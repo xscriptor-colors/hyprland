@@ -12,7 +12,42 @@
 
 </div>
 
+<p align="center"><img src="./assets/icon.png" width="100" alt="Xscriptor logo" /></p>
+
 ---
+
+
+<h1 align="center"> Previews </h1>
+
+<p align="center">
+  <a href="./assets/previews/preview02.png">
+    <img src="./assets/previews/preview02.png" alt="Main preview" width="850"/>
+  </a>
+</p>
+
+<details>
+  <summary>More previews</summary>
+
+  <table>
+    <tr>
+      <td align="center">
+        <a href="./assets/previews/preview01.png">
+          <img src="./assets/previews/preview01.png" alt="Preview 2" width="380"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./assets/previews/preview03.png">
+          <img src="./assets/previews/preview03.png" alt="Preview 3" width="380"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./assets/previews/preview04.png">
+          <img src="./assets/previews/preview04.png" alt="Preview 4" width="380"/>
+        </a>
+      </td>
+    </tr>
+  </table>
+</details>
 
 ## Features
 
