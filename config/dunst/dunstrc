@@ -1,24 +1,24 @@
 [global]
     monitor = 0
     follow = mouse
-    width = 350
+    width = 380
     height = (0, 300)
     origin = top-right
-    offset = (12, 60)
+    offset = (15, 15)
     notification_limit = 5
     progress_bar = true
     indicate_hidden = yes
     shrink = no
     separator_height = 2
-    padding = 16
-    horizontal_padding = 16
-    text_icon_padding = 16
+    padding = 20
+    horizontal_padding = 20
+    text_icon_padding = 15
     frame_width = 2
-    corner_radius = 12
-    separator_color = auto
+    corner_radius = 16
+    separator_color = frame
     sort = yes
     idle_threshold = 120
-    font = JetBrainsMono Nerd Font 11
+    font = JetBrainsMono Nerd Font 10
     line_height = 4
     markup = full
     format = "<b>%s</b>\n%b"
@@ -32,8 +32,8 @@
     hide_duplicate_count = false
     show_indicators = yes
     icon_position = left
-    min_icon_size = 0
-    max_icon_size = 48
+    min_icon_size = 48
+    max_icon_size = 80
     sticky_history = yes
     history_length = 20
     browser = /usr/bin/xdg-open
@@ -47,26 +47,17 @@
     mouse_middle_click = do_action, close_current
     mouse_right_click = close_all
 
+    # Dynamic colors
+    include = ~/.config/dunst/colors.conf
+
 [urgency_low]
-    background = "#000000F2"
-    foreground = "#f7f1ff"
-    frame_color = "#948ae3"
-    highlight = "#948ae3"
     timeout = 5
     default_icon = dialog-information
 
 [urgency_normal]
-    background = "#000000F2"
-    foreground = "#f7f1ff"
-    frame_color = "#fc618d"
-    highlight = "#fc618d"
     timeout = 10
     default_icon = dialog-information
 
 [urgency_critical]
-    background = "#000000F2"
-    foreground = "#f7f1ff"
-    frame_color = "#FF5555"
-    highlight = "#FF5555"
     timeout = 0
     default_icon = dialog-warning

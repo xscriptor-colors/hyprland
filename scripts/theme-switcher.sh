@@ -13,6 +13,8 @@ KITTY_CONF="$HOME/.config/kitty/kitty.conf"
 KITTY_CURRENT="$HOME/.config/kitty/current-theme.conf"
 ROFI_DIR="$HOME/.config/rofi"
 ROFI_COLORS="$ROFI_DIR/colors.rasi"
+DUNST_DIR="$HOME/.config/dunst"
+DUNST_COLORS="$DUNST_DIR/colors.conf"
 
 # Fallback paths
 SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
@@ -125,6 +127,30 @@ main() {
 }
 EOF
     
+    # ┌─────────────────────────────────────────────────────────────────────────┐
+    # │ Apply Dunst theme                                                       │
+    # └─────────────────────────────────────────────────────────────────────────┘
+    mkdir -p "$DUNST_DIR"
+    cat > "$DUNST_COLORS" <<EOF
+[urgency_low]
+    background = "#${bg_hex}CC"
+    foreground = "#${fg_hex}"
+    frame_color = "#${accent_hex}"
+    highlight = "#${accent_hex}"
+
+[urgency_normal]
+    background = "#${bg_hex}E6"
+    foreground = "#${fg_hex}"
+    frame_color = "#${accent_hex}"
+    highlight = "#${accent_hex}"
+
+[urgency_critical]
+    background = "#${bg_hex}FA"
+    foreground = "#${fg_hex}"
+    frame_color = "#${urgent_hex}"
+    highlight = "#${urgent_hex}"
+EOF
+
     # Restore the actual selected theme for system application
     theme_file="$real_theme_file"
 
@@ -170,6 +196,11 @@ EOF
     killall waybar 2>/dev/null
     sleep 0.3
     waybar &
+    
+    # Reload Dunst
+    killall dunst 2>/dev/null
+    dunst &
+    
     disown
     
     notify-send "Theme Switcher" "Applied: $selected" -i preferences-desktop-theme
