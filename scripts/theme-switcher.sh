@@ -15,6 +15,7 @@ ROFI_DIR="$HOME/.config/rofi"
 ROFI_COLORS="$ROFI_DIR/colors.rasi"
 DUNST_DIR="$HOME/.config/dunst"
 DUNST_COLORS="$DUNST_DIR/colors.conf"
+HYPRLOCK_COLORS="$HOME/.config/hyprlock/colors.conf"
 
 # Fallback paths
 SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
@@ -149,6 +150,19 @@ EOF
     foreground = "#${fg_hex}"
     frame_color = "#${urgent_hex}"
     highlight = "#${urgent_hex}"
+EOF
+
+    # ┌─────────────────────────────────────────────────────────────────────────┐
+    # │ Apply Hyprlock theme                                                    │
+    # └─────────────────────────────────────────────────────────────────────────┘
+    # Hyprlock variables
+    mkdir -p "$(dirname "$HYPRLOCK_COLORS")"
+    cat > "$HYPRLOCK_COLORS" <<EOF
+\$background = rgba(${bg_hex}CC)
+\$foreground = rgba(${fg_hex}FF)
+\$accent = rgba(${accent_hex}FF)
+\$accent2 = rgba(${accent2_hex}FF)
+\$urgent = rgba(${urgent_hex}FF)
 EOF
 
     # Restore the actual selected theme for system application
