@@ -32,12 +32,22 @@ ensure_thumb() {
         return 0
     fi
 
+    local w=${size%x*}
+    local h=${size#*x}
+    local radius=20
+
     if command -v magick >/dev/null 2>&1; then
-        magick "$img" -resize "${size}^" -gravity center -extent "$size" "$out" 2>/dev/null
+        magick "$img" -resize "${size}^" -gravity center -extent "$size" \
+            \( -size "$size" xc:none -fill white -draw "roundrectangle 0,0,$((w-1)),$((h-1)),$radius,$radius" \) \
+            -compose DstIn -composite \
+            "$out" 2>/dev/null
         return 0
     fi
     if command -v convert >/dev/null 2>&1; then
-        convert "$img" -resize "${size}^" -gravity center -extent "$size" "$out" 2>/dev/null
+        convert "$img" -resize "${size}^" -gravity center -extent "$size" \
+            \( -size "$size" xc:none -fill white -draw "roundrectangle 0,0,$((w-1)),$((h-1)),$radius,$radius" \) \
+            -compose DstIn -composite \
+            "$out" 2>/dev/null
         return 0
     fi
     return 1

@@ -126,6 +126,7 @@ element-icon {
     size:                        160px;
     cursor:                      inherit;
     horizontal-align:            0.5;
+    border-radius:               12px;
 }
 
 element-text {
