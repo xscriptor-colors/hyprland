@@ -40,8 +40,8 @@ main() {
         exit 1
     fi
     
-    # Use wofi to select theme
-    selected=$(echo "$themes" | wofi --dmenu --prompt "Select Theme" --cache-file /dev/null)
+    # Use rofi to select theme
+    selected=$(echo "$themes" | rofi -dmenu -theme "$HOME/.config/rofi/theme-selector.rasi")
     
     if [ -z "$selected" ]; then
         exit 0
