@@ -305,7 +305,7 @@ pacman -S hyprlock
 
 ## License
 
-MIT License - Feel free to use, modify and distribute.
+(MIT License)[./LICENSE]
 
 ---
 
