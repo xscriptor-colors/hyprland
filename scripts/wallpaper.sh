@@ -37,14 +37,14 @@ ensure_thumb() {
     local radius=20
 
     if command -v magick >/dev/null 2>&1; then
-        magick "$img" -resize "${size}^" -gravity center -extent "$size" \
+        magick "$img" -resize "${size}^" -gravity center -extent "$size" -alpha set -background none \
             \( -size "$size" xc:none -fill white -draw "roundrectangle 0,0,$((w-1)),$((h-1)),$radius,$radius" \) \
             -compose DstIn -composite \
             "$out" 2>/dev/null
         return 0
     fi
     if command -v convert >/dev/null 2>&1; then
-        convert "$img" -resize "${size}^" -gravity center -extent "$size" \
+        convert "$img" -resize "${size}^" -gravity center -extent "$size" -alpha set -background none \
             \( -size "$size" xc:none -fill white -draw "roundrectangle 0,0,$((w-1)),$((h-1)),$radius,$radius" \) \
             -compose DstIn -composite \
             "$out" 2>/dev/null
