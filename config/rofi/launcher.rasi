@@ -1,67 +1,187 @@
-@import "colors.rasi"
-
 configuration {
-    show-icons: true;
-    font: "JetBrainsMono Nerd Font 11";
-    display-drun: "";
-    display-run: "";
+    modi:                       "drun,run";
+    show-icons:                 true;
+    display-drun:               "  Apps";
+    display-run:                "  Run";
+    drun-display-format:        "{name}";
+    window-format:              "{w} · {c} · {t}";
+    
+    /* Font */
+    font:                       "JetBrainsMono Nerd Font Bold 12";
 }
 
+@import "colors.rasi"
+
 window {
-    location: center;
-    width: 600px;
-    border: 2px;
-    border-color: @accent;
-    border-radius: 20px;
-    background-color: @background;
+    /* properties for window widget */
+    transparency:                "real";
+    location:                    center;
+    anchor:                      center;
+    fullscreen:                  false;
+    width:                       600px;
+    x-offset:                    0px;
+    y-offset:                    0px;
+
+    /* properties for all widgets */
+    enabled:                     true;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      2px solid;
+    border-radius:               15px;
+    border-color:                @border-col;
+    cursor:                      "default";
+    background-color:            @background;
 }
 
 mainbox {
-    padding: 18px;
-    background-color: transparent;
+    enabled:                     true;
+    spacing:                     10px;
+    margin:                      0px;
+    padding:                     20px;
+    border:                      0px solid;
+    border-radius:               0px 0px 0px 0px;
+    border-color:                @border-col;
+    background-color:            transparent;
+    children:                    [ "inputbar", "message", "listview" ];
 }
 
 inputbar {
-    padding: 10px;
-    border-radius: 14px;
-    border: 2px;
-    border-color: @accent2;
-    background-color: #000000;
-    text-color: @foreground;
+    enabled:                     true;
+    spacing:                     10px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @border-col;
+    background-color:            transparent;
+    text-color:                  @foreground;
+    children:                    [ "textbox-prompt-colon", "entry" ];
 }
 
-prompt { enabled: false; }
-textbox-prompt-colon { enabled: false; }
+prompt {
+    enabled:                     true;
+    background-color:            inherit;
+    text-color:                  inherit;
+}
 
-entry { background-color: transparent; text-color: @foreground; }
-textbox { background-color: transparent; text-color: @foreground; }
+textbox-prompt-colon {
+    enabled:                     true;
+    expand:                      false;
+    str:                         "";
+    padding:                     12px 15px;
+    border-radius:               100%;
+    background-color:            @background-alt;
+    text-color:                  @foreground;
+}
+
+entry {
+    enabled:                     true;
+    padding:                     12px 16px;
+    border:                      0px solid;
+    border-radius:               100%;
+    border-color:                @border-col;
+    background-color:            @background-alt;
+    text-color:                  @foreground;
+    cursor:                      text;
+    placeholder:                 "Search...";
+    placeholder-color:           inherit;
+}
 
 listview {
-    lines: 10;
-    spacing: 8px;
-    background-color: transparent;
+    enabled:                     true;
+    columns:                     1;
+    lines:                       8;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    layout:                      vertical;
+    reverse:                     false;
+    fixed-height:                true;
+    fixed-columns:               true;
+    
+    spacing:                     5px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @border-col;
+    background-color:            transparent;
+    text-color:                  @foreground;
+    cursor:                      "default";
 }
 
 element {
-    padding: 10px;
-    border-radius: 12px;
-    background-color: transparent;
-    text-color: @foreground;
+    enabled:                     true;
+    spacing:                     10px;
+    margin:                      0px;
+    padding:                     8px;
+    border:                      0px solid;
+    border-radius:               10px;
+    border-color:                @border-col;
+    background-color:            transparent;
+    text-color:                  @foreground;
+    cursor:                      pointer;
 }
 
-element selected {
-    background-color: rgba(252, 97, 141, 0.22);
-    border: 2px;
-    border-color: @accent;
-    text-color: @foreground;
+element normal.normal {
+    background-color:            transparent;
+    text-color:                  @foreground;
+}
+
+element selected.normal {
+    background-color:            @background-alt;
+    text-color:                  @foreground;
+    border:                      1px solid;
+    border-color:                @border-col;
 }
 
 element-icon {
-    size: 24px;
-    border-radius: 10px;
+    background-color:            transparent;
+    text-color:                  inherit;
+    size:                        32px;
+    cursor:                      inherit;
 }
 
 element-text {
-    background-color: transparent;
-    text-color: @foreground;
+    background-color:            transparent;
+    text-color:                  inherit;
+    highlight:                   inherit;
+    cursor:                      inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+message {
+    enabled:                     true;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px 0px 0px 0px;
+    border-color:                @border-col;
+    background-color:            transparent;
+    text-color:                  @foreground;
+}
+
+textbox {
+    padding:                     10px;
+    border:                      0px solid;
+    border-radius:               20px;
+    border-color:                @border-col;
+    background-color:            @background-alt;
+    text-color:                  @foreground;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+    highlight:                   none;
+    placeholder-color:           @foreground;
+    blink:                       true;
+    markup:                      true;
+}
+
+error-message {
+    padding:                     20px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @border-col;
+    background-color:            @background;
+    text-color:                  @foreground;
 }

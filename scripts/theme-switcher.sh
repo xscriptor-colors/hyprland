@@ -56,6 +56,25 @@ main() {
         exit 1
     fi
 
+    # Determine which theme to use for Rofi colors (User Request: Praha for most, specific exceptions)
+    case "$selected" in
+        helsinki|london|miami|oslo|seul)
+            rofi_source="$theme_file"
+            ;;
+        *)
+            rofi_source="$THEMES_DIR/praha.conf"
+            ;;
+    esac
+
+    # Temporarily set theme_file to the source for get_hex
+    real_theme_file="$theme_file"
+    theme_file="$rofi_source"
+    
+    # Ensure source file exists
+    if [ ! -f "$theme_file" ]; then
+        theme_file="$real_theme_file" 
+    fi
+
     mkdir -p "$ROFI_DIR"
 
     get_hex() {
@@ -70,23 +89,45 @@ main() {
         ' "$theme_file"
     }
 
-    accent_hex=$(get_hex '$color1')
-    accent2_hex=$(get_hex '$color5')
+    bg_hex=$(get_hex '$color0')
+    bg_alt_hex=$(get_hex '$color8')
     fg_hex=$(get_hex '$color7')
+    accent_hex=$(get_hex '$accent')
+    # If accent is empty (variable reference), fallback to color4 or color6
+    [ -z "$accent_hex" ] && accent_hex=$(get_hex '$color4')
+    
+    accent2_hex=$(get_hex '$accent2')
+    [ -z "$accent2_hex" ] && accent2_hex=$(get_hex '$color6')
+    
+    active_hex=$(get_hex '$color2')
+    urgent_hex=$(get_hex '$color1')
 
-    accent_hex=${accent_hex:-fc618d}
-    accent2_hex=${accent2_hex:-948ae3}
-    fg_hex=${fg_hex:-f7f1ff}
+    # Fallbacks
+    bg_hex=${bg_hex:-1E1E2E}
+    bg_alt_hex=${bg_alt_hex:-252535}
+    fg_hex=${fg_hex:-FFFFFF}
+    accent_hex=${accent_hex:-89B4FA}
+    accent2_hex=${accent2_hex:-A6E3A1}
+    active_hex=${active_hex:-A6E3A1}
+    urgent_hex=${urgent_hex:-F38BA8}
 
     cat > "$ROFI_COLORS" <<EOF
 * {
-    background: #000000f2;
-    foreground: #${fg_hex};
-    accent: #${accent_hex};
-    accent2: #${accent2_hex};
+    background:     #${bg_hex}E6;
+    background-alt: #${bg_alt_hex}FF;
+    foreground:     #${fg_hex}FF;
+    selected:       #${accent_hex}FF;
+    active:         #${active_hex}FF;
+    urgent:         #${urgent_hex}FF;
+    
+    border-col:     #${accent_hex}FF;
+    border-col-2:   #${accent2_hex}FF;
 }
 EOF
     
+    # Restore the actual selected theme for system application
+    theme_file="$real_theme_file"
+
     # ┌─────────────────────────────────────────────────────────────────────────┐
     # │ Apply Hyprland theme                                                    │
     # └─────────────────────────────────────────────────────────────────────────┘
