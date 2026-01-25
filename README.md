@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![Hyprland](https://img.shields.io/badge/Hyprland-Premium-fc618d?style=for-the-badge&logo=linux&logoColor=white)
-![NVIDIA](https://img.shields.io/badge/NVIDIA-Ready-76B900?style=for-the-badge&logo=nvidia&logoColor=white)
-![Arch](https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white)
+![Hyprland](https://xscriptordev.github.io/badges/desktops/hyprland.svg)
+![NVIDIA](https://xscriptordev.github.io/badges/hardware/nvidia.svg)
+![Arch](https://xscriptordev.github.io/badges/os/arch.svg) ![X](https://xscriptordev.github.io/badges/os/x.svg) ![shell](https://xscriptordev.github.io/badges/languages/shell.svg) ![mit](https://xscriptordev.github.io/badges/licenses/mit.svg) 
 
 **A premium, modern, and complete configuration for Hyprland**
 

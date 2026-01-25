@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-01-25
+
+### Fixed
+- Migrated `windowrules.conf` to Hyprland v0.53 syntax standards.
+  - Replaced deprecated `windowrulev2` with `windowrule`.
+  - Updated regex matching to use `match:field criteria` syntax.
+  - Added explicit boolean values (e.g., `float 1`) to all rules.
+  - Removed unsupported `floating` matchers and unstable xwayland rules.
+
 ### Pending Tasks
 - [x] Change notification background (Dunst) to black
 - [x] Set wallpaper selector search bar background to black
