@@ -1,7 +1,7 @@
 [global]
     monitor = 0
     follow = mouse
-    width = 380
+    width = 300
     height = (0, 300)
     origin = top-right
     offset = (15, 15)
@@ -10,11 +10,11 @@
     indicate_hidden = yes
     shrink = no
     separator_height = 2
-    padding = 20
-    horizontal_padding = 20
-    text_icon_padding = 15
-    frame_width = 2
-    corner_radius = 16
+    padding = 12
+    horizontal_padding = 12
+    text_icon_padding = 10
+    frame_width = 1
+    corner_radius = 8
     separator_color = frame
     sort = yes
     idle_threshold = 120
@@ -32,8 +32,8 @@
     hide_duplicate_count = false
     show_indicators = yes
     icon_position = left
-    min_icon_size = 48
-    max_icon_size = 80
+    min_icon_size = 24
+    max_icon_size = 48
     sticky_history = yes
     history_length = 20
     browser = /usr/bin/xdg-open

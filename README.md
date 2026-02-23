@@ -152,7 +152,7 @@ chmod +x install.sh
 | `SUPER + SHIFT + Space` | Pin window |
 | `SUPER + P` | Pseudo-tile |
 | `SUPER + J` | Toggle split |
-| `ALT + Tab` | Cycle windows |
+| `ALT + Tab` | Cycle windows (bring to top) |
 
 ### Focus and Movement
 | Shortcut | Action |

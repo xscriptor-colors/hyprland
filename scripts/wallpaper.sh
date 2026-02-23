@@ -16,7 +16,7 @@ if [ ! -d "$WALLPAPER_DIR" ] || [ -z "$(ls -A "$WALLPAPER_DIR" 2>/dev/null)" ]; 
 fi
 
 if [ ! -d "$WALLPAPER_DIR" ]; then
-    notify-send "Wallpaper" "No wallpaper directory found" -u critical
+    notify-send "Wallpaper" "No wallpaper directory found" -u normal
     exit 1
 fi
 
@@ -75,7 +75,7 @@ pick_with_rofi() {
 
     if [ "$count" -eq 0 ]; then
         rm -f "$tmp"
-        notify-send "Wallpaper" "No wallpapers found in $WALLPAPER_DIR" -u critical
+        notify-send "Wallpaper" "No wallpapers found in $WALLPAPER_DIR" -u normal
         exit 1
     fi
 
@@ -142,7 +142,7 @@ pick_with_wofi() {
     shopt -u nocaseglob nullglob
 
     if [ "$count" -eq 0 ]; then
-        notify-send "Wallpaper" "No wallpapers found in $WALLPAPER_DIR" -u critical
+        notify-send "Wallpaper" "No wallpapers found in $WALLPAPER_DIR" -u normal
         exit 1
     fi
 
@@ -195,8 +195,10 @@ else
     wallpaper=$(pick_with_wofi)
 fi
 
-if [ -z "$wallpaper" ] || [ ! -f "$wallpaper" ]; then
-    notify-send "Wallpaper" "Could not find wallpaper" -u critical
+if [ -z "$wallpaper" ]; then
+    exit 0
+elif [ ! -f "$wallpaper" ]; then
+    notify-send "Wallpaper" "Could not find wallpaper file" -u normal
     exit 1
 fi
 
