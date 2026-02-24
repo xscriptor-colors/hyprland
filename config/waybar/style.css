@@ -18,5 +18,24 @@ window#waybar>box {
     padding: 0;
 }
 
+/* Global Transitions for all interactive modules */
+#workspaces button,
+#clock,
+#tray,
+#custom-hostname,
+#custom-local_ip,
+#custom-theme,
+#custom-palette,
+#cpu,
+#custom-gpu,
+#memory,
+#pulseaudio,
+#network,
+#battery,
+#custom-power,
+#custom-logo {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 /* Import current theme */
 @import "current-theme.css";

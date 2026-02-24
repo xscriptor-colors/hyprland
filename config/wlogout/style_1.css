@@ -20,6 +20,7 @@ button {
     background-size: 42%;
     min-width: 220px;
     min-height: 220px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 button:focus {
@@ -32,6 +33,7 @@ button:hover {
     border: 2px solid rgba(252, 97, 141, 0.9);
     background: rgba(252, 97, 141, 0.18);
     background-size: 52%;
+    transform: scale(1.05);
 }
 
 #lock {
