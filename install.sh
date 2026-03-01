@@ -256,9 +256,9 @@ CORE_PACKAGES_ARCH=(
 NVIDIA_PACKAGES_ARCH=(
     "nvidia-utils"
     "nvidia-settings"
-    "lib32-nvidia-utils"
     "libva-nvidia-driver"
     "egl-wayland"
+    "envycontrol"
 )
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -266,19 +266,9 @@ NVIDIA_PACKAGES_ARCH=(
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
 get_nvidia_driver() {
-    case "$NVIDIA_SERIES" in
-        "50xx"|"40xx")
-            # RTX 50xx/40xx: recommend open driver
-            echo "nvidia-open-dkms"
-            ;;
-        "30xx"|"20xx"|"16xx"|"10xx")
-            # Older series: recommend proprietary driver
-            echo "nvidia-dkms"
-            ;;
-        *)
-            echo "nvidia-dkms"
-            ;;
-    esac
+    # It is generally safer to use nvidia-dkms for all cards on Wayland to avoid conflicts
+    # with the open drivers which can still be problematic on some setups.
+    echo "nvidia-dkms"
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -300,8 +290,14 @@ configure_nvidia() {
     
     # Install kernel headers and driver
     NVIDIA_DRIVER=$(get_nvidia_driver)
-    log "Installing NVIDIA driver: $NVIDIA_DRIVER"
-    install_packages_arch "$KERNEL_HEADERS" "$NVIDIA_DRIVER" "${NVIDIA_PACKAGES_ARCH[@]}"
+    
+    if pacman -Qq "$NVIDIA_DRIVER" >/dev/null 2>&1; then
+        log "NVIDIA driver ($NVIDIA_DRIVER) is already installed. Skipping driver package."
+        install_packages_arch "$KERNEL_HEADERS" "${NVIDIA_PACKAGES_ARCH[@]}"
+    else
+        log "Installing NVIDIA driver: $NVIDIA_DRIVER"
+        install_packages_arch "$KERNEL_HEADERS" "$NVIDIA_DRIVER" "${NVIDIA_PACKAGES_ARCH[@]}"
+    fi
     
     # Configure mkinitcpio
     log "Configuring mkinitcpio..."
@@ -318,15 +314,17 @@ configure_nvidia() {
     fi
     
     # Configure kernel parameters for GRUB
-    if [ -f /etc/default/grub ]; then
+    if command -v grub-mkconfig >/dev/null 2>&1 && [ -f /etc/default/grub ]; then
         log "Configuring GRUB kernel parameters..."
         sudo cp /etc/default/grub /etc/default/grub.backup
         
         NVIDIA_PARAMS="nvidia_drm.modeset=1 nvidia.NVreg_PreserveVideoMemoryAllocations=1"
         if ! grep -q "nvidia_drm.modeset=1" /etc/default/grub; then
             sudo sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"$NVIDIA_PARAMS /" /etc/default/grub
-            sudo grub-mkconfig -o /boot/grub/grub.cfg
+            sudo grub-mkconfig -o /boot/grub/grub.cfg || warn "grub-mkconfig failed. You may need to update GRUB manually."
         fi
+    elif [ -f /etc/default/grub ]; then
+        warn "/etc/default/grub found but grub-mkconfig is missing. Skipping GRUB update."
     fi
     
     # Configure kernel parameters for systemd-boot
@@ -349,7 +347,21 @@ configure_nvidia() {
     log "Blacklisting nouveau driver..."
     echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf > /dev/null
     echo "options nouveau modeset=0" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf > /dev/null
-    
+
+    # GPU Mode Script Optional Setup
+    echo ""
+    prompt "Enable GPU Performance Mode script (adds sudoers rule for envycontrol)? [Y/n] "
+    read -r gpu_mode_response
+    if [[ ! "$gpu_mode_response" =~ ^[Nn]$ ]]; then
+        INSTALL_GPU_MODE=true
+        log "Adding sudoers rule for GPU mode (envycontrol)..."
+        echo "%wheel ALL=(ALL) NOPASSWD: /usr/bin/envycontrol -s *" | sudo tee /etc/sudoers.d/99-gpu-mode > /dev/null
+        sudo chmod 440 /etc/sudoers.d/99-gpu-mode
+    else
+        INSTALL_GPU_MODE=false
+        log "Skipping GPU mode script installation."
+    fi
+
     log "NVIDIA configuration complete!"
 }
 
@@ -435,7 +447,13 @@ install_dotfiles() {
         cp "$SCRIPT_DIR/config/hypridle/hypridle.conf" "$CONFIG_DIR/hypr/"
         log "Installed hypridle.conf"
     fi
-    
+
+    # Clean up GPU mode if user opted out
+    if [ "$INSTALL_GPU_MODE" = "false" ]; then
+        rm -f "$CONFIG_DIR/hypr/scripts/gpu-mode.sh"
+        sed -i '/custom\/gpu-mode/d' "$CONFIG_DIR/waybar/config.jsonc" 2>/dev/null || true
+    fi
+
     log "Dotfiles installed successfully!"
 }
 

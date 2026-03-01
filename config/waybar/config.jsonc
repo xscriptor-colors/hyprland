@@ -20,6 +20,7 @@
         "custom/palette",
         "cpu",
         "custom/gpu",
+        "custom/gpu-mode",
         "memory",
         "pulseaudio",
         "network",
@@ -34,7 +35,7 @@
     "hyprland/workspaces": {
         "format": "{id}",
         "on-click": "activate",
-        "all-outputs": true,
+        "all-outputs": false,
         "active-only": false,
         "persistent-workspaces": {
             "*": 5
@@ -85,6 +86,15 @@
         "format": " 󰍹 {}",
         "exec": "~/.config/hypr/scripts/waybar-gpu.sh",
         "interval": 2,
+        "tooltip": true
+    },
+    "custom/gpu-mode": {
+        "format": "{}",
+        "exec": "~/.config/hypr/scripts/gpu-mode.sh status",
+        "return-type": "json",
+        "interval": 5,
+        "on-click": "~/.config/hypr/scripts/gpu-mode.sh cycle",
+        "on-click-right": "~/.config/hypr/scripts/gpu-mode.sh menu",
         "tooltip": true
     },
     "memory": {

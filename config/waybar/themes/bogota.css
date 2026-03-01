@@ -137,6 +137,31 @@
     border-color: #ffed89;
 }
 
+#custom-gpu-mode {
+    background: rgba(0, 0, 0, 0.92);
+    border: 2px solid rgba(255, 237, 137, 0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin: 4px;
+    color: #ffed89;
+}
+
+#custom-gpu-mode:hover {
+    background: rgba(255, 237, 137, 0.2);
+    border-color: #ffed89;
+}
+
+#custom-gpu-mode.integrated {
+    color: #ffed89;
+    opacity: 0.7;
+}
+
+#custom-gpu-mode.nvidia {
+    color: #ffed89;
+    font-weight: bold;
+}
+
+
 #memory {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(255, 153, 153, 0.4);

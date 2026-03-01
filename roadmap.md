@@ -107,6 +107,19 @@ Create a complete and optimized Hyprland configuration based on the best communi
 - [x] Verify file structure (37 files created)
 - [ ] Test installation on real system
 
+### Phase 9: Multi-Monitor & GPU Performance
+- [x] Create `workspaces.conf` (workspace rules, smart gaps, scratchpads)
+- [x] Add multi-monitor workspace binding templates
+- [x] Add multi-monitor keybinds (SUPER+ALT combos)
+- [x] Create `gpu-mode.sh` (silent/normal/turbo, auto-detect GPU limits)
+- [x] Add GPU mode Waybar module with JSON output
+- [x] Add GPU mode Rofi/Wofi menu selector
+- [x] Add GPU keybinds (SUPER+F9)
+- [x] Update `README.md` with full documentation
+- [x] Update `hyprland.conf` with multi-monitor examples
+- [ ] Test on RTX 5060 laptop
+- [ ] Test on RTX 4060 laptop
+
 ---
 
 ## Available Color Schemes
@@ -132,14 +145,13 @@ Create a complete and optimized Hyprland configuration based on the best communi
 ## NVIDIA Hardware Support
 
 ### Supported Drivers
-- `nvidia-dkms` (recommended for stability)
-- `nvidia-open-dkms` (recommended for RTX 40xx)
+- `nvidia-dkms` (recommended for all modern cards)
 
 ### Supported Cards
 | Series | Examples | Recommended Driver |
 |--------|----------|-------------------|
-| RTX 50xx | RTX 5090, 5080 | `nvidia-open-dkms` |
-| RTX 40xx | RTX 4090, 4080, 4070, **4060** | `nvidia-open-dkms` |
+| RTX 50xx | RTX 5090, 5080 | `nvidia-dkms` |
+| RTX 40xx | RTX 4090, 4080, 4070, **4060** | `nvidia-dkms` |
 | RTX 30xx | RTX 3090, 3080, 3070, 3060 | `nvidia-dkms` |
 | RTX 20xx | RTX 2080, 2070, 2060 | `nvidia-dkms` |
 | GTX 16xx | GTX 1660, 1650 | `nvidia-dkms` |
