@@ -1,11 +1,11 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 40,
-    "spacing": 8,
-    "margin-top": 8,
-    "margin-left": 12,
-    "margin-right": 12,
+    "height": 28,
+    "spacing": 6,
+    "margin-top": 6,
+    "margin-left": 8,
+    "margin-right": 8,
     "exclusive": true,
     "modules-left": [
         "custom/logo",
@@ -103,8 +103,8 @@
         "tooltip": true
     },
     "tray": {
-        "icon-size": 16,
-        "spacing": 8
+        "icon-size": 11,
+        "spacing": 6
     },
     "pulseaudio": {
         "format": "{icon} {volume}%",

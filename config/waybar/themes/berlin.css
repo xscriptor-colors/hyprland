@@ -2,29 +2,29 @@
 #custom-logo {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px;
-    padding: 4px 14px;
-    margin: 4px 4px 4px 0;
+    border-radius: 10px;
+    padding: 3px 10px;
+    margin: 3px 3px 3px 0;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 10px;
     font-weight: bold;
 }
 
 #workspaces {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(170, 170, 170, 0.4);
-    border-radius: 20px;
-    margin: 4px;
+    border-radius: 10px;
+    margin: 3px;
     padding: 0 4px;
 }
 
 #workspaces button {
     padding: 4px 10px;
-    margin: 4px 2px;
+    margin: 3px 1px;
     color: #666666;
     background: transparent;
     border: none;
-    border-radius: 16px;
+    border-radius: 11px;
 }
 
 #workspaces button:hover {
@@ -46,9 +46,9 @@
 #clock {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 20px;
+    border-radius: 10px;
     padding: 4px 18px;
-    margin: 4px;
+    margin: 3px;
     color: #ffffff;
     font-weight: 600;
 }
@@ -62,17 +62,17 @@
 #tray {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(51, 51, 51, 0.4);
-    border-radius: 20px;
+    border-radius: 10px;
     padding: 4px 10px;
-    margin: 4px;
+    margin: 3px;
 }
 
 #custom-hostname {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(170, 170, 170, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #aaaaaa;
 }
 
@@ -84,9 +84,9 @@
 #custom-local_ip {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(204, 204, 204, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #cccccc;
 }
 
@@ -98,9 +98,9 @@
 #custom-palette {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 20px;
-    padding: 4px 14px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 10px;
+    margin: 3px;
     color: #ffffff;
 }
 
@@ -113,9 +113,9 @@
 #cpu {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(204, 204, 204, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #cccccc;
 }
 
@@ -127,9 +127,9 @@
 #custom-gpu {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(204, 204, 204, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #cccccc;
 }
 
@@ -141,9 +141,9 @@
 #custom-gpu-mode {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(204, 204, 204, 0.4);
-    border-radius: 20px;
-    padding: 4px 14px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 10px;
+    margin: 3px;
     color: #cccccc;
 }
 
@@ -166,9 +166,9 @@
 #memory {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(170, 170, 170, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #aaaaaa;
 }
 
@@ -180,9 +180,9 @@
 #pulseaudio {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(187, 187, 187, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #bbbbbb;
 }
 
@@ -199,9 +199,9 @@
 #network {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(204, 204, 204, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #cccccc;
 }
 
@@ -218,9 +218,9 @@
 #battery {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(187, 187, 187, 0.4);
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 8px;
+    margin: 3px;
     color: #bbbbbb;
 }
 
@@ -246,19 +246,19 @@
 #custom-power {
     background: #ffffff;
     border: none;
-    border-radius: 20px;
-    padding: 4px 14px;
-    margin: 4px 0 4px 4px;
+    border-radius: 10px;
+    padding: 3px 10px;
+    margin: 3px 0 3px 3px;
     color: #000000;
-    font-size: 14px;
+    font-size: 10px;
 }
 
 #custom-theme {
     background: rgba(0, 0, 0, 0.92);
     border: 2px solid rgba(148, 138, 227, 0.4);
-    border-radius: 20px;
-    padding: 4px 14px;
-    margin: 4px;
+    border-radius: 10px;
+    padding: 3px 10px;
+    margin: 3px;
     color: #948ae3;
 }
 
@@ -274,10 +274,10 @@
 tooltip {
     background: rgba(0, 0, 0, 0.95);
     border: 2px solid #ffffff;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 tooltip label {
     color: #ffffff;
-    padding: 6px;
+    padding: 4px;
 }
