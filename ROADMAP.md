@@ -114,3 +114,31 @@
 - [x] Update `hyprland.conf` with multi-monitor examples (#80)
 - [x] Test on RTX 5060 laptop (#81)
 - [x] Test on RTX 4060 laptop (#82)
+
+## Installer Robustness <!-- phase:installer-robustness -->
+
+- [ ] Add full Fedora package list (currently missing many packages vs Arch and X)
+- [ ] Add openSUSE support to `install.sh`
+- [ ] Complete distribution detection for Debian-based (build from source flow)
+- [ ] Sync `uninstall.sh` with all installed components (missing rofi, wlogout, hyprlock, hypridle)
+- [ ] Create `update.sh` to pull latest dotfiles without full reinstall
+- [ ] Remove root fix scripts from project root (`fix_hypr.py`, `force_fix.py`, `restore_hypr.py`, `fix_migration_errors.py`)
+- [ ] Add `--dry-run` flag to `install.sh` (preview changes without applying)
+- [ ] Add version pinning/tagging for releases
+
+## CI & Quality <!-- phase:ci-quality -->
+
+- [ ] Add ShellCheck linting for all `.sh` scripts
+- [ ] Add Python linting for helper scripts
+- [ ] Add CI workflow to validate `install.sh --dry-run` on Arch container
+- [ ] Add CI workflow to validate theme JSON/config syntax
+- [ ] Add CHANGELOG.md auto-generation from commits
+
+## UX & Desktop Polish <!-- phase:ux-desktop-polish -->
+
+- [ ] Migrate Wofi to Rofi fully (Wofi is unmaintained)
+- [ ] Add clipboard manager integration (cliphist + Rofi picker)
+- [ ] Add media player widget to Waybar (playerctl)
+- [ ] Add power profile integration (power-profiles-daemon or TLP)
+- [ ] Verify XDG portals configuration (file picker, screen sharing)
+- [ ] Add OSD notifications for brightness/volume changes
