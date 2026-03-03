@@ -117,28 +117,28 @@
 
 ## Installer Robustness <!-- phase:installer-robustness -->
 
-- [ ] Add full Fedora package list (currently missing many packages vs Arch and X)
-- [ ] Add openSUSE support to `install.sh`
-- [ ] Complete distribution detection for Debian-based (build from source flow)
-- [ ] Sync `uninstall.sh` with all installed components (missing rofi, wlogout, hyprlock, hypridle)
-- [ ] Create `update.sh` to pull latest dotfiles without full reinstall
-- [ ] Remove root fix scripts from project root (`fix_hypr.py`, `force_fix.py`, `restore_hypr.py`, `fix_migration_errors.py`)
-- [ ] Add `--dry-run` flag to `install.sh` (preview changes without applying)
-- [ ] Add version pinning/tagging for releases
+- [ ] Add full Fedora package list (currently missing many packages vs Arch and X) (#83)
+- [ ] Add openSUSE support to `install.sh` (#84)
+- [ ] Complete distribution detection for Debian-based (build from source flow) (#85)
+- [ ] Sync `uninstall.sh` with all installed components (missing rofi, wlogout, hyprlock, hypridle) (#86)
+- [ ] Create `update.sh` to pull latest dotfiles without full reinstall (#87)
+- [ ] Remove root fix scripts from project root (`fix_hypr.py`, `force_fix.py`, `restore_hypr.py`, `fix_migration_errors.py`) (#88)
+- [ ] Add `--dry-run` flag to `install.sh` (preview changes without applying) (#89)
+- [ ] Add version pinning/tagging for releases (#90)
 
 ## CI & Quality <!-- phase:ci-quality -->
 
-- [ ] Add ShellCheck linting for all `.sh` scripts
-- [ ] Add Python linting for helper scripts
-- [ ] Add CI workflow to validate `install.sh --dry-run` on Arch container
-- [ ] Add CI workflow to validate theme JSON/config syntax
-- [ ] Add CHANGELOG.md auto-generation from commits
+- [ ] Add ShellCheck linting for all `.sh` scripts (#91)
+- [ ] Add Python linting for helper scripts (#92)
+- [ ] Add CI workflow to validate `install.sh --dry-run` on Arch container (#93)
+- [ ] Add CI workflow to validate theme JSON/config syntax (#94)
+- [ ] Add CHANGELOG.md auto-generation from commits (#95)
 
 ## UX & Desktop Polish <!-- phase:ux-desktop-polish -->
 
-- [ ] Migrate Wofi to Rofi fully (Wofi is unmaintained)
-- [ ] Add clipboard manager integration (cliphist + Rofi picker)
-- [ ] Add media player widget to Waybar (playerctl)
-- [ ] Add power profile integration (power-profiles-daemon or TLP)
-- [ ] Verify XDG portals configuration (file picker, screen sharing)
-- [ ] Add OSD notifications for brightness/volume changes
+- [ ] Migrate Wofi to Rofi fully (Wofi is unmaintained) (#96)
+- [ ] Add clipboard manager integration (cliphist + Rofi picker) (#97)
+- [ ] Add media player widget to Waybar (playerctl) (#98)
+- [ ] Add power profile integration (power-profiles-daemon or TLP) (#99)
+- [ ] Verify XDG portals configuration (file picker, screen sharing) (#100)
+- [ ] Add OSD notifications for brightness/volume changes (#101)
