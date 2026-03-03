@@ -34,6 +34,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.config/hyprland-backup-$(date +%Y%m%d_%H%M%S)"
 CONFIG_DIR="$HOME/.config"
 LOG_FILE="/tmp/hyprland-install-$(date +%Y%m%d_%H%M%S).log"
+INSTALL_GPU_MODE=""
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ HELPER FUNCTIONS                                                                  │
@@ -565,6 +566,8 @@ main() {
                 read -r nvidia_response
                 if [[ ! "$nvidia_response" =~ ^[Nn]$ ]]; then
                     configure_nvidia
+                else
+                    INSTALL_GPU_MODE=false
                 fi
             fi
             ;;
