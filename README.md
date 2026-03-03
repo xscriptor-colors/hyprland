@@ -397,9 +397,9 @@ pacman -S hyprlock
 
 ---
 
-## License
-
-(MIT License)[./LICENSE]
+<div align="center">
+[MIT License](./LICENSE)
+</div>
 
 ---
 

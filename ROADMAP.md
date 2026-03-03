@@ -99,7 +99,7 @@
 ## Verification and Testing <!-- phase:verification-testing -->
 
 - [x] Verify file structure (37 files created)
-- [ ] Test installation on real system
+- [x] Test installation on real system
 
 ## Multi-Monitor & GPU Performance <!-- phase:multi-monitor-gpu -->
 
@@ -112,5 +112,5 @@
 - [x] Add GPU keybinds (SUPER+F9)
 - [x] Update `README.md` with full documentation
 - [x] Update `hyprland.conf` with multi-monitor examples
-- [ ] Test on RTX 5060 laptop
-- [ ] Test on RTX 4060 laptop
+- [x] Test on RTX 5060 laptop
+- [x] Test on RTX 4060 laptop
