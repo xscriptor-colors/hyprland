@@ -142,4 +142,4 @@
 - [ ] Add power profile integration (power-profiles-daemon or TLP) (#99)
 - [ ] Verify XDG portals configuration (file picker, screen sharing) (#100)
 - [ ] Add OSD notifications for brightness/volume changes (#101)
-- [ ] Leave just few wallpapers and add the possibility to add more through the release XWall package
+- [ ] Leave just few wallpapers and add the possibility to add more through the release XWall package (#102)
