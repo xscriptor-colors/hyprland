@@ -2,14 +2,14 @@
 
 ## Research and Planning <!-- phase:research-planning -->
 
-- [x] Research most popular Hyprland configurations
-- [x] Analyze project color references (13 schemes)
-- [x] Research best practices for NVIDIA RTX 4060/Wayland
-- [x] Create roadmap.md
+- [x] Research most popular Hyprland configurations (#42)
+- [x] Analyze project color references (13 schemes) (#43)
+- [x] Research best practices for NVIDIA RTX 4060/Wayland (#44)
+- [x] Create roadmap.md (#45)
 
 ## Base Structure <!-- phase:base-structure -->
 
-- [x] Create project directory structure
+- [x] Create project directory structure (#46)
   - [x] `hypr/` - Main Hyprland configuration
   - [x] `waybar/` - Status bar
   - [x] `wofi/` - App launcher
@@ -21,34 +21,34 @@
 
 ## Hyprland Configuration <!-- phase:hyprland-config -->
 
-- [x] Create main `hypr/hyprland.conf`
-- [x] Configure monitors and resolution
-- [x] Configure keybindings
-- [x] Configure animations and visual effects
-- [x] Configure window decorations
-- [x] Configure workspaces
-- [x] Configure window rules
-- [x] Configure gestures (touchpad/touchscreen)
-- [x] Configure NVIDIA environment variables
-- [x] Configure autostart applications
+- [x] Create main `hypr/hyprland.conf` (#47)
+- [x] Configure monitors and resolution (#48)
+- [x] Configure keybindings (#49)
+- [x] Configure animations and visual effects (#50)
+- [x] Configure window decorations (#51)
+- [x] Configure workspaces (#52)
+- [x] Configure window rules (#53)
+- [x] Configure gestures (touchpad/touchscreen) (#54)
+- [x] Configure NVIDIA environment variables (#55)
+- [x] Configure autostart applications (#56)
 
 ## Additional Components <!-- phase:additional-components -->
 
-- [x] Configure Waybar (status bar)
+- [x] Configure Waybar (status bar) (#57)
   - [x] Modules: workspaces, clock, battery, network, audio, etc.
   - [x] CSS styles with project colors
-- [x] Configure Wofi (app launcher)
-- [x] Configure Kitty (via integrated script)
-- [x] Configure Dunst (notifications)
-- [x] Configure swww/hyprpaper (wallpapers)
-- [x] Configure wlogout (logout screen)
-- [x] Configure hyprlock (lock screen)
-- [x] Configure hypridle (idle management)
+- [x] Configure Wofi (app launcher) (#58)
+- [x] Configure Kitty (via integrated script) (#59)
+- [x] Configure Dunst (notifications) (#60)
+- [x] Configure swww/hyprpaper (wallpapers) (#61)
+- [x] Configure wlogout (logout screen) (#62)
+- [x] Configure hyprlock (lock screen) (#63)
+- [x] Configure hypridle (idle management) (#64)
 
 ## Color Schemes <!-- phase:color-schemes -->
 
-- [x] Create dynamic theme system
-- [x] Implement 13 color schemes:
+- [x] Create dynamic theme system (#65)
+- [x] Implement 13 color schemes: (#66)
   - [x] X (main theme)
   - [x] Madrid
   - [x] Lahabana
@@ -62,11 +62,11 @@
   - [x] London
   - [x] Praha
   - [x] Bogota
-- [x] Script to switch between themes
+- [x] Script to switch between themes (#67)
 
 ## Installation Script <!-- phase:installation-script -->
 
-- [x] Create `install.sh` with:
+- [x] Create `install.sh` with: (#68)
   - [ ] Distribution detection (Arch, Fedora, Debian, openSUSE)
   - [x] Base dependencies installation
   - [x] Hyprland and components installation
@@ -86,7 +86,7 @@
 
 ## Documentation <!-- phase:documentation -->
 
-- [x] Create complete README.md with:
+- [x] Create complete README.md with: (#69)
   - [x] Project description
   - [x] System requirements
   - [x] Installation guide
@@ -98,19 +98,19 @@
 
 ## Verification and Testing <!-- phase:verification-testing -->
 
-- [x] Verify file structure (37 files created)
-- [x] Test installation on real system
+- [x] Verify file structure (37 files created) (#70)
+- [x] Test installation on real system (#71)
 
 ## Multi-Monitor & GPU Performance <!-- phase:multi-monitor-gpu -->
 
-- [x] Create `workspaces.conf` (workspace rules, smart gaps, scratchpads)
-- [x] Add multi-monitor workspace binding templates
-- [x] Add multi-monitor keybinds (SUPER+ALT combos)
-- [x] Create `gpu-mode.sh` (silent/normal/turbo, auto-detect GPU limits)
-- [x] Add GPU mode Waybar module with JSON output
-- [x] Add GPU mode Rofi/Wofi menu selector
-- [x] Add GPU keybinds (SUPER+F9)
-- [x] Update `README.md` with full documentation
-- [x] Update `hyprland.conf` with multi-monitor examples
-- [x] Test on RTX 5060 laptop
-- [x] Test on RTX 4060 laptop
+- [x] Create `workspaces.conf` (workspace rules, smart gaps, scratchpads) (#72)
+- [x] Add multi-monitor workspace binding templates (#73)
+- [x] Add multi-monitor keybinds (SUPER+ALT combos) (#74)
+- [x] Create `gpu-mode.sh` (silent/normal/turbo, auto-detect GPU limits) (#75)
+- [x] Add GPU mode Waybar module with JSON output (#76)
+- [x] Add GPU mode Rofi/Wofi menu selector (#77)
+- [x] Add GPU keybinds (SUPER+F9) (#78)
+- [x] Update `README.md` with full documentation (#79)
+- [x] Update `hyprland.conf` with multi-monitor examples (#80)
+- [x] Test on RTX 5060 laptop (#81)
+- [x] Test on RTX 4060 laptop (#82)
