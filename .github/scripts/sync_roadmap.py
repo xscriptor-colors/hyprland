@@ -198,7 +198,8 @@ def git_commit_roadmap(path: Path) -> None:
     )
     subprocess.run(["git", "add", str(path)], capture_output=True, check=True)
     subprocess.run(
-        ["git", "commit", "-m", "docs: update ROADMAP.md with auto-created issue numbers"],
+        ["git", "commit", "-m",
+         "docs: update ROADMAP.md with issue numbers [roadmap-sync]"],
         capture_output=True, check=True,
     )
     subprocess.run(["git", "push"], capture_output=True, check=True)
@@ -288,15 +289,19 @@ def main() -> None:
         ensure_label_exists(IN_PROGRESS_LABEL, args.repo, "fbca04")
 
     # ── Phase 1: Auto-create issues for tasks without (#N) ────────────────
-    # Skip done tasks — no point creating an issue just to close it
-    new_tasks = [t for t in tasks if t.issue_number is None and t.state != TaskState.DONE]
+    # This includes [x] tasks — they get created and immediately closed
+    new_tasks = [t for t in tasks if t.issue_number is None]
     if new_tasks:
-        print(f"{prefix}Creating {len(new_tasks)} new issue(s)...")
+        done_count = sum(1 for t in new_tasks if t.state == TaskState.DONE)
+        open_count = len(new_tasks) - done_count
+        print(f"{prefix}Creating {len(new_tasks)} new issue(s) "
+              f"({open_count} open, {done_count} done → create+close)...")
         roadmap_modified = False
         for task in new_tasks:
             checkbox_char = {"todo": " ", "in-progress": "/", "done": "x"}[task.state.value]
             if args.dry_run:
-                print(f"  would create: \"{task.title}\" [{task.phase_label}]")
+                suffix = " → would create + close" if task.state == TaskState.DONE else ""
+                print(f"  would create: \"{task.title}\" [{task.phase_label}]{suffix}")
             else:
                 # Check for existing issue with same title to avoid duplicates
                 existing = find_existing_issue(task.title, args.repo)
@@ -307,6 +312,12 @@ def main() -> None:
                     ensure_label_exists(task.phase_label, args.repo)
                     issue_num = create_issue(task.title, task.phase_label, args.repo)
                     print(f"  created #{issue_num}: \"{task.title}\"")
+
+                # If the task is already done, close the issue immediately
+                if task.state == TaskState.DONE:
+                    close_issue(issue_num, args.repo)
+                    print(f"  closed #{issue_num} (already done)")
+
                 task.issue_number = issue_num
                 update_roadmap_line(
                     roadmap_path, task.line_number,
