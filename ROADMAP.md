@@ -1,26 +1,14 @@
 # Hyprland Configuration Roadmap
 
-> **Project**: Premium Hyprland Configuration with custom color schemes
-> **Start date**: 2026-01-21
-> **Status**: Complete
+## Research and Planning <!-- phase:research-planning -->
 
----
-
-## Project Summary
-
-Create a complete and optimized Hyprland configuration based on the best community dotfiles (ML4W), adapted with custom color schemes and full support for NVIDIA RTX 4060 and other graphics cards.
-
----
-
-## Task Checklist
-
-### Phase 1: Research and Planning
 - [x] Research most popular Hyprland configurations
 - [x] Analyze project color references (13 schemes)
 - [x] Research best practices for NVIDIA RTX 4060/Wayland
 - [x] Create roadmap.md
 
-### Phase 2: Base Structure
+## Base Structure <!-- phase:base-structure -->
+
 - [x] Create project directory structure
   - [x] `hypr/` - Main Hyprland configuration
   - [x] `waybar/` - Status bar
@@ -31,7 +19,8 @@ Create a complete and optimized Hyprland configuration based on the best communi
   - [x] `wallpapers/` - Wallpapers
   - [x] `scripts/` - Helper scripts
 
-### Phase 3: Hyprland Configuration
+## Hyprland Configuration <!-- phase:hyprland-config -->
+
 - [x] Create main `hypr/hyprland.conf`
 - [x] Configure monitors and resolution
 - [x] Configure keybindings
@@ -43,7 +32,8 @@ Create a complete and optimized Hyprland configuration based on the best communi
 - [x] Configure NVIDIA environment variables
 - [x] Configure autostart applications
 
-### Phase 4: Additional Components
+## Additional Components <!-- phase:additional-components -->
+
 - [x] Configure Waybar (status bar)
   - [x] Modules: workspaces, clock, battery, network, audio, etc.
   - [x] CSS styles with project colors
@@ -55,7 +45,8 @@ Create a complete and optimized Hyprland configuration based on the best communi
 - [x] Configure hyprlock (lock screen)
 - [x] Configure hypridle (idle management)
 
-### Phase 5: Color Schemes
+## Color Schemes <!-- phase:color-schemes -->
+
 - [x] Create dynamic theme system
 - [x] Implement 13 color schemes:
   - [x] X (main theme)
@@ -73,9 +64,10 @@ Create a complete and optimized Hyprland configuration based on the best communi
   - [x] Bogota
 - [x] Script to switch between themes
 
-### Phase 6: Installation Script
+## Installation Script <!-- phase:installation-script -->
+
 - [x] Create `install.sh` with:
-  - [_] Distribution detection (Arch, Fedora, Debian, openSUSE)
+  - [ ] Distribution detection (Arch, Fedora, Debian, openSUSE)
   - [x] Base dependencies installation
   - [x] Hyprland and components installation
   - [x] NVIDIA driver configuration:
@@ -92,7 +84,8 @@ Create a complete and optimized Hyprland configuration based on the best communi
   - [x] Systemd services configuration
   - [x] Post-installation verification
 
-### Phase 7: Documentation
+## Documentation <!-- phase:documentation -->
+
 - [x] Create complete README.md with:
   - [x] Project description
   - [x] System requirements
@@ -103,11 +96,13 @@ Create a complete and optimized Hyprland configuration based on the best communi
   - [x] Common troubleshooting
   - [x] Credits and license
 
-### Phase 8: Verification and Testing
+## Verification and Testing <!-- phase:verification-testing -->
+
 - [x] Verify file structure (37 files created)
 - [ ] Test installation on real system
 
-### Phase 9: Multi-Monitor & GPU Performance
+## Multi-Monitor & GPU Performance <!-- phase:multi-monitor-gpu -->
+
 - [x] Create `workspaces.conf` (workspace rules, smart gaps, scratchpads)
 - [x] Add multi-monitor workspace binding templates
 - [x] Add multi-monitor keybinds (SUPER+ALT combos)
@@ -119,4 +114,3 @@ Create a complete and optimized Hyprland configuration based on the best communi
 - [x] Update `hyprland.conf` with multi-monitor examples
 - [ ] Test on RTX 5060 laptop
 - [ ] Test on RTX 4060 laptop
-
