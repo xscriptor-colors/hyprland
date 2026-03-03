@@ -131,13 +131,15 @@ def ensure_label_exists(label: str, repo: str | None, color: str = "ededed") -> 
 
 def create_issue(title: str, label: str, repo: str | None) -> int:
     """Create a new GitHub issue and return its number."""
-    raw = gh(["issue", "create",
+    url = gh(["issue", "create",
               "--title", title,
               "--body", f"Auto-created from ROADMAP.md\n\nPhase: `{label}`",
-              "--label", label,
-              "--json", "number"], repo)
-    data = json.loads(raw)
-    return data["number"]
+              "--label", label], repo)
+    # gh issue create prints the URL: https://github.com/owner/repo/issues/42
+    match = re.search(r"/issues/(\d+)", url)
+    if not match:
+        raise RuntimeError(f"Could not parse issue number from gh output: {url}")
+    return int(match.group(1))
 
 
 def close_issue(number: int, repo: str | None) -> None:
