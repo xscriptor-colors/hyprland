@@ -252,6 +252,7 @@ CORE_PACKAGES_ARCH=(
     # Other
     "jq"
     "imagemagick"
+    "unzip"
 )
 
 NVIDIA_PACKAGES_ARCH=(
@@ -487,6 +488,59 @@ install_kitty_config() {
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
+# │ DOWNLOAD WALLPAPERS                                                               │
+# └───────────────────────────────────────────────────────────────────────────────────┘
+
+download_wallpapers() {
+    local WALLPAPER_DIR="$CONFIG_DIR/hypr/wallpapers"
+    local WALLPAPER_URL="https://github.com/xscriptordev/xwall/releases/download/1.0.0/xwall-1.0.0.zip"
+    local TMP_ZIP="/tmp/xwall-1.0.0.zip"
+    local TMP_EXTRACT="/tmp/xwall-extract"
+
+    echo ""
+    warn "The full wallpaper pack weighs approximately 1.37 GB."
+    prompt "Download the complete wallpaper collection? [y/N] "
+    read -r wall_response
+    if [[ ! "$wall_response" =~ ^[Yy]$ ]]; then
+        log "Skipping wallpaper download."
+        return
+    fi
+
+    log "Downloading wallpaper pack (1.37 GB)... This may take a while."
+    if ! wget --progress=bar:force -O "$TMP_ZIP" "$WALLPAPER_URL"; then
+        error "Failed to download wallpaper pack."
+        rm -f "$TMP_ZIP"
+        return
+    fi
+
+    log "Extracting wallpapers..."
+    mkdir -p "$TMP_EXTRACT"
+    if ! unzip -qo "$TMP_ZIP" -d "$TMP_EXTRACT"; then
+        error "Failed to extract wallpaper pack."
+        rm -rf "$TMP_ZIP" "$TMP_EXTRACT"
+        return
+    fi
+
+    # The zip contains a folder named "xwall-1,0,0" — move its contents into the wallpapers dir
+    mkdir -p "$WALLPAPER_DIR"
+    local INNER_DIR
+    INNER_DIR=$(find "$TMP_EXTRACT" -mindepth 1 -maxdepth 1 -type d | head -n 1)
+
+    if [ -n "$INNER_DIR" ] && [ -d "$INNER_DIR" ]; then
+        cp -r "$INNER_DIR/"* "$WALLPAPER_DIR/"
+        log "Wallpapers installed to $WALLPAPER_DIR ($(ls -1 "$INNER_DIR" | wc -l) files)"
+    else
+        # Fallback: copy everything directly
+        cp -r "$TMP_EXTRACT/"* "$WALLPAPER_DIR/"
+        log "Wallpapers installed to $WALLPAPER_DIR"
+    fi
+
+    # Cleanup
+    rm -rf "$TMP_ZIP" "$TMP_EXTRACT"
+    log "Wallpaper download complete!"
+}
+
+# ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ CREATE SCREENSHOTS DIR                                                            │
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
@@ -589,6 +643,9 @@ main() {
     
     # Install dotfiles
     install_dotfiles
+
+    # Download wallpaper pack
+    download_wallpapers
     
     # Install Kitty config
     prompt "Install custom Kitty configuration? [Y/n] "
