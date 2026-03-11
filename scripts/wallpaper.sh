@@ -20,9 +20,6 @@ if [ ! -d "$WALLPAPER_DIR" ]; then
     exit 1
 fi
 
-use_rofi=0
-command -v rofi >/dev/null 2>&1 && use_rofi=1
-
 ensure_thumb() {
     local img="$1"
     local out="$2"
@@ -122,78 +119,7 @@ pick_with_rofi() {
     return 1
 }
 
-pick_with_wofi() {
-    local entries=""
-    local count=0
-    shopt -s nullglob nocaseglob
-    for img in "$WALLPAPER_DIR"/*.{jpg,jpeg,png,webp}; do
-        [ -f "$img" ] || continue
-        filename=$(basename "$img")
-        name="${filename%.*}"
-        thumb="$CACHE_DIR/${filename}.png"
-        ensure_thumb "$img" "$thumb" "$THUMB_SIZE" || true
-        if [ -f "$thumb" ]; then
-            entries+="img:${thumb}:text:${name}\n"
-        else
-            entries+="${filename}\n"
-        fi
-        count=$((count + 1))
-    done
-    shopt -u nocaseglob nullglob
-
-    if [ "$count" -eq 0 ]; then
-        notify-send "Wallpaper" "No wallpapers found in $WALLPAPER_DIR" -u normal
-        exit 1
-    fi
-
-    selected=$(printf "%b" "$entries" | wofi --dmenu \
-        --prompt " Wallpaper" \
-        --cache-file /dev/null \
-        --allow-images \
-        --define image_size=150 \
-        --columns 4 \
-        --width 1000 \
-        --height 600 \
-        --style "$HOME/.config/wofi/wallpaper.css")
-
-    [ -z "$selected" ] && exit 0
-
-    if [[ "$selected" == img:*:text:* ]]; then
-        name="${selected#img:}"
-        name="${name#*:text:}"
-    else
-        name="$(basename "$selected")"
-        name="${name%.*}"
-    fi
-
-    wallpaper=""
-    for ext in jpg jpeg png webp JPG JPEG PNG WEBP; do
-        if [ -f "$WALLPAPER_DIR/$name.$ext" ]; then
-            wallpaper="$WALLPAPER_DIR/$name.$ext"
-            break
-        fi
-    done
-
-    if [ -z "$wallpaper" ] || [ ! -f "$wallpaper" ]; then
-        for img in "$WALLPAPER_DIR"/*; do
-            [ -f "$img" ] || continue
-            imgname=$(basename "${img%.*}")
-            if [ "$imgname" = "$name" ]; then
-                wallpaper="$img"
-                break
-            fi
-        done
-    fi
-
-    [ -z "$wallpaper" ] && exit 1
-    printf '%s' "$wallpaper"
-}
-
-if [ "$use_rofi" -eq 1 ]; then
-    wallpaper=$(pick_with_rofi)
-else
-    wallpaper=$(pick_with_wofi)
-fi
+wallpaper=$(pick_with_rofi)
 
 if [ -z "$wallpaper" ]; then
     exit 0

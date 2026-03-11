@@ -65,7 +65,7 @@
         "tooltip": true
     },
     "custom/theme": {
-        "format": "  {}",
+        "format": " ✘ {}",
         "exec": "~/.config/hypr/scripts/waybar-theme-name.sh",
         "interval": 2,
         "tooltip": false,

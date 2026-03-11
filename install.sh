@@ -185,8 +185,7 @@ CORE_PACKAGES_ARCH=(
     
     # Bar and launcher
     "waybar"
-    "wofi"
-    "rofi"
+    "rofi-wayland"
     "jq"
     "imagemagick"
     "librsvg"
@@ -215,7 +214,7 @@ CORE_PACKAGES_ARCH=(
     "pciutils"
     "pavucontrol"
     "networkmanager"
-    "wofi-emoji"
+    "rofi-emoji"
     "radeontop"
     
     # System
@@ -375,7 +374,7 @@ backup_config() {
     log "Creating backup of existing configurations..."
     mkdir -p "$BACKUP_DIR"
     
-    local configs=("hypr" "waybar" "wofi" "rofi" "wlogout" "kitty" "dunst")
+    local configs=("hypr" "waybar" "rofi" "wlogout" "kitty" "dunst")
     
     for config in "${configs[@]}"; do
         if [ -d "$CONFIG_DIR/$config" ]; then
@@ -418,10 +417,6 @@ install_dotfiles() {
     mkdir -p "$CONFIG_DIR/waybar"
     cp -r "$SCRIPT_DIR/config/waybar/"* "$CONFIG_DIR/waybar/"
     
-    # Copy Wofi config
-    mkdir -p "$CONFIG_DIR/wofi"
-    cp -r "$SCRIPT_DIR/config/wofi/"* "$CONFIG_DIR/wofi/"
-
     # Copy Rofi config
     if [ -d "$SCRIPT_DIR/config/rofi" ]; then
         mkdir -p "$CONFIG_DIR/rofi"
@@ -552,7 +547,7 @@ create_directories() {
 
 check_requirements() {
     local missing=()
-    local cmds=(wofi waybar swww notify-send ip lspci)
+    local cmds=(rofi waybar swww notify-send ip lspci)
 
     for c in "${cmds[@]}"; do
         if ! command -v "$c" >/dev/null 2>&1; then
@@ -628,7 +623,7 @@ main() {
         fedora)
             warn "Fedora support is experimental. Some packages may not be available."
             # Basic packages for Fedora
-            install_packages_fedora hyprland waybar wofi rofi kitty dunst wlogout grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
+            install_packages_fedora hyprland waybar rofi-wayland kitty dunst wlogout grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
             ;;
         debian|ubuntu|pop)
             error "Debian/Ubuntu requires manual Hyprland installation from source."

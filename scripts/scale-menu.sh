@@ -14,8 +14,6 @@ EOF
 pick=""
 if command -v rofi >/dev/null 2>&1; then
     pick=$(printf "%s" "$choices" | rofi -dmenu -p "Scale" -theme "$HOME/.config/rofi/launcher.rasi")
-elif command -v wofi >/dev/null 2>&1; then
-    pick=$(printf "%s" "$choices" | wofi --dmenu --prompt " Scale" --cache-file /dev/null)
 else
     exit 1
 fi

@@ -140,8 +140,8 @@ chmod +x install.sh
 | `SUPER + T` | Terminal (Kitty) |
 | `SUPER + Q` | Close window |
 | `SUPER + SHIFT + Q` | Exit Hyprland |
-| `SUPER + D` | App launcher (Rofi, fallback to Wofi) |
-| `SUPER + R` | Run command (Rofi, fallback to Wofi) |
+| `SUPER + D` | App launcher (Rofi) |
+| `SUPER + R` | Run command (Rofi) |
 | `SUPER + E` | File manager (Nautilus) |
 | `SUPER + B` | Browser (Firefox) |
 | `SUPER + C` | Code editor (VSCode) |
@@ -268,7 +268,6 @@ chmod +x install.sh
 │   ├── scripts/         # Helper scripts
 │   └── wallpapers/      # Wallpapers
 ├── waybar/              # Status bar
-├── wofi/                # App launcher
 ├── rofi/                # App launcher themes
 ├── wlogout/             # Logout menu (layout/style/icons)
 └── dunst/               # Notifications
@@ -376,9 +375,9 @@ killall waybar
 waybar &
 ```
 
-### Wofi not responding
+### Rofi not responding
 ```bash
-killall wofi
+killall rofi
 ```
 
 ### Hyprlock not working

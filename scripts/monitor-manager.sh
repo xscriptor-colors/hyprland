@@ -155,10 +155,6 @@ change_refresh_rate() {
     local choice
     choice=$(echo -e "$options" | rofi -dmenu -i -p "Set Refresh Rate" -theme-str 'window {width: 350px;}' 2>/dev/null)
 
-    if [ -z "$choice" ]; then
-        choice=$(echo -e "$options" | wofi --dmenu -i -p "Set Refresh Rate" 2>/dev/null)
-    fi
-
     if [ -n "$choice" ]; then
         local mon rate
         mon=$(echo "$choice" | awk '{print $1}')
@@ -203,10 +199,6 @@ main_menu() {
 
     local choice
     choice=$(echo -e "$options" | rofi -dmenu -i -p "Monitor Manager ($count displays)" -theme-str 'window {width: 400px;}' 2>/dev/null)
-
-    if [ -z "$choice" ]; then
-        choice=$(echo -e "$options" | wofi --dmenu -i -p "Monitor Manager ($count displays)" 2>/dev/null)
-    fi
 
     case "$choice" in
         *"Monitor Info"*)       show_info ;;

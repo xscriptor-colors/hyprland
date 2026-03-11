@@ -12,7 +12,7 @@
 - [x] Create project directory structure (#46)
   - [x] `hypr/` - Main Hyprland configuration
   - [x] `waybar/` - Status bar
-  - [x] `wofi/` - App launcher
+  - [x] `rofi/` - App launcher
   - [x] `kitty/` - Terminal (integrated via external script)
   - [x] `dunst/` - Notifications
   - [x] `themes/` - Color schemes
@@ -37,7 +37,7 @@
 - [x] Configure Waybar (status bar) (#57)
   - [x] Modules: workspaces, clock, battery, network, audio, etc.
   - [x] CSS styles with project colors
-- [x] Configure Wofi (app launcher) (#58)
+- [x] Configure Rofi (app launcher) (#58)
 - [x] Configure Kitty (via integrated script) (#59)
 - [x] Configure Dunst (notifications) (#60)
 - [x] Configure swww/hyprpaper (wallpapers) (#61)
@@ -120,7 +120,7 @@
 - [ ] Add full Fedora package list (currently missing many packages vs Arch and X) (#83)
 - [ ] Add openSUSE support to `install.sh` (#84)
 - [ ] Complete distribution detection for Debian-based (build from source flow) (#85)
-- [ ] Sync `uninstall.sh` with all installed components (missing rofi, wlogout, hyprlock, hypridle) (#86)
+- [x] Sync `uninstall.sh` with all installed components (missing rofi, wlogout, hyprlock, hypridle) (#86)
 - [ ] Create `update.sh` to pull latest dotfiles without full reinstall (#87)
 - [ ] Remove root fix scripts from project root (`fix_hypr.py`, `force_fix.py`, `restore_hypr.py`, `fix_migration_errors.py`) (#88)
 - [ ] Add `--dry-run` flag to `install.sh` (preview changes without applying) (#89)
@@ -136,8 +136,8 @@
 
 ## UX & Desktop Polish <!-- phase:ux-desktop-polish -->
 
-- [ ] Migrate Wofi to Rofi fully (Wofi is unmaintained) (#96)
-- [ ] Add clipboard manager integration (cliphist + Rofi picker) (#97)
+- [x] Migrate Wofi to Rofi fully (Wofi is unmaintained) (#96)
+- [x] Add clipboard manager integration (cliphist + Rofi picker) (#97)
 - [ ] Add media player widget to Waybar (playerctl) (#98)
 - [ ] Add power profile integration (power-profiles-daemon or TLP) (#99)
 - [ ] Verify XDG portals configuration (file picker, screen sharing) (#100)
