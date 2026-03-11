@@ -33,7 +33,6 @@ button:hover {
     border: 2px solid rgba(252, 97, 141, 0.9);
     background: rgba(252, 97, 141, 0.18);
     background-size: 52%;
-    transform: scale(1.05);
 }
 
 #lock {
