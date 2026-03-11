@@ -1,0 +1,19 @@
+# Define linguistic attributes to accurately represent the repository's languages on GitHub
+
+# Shell Scripts
+*.sh linguist-language=Shell
+
+# Waybar and Wlogout configurations (CSS)
+*.css linguist-language=CSS
+
+# Waybar JSON Configurations
+*.jsonc linguist-language=JSONC
+
+# Hyprland configurations
+*.conf linguist-language=Hyprlang
+
+# Rofi Themes / Configs
+*.rasi linguist-language=CSS
+
+# Documentation
+*.md linguist-language=Markdown
