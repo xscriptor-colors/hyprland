@@ -488,7 +488,7 @@ install_kitty_config() {
 
 download_wallpapers() {
     local WALLPAPER_DIR="$CONFIG_DIR/hypr/wallpapers"
-    local WALLPAPER_URL="https://github.com/xscriptordev/xwall/releases/download/1.0.0/xwall-1.0.0.zip"
+    local WALLPAPER_URL="https://github.com/xscriptor/xwall/releases/download/1.0.0/xwall-1.0.0.zip"
     local TMP_ZIP="/tmp/xwall-1.0.0.zip"
     local TMP_EXTRACT="/tmp/xwall-extract"
 

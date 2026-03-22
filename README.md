@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![Hyprland](https://xscriptordev.github.io/badges/desktops/hyprland.svg)
-![NVIDIA](https://xscriptordev.github.io/badges/hardware/nvidia.svg)
-![Arch](https://xscriptordev.github.io/badges/os/arch.svg) ![X](https://xscriptordev.github.io/badges/os/x.svg) ![shell](https://xscriptordev.github.io/badges/languages/shell.svg) ![mit](https://xscriptordev.github.io/badges/licenses/mit.svg) 
+![Hyprland](https://xscriptor.github.io/badges/desktops/hyprland.svg)
+![NVIDIA](https://xscriptor.github.io/badges/hardware/nvidia.svg)
+![Arch](https://xscriptor.github.io/badges/os/arch.svg) ![X](https://xscriptor.github.io/badges/os/x.svg) ![shell](https://xscriptor.github.io/badges/languages/shell.svg) ![mit](https://xscriptor.github.io/badges/licenses/mit.svg) 
 
 **A premium, modern, and complete configuration for Hyprland**
 
@@ -111,7 +111,7 @@
 ### Quick Install
 
 ```bash
-git clone https://github.com/xscriptordev/hyprland.git
+git clone https://github.com/xscriptor/hyprland.git
 cd hyprland
 chmod +x install.sh
 ./install.sh
@@ -404,6 +404,6 @@ pacman -S hyprlock
 
 <div align="center">
 
-**[X](https://github.com/xscriptordev)**
+**[X](https://github.com/xscriptor)**
 
 </div>

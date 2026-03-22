@@ -1,7 +1,7 @@
 import shutil
 import os
 
-src = "/home/xscriptor/Documentos/repos/xscriptordev/hyprland/fix_restore.conf"
+src = "/home/xscriptor/Documentos/repos/xscriptor/hyprland/fix_restore.conf"
 dst = "/home/xscriptor/.config/hypr/windowrules.conf"
 
 print(f"Restoring {dst} from {src}")
