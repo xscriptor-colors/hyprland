@@ -62,9 +62,9 @@ pick_with_rofi() {
         thumb_sqre="$CACHE_DIR/${filename}.sqre.png"
         ensure_thumb "$img" "$thumb_sqre" "$THUMB_SQRE_SIZE" || true
         if [ -f "$thumb_sqre" ]; then
-            printf '%s\0icon\x1f%s\0info\x1f%s\n' "$filename" "$thumb_sqre" "$img" >> "$tmp"
+            printf '%s\x00icon\x1f%s\n' "$filename" "$thumb_sqre" >> "$tmp"
         else
-            printf '%s\0info\x1f%s\n' "$filename" "$img" >> "$tmp"
+            printf '%s\n' "$filename" >> "$tmp"
         fi
         count=$((count + 1))
     done
@@ -128,8 +128,8 @@ elif [ ! -f "$wallpaper" ]; then
     exit 1
 fi
 
-if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
-    swww-daemon &
+if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
+    awww-daemon &
     sleep 0.5
 fi
 
@@ -138,7 +138,7 @@ positions=("center" "top" "left" "right" "bottom" "top-left" "top-right" "bottom
 rand_type=${types[$RANDOM % ${#types[@]}]}
 rand_pos=${positions[$RANDOM % ${#positions[@]}]}
 
-swww img "$wallpaper" \
+awww img "$wallpaper" \
     --transition-type "$rand_type" \
     --transition-pos "$rand_pos" \
     --transition-duration 2 \
