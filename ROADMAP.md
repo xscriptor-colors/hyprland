@@ -44,6 +44,7 @@
 - [x] Configure wlogout (logout screen) (#62)
 - [x] Configure hyprlock (lock screen) (#63)
 - [x] Configure hypridle (idle management) (#64)
+- [ ] Configure awww/hyprpaper (wallpapers)
 
 ## Color Schemes <!-- phase:color-schemes -->
 
