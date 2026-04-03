@@ -1,6 +1,6 @@
-# Contributing to xhyprland
+# Contributing to X Hyprland
 
-First off, thank you for considering contributing to **xhyprland**! It's people like you that make xhyprland such a powerful and beautiful environment.
+First off, thank you for considering contributing to **X Hyprland**! It's people like you that make xhyprland such a powerful and beautiful environment.
 
 ## How Can I Contribute?
 
