@@ -203,19 +203,11 @@ EOF
     # │ Reload components                                                       │
     # └─────────────────────────────────────────────────────────────────────────┘
     
-    # Reload Hyprland
+    # Reload Hyprland for theme colors
     hyprctl reload
     
-    # Restart Waybar
-    killall waybar 2>/dev/null
-    sleep 0.3
-    waybar &
-    
-    # Reload Dunst
-    killall dunst 2>/dev/null
-    dunst &
-    
-    disown
+    # Reload Quickshell for QML theme
+    bash ~/.config/hypr/scripts/reload.sh 2>/dev/null || true
     
     notify-send "Theme Switcher" "Applied: $selected" -i preferences-desktop-theme
 }
