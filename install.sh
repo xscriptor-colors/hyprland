@@ -199,7 +199,6 @@ CORE_PACKAGES_ARCH=(
 
     # Utilities
     "awww"
-    "swww"
     "dunst"
     "hyprlock"
     "hypridle"

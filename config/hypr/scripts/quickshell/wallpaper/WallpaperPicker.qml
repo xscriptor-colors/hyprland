@@ -174,25 +174,13 @@ Item {
                     export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
                     export TARGET_MONITORS="${escOutputs}"
                     
-                    # Auto-detect wallpaper daemon (swww or awww)
-                    if command -v swww >/dev/null 2>&1; then
-                        WALLPAPER_BIN="swww"
-                        DAEMON_BIN="swww-daemon"
-                    elif command -v awww >/dev/null 2>&1; then
-                        WALLPAPER_BIN="awww"
-                        DAEMON_BIN="awww-daemon"
-                    else
-                        notify-send "Wallpaper Error" "Neither swww nor awww found" -u critical -t 5000
-                        exit 1
-                    fi
-                    
                     if [ ! -f "$DEST_FILE" ]; then
                         notify-send "Wallpaper Error" "File not found: $DEST_FILE" -u critical -t 5000
                         exit 1
                     fi
                     
-                    if ! pgrep -x "\$DAEMON_BIN" >/dev/null 2>&1; then
-                        \$DAEMON_BIN || { notify-send "Wallpaper Error" "Failed to start wallpaper daemon" -u critical -t 5000; exit 1; }
+                    if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
+                        awww-daemon || { notify-send "Wallpaper Error" "Failed to start awww-daemon" -u critical -t 5000; exit 1; }
                         sleep 0.5
                     fi
                     
@@ -203,9 +191,9 @@ Item {
                     echo "[$(date +'%H:%M:%S.%3N')] APPLYING CACHED SEARCH: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
                     
                     if [ "$TARGET_MONITORS" = "all" ]; then
-                        \$WALLPAPER_BIN img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                        awww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                     else
-                        \$WALLPAPER_BIN img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                        awww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                     fi
                     
                     notify-send "Wallpaper" "Applied: $(basename "$DEST_FILE")" -i preferences-desktop-wallpaper -t 2000
@@ -226,16 +214,9 @@ Item {
                     export MAP_FILE="${escapeBash(mapFile)}"
                     export TARGET_MONITORS="${escOutputs}"
                     
-                    # Auto-detect wallpaper daemon (swww or awww)
-                    if command -v swww >/dev/null 2>&1; then
-                        WALLPAPER_BIN="swww"
-                        DAEMON_BIN="swww-daemon"
-                    elif command -v awww >/dev/null 2>&1; then
-                        WALLPAPER_BIN="awww"
-                        DAEMON_BIN="awww-daemon"
-                    else
-                        notify-send "Wallpaper Error" "Neither swww nor awww found" -u critical -t 5000
-                        exit 1
+                    if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
+                        awww-daemon || { notify-send "Wallpaper Error" "Failed to start awww-daemon" -u critical -t 5000; exit 1; }
+                        sleep 0.5
                     fi
                     
                     URL=$(awk -F'|' -v fname="$SAFE_NAME" '$1 == fname {print $2; exit}' "$MAP_FILE")
@@ -259,9 +240,9 @@ Item {
                         echo "[$(date +'%H:%M:%S.%3N')] APPLYING NEW DOWNLOAD: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
                         
                         if [ "$TARGET_MONITORS" = "all" ]; then
-                            \$WALLPAPER_BIN img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                            awww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         else
-                            \$WALLPAPER_BIN img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                            awww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         fi
                         
                         ( command -v matugen >/dev/null 2>&1 && matugen image "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
