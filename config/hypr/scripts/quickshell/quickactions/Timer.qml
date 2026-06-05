@@ -250,7 +250,7 @@ Item {
                 id: tabActiveHighlight
                 y: root.s(2)
                 height: root.s(32)
-                radius: root.s(10)
+                radius: root.s(18)
                 color: root.cMauve
                 z: 0
 
@@ -773,13 +773,13 @@ Item {
                                     width: root.s(240)
                                     Text { text: modelData.label; color: root.cSubtext0; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); Layout.fillWidth: true }
                                     Rectangle {
-                                        width: root.s(24); height: root.s(24); radius: root.s(8); color: root.cSurface1
+                                        width: root.s(24); height: root.s(24); radius: root.s(14); color: root.cSurface1
                                         Text { anchors.centerIn: parent; text: "-"; color: root.cText; font.family: "JetBrains Mono"; font.pixelSize: root.s(14) }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: stateCache[modelData.target] = Math.max(modelData.min, stateCache[modelData.target] - modelData.step) }
                                     }
                                     Text { text: stateCache[modelData.target]; color: root.cText; font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(14); Layout.minimumWidth: root.s(24); horizontalAlignment: Text.AlignHCenter }
                                     Rectangle {
-                                        width: root.s(24); height: root.s(24); radius: root.s(8); color: root.cSurface1
+                                        width: root.s(24); height: root.s(24); radius: root.s(14); color: root.cSurface1
                                         Text { anchors.centerIn: parent; text: "+"; color: root.cText; font.family: "JetBrains Mono"; font.pixelSize: root.s(14) }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: stateCache[modelData.target] = Math.min(modelData.max, stateCache[modelData.target] + modelData.step) }
                                     }

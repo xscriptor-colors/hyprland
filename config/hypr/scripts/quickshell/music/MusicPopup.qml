@@ -716,7 +716,7 @@ Item {
                                 spacing: root.s(10)
                                 Rectangle {
                                     color: "#1AFFFFFF"
-                                    radius: root.s(5)
+                                    radius: root.s(10)
                                     Layout.preferredHeight: root.s(24)
                                     Layout.preferredWidth: pillContent.width + root.s(20)
                                     RowLayout {
@@ -793,7 +793,7 @@ Item {
                                     // Shadows mimicking the EQ slider background
                                     Rectangle {
                                         anchors.fill: parent
-                                        radius: root.s(8)
+                                        radius: root.s(14)
                                         // Dynamic tint: surface0 with 70% opacity for a softer dark look
                                         color: Qt.rgba(root.surface0.r, root.surface0.g, root.surface0.b, 0.7)
 
@@ -822,7 +822,7 @@ Item {
                                             id: sliderFillMask
                                             width: parent.width
                                             height: parent.height
-                                            radius: root.s(8)
+                                            radius: root.s(14)
                                             visible: false
                                             layer.enabled: true 
                                         }
@@ -853,7 +853,7 @@ Item {
                                     implicitWidth: root.s(18) 
                                     implicitHeight: root.s(18)
                                     width: root.s(18); height: root.s(18)
-                                    radius: root.s(12); color: root.text
+                                    radius: root.s(19); color: root.text
                                     scale: progBar.pressed ? 1.3 : 1.0
                                     Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                                 }
@@ -1146,7 +1146,7 @@ Item {
                                                 implicitWidth: root.s(10) 
                                                 implicitHeight: root.s(150)
                                                 width: root.s(10); height: eqSlider.availableHeight
-                                                radius: root.s(5); 
+                                                radius: root.s(10); 
                                                 
                                                 // Dynamic tint: surface0 with 70% opacity for a softer dark look
                                                 color: Qt.rgba(root.surface0.r, root.surface0.g, root.surface0.b, 0.7)
@@ -1192,7 +1192,7 @@ Item {
                                                     Rectangle {
                                                         id: eqFillMask
                                                         anchors.fill: parent
-                                                        radius: root.s(5)
+                                                        radius: root.s(10)
                                                         visible: false
                                                         layer.enabled: true 
                                                     }
@@ -1244,7 +1244,7 @@ Item {
                                                 implicitWidth: root.s(18)
                                                 implicitHeight: root.s(18)
                                                 width: root.s(18); height: root.s(18)
-                                                radius: root.s(12); color: root.text
+                                                radius: root.s(19); color: root.text
 
                                                 property var catColors: [root.mauve, root.pink, root.lavender, root.mauve, root.blue]
 
@@ -1440,7 +1440,7 @@ Item {
         property string name: ""
         Layout.fillWidth: true
         Layout.preferredHeight: root.s(32)
-        radius: root.s(10)
+        radius: root.s(18)
         
         property bool isActivePreset: root.eqData && root.eqData.preset === name
         property bool isHovered: hoverMa.containsMouse

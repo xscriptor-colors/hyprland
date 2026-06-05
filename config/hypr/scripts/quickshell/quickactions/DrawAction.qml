@@ -776,7 +776,7 @@ Item {
 
                         Rectangle {
                             width: parent.width; height: s(8)
-                            radius: s(5)
+                            radius: s(10)
                             border.width: 1; border.color: "black"
                             color: "white"
                             y: (root.pickHue * parent.height) - (height/2)
@@ -852,7 +852,7 @@ Item {
                         color: (typeof mochaColors !== "undefined" && mochaColors && mochaColors.surface0) ? mochaColors.surface0 : Qt.rgba(root.baseTextColor.r, root.baseTextColor.g, root.baseTextColor.b, 0.05)
                         border.width: 1
                         border.color: (typeof mochaColors !== "undefined" && mochaColors && mochaColors.surface1) ? mochaColors.surface1 : Qt.rgba(root.baseTextColor.r, root.baseTextColor.g, root.baseTextColor.b, 0.1)
-                        radius: s(8)
+                        radius: s(14)
                         
                         TextInput {
                             id: hexInput

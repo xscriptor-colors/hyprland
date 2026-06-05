@@ -469,7 +469,7 @@ Item {
                         id: activeHighlight
                         width: parent.width
                         height: root.s(44)
-                        radius: root.s(10)
+                        radius: root.s(18)
                         color: root.mauve
                         z: 0
 
@@ -496,7 +496,7 @@ Item {
                                 Rectangle {
                                     width: parent.width
                                     height: root.s(44)
-                                    radius: root.s(10)
+                                    radius: root.s(18)
                                     z: 1
                                     
                                     property bool isActive: root.currentTab === index
@@ -583,7 +583,7 @@ Item {
                     Layout.preferredHeight: root.updateAvailable ? root.s(50) : 0
                     visible: root.updateAvailable
                     opacity: root.updateAvailable ? 1.0 : 0.0
-                    radius: root.s(10)
+                    radius: root.s(18)
                     color: updateHover.containsMouse ? Qt.alpha(root.green, 0.15) : Qt.alpha(root.green, 0.05)
                     border.color: updateHover.containsMouse ? root.green : Qt.alpha(root.green, 0.4)
                     border.width: 1
@@ -632,7 +632,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.s(44)
-                    radius: root.s(10)
+                    radius: root.s(18)
                     color: closeHover.containsMouse ? Qt.alpha(root.red, 0.1) : "transparent"
                     border.color: closeHover.containsMouse ? root.red : root.surface1
                     border.width: 1
@@ -932,7 +932,7 @@ Item {
                                 Layout.alignment: Qt.AlignVCenter
                                 width: root.s(32)
                                 height: root.s(32)
-                                radius: root.s(10)
+                                radius: root.s(18)
                                 color: root.surface0
                                 border.color: root.surface2
                                 border.width: 1
@@ -963,7 +963,7 @@ Item {
                                 Layout.alignment: Qt.AlignVCenter
                                 width: root.s(28)
                                 height: root.s(28)
-                                radius: root.s(8)
+                                radius: root.s(14)
                                 color: authorMa.containsMouse ? root.surface1 : "transparent"
                                 Text { 
                                     anchors.centerIn: parent
@@ -998,7 +998,7 @@ Item {
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: root.s(44)
-                                radius: root.s(10)
+                                radius: root.s(18)
                                 color: navBtnMa.containsMouse ? Qt.alpha(root[modelData.color], 0.15) : Qt.alpha(root.surface0, 0.4)
                                 border.color: navBtnMa.containsMouse ? root[modelData.color] : root.surface1
                                 border.width: 1
@@ -1248,7 +1248,7 @@ Item {
                                         Layout.alignment: Qt.AlignVCenter
                                         width: root.s(28)
                                         height: root.s(28)
-                                        radius: root.s(8)
+                                        radius: root.s(14)
                                         color: Qt.alpha(root.base, 0.5)
                                         Text { anchors.centerIn: parent; text: model.icon; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(14); color: isSelected ? root.ambientBlue : root.text } 
                                     } 
@@ -1409,7 +1409,7 @@ Item {
                                                 Layout.alignment: Qt.AlignVCenter
                                                 width: root.s(12)
                                                 height: root.s(12)
-                                                radius: root.s(8)
+                                                radius: root.s(14)
                                                 color: modelData
                                                 SequentialAnimation on scale { 
                                                     loops: Animation.Infinite
@@ -1498,7 +1498,7 @@ Item {
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: root.s(45)
-                                radius: root.s(10)
+                                radius: root.s(18)
                                 color: tplMa.containsMouse ? Qt.alpha(root[modelData.c], 0.1) : root.surface0
                                 border.color: tplMa.containsMouse ? root[modelData.c] : "transparent"
                                 border.width: 1

@@ -1114,7 +1114,7 @@ Item {
                         id: box0
                         Layout.fillWidth: true
                         Layout.preferredHeight: guideRow.implicitHeight + root.s(28)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 0
                         color: isActive ? root.peach : root.surface0
@@ -1166,7 +1166,7 @@ Item {
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                                 Layout.preferredWidth: root.s(40)
                                 Layout.preferredHeight: root.s(22)
-                                radius: root.s(14)
+                                radius: root.s(22)
                                 scale: toggle1Ma.containsMouse ? 1.05 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                                 color: Config.openGuideAtStartup
@@ -1174,7 +1174,7 @@ Item {
                                     : Qt.alpha(root.surface2, box0.isActive ? 0.4 : 1.0)
                                 Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                 Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(10)
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
                                     color: Config.openGuideAtStartup
                                         ? (box0.isActive ? root.peach : root.base)
                                         : (box0.isActive ? root.peach : root.surface0)
@@ -1192,7 +1192,7 @@ Item {
                         id: box1
                         Layout.fillWidth: true
                         Layout.preferredHeight: helpIconRow.implicitHeight + root.s(28)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 1
                         color: isActive ? root.blue : root.surface0
@@ -1234,7 +1234,7 @@ Item {
                             }
                             Rectangle {
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(14)
+                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
                                 scale: toggle2Ma.containsMouse ? 1.05 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
                                 color: Config.topbarHelpIcon
@@ -1242,7 +1242,7 @@ Item {
                                     : Qt.alpha(root.surface2, box1.isActive ? 0.4 : 1.0)
                                 Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                 Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(10)
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
                                     color: Config.topbarHelpIcon
                                         ? (box1.isActive ? root.blue : root.base)
                                         : (box1.isActive ? root.blue : root.surface0)
@@ -1260,7 +1260,7 @@ Item {
                         id: box2
                         Layout.fillWidth: true
                         Layout.preferredHeight: col2.implicitHeight + root.s(32)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 2
                         color: isActive ? root.sapphire : root.surface0
@@ -1300,7 +1300,7 @@ Item {
                                 RowLayout {
                                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(10)
                                     Rectangle {
-                                        width: root.s(28); height: root.s(28); radius: root.s(8)
+                                        width: root.s(28); height: root.s(28); radius: root.s(22)
                                         color: sMinusMa.pressed
                                             ? Qt.alpha(root.base, 0.3)
                                             : (sMinusMa.containsMouse
@@ -1325,7 +1325,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
                                     Rectangle {
-                                        width: root.s(28); height: root.s(28); radius: root.s(8)
+                                        width: root.s(28); height: root.s(28); radius: root.s(22)
                                         color: sPlusMa.pressed
                                             ? Qt.alpha(root.base, 0.3)
                                             : (sPlusMa.containsMouse ? Qt.alpha(root.base, 0.2) : Qt.alpha(root.base, 0.15))
@@ -1350,7 +1350,7 @@ Item {
                         id: box3
                         Layout.fillWidth: true
                         Layout.preferredHeight: col3lang.implicitHeight + root.s(32)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 3
                         color: isActive ? root.green : root.surface0
@@ -1392,7 +1392,7 @@ Item {
                                         Repeater {
                                             model: Config.language ? Config.language.split(",").filter(x => x.trim() !== "") : []
                                             Rectangle {
-                                                width: langChipLayout.implicitWidth + root.s(20); height: root.s(26); radius: root.s(17)
+                                                width: langChipLayout.implicitWidth + root.s(20); height: root.s(26); radius: root.s(24)
                                                 color: box3.isActive ? Qt.alpha(root.base, 0.2) : root.surface1
                                                 border.color: chipMa.containsMouse ? root.red : (box3.isActive ? Qt.alpha(root.base, 0.4) : "transparent")
                                                 border.width: chipMa.containsMouse ? 1 : 0
@@ -1427,7 +1427,7 @@ Item {
                             }
                             Rectangle {
                                 Layout.fillWidth: true; Layout.preferredHeight: root.s(34); Layout.topMargin: root.s(8)
-                                radius: root.s(9)
+                                radius: root.s(15)
                                 color: box3.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                 border.color: langInput.activeFocus
                                     ? (box3.isActive ? root.base : root.green)
@@ -1472,7 +1472,7 @@ Item {
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: langInput.activeFocus && langSearchModel.count > 0 ? Math.min(root.s(160), langSearchModel.count * root.s(30) + root.s(8)) : 0
-                                radius: root.s(9)
+                                radius: root.s(15)
                                 color: box3.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                 border.color: box3.isActive ? Qt.alpha(root.base, 0.3) : root.surface1
                                 border.width: 1
@@ -1488,7 +1488,7 @@ Item {
                                     ScrollBar.vertical: ScrollBar { active: true; policy: ScrollBar.AsNeeded }
                                     delegate: Rectangle {
                                         width: parent.width - root.s(8); height: root.s(30)
-                                        anchors.horizontalCenter: parent.horizontalCenter; radius: root.s(5)
+                                        anchors.horizontalCenter: parent.horizontalCenter; radius: root.s(18)
                                         property bool isHovered: sMa.containsMouse
                                         color: isHovered
                                             ? Qt.alpha(box3.isActive ? root.base : root.green, 0.2)
@@ -1518,7 +1518,7 @@ Item {
                         id: box4
                         Layout.fillWidth: true
                         Layout.preferredHeight: col4layout.implicitHeight + root.s(32)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 4
                         color: isActive ? root.teal : root.surface0
@@ -1557,7 +1557,7 @@ Item {
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true; Layout.preferredHeight: root.s(34); Layout.topMargin: root.s(8)
-                                        radius: root.s(9)
+                                        radius: root.s(15)
                                         color: box4.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                         border.color: root.isLayoutDropdownOpen
                                             ? (box4.isActive ? root.base : root.teal)
@@ -1594,7 +1594,7 @@ Item {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: root.isLayoutDropdownOpen ? root.kbToggleModelArr.length * root.s(30) + root.s(8) : 0
-                                        radius: root.s(9)
+                                        radius: root.s(15)
                                         color: box4.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                         border.color: box4.isActive ? Qt.alpha(root.base, 0.3) : root.surface1
                                         border.width: 1
@@ -1609,7 +1609,7 @@ Item {
                                             Behavior on opacity { NumberAnimation { duration: 200 } }
                                             delegate: Rectangle {
                                                 width: parent.width - root.s(8); height: root.s(30)
-                                                anchors.horizontalCenter: parent.horizontalCenter; radius: root.s(5)
+                                                anchors.horizontalCenter: parent.horizontalCenter; radius: root.s(18)
                                                 property bool isHovered: toggleMa.containsMouse
                                                 color: isHovered
                                                     ? Qt.alpha(box4.isActive ? root.base : root.teal, 0.2)
@@ -1640,7 +1640,7 @@ Item {
                         id: box5
                         Layout.fillWidth: true
                         Layout.preferredHeight: col5wp.implicitHeight + root.s(32)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 5
                         color: isActive ? root.mauve : root.surface0
@@ -1678,7 +1678,7 @@ Item {
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true; Layout.preferredHeight: root.s(34); Layout.topMargin: root.s(8)
-                                        radius: root.s(9)
+                                        radius: root.s(15)
                                         color: box5.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                         border.color: wpDirInput.activeFocus
                                             ? (box5.isActive ? root.base : root.mauve)
@@ -1726,7 +1726,7 @@ Item {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: wpDirInput.activeFocus && pathSuggestModel.count > 0 ? pathSuggestModel.count * root.s(28) + root.s(8) : 0
-                                        radius: root.s(9)
+                                        radius: root.s(15)
                                         color: box5.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                         border.color: box5.isActive ? Qt.alpha(root.base, 0.3) : root.surface1
                                         border.width: 1
@@ -1741,7 +1741,7 @@ Item {
                                             Behavior on opacity { NumberAnimation { duration: 200 } }
                                             delegate: Rectangle {
                                                 width: parent.width - root.s(8); height: root.s(28)
-                                                anchors.horizontalCenter: parent.horizontalCenter; radius: root.s(5)
+                                                anchors.horizontalCenter: parent.horizontalCenter; radius: root.s(18)
                                                 property bool isHovered: suggestMa.containsMouse
                                                 color: isHovered
                                                     ? Qt.alpha(box5.isActive ? root.base : root.mauve, 0.2)
@@ -1768,7 +1768,7 @@ Item {
                         id: box6
                         Layout.fillWidth: true
                         Layout.preferredHeight: col6ws.implicitHeight + root.s(32)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 6
                         color: isActive ? root.red : root.surface0
@@ -1807,7 +1807,7 @@ Item {
                                 RowLayout {
                                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(10)
                                     Rectangle {
-                                        width: root.s(28); height: root.s(28); radius: root.s(8)
+                                        width: root.s(28); height: root.s(28); radius: root.s(22)
                                         color: wsMinusMa.pressed ? Qt.alpha(root.base, 0.3) : (wsMinusMa.containsMouse ? Qt.alpha(root.base, 0.2) : Qt.alpha(root.base, 0.15))
                                         scale: wsMinusMa.pressed ? 0.90 : (wsMinusMa.containsMouse ? 1.08 : 1.0)
                                         Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
@@ -1828,7 +1828,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
                                     Rectangle {
-                                        width: root.s(28); height: root.s(28); radius: root.s(8)
+                                        width: root.s(28); height: root.s(28); radius: root.s(22)
                                         color: wsPlusMa.pressed ? Qt.alpha(root.base, 0.3) : (wsPlusMa.containsMouse ? Qt.alpha(root.base, 0.2) : Qt.alpha(root.base, 0.15))
                                         scale: wsPlusMa.pressed ? 0.90 : (wsPlusMa.containsMouse ? 1.08 : 1.0)
                                         Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
@@ -1907,7 +1907,7 @@ Item {
                         id: wBox0
                         Layout.fillWidth: true
                         Layout.preferredHeight: instructionLayout.implicitHeight + root.s(28)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 0
                         color: isActive ? root.blue : root.surface0
@@ -1930,7 +1930,7 @@ Item {
                             RowLayout {
                                 spacing: root.s(10)
                                 Rectangle {
-                                    width: root.s(22); height: root.s(22); radius: root.s(14)
+                                    width: root.s(22); height: root.s(22); radius: root.s(22)
                                     color: wBox0.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.blue, 0.2)
                                     border.color: wBox0.isActive ? Qt.alpha(root.base, 0.5) : root.blue; border.width: 1
                                     Behavior on color { ColorAnimation { duration: 220 } }
@@ -1958,7 +1958,7 @@ Item {
                                         model: ["Go to openweathermap.org & create an account.", "Navigate to profile -> 'My API keys'.", "Generate a new key and paste it below."]
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: root.s(30)
-                                            radius: root.s(8)
+                                            radius: root.s(22)
                                             color: wBox0.isActive ? Qt.alpha(root.base, 0.12) : root.surface0
                                             border.color: wBox0.isActive ? Qt.alpha(root.base, 0.2) : root.surface1; border.width: 1
                                             Behavior on color { ColorAnimation { duration: 220 } }
@@ -1974,7 +1974,7 @@ Item {
                             RowLayout {
                                 spacing: root.s(10)
                                 Rectangle {
-                                    width: root.s(22); height: root.s(22); radius: root.s(14)
+                                    width: root.s(22); height: root.s(22); radius: root.s(22)
                                     color: wBox0.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.peach, 0.2)
                                     border.color: wBox0.isActive ? Qt.alpha(root.base, 0.5) : root.peach; border.width: 1
                                     Behavior on color { ColorAnimation { duration: 220 } }
@@ -2006,7 +2006,7 @@ Item {
                                         model: ["Search for your city on openweathermap.org.", "Look at the URL (e.g. .../city/2643743).", "Copy the number at the end and paste below."]
                                         Rectangle {
                                             Layout.fillWidth: true; Layout.preferredHeight: root.s(30)
-                                            radius: root.s(8)
+                                            radius: root.s(22)
                                             color: wBox0.isActive ? Qt.alpha(root.base, 0.12) : root.surface0
                                             border.color: wBox0.isActive ? Qt.alpha(root.base, 0.2) : root.surface1; border.width: 1
                                             Behavior on color { ColorAnimation { duration: 220 } }
@@ -2032,7 +2032,7 @@ Item {
                         id: wBox1
                         Layout.fillWidth: true
                         Layout.preferredHeight: apiKeyRow.implicitHeight + root.s(28)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 1
                         color: isActive ? root.blue : root.surface0
@@ -2072,7 +2072,7 @@ Item {
                             }
                             Rectangle {
                                 Layout.fillWidth: true; Layout.preferredHeight: root.s(42)
-                                radius: root.s(9)
+                                radius: root.s(15)
                                 color: wBox1.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                 border.color: apiKeyInput.activeFocus
                                     ? (wBox1.isActive ? root.base : root.blue)
@@ -2104,7 +2104,7 @@ Item {
                                         }
                                     }
                                     Rectangle {
-                                        width: root.s(24); height: root.s(24); radius: root.s(5); color: "transparent"
+                                        width: root.s(24); height: root.s(24); radius: root.s(18); color: "transparent"
                                         Text {
                                             anchors.centerIn: parent; text: weatherTabRoot.apiKeyVisible ? "󰈈" : "󰈉"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(16)
                                             color: eyeMa.containsMouse
@@ -2124,7 +2124,7 @@ Item {
                         id: wBox2
                         Layout.fillWidth: true
                         Layout.preferredHeight: cityIdRow.implicitHeight + root.s(28)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 2
                         color: isActive ? root.blue : root.surface0
@@ -2164,7 +2164,7 @@ Item {
                             }
                             Rectangle {
                                 Layout.fillWidth: true; Layout.preferredHeight: root.s(42)
-                                radius: root.s(9)
+                                radius: root.s(15)
                                 color: wBox2.isActive ? Qt.alpha(root.base, 0.15) : root.surface0
                                 border.color: cityIdInput.activeFocus
                                     ? (wBox2.isActive ? root.base : root.blue)
@@ -2195,7 +2195,7 @@ Item {
                         id: wBox3
                         Layout.fillWidth: true
                         Layout.preferredHeight: unitRow.implicitHeight + root.s(28)
-                        radius: root.s(16)
+                        radius: root.s(26)
 
                         property bool isActive: root.highlightedBox === 3
                         color: isActive ? root.blue : root.surface0
@@ -2238,7 +2238,7 @@ Item {
                                 Repeater {
                                     model: [{ val: "metric", label: "Celsius" }, { val: "imperial", label: "Fahrenheit" }, { val: "standard", label: "Kelvin" }]
                                     Rectangle {
-                                        Layout.preferredWidth: root.s(88); Layout.preferredHeight: root.s(30); radius: root.s(8)
+                                        Layout.preferredWidth: root.s(88); Layout.preferredHeight: root.s(30); radius: root.s(22)
                                         property bool isSelected: Config.weatherUnit === modelData.val
                                         property bool parentActive: wBox3.isActive
                                         color: isSelected
@@ -2313,7 +2313,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: wsCol.implicitHeight + root.s(32)
-                        radius: root.s(16)
+                        radius: root.s(26)
                         color: root.surface0
                         border.color: root.surface1; border.width: 1
                         ColumnLayout {
@@ -2327,7 +2327,7 @@ Item {
                                     model: 9
                                     Rectangle {
                                         property int wsNum: index + 1
-                                        width: root.s(30); height: root.s(30); radius: root.s(8)
+                                        width: root.s(30); height: root.s(30); radius: root.s(22)
                                         color: wsMa.containsMouse ? root.peach : root.surface1
                                         border.color: wsMa.containsMouse ? root.peach : "transparent"; border.width: 1
                                         Behavior on color { ColorAnimation { duration: 150 } }
@@ -2366,7 +2366,7 @@ Item {
 
                             width: kbListView.width
                             height: root.s(44) + (model.isEditing ? editPanel.implicitHeight + root.s(12) : 0)
-                            radius: root.s(10)
+                            radius: root.s(18)
 
                             HoverHandler { id: rowHover }
                             property bool isHovered: rowHover.hovered || model.isEditing || isJumpHighlighted
@@ -2394,7 +2394,7 @@ Item {
                                         id: modKeyContainer
                                         anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; spacing: root.s(5)
                                         Rectangle {
-                                            width: k1Text.implicitWidth + root.s(10); height: root.s(24); radius: root.s(5)
+                                            width: k1Text.implicitWidth + root.s(10); height: root.s(24); radius: root.s(18)
                                             color: root.surface1
                                             border.color: root.surface2; border.width: 1
                                             visible: model.mods !== ""
@@ -2410,7 +2410,7 @@ Item {
                                             visible: model.mods !== "" && model.key !== ""; anchors.verticalCenter: parent.verticalCenter
                                         }
                                         Rectangle {
-                                            width: k2Text.implicitWidth + root.s(10); height: root.s(24); radius: root.s(5)
+                                            width: k2Text.implicitWidth + root.s(10); height: root.s(24); radius: root.s(18)
                                             color: root.surface1
                                             border.color: root.surface2; border.width: 1
                                             visible: model.key !== ""
@@ -2425,7 +2425,7 @@ Item {
                                     // Edit button
                                     Rectangle {
                                         id: editButtonSlide
-                                        width: root.s(26); height: root.s(26); radius: root.s(8)
+                                        width: root.s(26); height: root.s(26); radius: root.s(22)
                                         anchors.verticalCenter: parent.verticalCenter
                                         x: kbRowRect.isHovered ? parent.width - width : parent.width
                                         color: model.isEditing
@@ -2526,7 +2526,7 @@ Item {
                                     // Record shortcut
                                     Rectangle {
                                         Layout.fillWidth: true; Layout.preferredHeight: root.s(34)
-                                        radius: root.s(8)
+                                        radius: root.s(22)
                                         color: recordMa.pressed || captureTrap.activeFocus
                                             ? Qt.alpha(root.red, 0.12)
                                             : root.surface0
@@ -2617,7 +2617,7 @@ Item {
                                             Layout.preferredWidth: (parent.width - root.s(8)) * 0.4; Layout.alignment: Qt.AlignTop; spacing: root.s(4)
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: root.s(30)
-                                                radius: root.s(8)
+                                                radius: root.s(22)
                                                 scale: kbRowRect.isTypeOpen ? 1.02 : 1.0
                                                 Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
                                                 color: kbRowRect.isTypeOpen
@@ -2646,7 +2646,7 @@ Item {
                                             Rectangle {
                                                 Layout.fillWidth: true
                                                 Layout.preferredHeight: kbRowRect.isTypeOpen ? root.bindTypes.length * root.s(26) : 0
-                                                radius: root.s(8); color: root.surface0; clip: true
+                                                radius: root.s(22); color: root.surface0; clip: true
                                                 border.color: root.surface1; border.width: kbRowRect.isTypeOpen ? 1 : 0
                                                 Behavior on Layout.preferredHeight { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
                                                 ListView {
@@ -2670,7 +2670,7 @@ Item {
                                             Layout.preferredWidth: (parent.width - root.s(8)) * 0.6; Layout.alignment: Qt.AlignTop; spacing: root.s(4)
                                             Rectangle {
                                                 Layout.fillWidth: true; Layout.preferredHeight: root.s(30)
-                                                radius: root.s(8)
+                                                radius: root.s(22)
                                                 scale: kbRowRect.isDispOpen ? 1.02 : 1.0
                                                 Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
                                                 color: kbRowRect.isDispOpen
@@ -2699,7 +2699,7 @@ Item {
                                             Rectangle {
                                                 Layout.fillWidth: true
                                                 Layout.preferredHeight: kbRowRect.isDispOpen ? Math.min(root.s(140), root.dispatchers.length * root.s(26)) : 0
-                                                radius: root.s(8); color: root.surface0; clip: true
+                                                radius: root.s(22); color: root.surface0; clip: true
                                                 border.color: root.surface1; border.width: kbRowRect.isDispOpen ? 1 : 0
                                                 Behavior on Layout.preferredHeight { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
                                                 ListView {
@@ -2725,7 +2725,7 @@ Item {
                                     // Command input
                                     Rectangle {
                                         Layout.fillWidth: true; Layout.preferredHeight: root.s(34)
-                                        radius: root.s(8)
+                                        radius: root.s(22)
                                         color: cmdInput.activeFocus ? Qt.alpha(root.peach, 0.08) : root.surface0
                                         border.color: cmdInput.activeFocus ? root.peach : root.surface2
                                         border.width: 1; z: 1
@@ -2751,7 +2751,7 @@ Item {
                                         Layout.fillWidth: true; Layout.alignment: Qt.AlignRight; spacing: root.s(8); z: 0
                                         // Delete button
                                         Rectangle {
-                                            Layout.preferredWidth: root.s(80); Layout.preferredHeight: root.s(30); radius: root.s(9)
+                                            Layout.preferredWidth: root.s(80); Layout.preferredHeight: root.s(30); radius: root.s(15)
                                             color: delMa.containsMouse ? root.red : root.surface1
                                             border.color: delMa.containsMouse ? root.red : Qt.alpha(root.red, 0.4)
                                             border.width: 1
@@ -2781,7 +2781,7 @@ Item {
                                         }
                                         // Save button
                                         Rectangle {
-                                            Layout.preferredWidth: root.s(80); Layout.preferredHeight: root.s(30); radius: root.s(9)
+                                            Layout.preferredWidth: root.s(80); Layout.preferredHeight: root.s(30); radius: root.s(15)
                                             color: rowSaveMa.containsMouse ? root.green : root.surface1
                                             border.color: rowSaveMa.containsMouse ? root.green : Qt.alpha(root.green, 0.4)
                                             border.width: 1
@@ -2866,7 +2866,7 @@ Item {
 
                     Rectangle {
                         visible: root.isSearchMode
-                        width: root.s(26); height: root.s(26); radius: root.s(8)
+                        width: root.s(26); height: root.s(26); radius: root.s(22)
                         color: closeSearchMa.containsMouse ? Qt.alpha(root.red, 0.15) : "transparent"
                         border.color: closeSearchMa.containsMouse ? root.red : "transparent"; border.width: 1
                         opacity: root.isSearchMode ? 1.0 : 0.0
@@ -2892,7 +2892,7 @@ Item {
                         Layout.preferredHeight: root.s(34)
                         Layout.preferredWidth: saveBtnRow.implicitWidth + root.s(28)
 
-                        radius: root.s(10)
+                        radius: root.s(18)
                         scale: headerSaveMa.pressed ? 0.94 : (headerSaveMa.containsMouse ? 1.03 : 1.0)
                         Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
@@ -2949,7 +2949,7 @@ Item {
                         Layout.preferredHeight: root.s(34)
                         Layout.preferredWidth: addBtnRow.implicitWidth + root.s(28)
 
-                        radius: root.s(10)
+                        radius: root.s(18)
                         scale: headerAddMa.pressed ? 0.94 : (headerAddMa.containsMouse ? 1.03 : 1.0)
                         Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
@@ -3059,7 +3059,7 @@ Item {
                             }
                         }
                         Rectangle {
-                            visible: root.isSearchMode && globalSearchInput.text.length > 0; width: root.s(20); height: root.s(20); radius: root.s(5)
+                            visible: root.isSearchMode && globalSearchInput.text.length > 0; width: root.s(20); height: root.s(20); radius: root.s(18)
                             color: clearSearchBtnMa.containsMouse ? Qt.alpha(root.red, 0.15) : "transparent"
                             border.color: clearSearchBtnMa.containsMouse ? root.red : "transparent"; border.width: 1
                             Behavior on color { ColorAnimation { duration: 150 } }
@@ -3140,7 +3140,7 @@ Item {
                             id: tabHighlightPill
                             y: root.s(3)
                             height: root.s(32)
-                            radius: root.s(10)
+                            radius: root.s(18)
 
                             property color c0: root.teal
                             property color c1: root.blue
@@ -3299,7 +3299,7 @@ Item {
                                         RowLayout {
                                             anchors.fill: parent; anchors.margins: root.s(12); spacing: root.s(12)
                                             Rectangle {
-                                                width: root.s(32); height: root.s(32); radius: root.s(10)
+                                                width: root.s(32); height: root.s(32); radius: root.s(18)
                                                 color: Qt.alpha(root[card.color], 0.15)
                                                 border.color: Qt.alpha(root[card.color], 0.3); border.width: 1
                                                 Text {
@@ -3364,7 +3364,7 @@ Item {
                                 Behavior on opacity { NumberAnimation { duration: 200 } }
                                 RowLayout {
                                     anchors.fill: parent; anchors.leftMargin: root.s(4); spacing: root.s(8)
-                                    Rectangle { width: root.s(3); height: root.s(12); radius: root.s(3); color: root.peach }
+                                    Rectangle { width: root.s(3); height: root.s(12); radius: root.s(8); color: root.peach }
                                     Text { text: "Keybinds (" + root.matchingKeybindIndices.length + " match" + (root.matchingKeybindIndices.length !== 1 ? "es" : "") + ")"; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.peach }
                                 }
                             }
@@ -3400,7 +3400,7 @@ Item {
                                         RowLayout {
                                             anchors.fill: parent; anchors.margins: root.s(11); spacing: root.s(11)
                                             Rectangle {
-                                                width: root.s(32); height: root.s(32); radius: root.s(10)
+                                                width: root.s(32); height: root.s(32); radius: root.s(18)
                                                 color: Qt.alpha(root.peach, 0.12)
                                                 border.color: Qt.alpha(root.peach, 0.25); border.width: 1
                                                 Text {
@@ -3413,7 +3413,7 @@ Item {
                                                 Row {
                                                     spacing: root.s(4)
                                                     Rectangle {
-                                                        width: modsT.implicitWidth + root.s(8); height: root.s(18); radius: root.s(5)
+                                                        width: modsT.implicitWidth + root.s(8); height: root.s(18); radius: root.s(18)
                                                         color: root.surface1
                                                         border.color: root.surface2; border.width: 1
                                                         visible: kbItem && kbItem.mods !== ""
@@ -3429,7 +3429,7 @@ Item {
                                                         visible: kbItem && kbItem.mods !== "" && kbItem.key !== ""; anchors.verticalCenter: parent.verticalCenter
                                                     }
                                                     Rectangle {
-                                                        width: keyT.implicitWidth + root.s(8); height: root.s(18); radius: root.s(5)
+                                                        width: keyT.implicitWidth + root.s(8); height: root.s(18); radius: root.s(18)
                                                         color: root.surface1
                                                         border.color: root.surface2; border.width: 1
                                                         visible: kbItem && kbItem.key !== ""
@@ -3615,7 +3615,7 @@ Item {
 
                             width: startupListView.width
                             height: root.s(44) + (model.isEditing ? editPanel.implicitHeight + root.s(12) : 0)
-                            radius: root.s(10)
+                            radius: root.s(18)
 
                             HoverHandler { id: startupRowHover }
                             property bool isHovered: startupRowHover.hovered || model.isEditing || isJumpHighlighted
@@ -3638,7 +3638,7 @@ Item {
 
                                     Rectangle {
                                         id: startupEditBtn
-                                        width: root.s(26); height: root.s(26); radius: root.s(8)
+                                        width: root.s(26); height: root.s(26); radius: root.s(22)
                                         anchors.verticalCenter: parent.verticalCenter
                                         x: startupRowRect.isHovered ? parent.width - width : parent.width
                                         color: model.isEditing
@@ -3697,7 +3697,7 @@ Item {
                                         spacing: root.s(8)
 
                                         Rectangle {
-                                            Layout.fillWidth: true; Layout.preferredHeight: root.s(32); radius: root.s(8)
+                                            Layout.fillWidth: true; Layout.preferredHeight: root.s(32); radius: root.s(22)
                                             color: root.surface0; border.color: cmdInputFocus.activeFocus ? root.green : root.surface2; border.width: 1
                                             Behavior on border.color { ColorAnimation { duration: 150 } }
                                             RowLayout {
@@ -3724,7 +3724,7 @@ Item {
 
                                             Rectangle {
                                                 Layout.preferredHeight: root.s(28); Layout.preferredWidth: startupDelRow.implicitWidth + root.s(16)
-                                                radius: root.s(8)
+                                                radius: root.s(22)
                                                 color: startupDelMa.containsMouse ? root.red : root.surface1
                                                 border.color: startupDelMa.containsMouse ? root.red : root.surface2; border.width: 1
                                                 Behavior on color { ColorAnimation { duration: 150 } }
@@ -3738,7 +3738,7 @@ Item {
 
                                             Rectangle {
                                                 Layout.preferredHeight: root.s(28); Layout.preferredWidth: startupDoneRow.implicitWidth + root.s(16)
-                                                radius: root.s(8)
+                                                radius: root.s(22)
                                                 color: startupDoneMa.containsMouse ? root.green : root.surface1
                                                 border.color: startupDoneMa.containsMouse ? root.green : root.surface2; border.width: 1
                                                 Behavior on color { ColorAnimation { duration: 150 } }
@@ -3813,7 +3813,7 @@ Item {
                             id: monStandBase
                             width: root.s(100)
                             height: root.s(7)
-                            radius: root.s(5)
+                            radius: root.s(18)
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: root.s(12)
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -3829,7 +3829,7 @@ Item {
                             Rectangle {
                                 width: root.s(8)
                                 height: root.s(20)
-                                radius: root.s(5)
+                                radius: root.s(18)
                                 anchors.centerIn: parent
                                 color: root.base
                             }
@@ -3980,7 +3980,7 @@ Item {
                                     y: model.uiY
                                     width: monDelegateItem.cardW
                                     height: monDelegateItem.cardH
-                                    radius: root.s(10)
+                                    radius: root.s(18)
                                     color: isActive ? root.surface1 : root.crust
                                     border.color: isActive ? root.monSelectedResAccent : root.surface2
                                     border.width: isActive ? root.s(2) : root.s(1)
@@ -4225,14 +4225,14 @@ Item {
                             Rectangle {
                                 width: root.s(4)
                                 height: parent.height / 2 - root.s(22)
-                                radius: root.s(3)
+                                radius: root.s(8)
                                 color: root.monSelectedResAccent
                                 anchors.bottom: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 300 } }
                             }
                             Rectangle {
-                                width: root.s(18); height: root.s(18); radius: root.s(12)
+                                width: root.s(18); height: root.s(18); radius: root.s(19)
                                 color: root.base
                                 border.color: root.monSelectedResAccent
                                 border.width: root.s(4)
@@ -4335,7 +4335,7 @@ Item {
                             }
                             Rectangle {
                                 id: rKnob
-                                width: root.s(16); height: root.s(16); radius: root.s(10)
+                                width: root.s(16); height: root.s(16); radius: root.s(18)
                                 color: rateMa.containsPress ? root.monSelectedRateAccent : root.text
                                 y: rTrack.y + rTrack.height / 2 - height / 2
                                 x: rateSlider.knobX - width / 2
