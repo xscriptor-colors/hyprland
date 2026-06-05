@@ -294,7 +294,11 @@ Item {
             pkill mpvpaper || true
             
             ${wallpaperCmd}
-            ( matugen image "${escThumb}" || true; bash "${escReload}" || true ) &
+            if command -v matugen >/dev/null 2>&1; then
+                matugen image "${escOriginal}" 2>>${paths.logDir}/matugen_error.log
+                echo "matugen exit code: $?" >> ${paths.logDir}/matugen_error.log
+            fi
+            bash "${escReload}" 2>/dev/null || true
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
     }

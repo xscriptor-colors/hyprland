@@ -48,46 +48,50 @@ print_workspaces() {
     # Get raw data with a timeout fallback
     spaces=$(timeout 2 hyprctl workspaces -j 2>/dev/null)
     active=$(timeout 2 hyprctl activeworkspace -j 2>/dev/null | jq '.id')
-    clients=$(timeout 2 hyprctl clients -j 2>/dev/null)
 
     # Failsafe if hyprctl crashes to prevent jq from outputting errors
     if [ -z "$spaces" ] || [ -z "$active" ]; then return; fi
-    [ -z "$clients" ] && clients="[]"
 
-    # Generate the JSON and write it atomically to prevent UI flickering
-    echo "$spaces" | jq --unbuffered --argjson a "$active" --arg end "$SEQ_END" --argjson c "$clients" -c '
-        # Create a map of workspace ID -> workspace data for easy lookup
-        (map( { (.id|tostring): . } ) | add) as $s
-        |
-        # Group clients by workspace and collect unique app classes
-        ($c | group_by(.workspace.id) | map({
-            (.[0].workspace.id | tostring): ([.[] | .class] | unique | map(select(length > 0)))
-        }) | add) as $wins
-        |
-        # Iterate from 1 to SEQ_END
-        [range(1; ($end|tonumber) + 1)] | map(
-            . as $i |
-            # Determine state: active -> occupied -> empty
-            (if $i == $a then "active"
-             elif ($s[$i|tostring] != null and $s[$i|tostring].windows > 0) then "occupied"
-             else "empty" end) as $state |
-
-            # Get window title for tooltip (if exists)
+    # Generate the JSON with workspace states
+    echo "$spaces" | jq --unbuffered --argjson a "$active" --arg end "$SEQ_END" -c '
+        (map({(.id|tostring): .}) | add) as $s |
+        [range(1; ($end|tonumber)+1)] | map(. as $i |
+            (if $i == $a then "active" elif ($s[$i|tostring] != null and $s[$i|tostring].windows > 0) then "occupied" else "empty" end) as $state |
             (if $s[$i|tostring] != null then $s[$i|tostring].lastwindowtitle else "Empty" end) as $win |
-
-            # Get app classes for this workspace
-            ($wins[$i|tostring] // []) as $classes |
-
-            {
-                id: $i,
-                state: $state,
-                tooltip: $win,
-                classes: $classes
-            }
+            {id: $i, state: $state, tooltip: $win}
         )
     ' > "$QS_RUN_WORKSPACES/workspaces.tmp"
     
-    mv "$QS_RUN_WORKSPACES/workspaces.tmp" "$QS_RUN_WORKSPACES/workspaces.json"
+    # Add app classes per workspace using Python (simpler than complex jq)
+    python3 -c "
+import json, subprocess, sys
+try:
+    with open('$QS_RUN_WORKSPACES/workspaces.tmp') as f:
+        data = json.load(f)
+except:
+    sys.exit(0)
+try:
+    out = subprocess.run(['timeout', '2', 'hyprctl', 'clients', '-j'], capture_output=True, text=True, timeout=3)
+    clients = json.loads(out.stdout) if out.stdout else []
+except:
+    clients = []
+# Build workspace -> classes map
+ws_classes = {}
+for c in clients:
+    ws = str(c.get('workspace', {}).get('id', ''))
+    cls = c.get('class', '')
+    if ws and cls:
+        ws_classes.setdefault(ws, []).append(cls)
+# Deduplicate and add to each workspace
+for entry in data:
+    ws_id = str(entry['id'])
+    classes = list(dict.fromkeys(ws_classes.get(ws_id, [])))  # unique, preserve order
+    entry['classes'] = classes
+with open('$QS_RUN_WORKSPACES/workspaces.json', 'w') as f:
+    json.dump(data, f)
+" 2>/dev/null || mv "$QS_RUN_WORKSPACES/workspaces.tmp" "$QS_RUN_WORKSPACES/workspaces.json"
+    
+    rm -f "$QS_RUN_WORKSPACES/workspaces.tmp"
 }
 
 # Print initial state
