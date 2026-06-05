@@ -295,8 +295,9 @@ Item {
             
             ${wallpaperCmd}
             if command -v matugen >/dev/null 2>&1; then
-                matugen image "${escOriginal}" 2>>${paths.logDir}/matugen_error.log
-                echo "matugen exit code: $?" >> ${paths.logDir}/matugen_error.log
+                mkdir -p /tmp/quickshell/logs
+                matugen image "${escOriginal}" --source-color-index 0 >>/tmp/quickshell/logs/matugen.log 2>&1
+                echo "matugen exit code: $?" >> /tmp/quickshell/logs/matugen.log
             fi
             bash "${escReload}" 2>/dev/null || true
         `;
