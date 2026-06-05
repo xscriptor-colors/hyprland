@@ -1,0 +1,19 @@
+pragma Singleton
+import QtQuick 2.15
+
+QtObject {
+    readonly property color base: "{{ colors.background.default.hex }}"
+    readonly property color crust: "{{ colors.surface_container_lowest.default.hex }}"
+    readonly property color mantle: "{{ colors.surface_container_low.default.hex }}"
+    readonly property color text: "{{ colors.on_background.default.hex }}"
+    readonly property color subtext0: "{{ colors.outline.default.hex }}"
+    readonly property color surface0: "{{ colors.surface.default.hex }}"
+    readonly property color surface1: "{{ colors.surface_variant.default.hex }}"
+    readonly property color surface2: "{{ colors.surface_container.default.hex }}"
+
+    readonly property color mauve: "{{ colors.primary.default.hex }}"
+    readonly property color red: "{{ colors.error.default.hex }}"
+    readonly property color peach: "{{ colors.tertiary.default.hex }}"
+    readonly property color blue: "{{ colors.secondary.default.hex }}"
+    readonly property color green: "{{ colors.primary_container.default.hex }}"
+}
