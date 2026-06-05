@@ -128,18 +128,13 @@ elif [ ! -f "$wallpaper" ]; then
     exit 1
 fi
 
-# Auto-detect wallpaper daemon
-WP_BIN=""; DAEMON_BIN=""
-command -v swww >/dev/null 2>&1 && { WP_BIN=swww; DAEMON_BIN=swww-daemon; } || { command -v awww >/dev/null 2>&1 && { WP_BIN=awww; DAEMON_BIN=awww-daemon; }; }
-if [ -z "$WP_BIN" ]; then
-    notify-send "Wallpaper" "No wallpaper daemon found (install swww or awww)" -u critical
-    exit 1
-fi
-
-if ! pgrep -x "$DAEMON_BIN" >/dev/null 2>&1; then
-    $DAEMON_BIN &
+# Ensure awww-daemon is running
+if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
+    awww-daemon &
     sleep 0.5
 fi
+
+WP_BIN="awww"
 
 types=("fade" "left" "right" "top" "bottom" "wipe" "wave" "grow" "center" "outer")
 positions=("center" "top" "left" "right" "bottom" "top-left" "top-right" "bottom-left" "bottom-right")
