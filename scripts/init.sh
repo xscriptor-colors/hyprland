@@ -11,8 +11,8 @@ RELOAD_SCRIPT_PATH="$(dirname "${BASH_SOURCE[0]}")/quickshell/wallpaper/matugen_
 # If the flag exists, just run matugen and the reload script, then exit
 if [ -f "$FLAG" ]; then
     # Use the cached wallpaper image for matugen
-    if [ -f "$CACHE_IMG" ]; then
-        matugen image "$CACHE_IMG" --source-color-index 0
+    if [ -f "$CACHE_IMG" ] && command -v matugen >/dev/null 2>&1; then
+        matugen image "$CACHE_IMG" --source-color-index 0 2>/dev/null || true
     fi
     
     if [ -f "$RELOAD_SCRIPT_PATH" ]; then
@@ -38,7 +38,7 @@ if [ -n "$file" ]; then
     WPBIN=""; command -v swww >/dev/null 2>&1 && WPBIN=swww || command -v awww >/dev/null 2>&1 && WPBIN=awww
     [ -n "$WPBIN" ] && $WPBIN img "$file" --transition-type any --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 &
     
-    matugen image "$file" --source-color-index 0
+    command -v matugen >/dev/null 2>&1 && matugen image "$file" --source-color-index 0 2>/dev/null || true
     
     # Execute reload script if it exists
     if [ -f "$RELOAD_SCRIPT_PATH" ]; then

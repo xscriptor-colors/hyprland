@@ -209,7 +209,7 @@ Item {
                     fi
                     
                     notify-send "Wallpaper" "Applied: $(basename "$DEST_FILE")" -i preferences-desktop-wallpaper -t 2000
-                    ( matugen image "$FINAL_THUMB" || notify-send "Matugen" "Color generation failed" -u low -t 3000; bash "$RELOAD_SCRIPT" || true ) &
+                    ( command -v matugen >/dev/null 2>&1 && matugen image "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
                 `;
                 Quickshell.execDetached(["bash", "-c", applyScript]);
             } else {
@@ -264,7 +264,7 @@ Item {
                             \$WALLPAPER_BIN img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         fi
                         
-                        ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
+                        ( command -v matugen >/dev/null 2>&1 && matugen image "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
                     fi
                 `;
                 Quickshell.execDetached(["bash", "-c", downloadScript]);
@@ -338,9 +338,9 @@ Item {
             fi
             
             ${wallpaperCmd}
-            notify-send "Wallpaper" "Applied: \$(basename "\${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
+            notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
             
-            ( matugen image "${escThumb}" || notify-send "Matugen" "Color generation failed" -u low -t 3000; bash "${escReload}" || true ) &
+            ( command -v matugen >/dev/null 2>&1 && matugen image "${escThumb}" 2>/dev/null || true; bash "${escReload}" || true ) &
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
     }
