@@ -157,7 +157,7 @@ Item {
         const randomTransition = window.transitions[Math.floor(Math.random() * window.transitions.length)];
         const escOutputs = escapeBash(outputs);
         
-        const logFile = paths.logDir + "/swww_debug.log";
+        const logFile = paths.logDir + "/awww_debug.log";
         
         if (window.currentFilter === "Search" && window.hasSearched) {
             let alreadyExists = window.isDownloaded(safeFileName);
@@ -301,109 +301,19 @@ Item {
                 echo "[$(date +'%H:%M:%S.%3N')] APPLYING LOCAL IMAGE: ${escOriginal} TO ${escOutputs}" >> ${logFile}
                 
                 if [ "${escOutputs}" = "all" ]; then
-                    \$WALLPAPER_BIN img "${escOriginal}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                    awww img "${escOriginal}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                 else
-                    \$WALLPAPER_BIN img -o "${escOutputs}" "${escOriginal}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                    awww img -o "${escOutputs}" "${escOriginal}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                 fi
             `;
         }
 
         const fullScript = `
-            export PATH="$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
-            LOG="${paths.logDir}/wallpaper_apply.log"
-            echo "[$(date +'%H:%M:%S')] Applying wallpaper..." >> "$LOG"
-            
-            # Auto-detect wallpaper daemon (swww or awww)
-            if command -v swww >/dev/null 2>&1; then
-                WALLPAPER_BIN="swww"
-                DAEMON_BIN="swww-daemon"
-            elif command -v awww >/dev/null 2>&1; then
-                WALLPAPER_BIN="awww"
-                DAEMON_BIN="awww-daemon"
-            else
-                notify-send "Wallpaper Error" "Neither swww nor awww found" -u critical -t 5000
-                exit 1
-            fi
-            
-            if [ ! -f "${escOriginal}" ]; then
-                notify-send "Wallpaper Error" "File not found: ${escOriginal}" -u critical -t 5000
-                echo "ERROR: File not found: ${escOriginal}" >> "$LOG"
-                exit 1
-            fi
-            
             cp "${isVideo ? escThumb : escOriginal}" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
             pkill mpvpaper || true
             
-            if ! pgrep -x "\$DAEMON_BIN" >/dev/null 2>&1; then
-                \$DAEMON_BIN >> "$LOG" 2>&1 || { notify-send "Wallpaper Error" "Failed to start wallpaper daemon" -u critical -t 5000; echo "ERROR: daemon start failed" >> "$LOG"; exit 1; }
-                sleep 0.5
-            fi
-            
             ${wallpaperCmd}
-            
-            # --- COLOR GENERATION ---
-            QS_COLORS="$HOME/.config/hypr/scripts/quickshell/qs_colors.json"
-            mkdir -p "$(dirname "$QS_COLORS")"
-            
-            # Generate colors: try matugen first, then fallback to ImageMagick
-            COLORS_GENERATED=false
-            if command -v matugen >/dev/null 2>&1; then
-                echo "Running matugen..." >> "$LOG"
-                matugen image "${escOriginal}" >> "$LOG" 2>&1
-                if [ $? -eq 0 ] && [ -s "$QS_COLORS" ]; then
-                    COLORS_GENERATED=true
-                    echo "matugen succeeded" >> "$LOG"
-                    bash "${escReload}" 2>/dev/null || true
-                else
-                    echo "matugen failed, using magick fallback" >> "$LOG"
-                fi
-            fi
-            
-            # Fallback: extract colors via ImageMagick (always works, no extra deps)
-            if [ "$COLORS_GENERATED" != "true" ]; then
-                echo "Generating colors via ImageMagick..." >> "$LOG"
-                # Get dominant color
-                DOM_HEX=$(magick "${escOriginal}" -resize 1x1 -depth 8 -format "%[hex:p{0,0}]" info:- 2>/dev/null | tr -d ' ')
-                if [ -z "$DOM_HEX" ]; then
-                    DOM_HEX="1e1e2e"
-                    echo "magick failed, using default" >> "$LOG"
-                fi
-                echo "Dominant color: $DOM_HEX" >> "$LOG"
-                
-                # Generate palette from dominant color
-                R=$((16#${DOM_HEX:0:2})); G=$((16#${DOM_HEX:2:2})); B=$((16#${DOM_HEX:4:2}))
-                cat > "$QS_COLORS" << EOFCAT
-        {
-            "base": "#$(printf '%02x%02x%02x' $((R*80/100)) $((G*80/100)) $((B*80/100)))",
-            "mantle": "#$(printf '%02x%02x%02x' $((R*70/100)) $((G*70/100)) $((B*70/100)))",
-            "crust": "#$(printf '%02x%02x%02x' $((R*60/100)) $((G*60/100)) $((B*60/100)))",
-            "text": "#$DOM_HEX",
-            "subtext0": "#$(printf '%02x%02x%02x' $((R*82/100)) $((G*82/100)) $((B*82/100)))",
-            "surface0": "#$(printf '%02x%02x%02x' $((R*75/100)) $((G*75/100)) $((B*75/100)))",
-            "surface1": "#$(printf '%02x%02x%02x' $((R*70/100)) $((G*70/100)) $((B*70/100)))",
-            "blue": "#89b4fa",
-            "sapphire": "#74c7ec",
-            "peach": "#fab387",
-            "green": "#a6e3a1",
-            "red": "#f38ba8",
-            "mauve": "#cba6f7",
-            "yellow": "#f9e2af",
-            "teal": "#94e2d5"
-        }
-EOFCAT
-                echo "Colors written via magick fallback" >> "$LOG"
-            fi
-            
-            # Force Quickshell to re-read colors via IPC
-            echo "Triggering color reload..." >> "$LOG"
-            QS_BIN=""; command -v quickshell >/dev/null 2>&1 && QS_BIN=quickshell || command -v qs >/dev/null 2>&1 && QS_BIN=qs
-            if [ -n "\$QS_BIN" ]; then
-                \$QS_BIN -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>>"$LOG" || echo "IPC call failed" >> "$LOG"
-            else
-                echo "No quickshell binary found in PATH" >> "$LOG"
-            fi
-            
-            notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
+            ( matugen image "${escThumb}" || true; bash "${escReload}" || true ) &
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
     }
