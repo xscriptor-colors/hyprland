@@ -310,6 +310,8 @@ Item {
 
         const fullScript = `
             export PATH="$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+            LOG="${paths.logDir}/wallpaper_apply.log"
+            echo "[$(date +'%H:%M:%S')] Applying wallpaper..." >> "$LOG"
             
             # Auto-detect wallpaper daemon (swww or awww)
             if command -v swww >/dev/null 2>&1; then
@@ -323,9 +325,9 @@ Item {
                 exit 1
             fi
             
-            # Verify source file exists
             if [ ! -f "${escOriginal}" ]; then
                 notify-send "Wallpaper Error" "File not found: ${escOriginal}" -u critical -t 5000
+                echo "ERROR: File not found: ${escOriginal}" >> "$LOG"
                 exit 1
             fi
             
@@ -333,14 +335,35 @@ Item {
             pkill mpvpaper || true
             
             if ! pgrep -x "\$DAEMON_BIN" >/dev/null 2>&1; then
-                \$DAEMON_BIN || { notify-send "Wallpaper Error" "Failed to start wallpaper daemon" -u critical -t 5000; exit 1; }
+                \$DAEMON_BIN >> "$LOG" 2>&1 || { notify-send "Wallpaper Error" "Failed to start wallpaper daemon" -u critical -t 5000; echo "ERROR: daemon start failed" >> "$LOG"; exit 1; }
                 sleep 0.5
             fi
             
             ${wallpaperCmd}
-            notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
             
-            ( command -v matugen >/dev/null 2>&1 && matugen image "${escThumb}" 2>/dev/null || true; bash "${escReload}" || true ) &
+            # --- MATUGEN COLOR GENERATION ---
+            # Run on the ORIGINAL file (not thumbnail) for best results
+            if command -v matugen >/dev/null 2>&1; then
+                echo "Running matugen on: ${escOriginal}" >> "$LOG"
+                matugen image "${escOriginal}" >> "$LOG" 2>&1
+                MATUGEN_EXIT=$?
+                if [ $MATUGEN_EXIT -ne 0 ]; then
+                    echo "WARNING: matugen exit code $MATUGEN_EXIT" >> "$LOG"
+                else
+                    echo "matugen succeeded, flattening JSON..." >> "$LOG"
+                fi
+            else
+                echo "matugen not installed, skipping color gen" >> "$LOG"
+            fi
+            
+            # Run reload/flatten script regardless
+            bash "${escReload}" 2>/dev/null || true
+            echo "Reload script done" >> "$LOG"
+            
+            # Force Quickshell to re-read colors via IPC
+            qs -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar queueReload 2>/dev/null || true
+            
+            notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
     }
