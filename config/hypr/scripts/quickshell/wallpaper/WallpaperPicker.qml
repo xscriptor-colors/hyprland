@@ -361,7 +361,7 @@ Item {
             echo "Reload script done" >> "$LOG"
             
             # Force Quickshell to re-read colors via IPC
-            qs -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar queueReload 2>/dev/null || true
+            quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>/dev/null || true
             
             notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
         `;

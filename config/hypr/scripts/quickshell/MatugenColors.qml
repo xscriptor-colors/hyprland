@@ -31,6 +31,11 @@ Item {
 
     property string rawJson: ""
 
+    function forceRefresh() {
+        themeReader.running = false;
+        themeReader.running = true;
+    }
+
     Process {
         id: themeReader
 	command: ["cat", Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/qs_colors.json"]

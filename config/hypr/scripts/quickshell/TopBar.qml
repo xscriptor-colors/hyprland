@@ -35,6 +35,9 @@ Variants {
                         barWindow.pendingReload = true
                     }
                 }
+                function reloadColors() {
+                    mocha.forceRefresh();
+                }
                 function toggleUpdate() {
                     barWindow.forceUpdateShow = !barWindow.forceUpdateShow
                 }
@@ -307,7 +310,7 @@ Variants {
                                 let newData = JSON.parse(txt);
                                 
                                 while (workspacesModel.count < newData.length) {
-                                    workspacesModel.append({ "wsId": "", "wsState": "" });
+                                    workspacesModel.append({ "wsId": "", "wsState": "", "wsClasses": [] });
                                 }
                                 
                                 while (workspacesModel.count > newData.length) {
