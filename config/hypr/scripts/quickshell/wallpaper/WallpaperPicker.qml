@@ -174,8 +174,13 @@ Item {
                     export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
                     export TARGET_MONITORS="${escOutputs}"
                     
+                    if [ ! -f "$DEST_FILE" ]; then
+                        notify-send "Wallpaper Error" "File not found: $DEST_FILE" -u critical -t 5000
+                        exit 1
+                    fi
+                    
                     if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
-                        swww-daemon &
+                        swww-daemon || { notify-send "Wallpaper Error" "Failed to start swww-daemon" -u critical -t 5000; exit 1; }
                         sleep 0.5
                     fi
                     
@@ -192,7 +197,7 @@ Item {
                     fi
                     
                     notify-send "Wallpaper" "Applied: $(basename "$DEST_FILE")" -i preferences-desktop-wallpaper -t 2000
-                    ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
+                    ( matugen image "$FINAL_THUMB" || notify-send "Matugen" "Color generation failed" -u low -t 3000; bash "$RELOAD_SCRIPT" || true ) &
                 `;
                 Quickshell.execDetached(["bash", "-c", applyScript]);
             } else {
@@ -280,19 +285,26 @@ Item {
 
         const fullScript = `
             export PATH="$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+            
+            # Verify source file exists
+            if [ ! -f "${escOriginal}" ]; then
+                notify-send "Wallpaper Error" "File not found: ${escOriginal}" -u critical -t 5000
+                exit 1
+            fi
+            
             cp "${isVideo ? escThumb : escOriginal}" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
             pkill mpvpaper || true
             
             # Ensure swww-daemon is running
             if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
-                swww-daemon &
+                swww-daemon || { notify-send "Wallpaper Error" "Failed to start swww-daemon" -u critical -t 5000; exit 1; }
                 sleep 0.5
             fi
             
             ${wallpaperCmd}
             notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
             
-            ( matugen image "${escThumb}" || true; bash "${escReload}" || true ) &
+            ( matugen image "${escThumb}" || notify-send "Matugen" "Color generation failed" -u low -t 3000; bash "${escReload}" || true ) &
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
     }
@@ -554,7 +566,7 @@ Item {
         const dir = Quickshell.env("WALLPAPER_DIR")
         return (dir && dir !== "") 
         ? dir 
-        : Quickshell.env("HOME") + "/Pictures/Wallpapers"
+        : Quickshell.env("HOME") + "/.config/hypr/wallpapers"
     }
 
     readonly property var transitions: ["simple", "fade", "left", "right", "top", "bottom", "wipe", "grow", "center", "outer", "random", "wave"]

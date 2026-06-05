@@ -23,8 +23,8 @@ if [ -f "$FLAG" ]; then
     exit 0
 fi
 
-# If no wallpaper dir is set, default to a common one to prevent find from failing
-WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
+# If no wallpaper dir is set, default to hyprland config wallpapers
+WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/.config/hypr/wallpapers}"
 
 sleep 0.5
 
