@@ -396,7 +396,12 @@ EOFCAT
             
             # Force Quickshell to re-read colors via IPC
             echo "Triggering color reload..." >> "$LOG"
-            quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>>"$LOG" || echo "IPC failed (maybe quickshell not in PATH)" >> "$LOG"
+            QS_BIN=""; command -v quickshell >/dev/null 2>&1 && QS_BIN=quickshell || command -v qs >/dev/null 2>&1 && QS_BIN=qs
+            if [ -n "\$QS_BIN" ]; then
+                \$QS_BIN -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>>"$LOG" || echo "IPC call failed" >> "$LOG"
+            else
+                echo "No quickshell binary found in PATH" >> "$LOG"
+            fi
             
             notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
         `;
