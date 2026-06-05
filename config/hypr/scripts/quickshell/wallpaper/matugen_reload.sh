@@ -4,7 +4,7 @@
 # 1. Flatten Matugen v4.0 Nested JSON for Quickshell
 # ------------------------------------------------------------------------------
 # Updated to match your config.toml output path
-QS_JSON="~/.config/hypr/scripts/quickshell/qs_colors.json"
+QS_JSON="$HOME/.config/hypr/scripts/quickshell/qs_colors.json"
 
 python3 -c '
 import json
