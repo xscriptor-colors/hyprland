@@ -36,7 +36,7 @@ qs_ensure_cache "wallpaper_picker"
 
 BT_PID_FILE="$QS_RUN_DIR/bt_scan_pid"
 BT_SCAN_LOG="$QS_LOG_DIR/bt_scan.log"
-SRC_DIR="${WALLPAPER_DIR:-${srcdir:-$HOME/Pictures/Wallpapers}}"
+SRC_DIR="${WALLPAPER_DIR:-$HOME/.config/hypr/wallpapers}"
 THUMB_DIR="$QS_CACHE_WALLPAPER_PICKER/thumbs"
 PREP_LOCK="$QS_RUN_DIR/wallpaper_prep.lock"
 
