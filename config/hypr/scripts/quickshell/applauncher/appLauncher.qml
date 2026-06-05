@@ -146,6 +146,7 @@ Item {
     }
 
     function launchApp(execStr) {
+        Quickshell.execDetached(["bash", "-c", "mkdir -p ~/.cache/quickshell && USAGE=\"$HOME/.cache/quickshell/applauncher_usage.json\"; [ ! -f \"$USAGE\" ] && echo '{}' > \"$USAGE\"; KEY=$(echo \"$1\" | base64 -w0); COUNT=$(jq -r \".[\\\"$KEY\\\"].count // 0\" \"$USAGE\"); LAST=$(date +%s); jq \".[\\\"$KEY\\\"] = {\\\"count\\\": ($COUNT + 1), \\\"last_used\\\": $LAST}\" \"$USAGE\" > \"$USAGE.tmp\" && mv \"$USAGE.tmp\" \"$USAGE\"", "bash", execStr]);
         Quickshell.execDetached(["hyprctl", "dispatch", "exec", "--", execStr]);
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
     }

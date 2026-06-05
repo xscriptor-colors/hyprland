@@ -48,14 +48,22 @@ print_workspaces() {
     # Get raw data with a timeout fallback
     spaces=$(timeout 2 hyprctl workspaces -j 2>/dev/null)
     active=$(timeout 2 hyprctl activeworkspace -j 2>/dev/null | jq '.id')
+    clients=$(timeout 2 hyprctl clients -j 2>/dev/null)
 
     # Failsafe if hyprctl crashes to prevent jq from outputting errors
     if [ -z "$spaces" ] || [ -z "$active" ]; then return; fi
+    [ -z "$clients" ] && clients="[]"
 
     # Generate the JSON and write it atomically to prevent UI flickering
-    echo "$spaces" | jq --unbuffered --argjson a "$active" --arg end "$SEQ_END" -c '
+    echo "$spaces" | jq --unbuffered --argjson a "$active" --arg end "$SEQ_END" --argjson c "$clients" -c '
         # Create a map of workspace ID -> workspace data for easy lookup
         (map( { (.id|tostring): . } ) | add) as $s
+        |
+        # Group clients by workspace and collect unique app classes
+        ($c | group_by(.workspace.id) | map({
+            ws: .[0].workspace.id,
+            classes: [.[] | .class] | unique | map(select(length > 0))
+        }) | from_entries) as $wins
         |
         # Iterate from 1 to SEQ_END
         [range(1; ($end|tonumber) + 1)] | map(
@@ -68,10 +76,14 @@ print_workspaces() {
             # Get window title for tooltip (if exists)
             (if $s[$i|tostring] != null then $s[$i|tostring].lastwindowtitle else "Empty" end) as $win |
 
+            # Get app classes for this workspace
+            ($wins[$i|tostring].classes // []) as $classes |
+
             {
                 id: $i,
                 state: $state,
-                tooltip: $win
+                tooltip: $win,
+                classes: $classes
             }
         )
     ' > "$QS_RUN_WORKSPACES/workspaces.tmp"
