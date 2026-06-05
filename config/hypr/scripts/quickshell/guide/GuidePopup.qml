@@ -980,7 +980,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/xscriptor/hyprland"]) 
+                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/xscriptor/hyprland/tree/modernizex"]) 
                         }
                     }
 
