@@ -61,9 +61,8 @@ print_workspaces() {
         |
         # Group clients by workspace and collect unique app classes
         ($c | group_by(.workspace.id) | map({
-            ws: .[0].workspace.id,
-            classes: [.[] | .class] | unique | map(select(length > 0))
-        }) | from_entries) as $wins
+            (. [0].workspace.id | tostring): ([.[] | .class] | unique | map(select(length > 0)))
+        }) | add) as $wins
         |
         # Iterate from 1 to SEQ_END
         [range(1; ($end|tonumber) + 1)] | map(
@@ -77,7 +76,7 @@ print_workspaces() {
             (if $s[$i|tostring] != null then $s[$i|tostring].lastwindowtitle else "Empty" end) as $win |
 
             # Get app classes for this workspace
-            ($wins[$i|tostring].classes // []) as $classes |
+            ($wins[$i|tostring] // []) as $classes |
 
             {
                 id: $i,
