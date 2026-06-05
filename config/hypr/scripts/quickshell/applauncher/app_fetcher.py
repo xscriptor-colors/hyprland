@@ -4,6 +4,33 @@ import glob
 import json
 import base64
 
+SYSTEM_BLOCKLIST = [
+    "avahi", "advanced network", "ark", "file roller", "gdebi", "backup",
+    "firewall", "logs", "system monitor", "disk usage", "partition",
+    "printer", "settings", "control center", "gnome control center",
+    "about", "software", "firmware", "language", "region", "accessibility",
+    "color management", "universal access", "users", "account details",
+    "startup disk", "disks", "drives", "hardware", "blueman",
+    "bluetooth", "connect to server", "network connections",
+    "network proxy", "online accounts", "power statistics", "power manager",
+    "details", "display", "wallpapers", "background", "look and feel",
+    "mate", "cinnamon", "xfce", "lxde", "kde", "gnome", "plasma",
+    "session", "welcome", "tour", "first", "setup", "configuration",
+    "document viewer", "image viewer", "text editor", "gedit", "kate",
+    "calculator", "calendar", "clock", "notes", "contacts", "maps",
+    "weather", "help", "terminal", "lxterminal", "xfce4-terminal",
+    "mate-terminal", "konsole", "gnome-terminal", "tilix", "terminator",
+    "whatsapp", "telegram-desktop",
+]
+
+def is_system_app(name, exec_path):
+    name_lower = name.lower()
+    exec_lower = exec_path.lower() if exec_path else ""
+    for blocked in SYSTEM_BLOCKLIST:
+        if blocked in name_lower or blocked in exec_lower:
+            return True
+    return False
+
 def load_usage_db():
     db_path = os.path.expanduser('~/.cache/quickshell/applauncher_usage.json')
     if os.path.exists(db_path):
@@ -58,7 +85,7 @@ def fetch_apps():
                             elif line.startswith('NoDisplay=true') or line.startswith('NoDisplay=1'):
                                 no_display = True
                                 
-                    if app['name'] and app['exec'] and not no_display:
+                    if app['name'] and app['exec'] and not no_display and not is_system_app(app['name'], app['exec']):
                         key = base64.b64encode(app['exec'].encode()).decode()
                         usage = usage_db.get(key, {})
                         if usage:

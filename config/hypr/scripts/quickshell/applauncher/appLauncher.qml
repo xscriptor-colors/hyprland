@@ -175,12 +175,6 @@ Item {
         event.accepted = true;
     }
 
-    // --- BACKGROUND ORBIT ANIMATION ---
-    property real globalOrbitAngle: 0
-    NumberAnimation on globalOrbitAngle {
-        from: 0; to: Math.PI * 2; duration: 90000; loops: Animation.Infinite; running: true
-    }
-
     // --- MAIN INTRO ANIMATION ---
     property real introPhase: 0
     NumberAnimation on introPhase {
@@ -229,25 +223,6 @@ Item {
 
         transform: Translate { y: (window.introPhase - 1) * window.s(60) }
         opacity: window.introPhase
-
-        // --- AMBIENT BLOBS ---
-        Rectangle {
-            width: parent.width * 0.8; height: width; radius: width / 2
-            x: (parent.width / 2 - width / 2) + Math.cos(window.globalOrbitAngle * 2) * window.s(150)
-            y: (parent.height / 2 - height / 2) + Math.sin(window.globalOrbitAngle * 2) * window.s(100)
-            opacity: 0.08
-            color: window.mauve
-            Behavior on color { ColorAnimation { duration: 1000 } }
-        }
-        
-        Rectangle {
-            width: parent.width * 0.9; height: width; radius: width / 2
-            x: (parent.width / 2 - width / 2) + Math.sin(window.globalOrbitAngle * 1.5) * window.s(-150)
-            y: (parent.height / 2 - height / 2) + Math.cos(window.globalOrbitAngle * 1.5) * window.s(-100)
-            opacity: 0.06
-            color: window.blue
-            Behavior on color { ColorAnimation { duration: 1000 } }
-        }
 
         ColumnLayout {
             anchors.fill: parent
