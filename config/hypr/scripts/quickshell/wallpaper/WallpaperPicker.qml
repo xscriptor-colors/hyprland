@@ -341,27 +341,62 @@ Item {
             
             ${wallpaperCmd}
             
-            # --- MATUGEN COLOR GENERATION ---
-            # Run on the ORIGINAL file (not thumbnail) for best results
+            # --- COLOR GENERATION ---
+            QS_COLORS="$HOME/.config/hypr/scripts/quickshell/qs_colors.json"
+            mkdir -p "$(dirname "$QS_COLORS")"
+            
+            # Generate colors: try matugen first, then fallback to ImageMagick
+            COLORS_GENERATED=false
             if command -v matugen >/dev/null 2>&1; then
-                echo "Running matugen on: ${escOriginal}" >> "$LOG"
+                echo "Running matugen..." >> "$LOG"
                 matugen image "${escOriginal}" >> "$LOG" 2>&1
-                MATUGEN_EXIT=$?
-                if [ $MATUGEN_EXIT -ne 0 ]; then
-                    echo "WARNING: matugen exit code $MATUGEN_EXIT" >> "$LOG"
+                if [ $? -eq 0 ] && [ -s "$QS_COLORS" ]; then
+                    COLORS_GENERATED=true
+                    echo "matugen succeeded" >> "$LOG"
+                    bash "${escReload}" 2>/dev/null || true
                 else
-                    echo "matugen succeeded, flattening JSON..." >> "$LOG"
+                    echo "matugen failed, using magick fallback" >> "$LOG"
                 fi
-            else
-                echo "matugen not installed, skipping color gen" >> "$LOG"
             fi
             
-            # Run reload/flatten script regardless
-            bash "${escReload}" 2>/dev/null || true
-            echo "Reload script done" >> "$LOG"
+            # Fallback: extract colors via ImageMagick (always works, no extra deps)
+            if [ "$COLORS_GENERATED" != "true" ]; then
+                echo "Generating colors via ImageMagick..." >> "$LOG"
+                # Get dominant color
+                DOM_HEX=$(magick "${escOriginal}" -resize 1x1 -depth 8 -format "%[hex:p{0,0}]" info:- 2>/dev/null | tr -d ' ')
+                if [ -z "$DOM_HEX" ]; then
+                    DOM_HEX="1e1e2e"
+                    echo "magick failed, using default" >> "$LOG"
+                fi
+                echo "Dominant color: $DOM_HEX" >> "$LOG"
+                
+                # Generate palette from dominant color
+                R=$((16#${DOM_HEX:0:2})); G=$((16#${DOM_HEX:2:2})); B=$((16#${DOM_HEX:4:2}))
+                cat > "$QS_COLORS" << EOFCAT
+        {
+            "base": "#$(printf '%02x%02x%02x' $((R*80/100)) $((G*80/100)) $((B*80/100)))",
+            "mantle": "#$(printf '%02x%02x%02x' $((R*70/100)) $((G*70/100)) $((B*70/100)))",
+            "crust": "#$(printf '%02x%02x%02x' $((R*60/100)) $((G*60/100)) $((B*60/100)))",
+            "text": "#$DOM_HEX",
+            "subtext0": "#$(printf '%02x%02x%02x' $((R*82/100)) $((G*82/100)) $((B*82/100)))",
+            "surface0": "#$(printf '%02x%02x%02x' $((R*75/100)) $((G*75/100)) $((B*75/100)))",
+            "surface1": "#$(printf '%02x%02x%02x' $((R*70/100)) $((G*70/100)) $((B*70/100)))",
+            "blue": "#89b4fa",
+            "sapphire": "#74c7ec",
+            "peach": "#fab387",
+            "green": "#a6e3a1",
+            "red": "#f38ba8",
+            "mauve": "#cba6f7",
+            "yellow": "#f9e2af",
+            "teal": "#94e2d5"
+        }
+EOFCAT
+                echo "Colors written via magick fallback" >> "$LOG"
+            fi
             
             # Force Quickshell to re-read colors via IPC
-            quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>/dev/null || true
+            echo "Triggering color reload..." >> "$LOG"
+            quickshell -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>>"$LOG" || echo "IPC failed (maybe quickshell not in PATH)" >> "$LOG"
             
             notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
         `;
