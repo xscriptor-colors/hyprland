@@ -128,8 +128,8 @@ elif [ ! -f "$wallpaper" ]; then
     exit 1
 fi
 
-if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
-    awww-daemon &
+if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
+    swww-daemon &
     sleep 0.5
 fi
 
@@ -138,7 +138,7 @@ positions=("center" "top" "left" "right" "bottom" "top-left" "top-right" "bottom
 rand_type=${types[$RANDOM % ${#types[@]}]}
 rand_pos=${positions[$RANDOM % ${#positions[@]}]}
 
-awww img "$wallpaper" \
+swww img "$wallpaper" \
     --transition-type "$rand_type" \
     --transition-pos "$rand_pos" \
     --transition-duration 2 \

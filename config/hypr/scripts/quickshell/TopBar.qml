@@ -586,11 +586,8 @@ Variants {
                     y: (parent.height - barWindow.barHeight) / 2
                     height: barWindow.barHeight
 
-                    color: Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                    radius: barWindow.s(28)
-                    border.width: 1
-                    border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.08)
-                    clip: true
+                    color: "transparent"
+                    clip: false
                     
                     property bool showLayout: false
                     
@@ -608,20 +605,20 @@ Variants {
                         onTriggered: leftContent.showLayout = true
                     }
 
-                    width: leftLayout.width + barWindow.s(16)
+                    width: leftLayout.implicitWidth
 
                     Row {
                         id: leftLayout
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         anchors.leftMargin: barWindow.s(10)
-                        spacing: barWindow.s(4)
+                        spacing: barWindow.s(8)
                         
-                        property int pillHeight: barWindow.s(34)
+                        property int pillHeight: barWindow.s(36)
 
                         Rectangle {
                             property bool isHovered: helpMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : "transparent"
+                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
                             radius: barWindow.s(20)
                             
                             property real targetWidth: barWindow.showHelpIcon ? barWindow.s(34) : 0
@@ -654,7 +651,7 @@ Variants {
 
                         Rectangle {
                             property bool isHovered: searchMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : "transparent"
+                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
                             radius: barWindow.s(20)
                             height: parent.pillHeight; width: barWindow.s(34)
                             
@@ -679,7 +676,7 @@ Variants {
 
                         Rectangle {
                             property bool isHovered: settingsMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : "transparent"
+                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
                             radius: barWindow.s(20)
                             height: parent.pillHeight; width: barWindow.s(34)
                             
@@ -705,7 +702,7 @@ Variants {
                         Rectangle {
                             id: updateButton
                             property bool isHovered: updateMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.green.r, mocha.green.g, mocha.green.b, 0.15) : "transparent"
+                            color: isHovered ? Qt.rgba(mocha.green.r, mocha.green.g, mocha.green.b, 0.15) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
                             radius: barWindow.s(20)
                             
                             width: barWindow.isUpdateVisible ? barWindow.s(34) : 0
@@ -774,11 +771,11 @@ Variants {
                 
                 Rectangle {
                     id: workspacesBox
-                    color: Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                    radius: barWindow.s(28); border.width: 1; border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.05)
+                    color: "transparent"
+                    radius: barWindow.s(28); border.width: 0
                     height: barWindow.barHeight
                     y: (parent.height - barWindow.barHeight) / 2
-                    clip: true
+                    clip: false
                     
                     width: workspacesModel.count > 0 ? wsLayout.implicitWidth + barWindow.s(20) : 0
                     
@@ -813,8 +810,7 @@ Variants {
                             prevIdx = curIdx;
                         }
 
-                        // FIXED: Calculate step size to perfectly match the rounded width + rounded spacing of the Row elements.
-                        property real stepSize: barWindow.s(32) + barWindow.s(6)
+                        property real stepSize: barWindow.s(36) + barWindow.s(8)
                         property real targetLeft: wsLayout.x + (curIdx * stepSize)
                         property real targetRight: targetLeft + barWindow.s(32)
 
@@ -832,7 +828,7 @@ Variants {
                     Row {
                         id: wsLayout
                         anchors.centerIn: parent
-                        spacing: barWindow.s(6)
+                        spacing: barWindow.s(8)
                         
                         Repeater {
                             model: workspacesModel
@@ -847,11 +843,11 @@ Variants {
                                 property string stateLabel: model.wsState
                                 property string wsName: model.wsId
                                 
-                                property real targetWidth: barWindow.s(32)
+                                property real targetWidth: barWindow.s(36)
                                 width: targetWidth
                                 Behavior on targetWidth { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
                                 
-                                height: barWindow.s(32); radius: barWindow.s(20)
+                                height: barWindow.s(36); radius: barWindow.s(22)
                                 
                                 color: isHovered ? Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.1) : (stateLabel === "occupied" ? Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.15) : "transparent")
 
@@ -908,11 +904,11 @@ Variants {
 
                 Rectangle {
                     id: mediaBox
-                    color: Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                    radius: barWindow.s(28); border.width: 1; border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.05)
+                    color: "transparent"
+                    radius: barWindow.s(28); border.width: 0
                     y: (parent.height - barWindow.barHeight) / 2
                     height: barWindow.barHeight
-                    clip: true 
+                    clip: false 
                     
                     width: barWindow.isMediaActive ? innerMediaLayout.implicitWidth + barWindow.s(24) : 0
                     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
@@ -1147,12 +1143,8 @@ Variants {
 
                     Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
-                    Rectangle {
+                    Item {
                         height: barWindow.barHeight
-                        radius: barWindow.s(28)
-                        border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.08)
-                        border.width: 1
-                        color: Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
                         
                         property real targetWidth: trayRepeater.count > 0 ? trayLayout.width + barWindow.s(24) : 0
                         width: targetWidth
@@ -1242,22 +1234,17 @@ Variants {
                         }
                     }
 
-                    Rectangle {
+                    Item {
                         height: barWindow.barHeight
-                        radius: barWindow.s(28)
-                        border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.08)
-                        border.width: 1
-                        color: Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                        clip: true
                         
                         width: sysLayout.implicitWidth + barWindow.s(20)
 
                         Row {
                             id: sysLayout
                             anchors.centerIn: parent
-                            spacing: barWindow.s(10) 
+                            spacing: barWindow.s(8) 
 
-                            property int pillHeight: barWindow.s(34)
+                            property int pillHeight: barWindow.s(36)
 
                             Rectangle {
                                 property bool isHovered: kbMouse.containsMouse
