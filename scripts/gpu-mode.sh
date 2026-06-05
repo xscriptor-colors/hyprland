@@ -90,8 +90,8 @@ set_mode() {
     if sudo envycontrol -s "$target"; then
         notify-send -u critical "GPU Mode" "Switched to ${target^^} mode.\n\n⚠️ REBOOT REQUIRED to apply changes."
         echo "$target" > "$MODE_FILE"
-        # Signal Waybar to update
-        pkill -RTMIN+8 waybar || true
+        # Signal Quickshell to reload
+        bash ~/.config/hypr/scripts/reload.sh 2>/dev/null || true
     else
         notify-send -u critical "GPU Mode" "Failed or cancelled mode switch."
     fi
