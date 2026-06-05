@@ -1,0 +1,35 @@
+return {
+  -- Core Backgrounds (Deepest Darks)
+  crust     = "{{colors.surface_container_lowest.default.hex}}",
+  mantle    = "{{colors.surface_container_low.default.hex}}",
+  base      = "{{colors.surface.default.hex}}",
+  
+  -- UI Elements & Overlays
+  surface0  = "{{colors.surface_container.default.hex}}",
+  surface1  = "{{colors.surface_container_high.default.hex}}",
+  surface2  = "{{colors.surface_container_highest.default.hex}}",
+  overlay0  = "{{colors.outline_variant.default.hex}}",
+  overlay1  = "{{colors.outline.default.hex}}",
+  overlay2  = "{{colors.on_surface_variant.default.hex}}",
+  
+  -- Text & Foreground (Brightest Light)
+  subtext0  = "{{colors.on_surface_variant.default.hex}}",
+  subtext1  = "{{colors.on_surface.default.hex}}",
+  text      = "{{colors.on_surface.default.hex}}",
+  
+  -- Syntax Highlights (Bright Accents ONLY)
+  rosewater = "{{colors.primary.default.hex}}",
+  flamingo  = "{{colors.tertiary.default.hex}}",
+  pink      = "{{colors.tertiary.default.hex}}",
+  mauve     = "{{colors.tertiary.default.hex}}",
+  red       = "{{colors.error.default.hex}}",
+  maroon    = "{{colors.error.default.hex}}",
+  peach     = "{{colors.secondary.default.hex}}",
+  yellow    = "{{colors.secondary.default.hex}}",
+  green     = "{{colors.primary.default.hex}}",
+  teal      = "{{colors.secondary.default.hex}}",
+  sky       = "{{colors.primary.default.hex}}",
+  sapphire  = "{{colors.secondary.default.hex}}",
+  blue      = "{{colors.primary.default.hex}}",
+  lavender  = "{{colors.tertiary.default.hex}}",
+}
