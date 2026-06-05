@@ -889,27 +889,30 @@ Variants {
                                 property var wsClasses: model.wsClasses || []
 
                                 function classIcon(cls) {
+                                    var c = String(cls).toLowerCase();
                                     var map = {
                                         "kitty": "\uF489", "alacritty": "\uF489", "wezterm": "\uF489", "foot": "\uF489", "ghostty": "\uF489", "terminal": "\uF489",
-                                        "firefox": "\uF269", "firefoxdeveloperedition": "\uF269", "brave": "\uF269", "brave-browser": "\uF269",
-                                        "chromium": "\uF269", "google-chrome": "\uF269", "zen": "\uF269",
-                                        "code": "\uF121", "code-oss": "\uF121", "codium": "\uF121", "vscodium": "\uF121",
-                                        "nautilus": "\uF07C", "dolphin": "\uF07C", "thunar": "\uF07C", "pcmanfm": "\uF07C",
+                                        "firefox": "\uF269", "firefoxdeveloperedition": "\uF269", "brave": "\uF269", "brave-browser": "\uF269", "zen": "\uF269",
+                                        "chromium": "\uF269", "google-chrome": "\uF269", "microsoft-edge": "\uF269", "edge": "\uF269",
+                                        "code": "\uF121", "code-oss": "\uF121", "codium": "\uF121", "vscodium": "\uF121", "visual-studio-code": "\uF121",
+                                        "nautilus": "\uF07C", "org.gnome.nautilus": "\uF07C", "dolphin": "\uF07C", "thunar": "\uF07C", "pcmanfm": "\uF07C",
                                         "spotify": "\uF1BC",
                                         "discord": "\uF392",
                                         "slack": "\uF392",
                                         "obsidian": "\uF4A5",
                                         "gimp": "\uF338",
                                         "inkscape": "\uF344",
-                                        "libreoffice": "\uF15C",
-                                        "evince": "\uF15C", "org.gnome.Evince": "\uF15C",
-                                        "jetbrains-idea": "\uF121", "idea": "\uF121",
+                                        "libreoffice": "\uF15C", "soffice": "\uF15C",
+                                        "evince": "\uF15C", "org.gnome.evince": "\uF15C",
+                                        "jetbrains-idea": "\uF121", "idea": "\uF121", "intellij": "\uF121",
                                         "thunderbird": "\uF7E5",
-                                        "org.gnome.Nautilus": "\uF07C",
                                         "org.wezfurlong.wezterm": "\uF489",
+                                        "steam": "\uF1B7", "steamwebhelper": "\uF1B7",
+                                        "vlc": "\uF15C",
+                                        "virt-manager": "\uF17B",
                                         "": ""
                                     };
-                                    return map[cls] || "\uF128";
+                                    return map[c] || "\uF128";
                                 }
 
                                 property string appIcon: wsClasses.length > 0 ? classIcon(wsClasses[0]) : ""

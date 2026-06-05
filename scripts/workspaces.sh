@@ -61,7 +61,7 @@ print_workspaces() {
         |
         # Group clients by workspace and collect unique app classes
         ($c | group_by(.workspace.id) | map({
-            (. [0].workspace.id | tostring): ([.[] | .class] | unique | map(select(length > 0)))
+            (.[0].workspace.id | tostring): ([.[] | .class] | unique | map(select(length > 0)))
         }) | add) as $wins
         |
         # Iterate from 1 to SEQ_END
