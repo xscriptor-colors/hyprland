@@ -82,11 +82,11 @@ for c in clients:
     cls = c.get('class', '')
     if ws and cls:
         ws_classes.setdefault(ws, []).append(cls)
-# Deduplicate and add to each workspace
+# Deduplicate and add to each workspace (as comma-separated string - ListModel friendly)
 for entry in data:
     ws_id = str(entry['id'])
     classes = list(dict.fromkeys(ws_classes.get(ws_id, [])))  # unique, preserve order
-    entry['classes'] = classes
+    entry['classes'] = ','.join(classes)
 with open('$QS_RUN_WORKSPACES/workspaces.json', 'w') as f:
     json.dump(data, f)
 " 2>/dev/null || mv "$QS_RUN_WORKSPACES/workspaces.tmp" "$QS_RUN_WORKSPACES/workspaces.json"
