@@ -128,8 +128,16 @@ elif [ ! -f "$wallpaper" ]; then
     exit 1
 fi
 
-if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
-    swww-daemon &
+# Auto-detect wallpaper daemon
+WP_BIN=""; DAEMON_BIN=""
+command -v swww >/dev/null 2>&1 && { WP_BIN=swww; DAEMON_BIN=swww-daemon; } || { command -v awww >/dev/null 2>&1 && { WP_BIN=awww; DAEMON_BIN=awww-daemon; }; }
+if [ -z "$WP_BIN" ]; then
+    notify-send "Wallpaper" "No wallpaper daemon found (install swww or awww)" -u critical
+    exit 1
+fi
+
+if ! pgrep -x "$DAEMON_BIN" >/dev/null 2>&1; then
+    $DAEMON_BIN &
     sleep 0.5
 fi
 
@@ -138,7 +146,7 @@ positions=("center" "top" "left" "right" "bottom" "top-left" "top-right" "bottom
 rand_type=${types[$RANDOM % ${#types[@]}]}
 rand_pos=${positions[$RANDOM % ${#positions[@]}]}
 
-swww img "$wallpaper" \
+$WP_BIN img "$wallpaper" \
     --transition-type "$rand_type" \
     --transition-pos "$rand_pos" \
     --transition-duration 2 \
