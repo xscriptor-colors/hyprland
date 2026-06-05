@@ -324,7 +324,7 @@ PanelWindow {
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 32 * popupWindow.uiScale
-                                    radius: 8 * popupWindow.uiScale
+                                    radius: 13 * popupWindow.uiScale
 
                                     property bool isPrimary: index === 0
 

@@ -293,7 +293,7 @@ PanelWindow {
             color: Qt.alpha(_theme.green, 0.25)
             border.color: _theme.green
             border.width: s(3)
-            radius: s(8)
+            radius: s(14)
             z: 34
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuart } }
             Behavior on pad { NumberAnimation { duration: 400; easing.type: Easing.OutQuart } }
@@ -301,7 +301,7 @@ PanelWindow {
     }
 
     component Handle: Rectangle {
-        width: s(20); height: s(20); radius: s(10)
+        width: s(20); height: s(20); radius: s(18)
         color: root.handleColor; border.color: root.accentColor; border.width: s(4)
         visible: (root.hasSelection || root.isSelecting) && !root.isScanningQr && !root.showQrPopup && !root.isVideoMode; z: 10
     }
@@ -477,7 +477,7 @@ PanelWindow {
                 handle: Rectangle {
                     x: parent.leftPadding + parent.visualPosition * (parent.availableWidth - width)
                     y: parent.topPadding + parent.availableHeight / 2 - height / 2
-                    implicitWidth: s(12); implicitHeight: s(12); radius: s(6)
+                    implicitWidth: s(12); implicitHeight: s(12); radius: s(12)
                     color: parent.parent.parent.mutedValue ? _theme.subtext0 : _theme.mauve
                 }
             }
@@ -508,7 +508,7 @@ PanelWindow {
             color: Qt.rgba(_theme.base.r, _theme.base.g, _theme.base.b, 0.95)
             border.color: Qt.rgba(_theme.text.r, _theme.text.g, _theme.text.b, 0.08)
             border.width: s(1)
-            radius: s(12)
+            radius: s(19)
             z: 50
 
             Text {
@@ -525,7 +525,7 @@ PanelWindow {
                 model: micModel
                 clip: true
                 delegate: Rectangle {
-                    width: ListView.view.width; height: s(32); radius: s(6)
+                    width: ListView.view.width; height: s(32); radius: s(12)
                     color: maList.containsMouse ? _theme.surface0 : "transparent"
                     RowLayout {
                         anchors.fill: parent; anchors.margins: s(6)
