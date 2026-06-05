@@ -310,7 +310,7 @@ Variants {
                                 let newData = JSON.parse(txt);
                                 
                                 while (workspacesModel.count < newData.length) {
-                                    workspacesModel.append({ "wsId": "", "wsState": "", "wsClasses": [] });
+                                    workspacesModel.append({ "wsId": "", "wsState": "", "wsClasses": "" });
                                 }
                                 
                                 while (workspacesModel.count > newData.length) {
@@ -328,7 +328,7 @@ Variants {
                                     if (workspacesModel.get(i).wsId !== newData[i].id.toString()) {
                                         workspacesModel.setProperty(i, "wsId", newData[i].id.toString());
                                     }
-                                    if (newData[i].classes && JSON.stringify(workspacesModel.get(i).wsClasses) !== JSON.stringify(newData[i].classes)) {
+                                    if (newData[i].classes != undefined && workspacesModel.get(i).wsClasses !== newData[i].classes) {
                                         workspacesModel.setProperty(i, "wsClasses", newData[i].classes);
                                     }
                                 }
@@ -886,7 +886,7 @@ Variants {
                                 Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
                                 Behavior on color { ColorAnimation { duration: 250 } }
 
-                                property var wsClasses: model.wsClasses || []
+                                property string wsClassesStr: model.wsClasses || ""
 
                                 function classIcon(cls) {
                                     var c = String(cls).toLowerCase();
@@ -915,7 +915,7 @@ Variants {
                                     return map[c] || "\uF128";
                                 }
 
-                                property string appIcon: wsClasses.length > 0 ? classIcon(wsClasses[0]) : ""
+                                property string appIcon: wsClassesStr !== "" ? classIcon(wsClassesStr.split(",")[0]) : ""
 
                                 Item {
                                     anchors.fill: parent
