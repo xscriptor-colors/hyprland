@@ -168,10 +168,16 @@ Item {
 
             if (alreadyExists) {
                 const applyScript = `
+                    export PATH="$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
                     export DEST_FILE="${escapeBash(destFile)}"
                     export FINAL_THUMB="${escapeBash(finalThumb)}"
                     export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
                     export TARGET_MONITORS="${escOutputs}"
+                    
+                    if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
+                        swww-daemon &
+                        sleep 0.5
+                    fi
                     
                     cp "$DEST_FILE" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
                     pkill mpvpaper || true
@@ -185,6 +191,7 @@ Item {
                         swww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                     fi
                     
+                    notify-send "Wallpaper" "Applied: $(basename "$DEST_FILE")" -i preferences-desktop-wallpaper -t 2000
                     ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
                 `;
                 Quickshell.execDetached(["bash", "-c", applyScript]);
@@ -272,10 +279,19 @@ Item {
         }
 
         const fullScript = `
+            export PATH="$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
             cp "${isVideo ? escThumb : escOriginal}" ${paths.getCacheDir("wallpaper_picker")}/current_wallpaper.png || true
             pkill mpvpaper || true
             
+            # Ensure swww-daemon is running
+            if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
+                swww-daemon &
+                sleep 0.5
+            fi
+            
             ${wallpaperCmd}
+            notify-send "Wallpaper" "Applied: $(basename "${escOriginal}")" -i preferences-desktop-wallpaper -t 2000
+            
             ( matugen image "${escThumb}" || true; bash "${escReload}" || true ) &
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
