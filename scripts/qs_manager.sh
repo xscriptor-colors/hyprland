@@ -179,7 +179,8 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         if pgrep -a "mpvpaper" > /dev/null; then
             CURRENT_SRC=$(pgrep -a mpvpaper | grep -o "$SRC_DIR/[^' ]*" | head -n1)
         elif command -v swww >/dev/null; then
-            CURRENT_SRC=$(swww query 2>/dev/null | grep -o "$SRC_DIR/[^ ]*" | head -n1)
+            WP_BIN=""; command -v swww >/dev/null 2>&1 && WP_BIN=swww || command -v awww >/dev/null 2>&1 && WP_BIN=awww
+        CURRENT_SRC=$($WP_BIN query 2>/dev/null | grep -o "$SRC_DIR/[^ ]*" | head -n1)
         fi
 
         TARGET_THUMB=""

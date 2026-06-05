@@ -35,7 +35,8 @@ if [ -n "$file" ]; then
     # Copy to our persistent cache location instead of /tmp
     cp "$file" "$CACHE_IMG"
     
-    swww img "$file" --transition-type any --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 &
+    WPBIN=""; command -v swww >/dev/null 2>&1 && WPBIN=swww || command -v awww >/dev/null 2>&1 && WPBIN=awww
+    [ -n "$WPBIN" ] && $WPBIN img "$file" --transition-type any --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 &
     
     matugen image "$file" --source-color-index 0
     

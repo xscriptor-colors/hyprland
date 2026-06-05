@@ -198,6 +198,7 @@ CORE_PACKAGES_ARCH=(
     "kitty"
 
     # Utilities
+    "awww"
     "swww"
     "dunst"
     "hyprlock"
@@ -734,7 +735,7 @@ create_directories() {
 
 check_requirements() {
     local missing=()
-    local cmds=(rofi waybar swww notify-send ip lspci)
+    local cmds=(rofi waybar notify-send ip lspci)
 
     for c in "${cmds[@]}"; do
         if ! command -v "$c" >/dev/null 2>&1; then
