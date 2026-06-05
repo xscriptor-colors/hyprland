@@ -99,7 +99,7 @@ Item {
     Process {
         id: localVerProcess
         running: false
-        command: ["bash", "-c", "source ~/.local/state/imperative-dots-version 2>/dev/null && [ -n \"$LOCAL_VERSION\" ] && echo $LOCAL_VERSION || echo '0.0.0'"]
+        command: ["bash", "-c", "source ~/.local/state/hyprland-version 2>/dev/null && [ -n \"$LOCAL_VERSION\" ] && echo $LOCAL_VERSION || echo '0.0.0'"]
         stdout: StdioCollector {
             onStreamFinished: {
                 let out = this.text ? this.text.trim() : "";
@@ -112,7 +112,7 @@ Item {
     Process {
         id: remoteVerProcess
         running: false
-        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
+        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
         stdout: StdioCollector {
             onStreamFinished: {
                 let out = this.text ? this.text.trim() : "";
@@ -125,7 +125,7 @@ Item {
     property string videoResolveScript: `
 import urllib.request, json, subprocess, sys
 try:
-    local_str = subprocess.check_output("source ~/.local/state/imperative-dots-version 2>/dev/null && echo $LOCAL_VERSION", shell=True).decode('utf-8').strip()
+    local_str = subprocess.check_output("source ~/.local/state/hyprland-version 2>/dev/null && echo $LOCAL_VERSION", shell=True).decode('utf-8').strip()
     if not local_str: local_str = '0.0.0'
     
     # Safe Semantic Version Parsing
@@ -135,7 +135,7 @@ try:
         
     local_v = parse_v(local_str)
 
-    req = urllib.request.Request('https://raw.githubusercontent.com/xscriptor/imperative-dots/master/updates.json')
+    req = urllib.request.Request('https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/updates.json')
     res = urllib.request.urlopen(req, timeout=5)
     data = json.loads(res.read().decode())
 
@@ -194,10 +194,10 @@ except Exception:
     property string fetchScript: `
 import urllib.request, json, subprocess
 
-repo = 'xscriptor/imperative-dots'
+repo = 'xscriptor/hyprland'
 
 try:
-    local = subprocess.check_output("source ~/.local/state/imperative-dots-version 2>/dev/null && echo $LOCAL_VERSION", shell=True).decode('utf-8').strip()
+    local = subprocess.check_output("source ~/.local/state/hyprland-version 2>/dev/null && echo $LOCAL_VERSION", shell=True).decode('utf-8').strip()
 except:
     local = ''
 
@@ -673,7 +673,7 @@ except Exception as e:
                     easing.type: Easing.InSine
                     onFinished: {
                         updateBtn.triggered = true;
-                        let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh)\"'; fi";
+                        let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh)\"'; fi";
                         Quickshell.execDetached(["bash", "-c", cmd]);
                         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
                     }

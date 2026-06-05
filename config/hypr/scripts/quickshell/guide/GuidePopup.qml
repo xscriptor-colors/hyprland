@@ -156,7 +156,7 @@ Item {
 
     Process {
         id: versionReader
-        command: ["bash", "-c", "source ~/.local/state/imperative-dots-version 2>/dev/null && echo $LOCAL_VERSION || echo 'Unknown'"]
+        command: ["bash", "-c", "source ~/.local/state/hyprland-version 2>/dev/null && echo $LOCAL_VERSION || echo 'Unknown'"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -168,7 +168,7 @@ Item {
 
     Process {
         id: updateChecker
-        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
+        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -622,7 +622,7 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh)\"'; fi";
+                            let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh)\"'; fi";
                             Quickshell.execDetached(["bash", "-c", cmd]);
                         }
                     }
@@ -1544,8 +1544,8 @@ Item {
                     Repeater {
                         model: [
                             { name: "NixOS Config", icon: "", color: "blue", url: "https://github.com/xscriptor/hyprland" },
-                            { name: "Imperative Dots", icon: "󰣇", color: "mauve", url: "https://github.com/xscriptor/imperative-dots" },
-                            { name: "Wallpapers", icon: "", color: "peach", url: "https://github.com/xscriptor/shell-wallpapers" }
+                            { name: "Hyprland Config", icon: "󰣇", color: "mauve", url: "https://github.com/xscriptor/hyprland" },
+                            { name: "Wallpapers", icon: "", color: "peach", url: "https://github.com/xscriptor/xwall" }
                         ]
 
                         Rectangle {

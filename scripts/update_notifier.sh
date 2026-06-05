@@ -12,11 +12,11 @@ PENDING_FILE="$QS_CACHE_UPDATER/update_pending"
 
 while true; do
     # Fetch local version
-    LOCAL_VERSION=$(source ~/.local/state/imperative-dots-version 2>/dev/null && echo "$LOCAL_VERSION")
+    LOCAL_VERSION=$(source ~/.local/state/hyprland-version 2>/dev/null && echo "$LOCAL_VERSION")
     LOCAL_VERSION=${LOCAL_VERSION:-"Unknown"}
     
     # Fetch remote version
-    REMOTE_VERSION=$(curl -m 5 -s https://raw.githubusercontent.com/xscriptor/imperative-dots/master/install.sh | grep '^DOTS_VERSION=' | cut -d'"' -f2)
+    REMOTE_VERSION=$(curl -m 5 -s https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh | grep '^DOTS_VERSION=' | cut -d'"' -f2)
 
     # Check if we got valid responses and they don't match
     if [[ -n "$REMOTE_VERSION" && "$LOCAL_VERSION" != "Unknown" && "$LOCAL_VERSION" != "$REMOTE_VERSION" ]]; then
