@@ -44,3 +44,7 @@ output_path = "~/.config/qt6ct/qss/matugen-style.qss"
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland.conf.template'
 output_path = '~/.config/hypr/colors.conf'
+
+[templates.sddm]
+input_path = '~/.config/matugen/templates/sddm-colors.qml.template'
+output_path = '~/.config/hypr/sddm-colors.qml'

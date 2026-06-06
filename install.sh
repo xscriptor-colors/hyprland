@@ -646,27 +646,25 @@ install_sddm_theme() {
         sudo mkdir -p /usr/share/sddm/themes/matugen-minimal
         sudo cp -r "$SCRIPT_DIR/config/sddm/themes/matugen-minimal/"* /usr/share/sddm/themes/matugen-minimal/
 
-        # Create Colors.qml with default Catppuccin Mocha palette
-        if [ ! -f /usr/share/sddm/themes/matugen-minimal/Colors.qml ]; then
+        # Create Colors.qml with Matugen-generated colors if available, else fallback
+        if [ -f "$HOME/.config/hypr/sddm-colors.qml" ]; then
+            sudo cp "$HOME/.config/hypr/sddm-colors.qml" /usr/share/sddm/themes/matugen-minimal/Colors.qml
+            log "SDDM Colors.qml generated from Matugen"
+        else
             cat <<EOF | sudo tee /usr/share/sddm/themes/matugen-minimal/Colors.qml > /dev/null
 pragma Singleton
 import QtQuick
 QtObject {
     readonly property color base: "#1e1e2e"
-    readonly property color crust: "#11111b"
-    readonly property color mantle: "#181825"
+    readonly property color surface0: "#313244"
     readonly property color text: "#cdd6f4"
     readonly property color subtext0: "#a6adc8"
-    readonly property color surface0: "#313244"
-    readonly property color surface1: "#45475a"
-    readonly property color surface2: "#585b70"
     readonly property color mauve: "#cba6f7"
-    readonly property color red: "#f38ba8"
-    readonly property color peach: "#fab387"
     readonly property color blue: "#89b4fa"
-    readonly property color green: "#a6e3a1"
+    readonly property color red: "#f38ba8"
 }
 EOF
+            log "SDDM Colors.qml created with default palette"
         fi
 
         # Configure SDDM to use the theme
@@ -675,6 +673,16 @@ EOF
 [Theme]
 Current=matugen-minimal
 EOF
+
+        # Disable user-specific theme override if present (SilentSDDM, etc.)
+        if [ -f /etc/sddm.conf.d/theme.conf.user ]; then
+            sudo mv /etc/sddm.conf.d/theme.conf.user /etc/sddm.conf.d/theme.conf.user.bak
+            log "Disabled conflicting theme override: theme.conf.user → theme.conf.user.bak"
+        fi
+
+        # Disable on-screen virtual keyboard (not needed on non-touch devices)
+        sudo cp "$SCRIPT_DIR/config/sddm/z-disable-virtualkbd.conf" /etc/sddm.conf.d/z-disable-virtualkbd.conf
+        log "Disabled SDDM virtual keyboard"
 
         log "SDDM theme installed and configured!"
     else
