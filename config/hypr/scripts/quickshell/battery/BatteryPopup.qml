@@ -329,25 +329,6 @@ Item {
             border.width: 1
             clip: true
 
-            // Rotating Background Blobs - Spanning across the whole widget natively
-            Rectangle {
-                width: parent.width * 0.8; height: width; radius: width / 2
-                x: (parent.width / 2 - width / 2) + Math.cos(window.globalOrbitAngle * 2) * window.s(150)
-                y: (parent.height / 2 - height / 2) + Math.sin(window.globalOrbitAngle * 2) * window.s(100)
-                opacity: 0.08
-                color: window.ambientPrimary
-                Behavior on color { ColorAnimation { duration: 1000 } }
-            }
-            
-            Rectangle {
-                width: parent.width * 0.9; height: width; radius: width / 2
-                x: (parent.width / 2 - width / 2) + Math.sin(window.globalOrbitAngle * 1.5) * window.s(-150)
-                y: (parent.height / 2 - height / 2) + Math.cos(window.globalOrbitAngle * 1.5) * window.s(-100)
-                opacity: 0.06
-                color: window.ambientSecondary
-                Behavior on color { ColorAnimation { duration: 1000 } }
-            }
-
             RowLayout {
                 anchors.fill: parent
                 spacing: window.s(15) // Seamless separation instead of a line
