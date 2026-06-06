@@ -199,9 +199,7 @@ CORE_PACKAGES_ARCH=(
     # Utilities
     "awww"
     "dunst"
-    "hyprlock"
     "hypridle"
-    "wlogout"
     "grim"
     "slurp"
     "wl-clipboard"
@@ -415,7 +413,7 @@ backup_config() {
     log "Creating backup of existing configurations..."
     mkdir -p "$BACKUP_DIR"
 
-    local configs=("hypr" "rofi" "wlogout" "kitty" "dunst" "cava" "matugen" "swayosd")
+    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "matugen" "swayosd")
 
     for config in "${configs[@]}"; do
         if [ -d "$CONFIG_DIR/$config" ]; then
@@ -502,12 +500,6 @@ install_dotfiles() {
         cp -r "$SCRIPT_DIR/config/rofi/"* "$CONFIG_DIR/rofi/"
     fi
 
-    # Copy Wlogout config
-    if [ -d "$SCRIPT_DIR/config/wlogout" ]; then
-        mkdir -p "$CONFIG_DIR/wlogout"
-        cp -r "$SCRIPT_DIR/config/wlogout/"* "$CONFIG_DIR/wlogout/"
-    fi
-
     # Copy Dunst config
     if [ -d "$SCRIPT_DIR/config/dunst" ]; then
         mkdir -p "$CONFIG_DIR/dunst"
@@ -526,12 +518,6 @@ install_dotfiles() {
         mkdir -p "$CONFIG_DIR/matugen"
         cp -r "$SCRIPT_DIR/config/matugen/"* "$CONFIG_DIR/matugen/"
         log "Installed matugen config"
-    fi
-
-    # Copy Hyprlock config (goes to ~/.config/hypr/)
-    if [ -f "$SCRIPT_DIR/config/hyprlock/hyprlock.conf" ]; then
-        cp "$SCRIPT_DIR/config/hyprlock/hyprlock.conf" "$CONFIG_DIR/hypr/"
-        log "Installed hyprlock.conf"
     fi
 
     # Copy Hypridle config (goes to ~/.config/hypr/)
@@ -837,7 +823,7 @@ main() {
         fedora)
             warn "Fedora support is experimental. Some packages may not be available."
             # Basic packages for Fedora
-            install_packages_fedora hyprland rofi-wayland kitty dunst wlogout grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
+            install_packages_fedora hyprland rofi-wayland kitty dunst grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
             ;;
         debian|ubuntu|pop)
             error "Debian/Ubuntu requires manual Hyprland installation from source."

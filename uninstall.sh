@@ -11,10 +11,8 @@ echo ""
 echo "The following will be removed:"
 echo "  - ~/.config/hypr"
 echo "  - ~/.config/rofi"
-echo "  - ~/.config/wlogout"
 echo "  - ~/.config/dunst"
 echo "  - ~/.config/kitty"
-echo "  - ~/.config/hyprlock"
 echo "  - ~/.config/hypridle"
 echo ""
 read -p "Continue? [y/N] " response
@@ -32,7 +30,7 @@ if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
     read -p "Restore from backup? [Y/n] " restore_response
     
     if [[ ! "$restore_response" =~ ^[Nn]$ ]]; then
-        for config in hypr rofi wlogout kitty dunst hyprlock hypridle; do
+        for config in hypr rofi kitty dunst hypridle; do
             if [ -d "$BACKUP_DIR/$config" ]; then
                 rm -rf "$CONFIG_DIR/$config"
                 cp -r "$BACKUP_DIR/$config" "$CONFIG_DIR/"
@@ -48,10 +46,8 @@ fi
 echo "Removing configuration files..."
 rm -rf "$CONFIG_DIR/hypr"
 rm -rf "$CONFIG_DIR/rofi"
-rm -rf "$CONFIG_DIR/wlogout"
 rm -rf "$CONFIG_DIR/dunst"
 rm -rf "$CONFIG_DIR/kitty"
-rm -rf "$CONFIG_DIR/hyprlock"
 rm -rf "$CONFIG_DIR/hypridle"
 
 # Remove wallpaper cache
