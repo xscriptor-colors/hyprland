@@ -14,6 +14,9 @@ echo "  - ~/.config/rofi"
 echo "  - ~/.config/dunst"
 echo "  - ~/.config/kitty"
 echo "  - ~/.config/hypridle"
+echo "  - /usr/share/sddm/themes/matugen-minimal"
+echo "  - /etc/sddm.conf.d/10-matugen-theme.conf"
+echo "  - /etc/sddm.conf.d/z-disable-virtualkbd.conf"
 echo ""
 read -p "Continue? [y/N] " response
 
@@ -49,6 +52,17 @@ rm -rf "$CONFIG_DIR/rofi"
 rm -rf "$CONFIG_DIR/dunst"
 rm -rf "$CONFIG_DIR/kitty"
 rm -rf "$CONFIG_DIR/hypridle"
+
+# Restore SDDM theme override if it was backed up
+if [ -f /etc/sddm.conf.d/theme.conf.user.bak ]; then
+    sudo mv /etc/sddm.conf.d/theme.conf.user.bak /etc/sddm.conf.d/theme.conf.user
+    echo "Restored: theme.conf.user"
+fi
+
+# Remove SDDM theme and configs
+sudo rm -f /etc/sddm.conf.d/10-matugen-theme.conf
+sudo rm -f /etc/sddm.conf.d/z-disable-virtualkbd.conf
+sudo rm -rf /usr/share/sddm/themes/matugen-minimal
 
 # Remove wallpaper cache
 rm -rf "$HOME/.cache/wallpaper-thumbs"
