@@ -413,7 +413,7 @@ backup_config() {
     log "Creating backup of existing configurations..."
     mkdir -p "$BACKUP_DIR"
 
-    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "matugen" "swayosd")
+    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "matugen" "swayosd" "nvim")
 
     for config in "${configs[@]}"; do
         if [ -d "$CONFIG_DIR/$config" ]; then
@@ -633,6 +633,31 @@ install_hack_nerd_font() {
 
     fc-cache -f "$FONT_DIR" 2>/dev/null || true
     log "Font cache updated."
+}
+
+# ┌───────────────────────────────────────────────────────────────────────────────────┐
+# │ INSTALL NVIM CONFIG                                                               │
+# └───────────────────────────────────────────────────────────────────────────────────┘
+
+install_nvim_config() {
+    if [ -d "$SCRIPT_DIR/config/nvim" ]; then
+        log "Installing Neovim configuration..."
+        cp -r "$SCRIPT_DIR/config/nvim" "$CONFIG_DIR/nvim"
+        log "Neovim configuration installed!"
+        echo ""
+        echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${YELLOW}║                    NVIM POST-INSTALL STEPS                      ║${NC}"
+        echo -e "${YELLOW}╚══════════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        echo -e "${CYAN}1.${NC} Open Neovim:  ${WHITE}nvim${NC}"
+        echo -e "${CYAN}2.${NC} Run Lazy to install plugins:  ${WHITE}:Lazy${NC}"
+        echo -e "${CYAN}3.${NC} Run Mason to install LSP servers:  ${WHITE}:Mason${NC}"
+        echo ""
+        echo -e "${BLUE}Refer to the nvim README for more details.${NC}"
+        echo ""
+    else
+        warn "nvim config directory not found at config/nvim"
+    fi
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -863,6 +888,9 @@ main() {
     # Install Hack Nerd Font
     install_hack_nerd_font
 
+    # Install Neovim configuration
+    install_nvim_config
+
     # Install SDDM theme
     prompt "Install SDDM theme (matugen-minimal) and configure display manager? [y/N] "
     read -r sddm_response
@@ -949,6 +977,7 @@ case "$1" in
         install_kitty_config
         install_matugen_config
         install_hack_nerd_font
+        install_nvim_config
         create_directories
         check_requirements
         log "Dotfiles installed!"
