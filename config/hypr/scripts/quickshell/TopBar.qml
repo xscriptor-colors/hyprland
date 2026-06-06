@@ -640,7 +640,7 @@ Variants {
                             
                             Text {
                                 anchors.centerIn: parent
-                                text: "󰋗"
+                                text: "󰅖"
                                 font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(22)
                                 color: parent.isHovered ? mocha.teal : mocha.text
                                 Behavior on color { ColorAnimation { duration: 200 } }
@@ -816,9 +816,9 @@ Variants {
                             prevIdx = curIdx;
                         }
 
-                        property real stepSize: barWindow.s(36) + barWindow.s(8)
-                        property real targetLeft: wsLayout.x + (curIdx * stepSize)
-                        property real targetRight: targetLeft + barWindow.s(32)
+                        property var activePill: wsPillRepeater.itemAt(curIdx)
+                        property real targetLeft: activePill ? wsLayout.x + activePill.x : 0
+                        property real targetRight: activePill ? targetLeft + activePill.width : barWindow.s(32)
 
                         property real actualLeft: targetLeft
                         property real actualRight: targetRight
@@ -837,6 +837,7 @@ Variants {
                         spacing: barWindow.s(8)
                         
                         Repeater {
+                            id: wsPillRepeater
                             model: workspacesModel
                             delegate: Rectangle {
                                 id: wsPill
@@ -848,8 +849,9 @@ Variants {
                                 
                                 property string stateLabel: model.wsState
                                 property string wsName: model.wsId
+                                property int wsIndex: index
                                 
-                                property real targetWidth: barWindow.s(36)
+                                property real targetWidth: appIconList.length > 0 ? barWindow.s(24) + appIconList.length * barWindow.s(16) + (hasManyIcons ? barWindow.s(18) : 0) : barWindow.s(36)
                                 width: targetWidth
                                 Behavior on targetWidth { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
                                 
@@ -915,34 +917,71 @@ Variants {
                                     return map[c] || "\uF128";
                                 }
 
-                                property string appIcon: wsClassesStr !== "" ? classIcon(wsClassesStr.split(",")[0]) : ""
+                                property var appClassList: wsClassesStr !== "" ? wsClassesStr.split(",") : []
+                                property bool hasManyIcons: appClassList.length > 3
+                                property int maxShowIcons: hasManyIcons ? 2 : Math.min(appClassList.length, 3)
+                                property var appIconList: {
+                                    var icons = [];
+                                    for (var i = 0; i < appClassList.length && i < maxShowIcons; i++) {
+                                        icons.push(classIcon(appClassList[i]));
+                                    }
+                                    return icons;
+                                }
 
                                 Item {
                                     anchors.fill: parent
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: appIcon !== "" ? appIcon : wsName
-                                        font.family: appIcon !== "" ? "Hack Nerd Font" : "Hack Nerd Font"
-                                        font.pixelSize: appIcon !== "" ? barWindow.s(16) : barWindow.s(18)
-                                        font.weight: appIcon === "" && stateLabel === "active" ? Font.Black : (appIcon === "" && stateLabel === "occupied" ? Font.Bold : Font.Medium)
+                                        text: wsName
+                                        font.family: "Hack Nerd Font"
+                                        font.pixelSize: barWindow.s(18)
+                                        font.weight: stateLabel === "active" ? Font.Black : (stateLabel === "occupied" ? Font.Bold : Font.Medium)
                                         color: index === workspacesModel.activeIndex ? mocha.crust : (isHovered ? mocha.text : (stateLabel === "occupied" ? mocha.text : mocha.overlay0))
                                         Behavior on color { ColorAnimation { duration: 250 } }
+                                        visible: appIconList.length === 0
+                                    }
+
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: barWindow.s(2)
+                                        visible: appIconList.length > 0
+
+                                        Repeater {
+                                            model: appIconList
+                                            delegate: Text {
+                                                text: modelData
+                                                font.family: "Hack Nerd Font"
+                                                font.pixelSize: barWindow.s(12)
+                                                color: wsPill.wsIndex === workspacesModel.activeIndex ? mocha.crust : (isHovered ? mocha.text : (stateLabel === "occupied" ? mocha.text : mocha.overlay0))
+                                                Behavior on color { ColorAnimation { duration: 250 } }
+                                            }
+                                        }
+
+                                        Text {
+                                            text: hasManyIcons ? "+" + (appClassList.length - 2) : ""
+                                            font.family: "Hack Nerd Font"
+                                            font.pixelSize: barWindow.s(10)
+                                            font.weight: Font.Black
+                                            color: index === workspacesModel.activeIndex ? mocha.crust : mocha.overlay0
+                                            visible: hasManyIcons
+                                        }
                                     }
 
                                     Text {
                                         anchors.right: parent.right
                                         anchors.bottom: parent.bottom
-                                        anchors.rightMargin: barWindow.s(3)
+                                        anchors.rightMargin: barWindow.s(2)
                                         anchors.bottomMargin: barWindow.s(1)
                                         text: wsName
                                         font.family: "Hack Nerd Font"
                                         font.pixelSize: barWindow.s(9)
                                         font.weight: Font.Black
                                         color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.4)
-                                        visible: appIcon !== ""
+                                        visible: appIconList.length > 0
                                     }
                                 }
+
                                 MouseArea {
                                     id: wsPillMouse
                                     hoverEnabled: true
