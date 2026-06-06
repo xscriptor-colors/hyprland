@@ -1153,24 +1153,7 @@ Variants {
                             Text { text: barWindow.dateStr; Layout.alignment: Qt.AlignLeft; font.family: "JetBrains Mono"; font.pixelSize: barWindow.s(11); font.weight: Font.Bold; color: mocha.subtext0 }
                         }
 
-                        RowLayout {
-                            spacing: barWindow.s(10)
-                            Text { 
-                                text: barWindow.weatherIcon; 
-                                Layout.alignment: Qt.AlignVCenter;
-                                font.family: "Iosevka Nerd Font"; 
-                                font.pixelSize: barWindow.s(24); 
-                                color: Qt.tint(barWindow.weatherHex, Qt.rgba(mocha.mauve.r, mocha.mauve.g, mocha.mauve.b, 0.4)) 
-                            }
-                            Text { 
-                                text: barWindow.weatherTemp; 
-                                Layout.alignment: Qt.AlignVCenter;
-                                font.family: "JetBrains Mono"; 
-                                font.pixelSize: barWindow.s(17); 
-                                font.weight: Font.Black; 
-                                color: mocha.peach 
-                            }
-                        }
+
                     }
                 }
 
