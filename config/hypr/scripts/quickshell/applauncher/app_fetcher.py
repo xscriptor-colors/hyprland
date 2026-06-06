@@ -18,9 +18,19 @@ SYSTEM_BLOCKLIST = [
     "session", "welcome", "tour", "first", "setup", "configuration",
     "document viewer", "image viewer", "text editor", "gedit", "kate",
     "calculator", "calendar", "clock", "notes", "contacts", "maps",
-    "weather", "help", "terminal", "lxterminal", "xfce4-terminal",
-    "mate-terminal", "konsole", "gnome-terminal", "tilix", "terminator",
+    "weather", "help",
+    "lxterminal", "xfce4-terminal", "mate-terminal", "konsole",
+    "gnome-terminal", "tilix", "terminator",
     "whatsapp", "telegram-desktop",
+    "cmake", "btop", "cosmic", "htop", "nvtop", "iotop", "iftop",
+    "neofetch", "fastfetch", "cpufetch",
+    "arandr", "lxappearance", "qt5ct", "qt6ct", "nwg-look",
+    "vim", "nvim", "neovim", "emacs", "nano",
+    "gparted", "timeshift", "clamav", "clamtk",
+    "org.kde", "org.gnome", "org.mate", "org.xfce",
+    "pavucontrol", "easyeffects", "helvum", "qpwgraph",
+    "archlinux", "arch", "manjaro", "endeavouros",
+    "gamemode", "mangohud", "goverlay",
 ]
 
 def is_system_app(name, exec_path):
