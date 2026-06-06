@@ -1364,11 +1364,7 @@ Variants {
                                     radius: barWindow.s(20)
                                     opacity: barWindow.showEthernet ? (barWindow.ethStatus === "Connected" ? 1.0 : 0.0) : (barWindow.isWifiOn ? 1.0 : 0.0)
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    gradient: Gradient {
-                                        orientation: Gradient.Horizontal
-                                        GradientStop { position: 0.0; color: mocha.blue }
-                                        GradientStop { position: 1.0; color: Qt.lighter(mocha.blue, 1.3) }
-                                    }
+                                    color: mocha.blue
                                 }
 
                                 property real targetWidth: wifiLayoutRow.implicitWidth + barWindow.s(24)
@@ -1422,11 +1418,7 @@ Variants {
                                     radius: barWindow.s(20)
                                     opacity: barWindow.isBtOn ? 1.0 : 0.0
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    gradient: Gradient {
-                                        orientation: Gradient.Horizontal
-                                        GradientStop { position: 0.0; color: mocha.mauve }
-                                        GradientStop { position: 1.0; color: Qt.lighter(mocha.mauve, 1.3) }
-                                    }
+                                    color: mocha.mauve
                                 }
 
                                 property real targetWidth: barWindow.isDesktop ? 0 : btLayoutRow.implicitWidth + barWindow.s(24)
@@ -1475,11 +1467,7 @@ Variants {
                                     radius: barWindow.s(20)
                                     opacity: barWindow.isSoundActive ? 1.0 : 0.0
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    gradient: Gradient {
-                                        orientation: Gradient.Horizontal
-                                        GradientStop { position: 0.0; color: mocha.peach }
-                                        GradientStop { position: 1.0; color: Qt.lighter(mocha.peach, 1.3) }
-                                    }
+                                    color: mocha.peach
                                 }
                                 
                                 property real targetWidth: volLayoutRow.implicitWidth + barWindow.s(24)
@@ -1528,11 +1516,8 @@ Variants {
                                     radius: barWindow.s(20)
                                     opacity: 1.0 
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    gradient: Gradient {
-                                        orientation: Gradient.Horizontal
-                                        GradientStop { position: 0.0; color: barWindow.isDesktop ? mocha.red : barWindow.batDynamicColor; Behavior on color { ColorAnimation { duration: 300 } } }
-                                        GradientStop { position: 1.0; color: barWindow.isDesktop ? Qt.lighter(mocha.red, 1.3) : Qt.lighter(barWindow.batDynamicColor, 1.3); Behavior on color { ColorAnimation { duration: 300 } } }
-                                    }
+                                    color: barWindow.isDesktop ? mocha.red : barWindow.batDynamicColor
+                                    Behavior on color { ColorAnimation { duration: 300 } }
                                 }
                                 
                                 property real targetWidth: barWindow.isDesktop ? barWindow.s(34) : batLayoutRow.implicitWidth + barWindow.s(24)
