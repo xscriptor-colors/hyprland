@@ -912,7 +912,7 @@ Item {
     // --- SHARED STYLES ---
     component CustomComboBox: ComboBox {
         id: control
-        font.family: "JetBrains Mono"; font.pixelSize: window.s(14)
+        font.family: "Hack Nerd Font"; font.pixelSize: window.s(14)
         delegate: ItemDelegate {
             width: control.width; height: window.s(36)
             contentItem: Text { text: modelData || model.name; color: window.text; font: control.font; verticalAlignment: Text.AlignVCenter }
@@ -968,7 +968,7 @@ Item {
                     width: parent.width
                     text: model.title || "Unknown"
                     color: window.subtext0
-                    font.family: "JetBrains Mono"
+                    font.family: "Hack Nerd Font"
                     font.pixelSize: window.s(11)
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
@@ -1015,7 +1015,7 @@ Item {
                         Text {
                             text: "Recent Searches"
                             color: window.text
-                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(16)
+                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(16)
                         }
                         ListView {
                             width: parent.width; height: window.s(32)
@@ -1035,7 +1035,7 @@ Item {
                                 border.color: histMouse.containsMouse ? window.surface2 : window.surface1
                                 Text {
                                     id: queryText; text: model.query; color: window.text
-                                    font.family: "JetBrains Mono"; font.pixelSize: window.s(13)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: window.s(13)
                                     anchors.left: parent.left; anchors.leftMargin: window.s(10)
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -1068,7 +1068,7 @@ Item {
                         Text {
                             text: "Watch History"
                             color: window.text
-                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(16)
+                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(16)
                         }
                         ListView {
                             width: parent.width; height: window.s(200)
@@ -1089,7 +1089,7 @@ Item {
                         anchors.top: parent.top; anchors.topMargin: window.s(4)
                         text: window.mediaType === "movie" ? "Popular Movies" : "Popular TV Shows"
                         color: window.text
-                        font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(16)
+                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(16)
                     }
                 }
             }
@@ -1134,12 +1134,12 @@ Item {
                                 MouseArea {
                                     Layout.fillWidth: true; Layout.fillHeight: true
                                     onClicked: { window.mediaType = "movie"; if (searchInput.text !== "") doSearch(searchInput.text) }
-                                    Text { anchors.centerIn: parent; text: "Movies"; font.family: "JetBrains Mono"; font.weight: window.mediaType === "movie" ? Font.Bold : Font.Medium; font.pixelSize: window.s(13); color: window.mediaType === "movie" ? window.crust : window.text }
+                                    Text { anchors.centerIn: parent; text: "Movies"; font.family: "Hack Nerd Font"; font.weight: window.mediaType === "movie" ? Font.Bold : Font.Medium; font.pixelSize: window.s(13); color: window.mediaType === "movie" ? window.crust : window.text }
                                 }
                                 MouseArea {
                                     Layout.fillWidth: true; Layout.fillHeight: true
                                     onClicked: { window.mediaType = "tv"; if (searchInput.text !== "") doSearch(searchInput.text) }
-                                    Text { anchors.centerIn: parent; text: "TV Shows"; font.family: "JetBrains Mono"; font.weight: window.mediaType === "tv" ? Font.Bold : Font.Medium; font.pixelSize: window.s(13); color: window.mediaType === "tv" ? window.crust : window.text }
+                                    Text { anchors.centerIn: parent; text: "TV Shows"; font.family: "Hack Nerd Font"; font.weight: window.mediaType === "tv" ? Font.Bold : Font.Medium; font.pixelSize: window.s(13); color: window.mediaType === "tv" ? window.crust : window.text }
                                 }
                             }
                         }
@@ -1163,7 +1163,7 @@ Item {
                             radius: window.s(13); border.color: searchInput.activeFocus ? window.surface2 : "transparent"
                             Behavior on color { ColorAnimation { duration: 200 } }
                         }
-                        color: window.text; font.family: "JetBrains Mono"; font.pixelSize: window.s(15); leftPadding: window.s(15)
+                        color: window.text; font.family: "Hack Nerd Font"; font.pixelSize: window.s(15); leftPadding: window.s(15)
                         placeholderText: "Search"
                         placeholderTextColor: window.subtext0; verticalAlignment: TextInput.AlignVCenter
                         onTextChanged: {
@@ -1258,7 +1258,7 @@ Item {
                                 }
                             }
                         }
-                        Text { Layout.alignment: Qt.AlignHCenter; text: "Loading..."; color: window.text; font.family: "JetBrains Mono"; font.pixelSize: window.s(14) }
+                        Text { Layout.alignment: Qt.AlignHCenter; text: "Loading..."; color: window.text; font.family: "Hack Nerd Font"; font.pixelSize: window.s(14) }
                     }
                 }
                 Item {
@@ -1322,7 +1322,7 @@ Item {
                                                     }
                                                 }
                                             }
-                                            Text { anchors.centerIn: parent; width: parent.width - window.s(10); text: model.title || "Unknown"; color: window.subtext0; font.family: "JetBrains Mono"; font.pixelSize: window.s(12); wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter; visible: !parent.isLoading }
+                                            Text { anchors.centerIn: parent; width: parent.width - window.s(10); text: model.title || "Unknown"; color: window.subtext0; font.family: "Hack Nerd Font"; font.pixelSize: window.s(12); wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter; visible: !parent.isLoading }
                                         }
                                         Rectangle {
                                             anchors.fill: parent; radius: window.s(10)
@@ -1332,12 +1332,12 @@ Item {
                                         }
                                     }
                                     Text {
-                                        Layout.fillWidth: true; text: model.title; font.family: "JetBrains Mono"; font.pixelSize: window.s(12); font.weight: Font.Bold
+                                        Layout.fillWidth: true; text: model.title; font.family: "Hack Nerd Font"; font.pixelSize: window.s(12); font.weight: Font.Bold
                                         color: parent.parent.isActive ? window.text : window.subtext0
                                         wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight; lineHeight: 1.1; horizontalAlignment: Text.AlignHCenter
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                     }
-                                    Text { Layout.fillWidth: true; text: model.year !== "N/A" ? model.year : ""; font.family: "JetBrains Mono"; font.pixelSize: window.s(11); color: window.surface2; horizontalAlignment: Text.AlignHCenter; visible: text !== "" }
+                                    Text { Layout.fillWidth: true; text: model.year !== "N/A" ? model.year : ""; font.family: "Hack Nerd Font"; font.pixelSize: window.s(11); color: window.surface2; horizontalAlignment: Text.AlignHCenter; visible: text !== "" }
                                 }
                                 MouseArea {
                                     anchors.fill: parent; hoverEnabled: true
@@ -1403,12 +1403,12 @@ Item {
                     Rectangle {
                         anchors.fill: parent; color: window.surface0; radius: window.s(18)
                         visible: window.selectedPoster === "" || parent.children[0].status === Image.Error || parent.children[0].status === Image.Loading
-                        Text { anchors.centerIn: parent; width: parent.width - window.s(10); text: window.selectedTitle; color: window.subtext0; font.family: "JetBrains Mono"; font.pixelSize: window.s(14); wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
+                        Text { anchors.centerIn: parent; width: parent.width - window.s(10); text: window.selectedTitle; color: window.subtext0; font.family: "Hack Nerd Font"; font.pixelSize: window.s(14); wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter }
                     }
                 }
                 Text {
                     Layout.fillWidth: true; text: window.selectedTitle
-                    font.family: "JetBrains Mono"; font.pixelSize: window.s(16); font.weight: Font.Bold
+                    font.family: "Hack Nerd Font"; font.pixelSize: window.s(16); font.weight: Font.Bold
                     color: window.text; wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter
                     maximumLineCount: 3; elide: Text.ElideRight
                 }
@@ -1423,7 +1423,7 @@ Item {
                         id: descText
                         width: parent.width - window.s(8)
                         text: window.selectedDescription
-                        font.family: "JetBrains Mono"; font.pixelSize: window.s(11)
+                        font.family: "Hack Nerd Font"; font.pixelSize: window.s(11)
                         color: window.subtext0; wrapMode: Text.WordWrap; lineHeight: 1.4
                         Behavior on opacity { NumberAnimation { duration: 400 } }
                         opacity: window.selectedDescription !== "" ? 1 : 0
@@ -1434,7 +1434,7 @@ Item {
                     property bool isHovered: backMouse.containsMouse
                     color: isHovered ? window.surface2 : window.surface1
                     Behavior on color { ColorAnimation { duration: 200 } }
-                    Text { anchors.centerIn: parent; text: "← Back"; font.family: "JetBrains Mono"; font.pixelSize: window.s(14); font.weight: Font.Medium; color: window.text }
+                    Text { anchors.centerIn: parent; text: "← Back"; font.family: "Hack Nerd Font"; font.pixelSize: window.s(14); font.weight: Font.Medium; color: window.text }
                     MouseArea { id: backMouse; anchors.fill: parent; hoverEnabled: true; onClicked: { window.currentView = "search"; searchInput.forceActiveFocus(); saveUiState() } }
                 }
                 Item { Layout.fillHeight: true }
@@ -1461,7 +1461,7 @@ Item {
                                 id: seasonLabelText
                                 anchors.centerIn: parent
                                 text: "S" + model.seasonNum
-                                font.family: "JetBrains Mono"; font.pixelSize: window.s(13); font.weight: isActive ? Font.Bold : Font.Medium
+                                font.family: "Hack Nerd Font"; font.pixelSize: window.s(13); font.weight: isActive ? Font.Bold : Font.Medium
                                 color: isActive ? window.crust : window.text
                                 Behavior on color { ColorAnimation { duration: 200 } }
                             }
@@ -1506,7 +1506,7 @@ Item {
                             anchors.centerIn: parent
                             visible: window.isLoadingSeries
                             text: "Fetching episodes..."
-                            color: window.subtext0; font.family: "JetBrains Mono"; font.pixelSize: window.s(13)
+                            color: window.subtext0; font.family: "Hack Nerd Font"; font.pixelSize: window.s(13)
                         }
                         highlight: Rectangle {
                             color: window.surface0; border.color: window.surface2; border.width: 1; radius: window.s(13); z: 0
@@ -1533,7 +1533,7 @@ Item {
                                         Text {
                                             anchors.centerIn: parent
                                             text: model.epNum
-                                            font.family: "JetBrains Mono"; font.pixelSize: window.s(13); font.weight: Font.Bold
+                                            font.family: "Hack Nerd Font"; font.pixelSize: window.s(13); font.weight: Font.Bold
                                             color: isCurrent || epMouse.containsMouse ? window.crust : window.subtext0
                                             Behavior on color { ColorAnimation { duration: 200 } }
                                         }
@@ -1543,7 +1543,7 @@ Item {
                                         Text {
                                             width: parent.width
                                             text: model.epTitle
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: model.hasRealTitle ? window.s(13) : window.s(12)
                                             font.weight: model.hasRealTitle ? Font.Medium : Font.Normal
                                             color: model.hasRealTitle ? window.text : window.subtext0
@@ -1608,12 +1608,12 @@ Item {
                                 color: window.checkingState === "found"      ? window.green
                                      : window.checkingState === "failed_all" ? window.red
                                      :                                         window.text
-                                font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(17)
+                                font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(17)
                                 Behavior on color { ColorAnimation { duration: 300 } }
                             }
                             Text {
                                 text: window.pendingMedia.title || "Loading..."
-                                color: window.subtext0; font.family: "JetBrains Mono"; font.pixelSize: window.s(12)
+                                color: window.subtext0; font.family: "Hack Nerd Font"; font.pixelSize: window.s(12)
                                 elide: Text.ElideRight; Layout.fillWidth: true
                             }
                         }
@@ -1665,7 +1665,7 @@ Item {
                                 }
                                 Text {
                                     text: model.name
-                                    font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(14)
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(14)
                                     color: model.status === "checking" ? window.blue
                                          : model.status === "success"  ? window.green
                                          : model.status === "failed"   ? Qt.rgba(window.red.r, window.red.g, window.red.b, 0.7)
@@ -1731,14 +1731,14 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             text: "All stream sources failed for this title."
-                            color: window.subtext0; font.family: "JetBrains Mono"; font.pixelSize: window.s(13)
+                            color: window.subtext0; font.family: "Hack Nerd Font"; font.pixelSize: window.s(13)
                             wrapMode: Text.WordWrap; horizontalAlignment: Text.AlignHCenter; lineHeight: 1.3
                         }
                         Rectangle {
                             Layout.fillWidth: true; Layout.preferredHeight: window.s(45); radius: window.s(13)
                             color: fmhyMouse.containsMouse ? window.blue : window.surface1
                             Behavior on color { ColorAnimation { duration: 150 } }
-                            Text { anchors.centerIn: parent; text: "Browse Alternative Sites"; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(13); color: fmhyMouse.containsMouse ? window.crust : window.text }
+                            Text { anchors.centerIn: parent; text: "Browse Alternative Sites"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(13); color: fmhyMouse.containsMouse ? window.crust : window.text }
                             MouseArea {
                                 id: fmhyMouse; anchors.fill: parent; hoverEnabled: true
                                 onClicked: { Quickshell.execDetached(["xdg-open", "https://fmhy.net/video#streaming-sites"]); window.closeSourceModal() }
@@ -1768,13 +1768,13 @@ Item {
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: parent.parent.isPreferred ? "★ Preferred Source" : "Mark as Working"
-                                    font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(12)
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(12)
                                     color: window.green
                                 }
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: window.foundSourceName !== "" ? window.foundSourceName : ""
-                                    font.family: "JetBrains Mono"; font.pixelSize: window.s(10)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: window.s(10)
                                     color: Qt.rgba(window.green.r, window.green.g, window.green.b, 0.7)
                                     visible: text !== ""
                                 }
@@ -1798,13 +1798,13 @@ Item {
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "Try Next"
-                                    font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(12)
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(12)
                                     color: window.text
                                 }
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "Not working?"
-                                    font.family: "JetBrains Mono"; font.pixelSize: window.s(10)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: window.s(10)
                                     color: window.subtext0
                                 }
                             }

@@ -291,7 +291,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: modelData
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.bold: true
                             font.pixelSize: root.s(12)
                             color: stateCache.activeMode === index ? root.cMantle : root.cText
@@ -412,7 +412,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: value.toString().padStart(2, '0')
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.weight: Font.Black
                             font.pixelSize: root.s(54)
                             color: isSelected ? root.cMauve : root.cText
@@ -454,7 +454,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: root.formatTime(stateCache.timerRemainingMs, false)
-                        font.family: "JetBrains Mono"
+                        font.family: "Hack Nerd Font"
                         font.weight: Font.Black
                         font.pixelSize: root.s(68)
                         color: stateCache.timerRemainingMs === 0 && !root.isTimerRunning ? root.cMauve : root.cText
@@ -477,7 +477,7 @@ Item {
 
                         Text { 
                             text: ":"
-                            font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(54)
+                            font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(54)
                             color: root.alpha(root.cSubtext0, 0.4)
                             anchors.verticalCenter: parent.verticalCenter 
                         }
@@ -492,7 +492,7 @@ Item {
 
                         Text { 
                             text: ":"
-                            font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(54)
+                            font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(54)
                             color: root.alpha(root.cSubtext0, 0.4)
                             anchors.verticalCenter: parent.verticalCenter 
                         }
@@ -580,7 +580,7 @@ Item {
                             id: swTimeText
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: root.formatTime(stopwatchView.currentDisplayMs, true)
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.weight: Font.Black
                             font.pixelSize: root.s(52)
                             color: root.cText
@@ -616,9 +616,9 @@ Item {
                                     RowLayout {
                                         anchors.fill: parent
                                         anchors.leftMargin: root.s(15); anchors.rightMargin: root.s(15)
-                                        Text { text: "Lap " + (trueIdx + 1); color: root.cSubtext0; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); font.bold: true; Layout.fillWidth: true }
-                                        Text { text: lapItem ? "+" + root.formatTime(lapItem.diff, true) : ""; color: root.cMauve; font.family: "JetBrains Mono"; font.pixelSize: root.s(12) }
-                                        Text { text: lapItem ? root.formatTime(lapItem.total, true) : ""; color: root.cText; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); font.bold: true; Layout.alignment: Qt.AlignRight }
+                                        Text { text: "Lap " + (trueIdx + 1); color: root.cSubtext0; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); font.bold: true; Layout.fillWidth: true }
+                                        Text { text: lapItem ? "+" + root.formatTime(lapItem.diff, true) : ""; color: root.cMauve; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12) }
+                                        Text { text: lapItem ? root.formatTime(lapItem.total, true) : ""; color: root.cText; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); font.bold: true; Layout.alignment: Qt.AlignRight }
                                     }
                                 }
                             }
@@ -735,14 +735,14 @@ Item {
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: pomodoroView.getPhaseLabel() + " (" + stateCache.pomoSessionsCount + "/" + stateCache.pomoTargetSessions + ")"
-                            font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(14)
+                            font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(14)
                             color: pomodoroView.getPhaseColor()
                         }
 
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: root.formatTime(stateCache.pomoRemainingMs, false)
-                            font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(68)
+                            font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(68)
                             color: root.cText
                         }
                     }
@@ -771,16 +771,16 @@ Item {
                                 ]
                                 RowLayout {
                                     width: root.s(240)
-                                    Text { text: modelData.label; color: root.cSubtext0; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); Layout.fillWidth: true }
+                                    Text { text: modelData.label; color: root.cSubtext0; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); Layout.fillWidth: true }
                                     Rectangle {
                                         width: root.s(24); height: root.s(24); radius: root.s(14); color: root.cSurface1
-                                        Text { anchors.centerIn: parent; text: "-"; color: root.cText; font.family: "JetBrains Mono"; font.pixelSize: root.s(14) }
+                                        Text { anchors.centerIn: parent; text: "-"; color: root.cText; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14) }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: stateCache[modelData.target] = Math.max(modelData.min, stateCache[modelData.target] - modelData.step) }
                                     }
-                                    Text { text: stateCache[modelData.target]; color: root.cText; font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(14); Layout.minimumWidth: root.s(24); horizontalAlignment: Text.AlignHCenter }
+                                    Text { text: stateCache[modelData.target]; color: root.cText; font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(14); Layout.minimumWidth: root.s(24); horizontalAlignment: Text.AlignHCenter }
                                     Rectangle {
                                         width: root.s(24); height: root.s(24); radius: root.s(14); color: root.cSurface1
-                                        Text { anchors.centerIn: parent; text: "+"; color: root.cText; font.family: "JetBrains Mono"; font.pixelSize: root.s(14) }
+                                        Text { anchors.centerIn: parent; text: "+"; color: root.cText; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14) }
                                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: stateCache[modelData.target] = Math.min(modelData.max, stateCache[modelData.target] + modelData.step) }
                                     }
                                 }

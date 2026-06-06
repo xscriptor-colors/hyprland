@@ -222,7 +222,7 @@ PanelWindow {
         RowLayout {
             anchors.centerIn: parent; spacing: s(6)
             Text { 
-                font.family: "Iosevka Nerd Font"
+                font.family: "Hack Nerd Font"
                 text: tBtn.iconTxt
                 color: tBtn.isDanger ? _theme.crust : _theme.text
                 font.pixelSize: s(18) 
@@ -230,7 +230,7 @@ PanelWindow {
             Text { 
                 id: txt
                 visible: tBtn.label !== ""
-                font.family: "JetBrains Mono"
+                font.family: "Hack Nerd Font"
                 font.weight: Font.DemiBold
                 text: tBtn.label
                 color: tBtn.isDanger ? _theme.crust : _theme.text
@@ -257,7 +257,7 @@ PanelWindow {
             Text {
                 anchors.centerIn: parent
                 text: root.isVideoMode ? "Click Record (Portal handles area selection)" : "Select region to capture"
-                font.family: "JetBrains Mono"; font.weight: Font.DemiBold; font.pixelSize: s(24); color: _theme.text
+                font.family: "Hack Nerd Font"; font.weight: Font.DemiBold; font.pixelSize: s(24); color: _theme.text
             }
         }
         Item {
@@ -450,7 +450,7 @@ PanelWindow {
 
                 Text {
                     anchors.centerIn: parent
-                    font.family: "Iosevka Nerd Font"
+                    font.family: "Hack Nerd Font"
                     text: parent.parent.mutedValue ? parent.parent.iconOff : parent.parent.iconOn
                     color: parent.parent.mutedValue ? _theme.red : _theme.text
                     font.pixelSize: s(16)
@@ -487,7 +487,7 @@ PanelWindow {
                 width: s(20); height: s(30); color: "transparent"
                 Text {
                     anchors.centerIn: parent
-                    font.family: "Iosevka Nerd Font"
+                    font.family: "Hack Nerd Font"
                     // Correcting dropdown icon orientation base on position relative to fitsOutsideBottom
                     text: toolbar.fitsOutsideBottom ? "󰅃" : "󰅀" 
                     color: _theme.text
@@ -593,12 +593,12 @@ PanelWindow {
                         z: 1
                         Item {
                             width: parent.width / 2; height: parent.height
-                            Text { anchors.centerIn: parent; font.family: "Iosevka Nerd Font"; text: "󰄄"; color: !root.isVideoMode ? _theme.crust : _theme.text; font.pixelSize: s(16) }
+                            Text { anchors.centerIn: parent; font.family: "Hack Nerd Font"; text: "󰄄"; color: !root.isVideoMode ? _theme.crust : _theme.text; font.pixelSize: s(16) }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.isVideoMode = false }
                         }
                         Item {
                             width: parent.width / 2; height: parent.height
-                            Text { anchors.centerIn: parent; font.family: "Iosevka Nerd Font"; text: ""; color: root.isVideoMode ? _theme.crust : _theme.text; font.pixelSize: s(16) }
+                            Text { anchors.centerIn: parent; font.family: "Hack Nerd Font"; text: ""; color: root.isVideoMode ? _theme.crust : _theme.text; font.pixelSize: s(16) }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.isVideoMode = true }
                         }
                     }
@@ -823,7 +823,7 @@ PanelWindow {
                 Text {
                     text: model.qText
                     color: model.qSuccess ? _theme.text : _theme.red
-                    font.family: "JetBrains Mono"
+                    font.family: "Hack Nerd Font"
                     font.pixelSize: s(13)
                     font.weight: Font.DemiBold
                     Layout.maximumWidth: s(400)

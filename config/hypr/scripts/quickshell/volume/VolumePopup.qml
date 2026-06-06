@@ -411,7 +411,7 @@ Item {
                                 // 1. Base Text (Visible when empty)
                                 Text {
                                     anchors.centerIn: parent
-                                    font.family: "JetBrains Mono"
+                                    font.family: "Hack Nerd Font"
                                     font.weight: Font.Black
                                     font.pixelSize: window.s(32)
                                     color: window.activeMute ? window.red : window.text
@@ -439,7 +439,7 @@ Item {
                                     Text {
                                         x: waveClipItem.width / 2 - width / 2
                                         y: (centralCore.height / 2) - (height / 2) - (centralCore.height - waveClipItem.height)
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.Black
                                         font.pixelSize: window.s(32)
                                         color: window.crust
@@ -471,13 +471,13 @@ Item {
                                 spacing: window.s(2)
                                 Text {
                                     Layout.fillWidth: true; elide: Text.ElideRight
-                                    font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: window.s(20)
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: window.s(20)
                                     color: window.text
                                     text: window.activeName
                                 }
                                 Text {
                                     Layout.fillWidth: true; elide: Text.ElideRight
-                                    font.family: "JetBrains Mono"; font.pixelSize: window.s(13)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: window.s(13)
                                     color: window.subtext0
                                     text: window.activeTab === "apps" ? "Master Output Volume" : window.activeDesc
                                 }
@@ -603,13 +603,13 @@ Item {
                                     anchors.centerIn: parent
                                     spacing: window.s(8)
                                     Text {
-                                        font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18)
+                                        font.family: "Hack Nerd Font"; font.pixelSize: window.s(18)
                                         color: window.activeTab === tabId ? window.crust : (tabMa.containsMouse ? window.text : window.subtext0)
                                         text: icon
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                     }
                                     Text {
-                                        font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: window.s(13)
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: window.s(13)
                                         color: window.activeTab === tabId ? window.crust : (tabMa.containsMouse ? window.text : window.subtext0)
                                         text: label
                                         Behavior on color { ColorAnimation { duration: 200 } }
@@ -665,8 +665,8 @@ Item {
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: window.s(10)
-                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(32); color: window.surface2; text: "󰖁" }
-                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "JetBrains Mono"; font.pixelSize: window.s(14); color: window.overlay0; text: "No active streams" }
+                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: window.s(32); color: window.surface2; text: "󰖁" }
+                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: window.s(14); color: window.overlay0; text: "No active streams" }
                             }
                         }
 
@@ -732,7 +732,7 @@ Item {
                                     spacing: window.s(12)
 
                                     Text {
-                                        font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(22)
+                                        font.family: "Hack Nerd Font"; font.pixelSize: window.s(22)
                                         color: isActiveNode ? window.crust : window.text
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                         text: {
@@ -748,13 +748,13 @@ Item {
                                         spacing: window.s(2)
                                         Text {
                                             Layout.fillWidth: true; elide: Text.ElideRight
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(14)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(14)
                                             color: isActiveNode ? window.crust : window.text
                                             text: model.description
                                         }
                                         Text {
                                             Layout.fillWidth: true; elide: Text.ElideRight
-                                            font.family: "JetBrains Mono"; font.pixelSize: window.s(11)
+                                            font.family: "Hack Nerd Font"; font.pixelSize: window.s(11)
                                             color: isActiveNode ? Qt.darker(window.crust, 1.5) : window.subtext0
                                             text: isActiveNode ? "Active Default" : model.name
                                         }
@@ -777,7 +777,7 @@ Item {
 
                                         Text {
                                             anchors.centerIn: parent
-                                            font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18)
+                                            font.family: "Hack Nerd Font"; font.pixelSize: window.s(18)
                                             color: model.mute ? window.overlay0 : window.subtext0
                                             text: model.mute || model.volume === 0 ? "󰖁" : (model.volume > 50 ? "󰕾" : "󰖀")
                                             Behavior on color { ColorAnimation { duration: 200 } }
@@ -868,7 +868,7 @@ Item {
 
                                     Text {
                                         Layout.preferredWidth: window.s(35)
-                                        font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(12)
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(12)
                                         color: window.subtext0
                                         text: model.volume + "%"
                                         horizontalAlignment: Text.AlignRight

@@ -243,7 +243,7 @@ Item {
 
                     Text {
                         text: ""
-                        font.family: "Iosevka Nerd Font"
+                        font.family: "Hack Nerd Font"
                         font.pixelSize: window.s(18)
                         color: searchInput.activeFocus ? window.mauve : window.subtext0
                         Behavior on color { ColorAnimation { duration: 150 } }
@@ -255,7 +255,7 @@ Item {
                         Layout.fillHeight: true
                         background: Item {} 
                         color: window.text
-                        font.family: "JetBrains Mono"
+                        font.family: "Hack Nerd Font"
                         font.pixelSize: window.s(16)
                         
                         placeholderText: "Search..."
@@ -501,7 +501,7 @@ Item {
                             Text {
                                 Layout.fillWidth: true
                                 text: model.name
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.pixelSize: window.s(14)
                                 font.weight: index === appList.currentIndex ? Font.Bold : Font.Medium
                                 color: index === appList.currentIndex ? window.crust : window.text

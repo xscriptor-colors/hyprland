@@ -356,7 +356,7 @@ Item {
 
                             Text {
                                 text: "Notifications"
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.weight: Font.Black
                                 font.pixelSize: window.s(18)
                                 color: window.text
@@ -387,7 +387,7 @@ Item {
                                     Text {
                                         id: dndText
                                         text: window.dndEnabled ? "Silent" : "Mute"
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.Bold
                                         font.pixelSize: window.s(13)
                                         color: window.dndEnabled ? window.red : window.text
@@ -397,7 +397,7 @@ Item {
                                     }
 
                                     Text {
-                                        font.family: "Iosevka Nerd Font"
+                                        font.family: "Hack Nerd Font"
                                         font.pixelSize: window.s(18)
                                         color: window.dndEnabled ? window.red : (dndMa.containsMouse ? window.text : window.overlay0)
                                         text: window.dndEnabled ? "󰂛" : "󰂚"
@@ -423,7 +423,7 @@ Item {
                             Layout.fillHeight: true
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.weight: Font.Medium
                             font.pixelSize: window.s(14)
                             color: window.overlay0
@@ -504,7 +504,7 @@ Item {
                                                 spacing: window.s(8)
                                                 
                                                 Text {
-                                                    font.family: "Iosevka Nerd Font"
+                                                    font.family: "Hack Nerd Font"
                                                     font.pixelSize: window.s(14)
                                                     color: window.mauve
                                                     text: window.isCollapsed(section) ? "󰅂" : "󰅀"
@@ -513,7 +513,7 @@ Item {
 
                                                 Text {
                                                     text: section.toUpperCase()
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "Hack Nerd Font"
                                                     font.weight: Font.Black
                                                     font.pixelSize: window.s(11)
                                                     color: window.text
@@ -533,7 +533,7 @@ Item {
 
                                             Text {
                                                 anchors.centerIn: parent
-                                                font.family: "Iosevka Nerd Font"
+                                                font.family: "Hack Nerd Font"
                                                 font.pixelSize: window.s(14)
                                                 color: groupClearMa.containsMouse ? window.red : window.overlay0
                                                 text: "󰅖"
@@ -656,7 +656,7 @@ Item {
 
                                             Text {
                                                 text: model.summary || "Notification"
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Bold
                                                 font.pixelSize: window.s(13)
                                                 color: window.text
@@ -675,7 +675,7 @@ Item {
 
                                                 Text {
                                                     anchors.centerIn: parent
-                                                    font.family: "Iosevka Nerd Font"
+                                                    font.family: "Hack Nerd Font"
                                                     font.pixelSize: window.s(12)
                                                     color: itemClearMa.containsMouse ? window.red : window.overlay0
                                                     text: "󰅖"
@@ -692,7 +692,7 @@ Item {
 
                                         Text {
                                             text: model.body || ""
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.weight: Font.Medium
                                             font.pixelSize: window.s(11)
                                             color: window.subtext0
@@ -735,7 +735,7 @@ Item {
                                                     Text {
                                                         anchors.centerIn: parent
                                                         text: modelData.text || "Action"
-                                                        font.family: "JetBrains Mono"
+                                                        font.family: "Hack Nerd Font"
                                                         font.weight: Font.Bold
                                                         font.pixelSize: window.s(11)
                                                         color: isPrimary ? window.crust : window.text
@@ -817,13 +817,13 @@ Item {
                                 anchors.centerIn: parent
                                 Text { 
                                     text: window.upHours.toString().padStart(2, '0')
-                                    font.pixelSize: window.s(18); font.family: "JetBrains Mono"; font.weight: Font.Black
+                                    font.pixelSize: window.s(18); font.family: "Hack Nerd Font"; font.weight: Font.Black
                                     color: window.ambientPrimary
                                     Behavior on color { ColorAnimation { duration: 1000 } }
                                     anchors.horizontalCenter: parent.horizontalCenter 
                                 }
                                 Text { 
-                                    text: "HR"; font.pixelSize: window.s(8); font.family: "JetBrains Mono"; font.weight: Font.Bold
+                                    text: "HR"; font.pixelSize: window.s(8); font.family: "Hack Nerd Font"; font.weight: Font.Bold
                                     color: window.subtext0; anchors.horizontalCenter: parent.horizontalCenter 
                                 }
                             }
@@ -833,7 +833,7 @@ Item {
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             text: ":"
-                            font.pixelSize: window.s(22); font.family: "JetBrains Mono"; font.weight: Font.Black
+                            font.pixelSize: window.s(22); font.family: "Hack Nerd Font"; font.weight: Font.Black
                             color: window.ambientPrimary
                             Behavior on color { ColorAnimation { duration: 1000 } }
                             
@@ -856,13 +856,13 @@ Item {
                                 anchors.centerIn: parent
                                 Text { 
                                     text: window.upMins.toString().padStart(2, '0')
-                                    font.pixelSize: window.s(18); font.family: "JetBrains Mono"; font.weight: Font.Black
+                                    font.pixelSize: window.s(18); font.family: "Hack Nerd Font"; font.weight: Font.Black
                                     color: window.ambientSecondary
                                     Behavior on color { ColorAnimation { duration: 1000 } }
                                     anchors.horizontalCenter: parent.horizontalCenter 
                                 }
                                 Text { 
-                                    text: "MIN"; font.pixelSize: window.s(8); font.family: "JetBrains Mono"; font.weight: Font.Bold
+                                    text: "MIN"; font.pixelSize: window.s(8); font.family: "Hack Nerd Font"; font.weight: Font.Bold
                                     color: window.subtext0; anchors.horizontalCenter: parent.horizontalCenter 
                                 }
                             }
@@ -896,7 +896,7 @@ Item {
                             Text {
                                 id: usernameText
                                 text: window.currentUserName
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.weight: Font.Bold
                                 font.pixelSize: window.s(14)
                                 color: window.text
@@ -906,7 +906,7 @@ Item {
                             }
 
                             Text {
-                                font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18)
+                                font.family: "Hack Nerd Font"; font.pixelSize: window.s(18)
                                 color: logoutMa.containsMouse ? window.red : window.overlay0
                                 text: "󰍃"
                                 anchors.verticalCenter: parent.verticalCenter
@@ -1123,7 +1123,7 @@ Item {
                                         spacing: window.s(8)
                                         
                                         Text {
-                                            font.family: "Iosevka Nerd Font"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: window.s(28)
                                             color: window.batColorStart
                                             text: window.isCharging ? "󰂄" : (window.batCapacity > 20 ? "󰁹" : "󰂃")
@@ -1131,7 +1131,7 @@ Item {
                                         }
                                         
                                         Text {
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.weight: Font.Black
                                             font.pixelSize: window.s(54)
                                             color: window.text
@@ -1141,7 +1141,7 @@ Item {
 
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.Bold
                                         font.pixelSize: window.s(13)
                                         
@@ -1201,7 +1201,7 @@ Item {
                                             Text {
                                                 anchors.centerIn: parent
                                                 text: window.sysBrightness > 66 ? "󰃠" : (window.sysBrightness > 33 ? "󰃟" : "󰃞")
-                                                font.family: "Iosevka Nerd Font"
+                                                font.family: "Hack Nerd Font"
                                                 font.pixelSize: window.s(22)
                                                 color: window.ambientPrimary
                                                 Behavior on color { ColorAnimation { duration: 200 } }
@@ -1283,7 +1283,7 @@ Item {
                                             Text {
                                                 anchors.centerIn: parent
                                                 text: window.sysMuted || window.sysVolume === 0 ? "󰖁" : (window.sysVolume > 50 ? "󰕾" : "󰖀")
-                                                font.family: "Iosevka Nerd Font"
+                                                font.family: "Hack Nerd Font"
                                                 font.pixelSize: window.s(22)
                                                 color: window.sysMuted ? window.overlay0 : window.profileStart
                                                 Behavior on color { ColorAnimation { duration: 200 } }
@@ -1473,7 +1473,7 @@ Item {
 
                                         Text { 
                                             anchors.centerIn: parent
-                                            font.family: "Iosevka Nerd Font"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: window.s(24)
                                             color: actionMa.containsMouse ? window.text : window.subtext0
                                             text: icon
@@ -1488,7 +1488,7 @@ Item {
                                             Text { 
                                                 anchors.horizontalCenter: parent.horizontalCenter
                                                 y: (actionCapsule.height / 2) - (height / 2) - (actionCapsule.height - parent.height)
-                                                font.family: "Iosevka Nerd Font"
+                                                font.family: "Hack Nerd Font"
                                                 font.pixelSize: window.s(24)
                                                 color: window.crust
                                                 text: icon 
@@ -1589,13 +1589,13 @@ Item {
                                                 anchors.centerIn: parent
                                                 spacing: window.s(8)
                                                 Text {
-                                                    font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18)
+                                                    font.family: "Hack Nerd Font"; font.pixelSize: window.s(18)
                                                     color: window.powerProfile === name ? window.crust : (profileMa.containsMouse ? window.text : window.subtext0)
                                                     text: icon
                                                     Behavior on color { ColorAnimation { duration: 200 } }
                                                 }
                                                 Text {
-                                                    font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: window.s(13)
+                                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: window.s(13)
                                                     color: window.powerProfile === name ? window.crust : (profileMa.containsMouse ? window.text : window.subtext0)
                                                     text: label
                                                     Behavior on color { ColorAnimation { duration: 200 } }

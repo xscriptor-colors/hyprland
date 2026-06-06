@@ -652,7 +652,7 @@ Item {
                                             id: titleTextMain
                                             text: root.musicData.title
                                             color: root.dynamicTextColor
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: root.s(20)
                                             font.bold: true
                                             Behavior on color { ColorAnimation { duration: 600 } }
@@ -672,7 +672,7 @@ Item {
                                             id: titleTextClone
                                             text: root.musicData.title
                                             color: root.dynamicTextColor
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: root.s(20)
                                             font.bold: true
                                             visible: titleTextMain.implicitWidth > titleClipRect.width
@@ -704,7 +704,7 @@ Item {
                             Text {
                                 text: root.musicData.artist ? "BY " + root.musicData.artist : ""
                                 color: root.subtext0 // Better matugen match
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.pixelSize: root.s(14)
                                 font.bold: true
                                 elide: Text.ElideRight
@@ -723,14 +723,14 @@ Item {
                                         id: pillContent
                                         anchors.centerIn: parent
                                         spacing: root.s(6)
-                                        Text { text: root.musicData.deviceIcon || "󰓃"; color: root.mauve; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(14) }
-                                        Text { text: root.musicData.deviceName || "Speaker"; color: root.overlay2; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); font.bold: true }
+                                        Text { text: root.musicData.deviceIcon || "󰓃"; color: root.mauve; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14) }
+                                        Text { text: root.musicData.deviceName || "Speaker"; color: root.overlay2; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); font.bold: true }
                                     }
                                 }
                                 Text {
                                     text: "VIA " + (root.musicData.source || "Offline")
                                     color: root.overlay2 // Better matugen match
-                                    font.family: "JetBrains Mono"
+                                    font.family: "Hack Nerd Font"
                                     font.pixelSize: root.s(12)
                                     font.bold: true
                                     font.italic: true
@@ -861,9 +861,9 @@ Item {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: root.musicData.positionStr || "00:00"; color: root.overlay2; font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(13) }
+                                Text { text: root.musicData.positionStr || "00:00"; color: root.overlay2; font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(13) }
                                 Item { Layout.fillWidth: true }
-                                Text { text: root.musicData.lengthStr || "00:00"; color: root.overlay2; font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(13) }
+                                Text { text: root.musicData.lengthStr || "00:00"; color: root.overlay2; font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(13) }
                             }
                         }
 
@@ -878,7 +878,7 @@ Item {
                                 width: root.s(30); height: root.s(30)
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.execCmd("playerctl previous")
-                                Text { anchors.centerIn: parent; text: ""; color: parent.pressed ? root.text : root.overlay2; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(24) }
+                                Text { anchors.centerIn: parent; text: ""; color: parent.pressed ? root.text : root.overlay2; font.family: "Hack Nerd Font"; font.pixelSize: root.s(24) }
                             }
                             MouseArea {
                                 id: playPauseBtn
@@ -931,7 +931,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: root.musicData.status === "Playing" ? "" : ""
                                     color: parent.pressed ? root.pink : root.mauve
-                                    font.family: "Iosevka Nerd Font"
+                                    font.family: "Hack Nerd Font"
                                     font.pixelSize: root.s(42) 
                                     scale: parent.pressed ? 0.8 : 1.0
                                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -942,7 +942,7 @@ Item {
                                 width: root.s(30); height: root.s(30)
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: root.execCmd("playerctl next")
-                                Text { anchors.centerIn: parent; text: ""; color: parent.pressed ? root.text : root.overlay2; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(24) }
+                                Text { anchors.centerIn: parent; text: ""; color: parent.pressed ? root.text : root.overlay2; font.family: "Hack Nerd Font"; font.pixelSize: root.s(24) }
                             }
                         }
                     }
@@ -976,7 +976,7 @@ Item {
                         opacity: root.introEqHeader
                         transform: Translate { y: root.s(15) * (1 - root.introEqHeader) }
 
-                        Text { text: "Equalizer"; color: root.mauve; font.family: "JetBrains Mono"; font.pixelSize: root.s(16); font.bold: true; Layout.fillWidth: true }
+                        Text { text: "Equalizer"; color: root.mauve; font.family: "Hack Nerd Font"; font.pixelSize: root.s(16); font.bold: true; Layout.fillWidth: true }
                         
                         // Redesigned Apply Button
                         Rectangle {
@@ -1000,7 +1000,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: root.eqData.pending ? "Apply" : "Saved"
                                 color: root.eqData.pending ? root.base : root.subtext0
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.pixelSize: root.s(12)
                                 font.bold: true
                                 Behavior on color { ColorAnimation { duration: 300 } }
@@ -1023,7 +1023,7 @@ Item {
                                 }
                             }
                         }
-                        Text { text: root.eqData.preset || "Flat"; color: root.subtext0; font.family: "JetBrains Mono"; font.pixelSize: root.s(14); font.bold: true; Layout.leftMargin: root.s(15) }
+                        Text { text: root.eqData.preset || "Flat"; color: root.subtext0; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14); font.bold: true; Layout.leftMargin: root.s(15) }
                     }
 
                     // Eq Sliders Container with Canvas Lightning Overlay
@@ -1267,7 +1267,7 @@ Item {
                                         Text {
                                             text: modelData.lbl
                                             color: root.overlay1
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: root.s(10)
                                             font.bold: true
                                             Layout.alignment: Qt.AlignHCenter
@@ -1455,7 +1455,7 @@ Item {
             anchors.centerIn: parent
             text: parent.name
             color: parent.isActivePreset ? root.base : (parent.isHovered ? root.text : root.subtext0)
-            font.family: "JetBrains Mono"
+            font.family: "Hack Nerd Font"
             font.pixelSize: root.s(12)
             font.bold: true
             Behavior on color { ColorAnimation { duration: 200 } }
