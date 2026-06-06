@@ -568,7 +568,7 @@ Item {
                                 Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.OutQuint } }
                                 Behavior on color { ColorAnimation { duration: 150 } }
                                 
-                                Text { anchors.centerIn: parent; font.family: "Iosevka Nerd Font"; text: "󰁍"; color: window.text; font.pixelSize: window.s(18) }
+                                Text { anchors.centerIn: parent; font.family: "Hack Nerd Font"; text: "󰁍"; color: window.text; font.pixelSize: window.s(18) }
                                 MouseArea { 
                                     id: backMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
                                     onClicked: { 
@@ -594,7 +594,7 @@ Item {
                                 Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.OutQuint } }
                                 Behavior on color { ColorAnimation { duration: 150 } }
                                 
-                                Text { anchors.centerIn: parent; font.family: "Iosevka Nerd Font"; text: "󰃭"; color: window.text; font.pixelSize: window.s(18) }
+                                Text { anchors.centerIn: parent; font.family: "Hack Nerd Font"; text: "󰃭"; color: window.text; font.pixelSize: window.s(18) }
                                 MouseArea { 
                                     id: weekMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; 
                                     onClicked: window.isWeekView = true 
@@ -609,7 +609,7 @@ Item {
                             radius: window.s(26)
                             color: prevWeekMa.containsMouse ? window.surface0 : "transparent"
                             Behavior on color { ColorAnimation { duration: 150 } }
-                            Text { anchors.centerIn: parent; font.family: "Iosevka Nerd Font"; text: "󰅁"; color: window.text; font.pixelSize: window.s(18) }
+                            Text { anchors.centerIn: parent; font.family: "Hack Nerd Font"; text: "󰅁"; color: window.text; font.pixelSize: window.s(18) }
                             MouseArea { id: prevWeekMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: changeDay(window.isWeekView ? -7 : -1) }
                         }
                     }                   
@@ -641,7 +641,7 @@ Item {
                         Text {
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.weight: Font.DemiBold
                             font.pixelSize: window.s(18)
                             color: window.text
@@ -658,7 +658,7 @@ Item {
                         radius: window.s(26)
                         color: nextWeekMa.containsMouse ? window.surface0 : "transparent"
                         Behavior on color { ColorAnimation { duration: 150 } }
-                        Text { anchors.centerIn: parent; font.family: "Iosevka Nerd Font"; text: "󰅂"; color: window.text; font.pixelSize: window.s(18) }
+                        Text { anchors.centerIn: parent; font.family: "Hack Nerd Font"; text: "󰅂"; color: window.text; font.pixelSize: window.s(18) }
                         MouseArea { id: nextWeekMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: changeDay(window.isWeekView ? 7 : 1) }
                     }
                 }
@@ -712,7 +712,7 @@ Item {
                                     spacing: window.s(2)
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.DemiBold
                                         font.pixelSize: window.s(14)
                                         color: window.subtext0
@@ -720,7 +720,7 @@ Item {
                                     }
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.Bold
                                         font.pixelSize: window.s(20)
                                         color: window.text
@@ -728,7 +728,7 @@ Item {
                                     }
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.Medium
                                         font.pixelSize: window.s(12)
                                         color: window.overlay0
@@ -753,7 +753,7 @@ Item {
                                     spacing: 0
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.Black
                                         font.pixelSize: window.s(36)
                                         color: window.text
@@ -783,7 +783,7 @@ Item {
                                         visible: !(window.totalSeconds === 0 && window.yesterdaySeconds === 0) && window.totalSeconds !== window.yesterdaySeconds
                                         
                                         Text {
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.weight: Font.Black
                                             font.pixelSize: window.s(28)
                                             color: {
@@ -794,7 +794,7 @@ Item {
                                         }
                                         
                                         Text {
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.weight: Font.Bold
                                             font.pixelSize: window.s(28)
                                             color: {
@@ -811,7 +811,7 @@ Item {
                                     // No Data / Same fallback
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.DemiBold
                                         font.pixelSize: window.s(15)
                                         color: window.overlay0
@@ -904,7 +904,7 @@ Item {
                                                 id: dayLbl
                                                 anchors.bottom: parent.bottom
                                                 anchors.horizontalCenter: parent.horizontalCenter
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.DemiBold
                                                 font.pixelSize: window.s(12)
                                                 color: model.isTarget ? window.text : window.overlay0
@@ -936,7 +936,7 @@ Item {
 
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.DemiBold
                                         font.pixelSize: window.s(14)
                                         color: window.text
@@ -1085,7 +1085,7 @@ Item {
 
                                                 Text {
                                                     Layout.fillWidth: true
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "Hack Nerd Font"
                                                     font.weight: Font.DemiBold
                                                     font.pixelSize: window.s(15)
                                                     color: window.text
@@ -1093,7 +1093,7 @@ Item {
                                                     elide: Text.ElideRight
                                                 }
                                                 Text {
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "Hack Nerd Font"
                                                     font.weight: Font.Medium
                                                     font.pixelSize: window.s(14)
                                                     color: window.subtext0
@@ -1139,7 +1139,7 @@ Item {
 
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"
+                                        font.family: "Hack Nerd Font"
                                         font.weight: Font.DemiBold
                                         font.pixelSize: window.s(14)
                                         color: window.text
@@ -1185,15 +1185,15 @@ Item {
                                     // X-Axis Labels 24h
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "00:00" }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "00:00" }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "06:00" }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "06:00" }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "12:00" }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "12:00" }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "18:00" }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "18:00" }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "23:00" }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "23:00" }
                                     }
                                 }
                             }
@@ -1258,7 +1258,7 @@ Item {
 
                                                 Text {
                                                     text: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][dayIndex]
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "Hack Nerd Font"
                                                     font.weight: Font.Normal
                                                     font.pixelSize: window.s(12)
                                                     color: window.subtext0
@@ -1321,15 +1321,15 @@ Item {
                                         // Spacer matches the day-name label width + spacing exactly
                                         Item { Layout.preferredWidth: window.s(75 + 8) }
 
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "00:00"; Layout.alignment: Qt.AlignLeft }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "00:00"; Layout.alignment: Qt.AlignLeft }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "06:00"; Layout.alignment: Qt.AlignHCenter }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "06:00"; Layout.alignment: Qt.AlignHCenter }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "12:00"; Layout.alignment: Qt.AlignHCenter }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "12:00"; Layout.alignment: Qt.AlignHCenter }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "18:00"; Layout.alignment: Qt.AlignHCenter }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "18:00"; Layout.alignment: Qt.AlignHCenter }
                                         Item { Layout.fillWidth: true }
-                                        Text { font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "23:00"; Layout.alignment: Qt.AlignRight }
+                                        Text { font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: window.s(11); color: window.overlay0; text: "23:00"; Layout.alignment: Qt.AlignRight }
                                     }
                                 }
 
@@ -1351,7 +1351,7 @@ Item {
                                             spacing: window.s(4)
                                             Text {
                                                 Layout.alignment: Qt.AlignHCenter
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Medium
                                                 font.pixelSize: window.s(12)
                                                 color: window.subtext0
@@ -1359,7 +1359,7 @@ Item {
                                             }
                                             Text {
                                                 Layout.alignment: Qt.AlignHCenter
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Bold
                                                 font.pixelSize: window.s(18)
                                                 color: window.text
@@ -1380,7 +1380,7 @@ Item {
                                             spacing: window.s(4)
                                             Text {
                                                 Layout.alignment: Qt.AlignHCenter
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Medium
                                                 font.pixelSize: window.s(12)
                                                 color: window.subtext0
@@ -1388,7 +1388,7 @@ Item {
                                             }
                                             Text {
                                                 Layout.alignment: Qt.AlignHCenter
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Bold
                                                 font.pixelSize: window.s(14)
                                                 color: window.text
@@ -1487,7 +1487,7 @@ Item {
 
                                             Text {
                                                 Layout.fillWidth: true
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.DemiBold
                                                 font.pixelSize: window.s(15)
                                                 color: window.text
@@ -1495,7 +1495,7 @@ Item {
                                                 elide: Text.ElideRight
                                             }
                                             Text {
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Medium
                                                 font.pixelSize: window.s(14)
                                                 color: window.subtext0

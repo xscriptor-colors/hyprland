@@ -1137,7 +1137,7 @@ Item {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "󰑊"
-                                    font.family: "Iosevka Nerd Font"
+                                    font.family: "Hack Nerd Font"
                                     font.pixelSize: root.s(18)
                                     color: box0.isActive ? root.base : root.peach
                                     Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
@@ -1214,7 +1214,7 @@ Item {
                                 Layout.alignment: Qt.AlignVCenter
                                 Text {
                                     anchors.centerIn: parent; text: "󰋖"
-                                    font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                     color: box1.isActive ? root.base : root.blue
                                     Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                 }
@@ -1279,7 +1279,7 @@ Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
                                     Text {
                                         anchors.centerIn: parent; text: "󰁦"
-                                        font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: box2.isActive ? root.base : root.sapphire
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -1311,7 +1311,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                         Text {
                                             anchors.centerIn: parent; text: "-"
-                                            font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: root.s(15)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: root.s(15)
                                             color: box2.isActive ? root.base : root.sapphire
                                             Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                         }
@@ -1319,7 +1319,7 @@ Item {
                                     }
                                     Text { 
                                         text: Config.uiScale.toFixed(1) + "x"
-                                        font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(13)
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13)
                                         color: box2.isActive ? root.base : root.sapphire
                                         Layout.minimumWidth: root.s(36); horizontalAlignment: Text.AlignHCenter
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
@@ -1334,7 +1334,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                         Text {
                                             anchors.centerIn: parent; text: "+"
-                                            font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: root.s(15)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: root.s(15)
                                             color: box2.isActive ? root.base : root.sapphire
                                             Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                         }
@@ -1370,7 +1370,7 @@ Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignTop; Layout.topMargin: root.s(2)
                                     Text {
                                         anchors.top: parent.top; anchors.horizontalCenter: parent.horizontalCenter
-                                        text: "󰌌"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        text: "󰌌"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: box3.isActive ? root.base : root.green
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -1402,12 +1402,12 @@ Item {
                                                 RowLayout {
                                                     id: langChipLayout; anchors.centerIn: parent; spacing: root.s(6)
                                                     Text {
-                                                        text: modelData; font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: root.s(11)
+                                                        text: modelData; font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: root.s(11)
                                                         color: chipMa.containsMouse ? root.red : (box3.isActive ? root.base : root.text)
                                                         Behavior on color { ColorAnimation { duration: 150 } }
                                                     }
                                                     Text {
-                                                        text: "✖"; font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                        text: "✖"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                         color: chipMa.containsMouse ? root.red : (box3.isActive ? Qt.alpha(root.base, 0.6) : root.subtext0)
                                                         Behavior on color { ColorAnimation { duration: 150 } }
                                                     }
@@ -1439,7 +1439,7 @@ Item {
                                     id: langInput
                                     anchors.fill: parent; anchors.margins: root.s(9)
                                     verticalAlignment: TextInput.AlignVCenter
-                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                     color: box3.isActive ? root.base : root.text; clip: true; selectByMouse: true
                                     Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     Keys.onPressed: (event) => {
@@ -1496,7 +1496,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 150 } }
                                         RowLayout {
                                             anchors.fill: parent; anchors.leftMargin: root.s(8); anchors.rightMargin: root.s(8); spacing: root.s(8)
-                                            Text { text: model.code; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: box3.isActive ? root.base : root.text; Behavior on color { ColorAnimation { duration: 150 } } }
+                                            Text { text: model.code; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: box3.isActive ? root.base : root.text; Behavior on color { ColorAnimation { duration: 150 } } }
                                             Text { text: model.name; font.family: "Inter"; font.pixelSize: root.s(11); color: box3.isActive ? Qt.alpha(root.base, 0.7) : Qt.alpha(root.subtext0, 0.7); elide: Text.ElideRight; Layout.fillWidth: true; Behavior on color { ColorAnimation { duration: 150 } } }
                                         }
                                         MouseArea {
@@ -1538,7 +1538,7 @@ Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignTop; Layout.topMargin: root.s(2)
                                     Text {
                                         anchors.top: parent.top; anchors.horizontalCenter: parent.horizontalCenter
-                                        text: "󰯍"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        text: "󰯍"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: box4.isActive ? root.base : root.teal
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -1569,7 +1569,7 @@ Item {
                                             anchors.fill: parent; anchors.margins: root.s(9)
                                             Text {
                                                 text: root.getKbToggleLabel(Config.kbOptions)
-                                                font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                 color: box4.isActive ? root.base : root.text; Layout.fillWidth: true
                                                 Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                             }
@@ -1618,7 +1618,7 @@ Item {
                                                 RowLayout {
                                                     anchors.fill: parent; anchors.leftMargin: root.s(8); anchors.rightMargin: root.s(8)
                                                     Text {
-                                                        text: modelData.label; font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                        text: modelData.label; font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                         color: Config.kbOptions === modelData.val
                                                             ? (box4.isActive ? root.base : root.teal)
                                                             : (box4.isActive ? Qt.alpha(root.base, 0.8) : root.text)
@@ -1659,7 +1659,7 @@ Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignTop; Layout.topMargin: root.s(2)
                                     Text {
                                         anchors.top: parent.top; anchors.horizontalCenter: parent.horizontalCenter
-                                        text: "󰋩"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        text: "󰋩"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: box5.isActive ? root.base : root.mauve
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -1691,7 +1691,7 @@ Item {
                                             anchors.fill: parent; anchors.margins: root.s(9)
                                             verticalAlignment: TextInput.AlignVCenter
                                             text: Config.wallpaperDir
-                                            font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                             color: box5.isActive ? root.base : root.text; clip: true; selectByMouse: true
                                             Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                             Keys.onPressed: (event) => {
@@ -1749,7 +1749,7 @@ Item {
                                                 Behavior on color { ColorAnimation { duration: 150 } }
                                                 Text {
                                                     anchors.verticalCenter: parent.verticalCenter; x: root.s(8)
-                                                    text: model.path; font.family: "JetBrains Mono"; font.pixelSize: root.s(10)
+                                                    text: model.path; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10)
                                                     color: box5.isActive ? root.base : root.text
                                                     elide: Text.ElideMiddle; width: parent.width - root.s(16)
                                                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -1786,7 +1786,7 @@ Item {
                                 Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
                                     Text {
-                                        anchors.centerIn: parent; text: "󰽿"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        anchors.centerIn: parent; text: "󰽿"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: box6.isActive ? root.base : root.red
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -1814,7 +1814,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                         Text {
                                             anchors.centerIn: parent; text: "-"
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
                                             color: box6.isActive ? root.base : root.red
                                             Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                         }
@@ -1822,7 +1822,7 @@ Item {
                                     }
                                     Text { 
                                         text: Config.workspaceCount.toString()
-                                        font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(14)
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(14)
                                         color: box6.isActive ? root.base : root.red
                                         Layout.minimumWidth: root.s(36); horizontalAlignment: Text.AlignHCenter
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
@@ -1835,7 +1835,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                         Text {
                                             anchors.centerIn: parent; text: "+"
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
                                             color: box6.isActive ? root.base : root.red
                                             Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                         }
@@ -1934,7 +1934,7 @@ Item {
                                     color: wBox0.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.blue, 0.2)
                                     border.color: wBox0.isActive ? Qt.alpha(root.base, 0.5) : root.blue; border.width: 1
                                     Behavior on color { ColorAnimation { duration: 220 } }
-                                    Text { anchors.centerIn: parent; text: "1"; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: wBox0.isActive ? root.base : root.blue; Behavior on color { ColorAnimation { duration: 220 } } }
+                                    Text { anchors.centerIn: parent; text: "1"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: wBox0.isActive ? root.base : root.blue; Behavior on color { ColorAnimation { duration: 220 } } }
                                 }
                                 Text {
                                     text: "Get an API Key"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
@@ -1964,7 +1964,7 @@ Item {
                                             Behavior on color { ColorAnimation { duration: 220 } }
                                             Behavior on border.color { ColorAnimation { duration: 220 } }
                                             RowLayout { anchors.fill: parent; anchors.margins: root.s(7); spacing: root.s(7)
-                                                Text { text: "󰄾"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(12); color: wBox0.isActive ? Qt.alpha(root.base, 0.6) : root.overlay0; Behavior on color { ColorAnimation { duration: 220 } } }
+                                                Text { text: "󰄾"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: wBox0.isActive ? Qt.alpha(root.base, 0.6) : root.overlay0; Behavior on color { ColorAnimation { duration: 220 } } }
                                                 Text { text: modelData; font.family: "Inter"; font.pixelSize: root.s(11); color: wBox0.isActive ? Qt.alpha(root.base, 0.85) : root.subtext1; Layout.fillWidth: true; Behavior on color { ColorAnimation { duration: 220 } } }
                                             }
                                         }
@@ -1978,7 +1978,7 @@ Item {
                                     color: wBox0.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.peach, 0.2)
                                     border.color: wBox0.isActive ? Qt.alpha(root.base, 0.5) : root.peach; border.width: 1
                                     Behavior on color { ColorAnimation { duration: 220 } }
-                                    Text { anchors.centerIn: parent; text: "2"; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: wBox0.isActive ? root.base : root.peach; Behavior on color { ColorAnimation { duration: 220 } } }
+                                    Text { anchors.centerIn: parent; text: "2"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: wBox0.isActive ? root.base : root.peach; Behavior on color { ColorAnimation { duration: 220 } } }
                                 }
                                 Text {
                                     text: "Find your City ID"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
@@ -2012,7 +2012,7 @@ Item {
                                             Behavior on color { ColorAnimation { duration: 220 } }
                                             Behavior on border.color { ColorAnimation { duration: 220 } }
                                             RowLayout { anchors.fill: parent; anchors.margins: root.s(7); spacing: root.s(7)
-                                                Text { text: "󰄾"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(12); color: wBox0.isActive ? Qt.alpha(root.base, 0.6) : root.overlay0; Behavior on color { ColorAnimation { duration: 220 } } }
+                                                Text { text: "󰄾"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: wBox0.isActive ? Qt.alpha(root.base, 0.6) : root.overlay0; Behavior on color { ColorAnimation { duration: 220 } } }
                                                 Text { text: modelData; font.family: "Inter"; font.pixelSize: root.s(11); color: wBox0.isActive ? Qt.alpha(root.base, 0.85) : root.subtext1; Layout.fillWidth: true; Behavior on color { ColorAnimation { duration: 220 } } }
                                             }
                                         }
@@ -2051,7 +2051,7 @@ Item {
                                 Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
                                     Text {
-                                        anchors.centerIn: parent; text: "󰌆"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        anchors.centerIn: parent; text: "󰌆"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: wBox1.isActive ? root.base : root.blue
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -2083,7 +2083,7 @@ Item {
                                 RowLayout {
                                     anchors.fill: parent; anchors.margins: root.s(10); spacing: root.s(10)
                                     Text {
-                                        text: "󰌆"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(16)
+                                        text: "󰌆"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(16)
                                         color: wBox1.isActive ? Qt.alpha(root.base, 0.6) : root.subtext0
                                         Behavior on color { ColorAnimation { duration: 220 } }
                                     }
@@ -2091,7 +2091,7 @@ Item {
                                         id: apiKeyInput
                                         Layout.fillWidth: true; Layout.fillHeight: true
                                         verticalAlignment: TextInput.AlignVCenter
-                                        font.family: "JetBrains Mono"; font.pixelSize: root.s(12)
+                                        font.family: "Hack Nerd Font"; font.pixelSize: root.s(12)
                                         color: wBox1.isActive ? root.base : root.text; clip: true; selectByMouse: true
                                         echoMode: weatherTabRoot.apiKeyVisible ? TextInput.Normal : TextInput.Password
                                         passwordCharacter: "•"
@@ -2106,7 +2106,7 @@ Item {
                                     Rectangle {
                                         width: root.s(24); height: root.s(24); radius: root.s(18); color: "transparent"
                                         Text {
-                                            anchors.centerIn: parent; text: weatherTabRoot.apiKeyVisible ? "󰈈" : "󰈉"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(16)
+                                            anchors.centerIn: parent; text: weatherTabRoot.apiKeyVisible ? "󰈈" : "󰈉"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(16)
                                             color: eyeMa.containsMouse
                                                 ? (wBox1.isActive ? root.base : root.blue)
                                                 : (wBox1.isActive ? Qt.alpha(root.base, 0.6) : root.subtext0)
@@ -2143,7 +2143,7 @@ Item {
                                 Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
                                     Text {
-                                        anchors.centerIn: parent; text: "󰖐"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        anchors.centerIn: parent; text: "󰖐"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: wBox2.isActive ? root.base : root.blue
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -2176,7 +2176,7 @@ Item {
                                     id: cityIdInput
                                     anchors.fill: parent; anchors.margins: root.s(10)
                                     verticalAlignment: TextInput.AlignVCenter
-                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(12)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(12)
                                     color: wBox2.isActive ? root.base : root.text; clip: true; selectByMouse: true
                                     onTextChanged: Config.weatherCityId = text
                                     Behavior on color { ColorAnimation { duration: 220 } }
@@ -2214,7 +2214,7 @@ Item {
                                 Item {
                                     Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
                                     Text {
-                                        anchors.centerIn: parent; text: "°C"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(18)
+                                        anchors.centerIn: parent; text: "°C"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
                                         color: wBox3.isActive ? root.base : root.blue
                                         Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
                                     }
@@ -2252,7 +2252,7 @@ Item {
                                         Behavior on border.color { ColorAnimation { duration: 150 } }
                                         Text {
                                             anchors.centerIn: parent; text: modelData.label
-                                            font.family: "JetBrains Mono"; font.pixelSize: root.s(10); font.capitalization: Font.Capitalize
+                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); font.capitalization: Font.Capitalize
                                             color: isSelected
                                                 ? (parentActive ? root.base : root.base)
                                                 : (parentActive ? Qt.alpha(root.base, 0.6) : root.subtext0)
@@ -2320,7 +2320,7 @@ Item {
                             id: wsCol
                             anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: root.s(16)
                             spacing: root.s(10)
-                            Text { text: "Workspaces (SUPER + 1-9)"; font.family: "JetBrains Mono"; font.weight: Font.Medium; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignVCenter }
+                            Text { text: "Workspaces (SUPER + 1-9)"; font.family: "Hack Nerd Font"; font.weight: Font.Medium; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignVCenter }
                             Flow {
                                 Layout.fillWidth: true; spacing: root.s(7)
                                 Repeater {
@@ -2333,7 +2333,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 150 } }
                                         Text {
                                             anchors.centerIn: parent; text: parent.wsNum
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(11)
                                             color: wsMa.containsMouse ? root.base : root.peach
                                             Behavior on color { ColorAnimation { duration: 150 } }
                                         }
@@ -2400,12 +2400,12 @@ Item {
                                             visible: model.mods !== ""
                                             Text {
                                                 id: k1Text; anchors.centerIn: parent; text: model.mods
-                                                font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(9)
+                                                font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(9)
                                                 color: root.peach
                                             }
                                         }
                                         Text {
-                                            text: "+"; font.family: "JetBrains Mono"; font.pixelSize: root.s(10)
+                                            text: "+"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10)
                                             color: root.overlay0
                                             visible: model.mods !== "" && model.key !== ""; anchors.verticalCenter: parent.verticalCenter
                                         }
@@ -2416,7 +2416,7 @@ Item {
                                             visible: model.key !== ""
                                             Text {
                                                 id: k2Text; anchors.centerIn: parent; text: model.key
-                                                font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(9)
+                                                font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(9)
                                                 color: root.peach
                                             }
                                         }
@@ -2441,7 +2441,7 @@ Item {
                                         Text {
                                             anchors.centerIn: parent
                                             text: model.isEditing ? "▴" : "󰏫"
-                                            font.family: model.isEditing ? "Inter" : "Iosevka Nerd Font"
+                                            font.family: model.isEditing ? "Inter" : "Hack Nerd Font"
                                             font.pixelSize: root.s(13)
                                             color: model.isEditing
                                                 ? root.base
@@ -2482,7 +2482,7 @@ Item {
                                                 anchors.right: cmdClipRect.shouldMarquee ? undefined : parent.right
                                                 Text {
                                                     id: cmdTextMain; text: (model.dispatcher + " " + model.command).trim()
-                                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(10)
+                                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(10)
                                                     color: root.subtext0
                                                 }
                                                 Text {
@@ -2537,7 +2537,7 @@ Item {
                                         Behavior on color { ColorAnimation { duration: 150 } }
                                         Behavior on border.color { ColorAnimation { duration: 150 } }
                                         Text {
-                                            anchors.centerIn: parent; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11)
+                                            anchors.centerIn: parent; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(11)
                                             color: captureTrap.activeFocus ? root.red : root.text
                                             Behavior on color { ColorAnimation { duration: 150 } }
                                             text: captureTrap.activeFocus ? "Press Keys (Esc to confirm)..." : (model.mods ? model.mods + " + " : "") + (model.key || "[Click to Record Shortcut]")
@@ -2631,7 +2631,7 @@ Item {
                                                 RowLayout {
                                                     anchors.fill: parent; anchors.margins: root.s(7)
                                                     Text {
-                                                        text: model.type; font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                        text: model.type; font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                         color: kbRowRect.isTypeOpen ? root.peach : root.text; Layout.fillWidth: true
                                                         Behavior on color { ColorAnimation { duration: 200 } }
                                                     }
@@ -2658,7 +2658,7 @@ Item {
                                                         Behavior on color { ColorAnimation { duration: 120 } }
                                                         Text {
                                                             anchors.verticalCenter: parent.verticalCenter; x: root.s(8); text: modelData
-                                                            font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                             color: model.type === modelData ? root.peach : root.text
                                                         }
                                                         MouseArea { id: typeItemMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { dynamicKeybindsModel.setProperty(outerIndex, "type", modelData); kbRowRect.isTypeOpen = false; } }
@@ -2684,7 +2684,7 @@ Item {
                                                 RowLayout {
                                                     anchors.fill: parent; anchors.margins: root.s(7)
                                                     Text {
-                                                        text: model.dispatcher; font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                        text: model.dispatcher; font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                         color: kbRowRect.isDispOpen ? root.peach : root.text; Layout.fillWidth: true
                                                         Behavior on color { ColorAnimation { duration: 200 } }
                                                     }
@@ -2712,7 +2712,7 @@ Item {
                                                         Behavior on color { ColorAnimation { duration: 120 } }
                                                         Text {
                                                             anchors.verticalCenter: parent.verticalCenter; x: root.s(8); text: modelData
-                                                            font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                                             color: model.dispatcher === modelData ? root.peach : root.text
                                                         }
                                                         MouseArea { id: dispItemMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { dynamicKeybindsModel.setProperty(outerIndex, "dispatcher", modelData); kbRowRect.isDispOpen = false; } }
@@ -2736,7 +2736,7 @@ Item {
                                             anchors.fill: parent; anchors.margins: root.s(9)
                                             verticalAlignment: TextInput.AlignVCenter
                                             text: model.command
-                                            font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                             color: root.text; clip: true; selectByMouse: true
                                             onTextChanged: dynamicKeybindsModel.setProperty(outerIndex, "command", text)
                                             Text {
@@ -2760,12 +2760,12 @@ Item {
                                             RowLayout {
                                                 anchors.centerIn: parent; spacing: root.s(6)
                                                 Text {
-                                                    text: "󰆴"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(14)
+                                                    text: "󰆴"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14)
                                                     color: delMa.containsMouse ? root.base : root.red
                                                     Behavior on color { ColorAnimation { duration: 180 } }
                                                 }
                                                 Text {
-                                                    text: "Delete"; font.family: "JetBrains Mono"; font.pixelSize: root.s(10); font.weight: Font.Medium
+                                                    text: "Delete"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); font.weight: Font.Medium
                                                     color: delMa.containsMouse ? root.base : root.red
                                                     Behavior on color { ColorAnimation { duration: 180 } }
                                                 }
@@ -2790,12 +2790,12 @@ Item {
                                             RowLayout {
                                                 anchors.centerIn: parent; spacing: root.s(6)
                                                 Text {
-                                                    text: "󰆓"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(14)
+                                                    text: "󰆓"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14)
                                                     color: rowSaveMa.containsMouse ? root.base : root.green
                                                     Behavior on color { ColorAnimation { duration: 180 } }
                                                 }
                                                 Text {
-                                                    text: "Save"; font.family: "JetBrains Mono"; font.pixelSize: root.s(10); font.weight: Font.Medium
+                                                    text: "Save"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); font.weight: Font.Medium
                                                     color: rowSaveMa.containsMouse ? root.base : root.green
                                                     Behavior on color { ColorAnimation { duration: 180 } }
                                                 }
@@ -2910,14 +2910,14 @@ Item {
                             spacing: root.s(7)
                             Text { 
                                 text: "󰆓"
-                                font.family: "Iosevka Nerd Font"
+                                font.family: "Hack Nerd Font"
                                 font.pixelSize: root.s(15)
                                 color: headerSaveMa.containsMouse ? root.base : root.mauve
                                 Behavior on color { ColorAnimation { duration: 180 } }
                             }
                             Text { 
                                 text: "Save"
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.weight: Font.Bold
                                 font.pixelSize: root.s(12)
                                 color: headerSaveMa.containsMouse ? root.base : root.text
@@ -2967,7 +2967,7 @@ Item {
                             spacing: root.s(7)
                             Text { 
                                 text: "+"
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.weight: Font.Bold
                                 font.pixelSize: root.s(15)
                                 color: headerAddMa.containsMouse ? root.base : root.peach
@@ -2975,7 +2975,7 @@ Item {
                             }
                             Text { 
                                 text: "Add"
-                                font.family: "JetBrains Mono"
+                                font.family: "Hack Nerd Font"
                                 font.weight: Font.Bold
                                 font.pixelSize: root.s(12)
                                 color: headerAddMa.containsMouse ? root.base : root.text
@@ -3016,7 +3016,7 @@ Item {
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: root.s(11); anchors.rightMargin: root.s(11); spacing: root.s(9)
                         Text {
-                            text: "󰍉"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(15)
+                            text: "󰍉"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
                             color: root.isSearchMode ? root.sapphire : root.subtext0
                             Behavior on color { ColorAnimation { duration: 200 } }
                             MouseArea { anchors.fill: parent; anchors.margins: -root.s(6); hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.isSearchMode = true; globalSearchInput.forceActiveFocus(); } }
@@ -3024,13 +3024,13 @@ Item {
                         TextInput {
                             id: globalSearchInput
                             Layout.fillWidth: true; Layout.fillHeight: true; verticalAlignment: TextInput.AlignVCenter
-                            font.family: "JetBrains Mono"; font.pixelSize: root.s(12); color: root.text; clip: true; selectByMouse: true
+                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: root.text; clip: true; selectByMouse: true
                             Text {
                                 anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
                                 text: root.isSearchMode ? "Search settings & keybinds..." : "Search"
                                 color: Qt.alpha(root.subtext0, 0.45)
                                 visible: !globalSearchInput.text && !globalSearchInput.activeFocus
-                                font.family: "JetBrains Mono"; font.pixelSize: root.s(12)
+                                font.family: "Hack Nerd Font"; font.pixelSize: root.s(12)
                             }
                             onActiveFocusChanged: { if (activeFocus && !root.isSearchMode) root.isSearchMode = true; }
                             onTextChanged: { root.globalSearchQuery = text; if (!root.isSearchMode && text.length > 0) root.isSearchMode = true; }
@@ -3210,14 +3210,14 @@ Item {
                                         spacing: root.s(7)
                                         Text {
                                             text: root.tabIcons[index]
-                                            font.family: "Iosevka Nerd Font"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: root.s(14)
                                             color: isActive ? root.base : root.subtext0
                                             Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutExpo } }
                                         }
                                         Text {
                                             text: root.tabNames[index]
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.weight: isActive ? Font.Bold : Font.Medium
                                             font.pixelSize: root.s(12)
                                             color: isActive ? root.base : root.subtext0
@@ -3261,8 +3261,8 @@ Item {
                                 visible: root.globalSearchQuery.trim() === ""
                                 ColumnLayout {
                                     anchors.centerIn: parent; spacing: root.s(8)
-                                    Text { Layout.alignment: Qt.AlignHCenter; text: ""; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(30); color: Qt.alpha(root.subtext0, 0.25) }
-                                    Text { Layout.alignment: Qt.AlignHCenter; text: "Type to search settings & keybinds..."; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); color: Qt.alpha(root.subtext0, 0.35) }
+                                    Text { Layout.alignment: Qt.AlignHCenter; text: ""; font.family: "Hack Nerd Font"; font.pixelSize: root.s(30); color: Qt.alpha(root.subtext0, 0.25) }
+                                    Text { Layout.alignment: Qt.AlignHCenter; text: "Type to search settings & keybinds..."; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: Qt.alpha(root.subtext0, 0.35) }
                                 }
                             }
 
@@ -3303,7 +3303,7 @@ Item {
                                                 color: Qt.alpha(root[card.color], 0.15)
                                                 border.color: Qt.alpha(root[card.color], 0.3); border.width: 1
                                                 Text {
-                                                    anchors.centerIn: parent; text: card.icon; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(15)
+                                                    anchors.centerIn: parent; text: card.icon; font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
                                                     color: root[card.color]
                                                 }
                                             }
@@ -3325,7 +3325,7 @@ Item {
                                                 border.color: Qt.alpha(root[root.tabColors[card.tab]], 0.4); border.width: 1
                                                 Text {
                                                     id: tabBadgeText; anchors.centerIn: parent; text: root.tabNames[card.tab]
-                                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(9)
+                                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(9)
                                                     color: root[root.tabColors[card.tab]]
                                                 }
                                             }
@@ -3365,7 +3365,7 @@ Item {
                                 RowLayout {
                                     anchors.fill: parent; anchors.leftMargin: root.s(4); spacing: root.s(8)
                                     Rectangle { width: root.s(3); height: root.s(12); radius: root.s(8); color: root.peach }
-                                    Text { text: "Keybinds (" + root.matchingKeybindIndices.length + " match" + (root.matchingKeybindIndices.length !== 1 ? "es" : "") + ")"; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.peach }
+                                    Text { text: "Keybinds (" + root.matchingKeybindIndices.length + " match" + (root.matchingKeybindIndices.length !== 1 ? "es" : "") + ")"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.peach }
                                 }
                             }
 
@@ -3404,7 +3404,7 @@ Item {
                                                 color: Qt.alpha(root.peach, 0.12)
                                                 border.color: Qt.alpha(root.peach, 0.25); border.width: 1
                                                 Text {
-                                                    anchors.centerIn: parent; text: "󰌌"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(15)
+                                                    anchors.centerIn: parent; text: "󰌌"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
                                                     color: root.peach
                                                 }
                                             }
@@ -3419,12 +3419,12 @@ Item {
                                                         visible: kbItem && kbItem.mods !== ""
                                                         Text {
                                                             id: modsT; anchors.centerIn: parent; text: kbItem ? kbItem.mods : ""
-                                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(8)
+                                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(8)
                                                             color: root.peach
                                                         }
                                                     }
                                                     Text {
-                                                        text: "+"; font.family: "JetBrains Mono"; font.pixelSize: root.s(9)
+                                                        text: "+"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(9)
                                                         color: root.overlay0
                                                         visible: kbItem && kbItem.mods !== "" && kbItem.key !== ""; anchors.verticalCenter: parent.verticalCenter
                                                     }
@@ -3435,14 +3435,14 @@ Item {
                                                         visible: kbItem && kbItem.key !== ""
                                                         Text {
                                                             id: keyT; anchors.centerIn: parent; text: kbItem ? kbItem.key : ""
-                                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(8)
+                                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(8)
                                                             color: root.peach
                                                         }
                                                     }
                                                 }
                                                 Text {
                                                     text: kbItem ? (kbItem.dispatcher + " " + kbItem.command).trim() : ""
-                                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(9)
+                                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(9)
                                                     color: isSearchHighlighted ? root.peach : Qt.alpha(root.subtext0, 0.7)
                                                     elide: Text.ElideRight; Layout.fillWidth: true
                                                     Behavior on color { ColorAnimation { duration: 200 } }
@@ -3454,7 +3454,7 @@ Item {
                                                 border.color: Qt.alpha(root.peach, 0.35); border.width: 1
                                                 Text {
                                                     id: kbBadgeText; anchors.centerIn: parent; text: "Keybinds"
-                                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(9)
+                                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(9)
                                                     color: root.peach
                                                 }
                                             }
@@ -3652,7 +3652,7 @@ Item {
                                         Text {
                                             anchors.centerIn: parent
                                             text: model.isEditing ? "▴" : "󰏫"
-                                            font.family: model.isEditing ? "Inter" : "Iosevka Nerd Font"
+                                            font.family: model.isEditing ? "Inter" : "Hack Nerd Font"
                                             font.pixelSize: root.s(13)
                                             color: model.isEditing
                                                 ? root.base
@@ -3676,7 +3676,7 @@ Item {
                                         Text {
                                             anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
                                             text: model.command !== "" ? model.command : "(empty command)"
-                                            font.family: "JetBrains Mono"; font.pixelSize: root.s(10)
+                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(10)
                                             color: model.command !== "" ? root.text : root.overlay0
                                             elide: Text.ElideRight; width: parent.width
                                         }
@@ -3705,7 +3705,7 @@ Item {
                                                 TextInput {
                                                     id: cmdInputFocus
                                                     Layout.fillWidth: true; Layout.fillHeight: true; verticalAlignment: TextInput.AlignVCenter
-                                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(10); color: root.text; clip: true; selectByMouse: true
+                                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); color: root.text; clip: true; selectByMouse: true
                                                     text: model.command
                                                     onTextChanged: dynamicStartupModel.setProperty(outerIndex, "command", text)
                                                     Keys.onEscapePressed: { dynamicStartupModel.setProperty(outerIndex, "isEditing", false); root.forceActiveFocus(); }
@@ -3713,7 +3713,7 @@ Item {
                                                         anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
                                                         text: "e.g. waybar, dunst, nm-applet"
                                                         color: Qt.alpha(root.subtext0, 0.45); visible: !parent.text && !parent.activeFocus
-                                                        font.family: "JetBrains Mono"; font.pixelSize: root.s(10)
+                                                        font.family: "Hack Nerd Font"; font.pixelSize: root.s(10)
                                                     }
                                                 }
                                             }
@@ -3730,8 +3730,8 @@ Item {
                                                 Behavior on color { ColorAnimation { duration: 150 } }
                                                 RowLayout {
                                                     id: startupDelRow; anchors.centerIn: parent; spacing: root.s(5)
-                                                    Text { text: "󰆴"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(12); color: startupDelMa.containsMouse ? root.base : root.red; Behavior on color { ColorAnimation { duration: 150 } } }
-                                                    Text { text: "Delete"; font.family: "JetBrains Mono"; font.pixelSize: root.s(10); color: startupDelMa.containsMouse ? root.base : root.red; Behavior on color { ColorAnimation { duration: 150 } } }
+                                                    Text { text: "󰆴"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: startupDelMa.containsMouse ? root.base : root.red; Behavior on color { ColorAnimation { duration: 150 } } }
+                                                    Text { text: "Delete"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); color: startupDelMa.containsMouse ? root.base : root.red; Behavior on color { ColorAnimation { duration: 150 } } }
                                                 }
                                                 MouseArea { id: startupDelMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { dynamicStartupModel.remove(outerIndex); root.saveAllStartup(); } }
                                             }
@@ -3744,8 +3744,8 @@ Item {
                                                 Behavior on color { ColorAnimation { duration: 150 } }
                                                 RowLayout {
                                                     id: startupDoneRow; anchors.centerIn: parent; spacing: root.s(5)
-                                                    Text { text: "󰸞"; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(12); color: startupDoneMa.containsMouse ? root.base : root.green; Behavior on color { ColorAnimation { duration: 150 } } }
-                                                    Text { text: "Done"; font.family: "JetBrains Mono"; font.pixelSize: root.s(10); color: startupDoneMa.containsMouse ? root.base : root.green; Behavior on color { ColorAnimation { duration: 150 } } }
+                                                    Text { text: "󰸞"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: startupDoneMa.containsMouse ? root.base : root.green; Behavior on color { ColorAnimation { duration: 150 } } }
+                                                    Text { text: "Done"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); color: startupDoneMa.containsMouse ? root.base : root.green; Behavior on color { ColorAnimation { duration: 150 } } }
                                                 }
                                                 MouseArea {
                                                     id: startupDoneMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -3885,9 +3885,9 @@ Item {
                                         spacing: root.s(4)
                                         rotation: root.monCurrentTransform * 90
                                         Behavior on rotation { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-                                        Text { Layout.alignment: Qt.AlignHCenter; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(32); color: root.monSelectedResAccent; text: "󰍹"; Behavior on color { ColorAnimation { duration: 400 } } }
-                                        Text { Layout.alignment: Qt.AlignHCenter; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.text; text: Config.monitorsModel.count > 0 ? Config.monitorsModel.get(0).name : "—" }
-                                        Text { Layout.alignment: Qt.AlignHCenter; font.family: "JetBrains Mono"; font.pixelSize: root.s(11); color: root.subtext0; text: root.monCurrentSimW + "\xd7" + root.monCurrentSimH + " @ " + (Config.monitorsModel.count > 0 ? Config.monitorsModel.get(0).rate : "60") + "Hz" }
+                                        Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: root.s(32); color: root.monSelectedResAccent; text: "󰍹"; Behavior on color { ColorAnimation { duration: 400 } } }
+                                        Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.text; text: Config.monitorsModel.count > 0 ? Config.monitorsModel.get(0).name : "—" }
+                                        Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: root.s(11); color: root.subtext0; text: root.monCurrentSimW + "\xd7" + root.monCurrentSimH + " @ " + (Config.monitorsModel.count > 0 ? Config.monitorsModel.get(0).rate : "60") + "Hz" }
                                     }
                                 }
                             }
@@ -4007,9 +4007,9 @@ Item {
                                             spacing: root.s(2)
                                             rotation: model.transform * 90
                                             Behavior on rotation { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-                                            Text { Layout.alignment: Qt.AlignHCenter; font.family: "Iosevka Nerd Font"; font.pixelSize: root.s(26); color: isActive ? root.monSelectedResAccent : root.text; text: "󰍹"; Behavior on color { ColorAnimation { duration: 300 } } }
-                                            Text { Layout.alignment: Qt.AlignHCenter; font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(10); color: root.text; text: model.name }
-                                            Text { Layout.alignment: Qt.AlignHCenter; font.family: "JetBrains Mono"; font.pixelSize: root.s(9); color: root.subtext0; text: model.resW + "\xd7" + model.resH + "@" + model.rate }
+                                            Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: root.s(26); color: isActive ? root.monSelectedResAccent : root.text; text: "󰍹"; Behavior on color { ColorAnimation { duration: 300 } } }
+                                            Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(10); color: root.text; text: model.name }
+                                            Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: root.s(9); color: root.subtext0; text: model.resW + "\xd7" + model.resH + "@" + model.rate }
                                         }
                                     }
                                 }
@@ -4129,13 +4129,13 @@ Item {
                             RowLayout {
                                 anchors.fill: parent; anchors.margins: root.s(10); spacing: root.s(6)
                                 Text {
-                                    font.family: "JetBrains Mono"; font.weight: isSel ? Font.Black : Font.Bold; font.pixelSize: root.s(13)
+                                    font.family: "Hack Nerd Font"; font.weight: isSel ? Font.Black : Font.Bold; font.pixelSize: root.s(13)
                                     color: isSel ? accent : root.text; text: resLabel
                                     Behavior on color { ColorAnimation { duration: 200 } }
                                 }
                                 Item { Layout.fillWidth: true }
                                 Text {
-                                    font.family: "JetBrains Mono"; font.pixelSize: root.s(10)
+                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(10)
                                     color: isSel ? root.text : root.overlay0
                                     text: md ? (md.w + "×" + md.h) : ""
                                     Behavior on color { ColorAnimation { duration: 200 } }
@@ -4275,7 +4275,7 @@ Item {
                             Layout.fillWidth: true
                             Text {
                                 text: "Refresh Rate"
-                                font.family: "JetBrains Mono"; font.pixelSize: root.s(11)
+                                font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
                                 color: root.subtext0; Layout.fillWidth: true
                             }
                             Text {
@@ -4285,7 +4285,7 @@ Item {
                                     if (rateSlider.numRates > 0) return rateSlider.rates[rateSlider.curIdx] + " Hz";
                                     return Math.round(parseFloat(Config.monitorsModel.get(Config.monActiveEditIndex).rate) || 60) + " Hz";
                                 }
-                                font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(13)
+                                font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13)
                                 color: root.monSelectedRateAccent
                                 Behavior on color { ColorAnimation { duration: 200 } }
                             }
@@ -4351,7 +4351,7 @@ Item {
                                     Text {
                                         anchors.horizontalCenter: parent.horizontalCenter; y: root.s(4)
                                         text: rateSlider.rates[index]
-                                        font.family: "JetBrains Mono"; font.pixelSize: root.s(8)
+                                        font.family: "Hack Nerd Font"; font.pixelSize: root.s(8)
                                         font.weight: rateSlider.curIdx === index ? Font.Bold : Font.Normal
                                         color: rateSlider.curIdx === index ? root.monSelectedRateAccent : root.overlay0
                                         Behavior on color { ColorAnimation { duration: 200 } }

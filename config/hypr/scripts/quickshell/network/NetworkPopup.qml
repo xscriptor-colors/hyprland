@@ -1262,7 +1262,7 @@ Item {
                                 }
                                 Text {
                                     anchors.centerIn: parent
-                                    font.family: "Iosevka Nerd Font"
+                                    font.family: "Hack Nerd Font"
                                     font.pixelSize: window.s(48) - (window.s(16) * coreContainer.multiShift)
                                     color: window.activeColor
                                     text: window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : "󰂯")
@@ -1280,8 +1280,8 @@ Item {
                                 visible: showEthDisconnected
                                 opacity: visible ? 1.0 : 0.0
                                 Behavior on opacity { NumberAnimation { duration: 300 } }
-                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(48); color: window.overlay0; text: "󰈂" }
-                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(14); color: window.overlay0; text: window.currentPowerPending ? (window.expectedEthPower === "on" ? "Powering On..." : "Powering Off...") : "Disconnected" }
+                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: window.s(48); color: window.overlay0; text: "󰈂" }
+                                Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(14); color: window.overlay0; text: window.currentPowerPending ? (window.expectedEthPower === "on" ? "Powering On..." : "Powering Off...") : "Disconnected" }
                             }
 
                             Item {
@@ -1297,11 +1297,11 @@ Item {
                                     anchors.centerIn: parent
                                     spacing: window.s(8)
                                     
-                                    Text { Layout.alignment: Qt.AlignHCenter; font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(32); color: window.crust; text: "󰤨" }
+                                    Text { Layout.alignment: Qt.AlignHCenter; font.family: "Hack Nerd Font"; font.pixelSize: window.s(32); color: window.crust; text: "󰤨" }
                                     
                                     Text { 
                                         Layout.alignment: Qt.AlignHCenter; Layout.maximumWidth: pwdLayer.width - window.s(40)
-                                        font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(13)
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(13)
                                         color: window.crust; text: window.pendingWifiSsid; elide: Text.ElideRight 
                                     }
                                     
@@ -1319,7 +1319,7 @@ Item {
                                             anchors.fill: parent
                                             anchors.leftMargin: window.s(15); anchors.rightMargin: window.s(15)
                                             verticalAlignment: TextInput.AlignVCenter
-                                            font.family: "JetBrains Mono"; font.pixelSize: window.s(13); color: window.text
+                                            font.family: "Hack Nerd Font"; font.pixelSize: window.s(13); color: window.text
                                             echoMode: TextInput.Password; clip: true
                                             onAccepted: {
                                                 if (text.trim() !== "") {
@@ -1352,7 +1352,7 @@ Item {
 
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "Iosevka Nerd Font"
+                                        font.family: "Hack Nerd Font"
                                         font.pixelSize: window.s(48) - (window.s(16) * coreContainer.multiShift)
                                         color: isMyDisconnecting ? window.overlay1 : window.crust
                                         text: isMyDisconnecting ? "" : (coreMa.containsMouse ? (window.activeMode === "wifi" ? "󰖪" : (window.activeMode === "eth" ? "󰈂" : "󰂲")) : (coreContainer.myDevice ? (coreContainer.myDevice.icon || (window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : "󰂯"))) : ""))
@@ -1363,7 +1363,7 @@ Item {
                                         Layout.alignment: Qt.AlignHCenter
                                         Layout.maximumWidth: window.s(150) - (window.s(50) * coreContainer.multiShift)
                                         horizontalAlignment: Text.AlignHCenter
-                                        font.family: "JetBrains Mono"; font.weight: Font.Black
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Black
                                         font.pixelSize: window.s(16) - (window.s(4) * coreContainer.multiShift)
                                         color: isMyDisconnecting ? window.overlay1 : window.crust
                                         text: coreContainer.myDevice ? (window.activeMode === "wifi" ? coreContainer.myDevice.ssid : coreContainer.myDevice.name) : ""
@@ -1372,7 +1372,7 @@ Item {
                                     }
                                     Text {
                                         Layout.alignment: Qt.AlignHCenter
-                                        font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(11)
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(11)
                                         color: isMyDisconnecting ? window.overlay1 : (coreMa.containsMouse ? window.crust : "#99000000")
                                         text: isMyDisconnecting ? "Disconnecting..." : (centralCore.disconnectFill > 0.01 ? "Hold..." : "Connected")
                                         Behavior on color { ColorAnimation { duration: 200 } }
@@ -1395,7 +1395,7 @@ Item {
 
                                         Text {
                                             Layout.alignment: Qt.AlignHCenter
-                                            font.family: "Iosevka Nerd Font"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: window.s(48) - (window.s(16) * coreContainer.multiShift)
                                             color: window.text
                                             text: isMyDisconnecting ? "" : (coreMa.containsMouse ? (window.activeMode === "wifi" ? "󰖪" : (window.activeMode === "eth" ? "󰈂" : "󰂲")) : (coreContainer.myDevice ? (coreContainer.myDevice.icon || (window.activeMode === "wifi" ? "󰤨" : (window.activeMode === "eth" ? "󰈀" : "󰂯"))) : ""))
@@ -1405,7 +1405,7 @@ Item {
                                             Layout.alignment: Qt.AlignHCenter
                                             Layout.maximumWidth: window.s(150) - (window.s(50) * coreContainer.multiShift)
                                             horizontalAlignment: Text.AlignHCenter
-                                            font.family: "JetBrains Mono"; font.weight: Font.Black
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Black
                                             font.pixelSize: window.s(16) - (window.s(4) * coreContainer.multiShift)
                                             color: window.text
                                             text: coreContainer.myDevice ? (window.activeMode === "wifi" ? coreContainer.myDevice.ssid : coreContainer.myDevice.name) : ""
@@ -1413,7 +1413,7 @@ Item {
                                         }
                                         Text {
                                             Layout.alignment: Qt.AlignHCenter
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(11)
+                                            font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(11)
                                             color: window.text
                                             text: isMyDisconnecting ? "Disconnecting..." : (centralCore.disconnectFill > 0.01 ? "Hold..." : "Connected")
                                         }
@@ -1855,7 +1855,7 @@ Item {
                                     spacing: window.s(10)
                                     
                                     Text {
-                                        font.family: "Iosevka Nerd Font"
+                                        font.family: "Hack Nerd Font"
                                         font.pixelSize: window.s(20)
                                         color: floatCard.isFailed ? window.red : (floatCard.isMyBusy ? window.text : window.activeColor)
                                         text: icon
@@ -1878,7 +1878,7 @@ Item {
                                                 anchors.leftMargin: floatCard.textOffset
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 text: floatCard.itemName
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Bold
                                                 font.pixelSize: window.s(13)
                                                 color: floatCard.isFailed ? window.red : (floatCard.isHighlighted ? window.activeColor : window.text)
@@ -1890,7 +1890,7 @@ Item {
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 visible: floatCard.doMarquee
                                                 text: floatCard.itemName
-                                                font.family: "JetBrains Mono"
+                                                font.family: "Hack Nerd Font"
                                                 font.weight: Font.Bold
                                                 font.pixelSize: window.s(13)
                                                 color: floatCard.isFailed ? window.red : (floatCard.isHighlighted ? window.activeColor : window.text)
@@ -1898,7 +1898,7 @@ Item {
                                         }
                                         
                                         Text {
-                                            font.family: "JetBrains Mono"
+                                            font.family: "Hack Nerd Font"
                                             font.pixelSize: window.s(10)
                                             color: floatCard.isFailed ? window.maroon : (floatCard.isMyBusy ? window.activeColor : window.overlay0)
                                             text: floatCard.isFailed ? "Connection Failed" : (floatCard.isMyBusy ? "Connecting..." : (floatCard.renderFill > 0.1 && floatCard.renderFill < 1.0 ? floatCard.itemId === "ip_0" ? floatCard.triggered ? "Copied!" : "Hold to copy...": "Hold..." : action))
@@ -1919,7 +1919,7 @@ Item {
                                         width: baseTextRow.width; height: baseTextRow.height
                                         spacing: window.s(10)
                                         
-                                        Text { font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(20); color: window.crust; text: icon }
+                                        Text { font.family: "Hack Nerd Font"; font.pixelSize: window.s(20); color: window.crust; text: icon }
                                         
                                         ColumnLayout {
                                             Layout.fillWidth: true
@@ -1936,7 +1936,7 @@ Item {
                                                     anchors.leftMargin: floatCard.textOffset
                                                     anchors.verticalCenter: parent.verticalCenter
                                                     text: floatCard.itemName
-                                                    font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(13); color: window.crust 
+                                                    font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(13); color: window.crust 
                                                 }
                                                 Text { 
                                                     anchors.left: filledNameText.right
@@ -1944,11 +1944,11 @@ Item {
                                                     anchors.verticalCenter: parent.verticalCenter
                                                     visible: floatCard.doMarquee
                                                     text: floatCard.itemName
-                                                    font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: window.s(13); color: window.crust 
+                                                    font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: window.s(13); color: window.crust 
                                                 }
                                             }
                                             Text {
-                                                font.family: "JetBrains Mono"; font.pixelSize: window.s(10); color: window.crust
+                                                font.family: "Hack Nerd Font"; font.pixelSize: window.s(10); color: window.crust
                                                 text: floatCard.isMyBusy ? "Connecting..." : (floatCard.renderFill > 0.1 && floatCard.renderFill < 1.0 ? floatCard.itemId === "ip_0" ? floatCard.triggered ? "Copied!" : "Hold to copy..." : "Hold..." : action)
                                             }
                                         }
@@ -2123,8 +2123,8 @@ Item {
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: window.s(8)
-                            Text { font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18); color: window.activeMode === "eth" ? window.crust : window.text; text: "󰈀"; Behavior on color { ColorAnimation{duration:200} } }
-                            Text { font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: window.s(13); color: window.activeMode === "eth" ? window.crust : window.text; text: "Ethernet"; Behavior on color { ColorAnimation{duration:200} } }
+                            Text { font.family: "Hack Nerd Font"; font.pixelSize: window.s(18); color: window.activeMode === "eth" ? window.crust : window.text; text: "󰈀"; Behavior on color { ColorAnimation{duration:200} } }
+                            Text { font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: window.s(13); color: window.activeMode === "eth" ? window.crust : window.text; text: "Ethernet"; Behavior on color { ColorAnimation{duration:200} } }
                         }
                         MouseArea {
                             id: ethTabMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -2155,8 +2155,8 @@ Item {
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: window.s(8)
-                            Text { font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18); color: window.activeMode === "wifi" ? window.crust : window.text; text: "󰤨"; Behavior on color { ColorAnimation{duration:200} } }
-                            Text { font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: window.s(13); color: window.activeMode === "wifi" ? window.crust : window.text; text: "Wi-Fi"; Behavior on color { ColorAnimation{duration:200} } }
+                            Text { font.family: "Hack Nerd Font"; font.pixelSize: window.s(18); color: window.activeMode === "wifi" ? window.crust : window.text; text: "󰤨"; Behavior on color { ColorAnimation{duration:200} } }
+                            Text { font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: window.s(13); color: window.activeMode === "wifi" ? window.crust : window.text; text: "Wi-Fi"; Behavior on color { ColorAnimation{duration:200} } }
                         }
                         MouseArea {
                             id: wifiTabMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -2186,8 +2186,8 @@ Item {
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: window.s(8)
-                            Text { font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18); color: window.activeMode === "bt" ? window.crust : window.text; text: "󰂯"; Behavior on color { ColorAnimation{duration:200} } }
-                            Text { font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: window.s(13); color: window.activeMode === "bt" ? window.crust : window.text; text: "Bluetooth"; Behavior on color { ColorAnimation{duration:200} } }
+                            Text { font.family: "Hack Nerd Font"; font.pixelSize: window.s(18); color: window.activeMode === "bt" ? window.crust : window.text; text: "󰂯"; Behavior on color { ColorAnimation{duration:200} } }
+                            Text { font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: window.s(13); color: window.activeMode === "bt" ? window.crust : window.text; text: "Bluetooth"; Behavior on color { ColorAnimation{duration:200} } }
                         }
                         MouseArea {
                             id: btTabMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -2275,7 +2275,7 @@ Item {
                     Text {
                         id: pwrIcon
                         anchors.centerIn: parent
-                        font.family: "Iosevka Nerd Font"
+                        font.family: "Hack Nerd Font"
                         font.pixelSize: window.currentPower ? window.s(22) : window.s(64)
                         color: window.currentPower ? window.crust : window.text
                         text: window.currentPowerPending ? "󰑮" : ""

@@ -263,20 +263,20 @@ Item {
             Text {
                 anchors.verticalCenter: baseIcon.verticalCenter 
                 anchors.right: parent.right
-                font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(10)
+                font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(10)
                 color: root.cSubtext0; text: ls.title
             }
             Text {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.bottomMargin: root.s(4) 
-                font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(12)
+                font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(12)
                 color: root.cSubtext0; text: ls.subText
             }
             Text {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(24)
+                font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(24)
                 color: root.cText; text: ls.valueText
             }
         }
@@ -307,20 +307,20 @@ Item {
                 Text {
                     anchors.verticalCenter: filledIcon.verticalCenter 
                     anchors.right: parent.right
-                    font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(10)
+                    font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(10)
                     color: root.alpha(root.cCrust, 0.7); text: ls.title
                 }
                 Text {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.bottomMargin: root.s(4) 
-                    font.family: "JetBrains Mono"; font.bold: true; font.pixelSize: root.s(12)
+                    font.family: "Hack Nerd Font"; font.bold: true; font.pixelSize: root.s(12)
                     color: root.cCrust; text: ls.subText
                 }
                 Text {
                     anchors.bottom: parent.bottom
                     anchors.right: parent.right
-                    font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: root.s(24)
+                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(24)
                     color: root.cCrust; text: ls.valueText
                 }
             }
@@ -414,13 +414,13 @@ Item {
                 RowLayout {
                     spacing: root.s(12)
                     Text { text: "\uF063"; font.family: root.iconFont; font.pixelSize: root.s(16); color: root.cGreen }
-                    Text { text: root.rxSpeedStr; color: root.textPrimary; font.family: "JetBrains Mono"; font.pixelSize: root.s(16); font.bold: true }
+                    Text { text: root.rxSpeedStr; color: root.textPrimary; font.family: "Hack Nerd Font"; font.pixelSize: root.s(16); font.bold: true }
                 }
 
                 RowLayout {
                     spacing: root.s(12)
                     Text { text: "\uF062"; font.family: root.iconFont; font.pixelSize: root.s(16); color: root.cPeach }
-                    Text { text: root.txSpeedStr; color: root.textPrimary; font.family: "JetBrains Mono"; font.pixelSize: root.s(16); font.bold: true }
+                    Text { text: root.txSpeedStr; color: root.textPrimary; font.family: "Hack Nerd Font"; font.pixelSize: root.s(16); font.bold: true }
                 }
             }
         }

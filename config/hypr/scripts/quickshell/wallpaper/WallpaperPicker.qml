@@ -1383,7 +1383,7 @@ Item {
                     text: window.currentNotification
                     
                     color: _theme.text
-                    font.family: "JetBrains Mono"
+                    font.family: "Hack Nerd Font"
                     font.pixelSize: window.s(14)
                     font.bold: true
                     elide: Text.ElideRight
@@ -1491,7 +1491,7 @@ Item {
                                     text: model.name
                                     anchors.centerIn: parent
                                     color: model.selected ? _theme.base : _theme.text
-                                    font.family: "JetBrains Mono"
+                                    font.family: "Hack Nerd Font"
                                     font.pixelSize: window.s(12)
                                     font.bold: model.selected
                                     Behavior on color { ColorAnimation { duration: 250 } }
@@ -1551,7 +1551,7 @@ Item {
                             text: modelData.label
                             anchors.centerIn: parent
                             color: window.currentFilter === modelData.name ? _theme.text : Qt.rgba(_theme.text.r, _theme.text.g, _theme.text.b, 0.7)
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.pixelSize: window.s(14)
                             font.bold: window.currentFilter === modelData.name
                             Behavior on color { ColorAnimation { duration: 400; easing.type: Easing.OutQuart } }
@@ -1740,7 +1740,7 @@ Item {
                     Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
                     
                     color: _theme.text
-                    font.family: "JetBrains Mono"
+                    font.family: "Hack Nerd Font"
                     font.pixelSize: window.s(16)
                     clip: true
                     

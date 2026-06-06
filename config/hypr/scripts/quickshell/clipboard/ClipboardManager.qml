@@ -301,7 +301,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: "󰅌"
-                        font.family: "Iosevka Nerd Font"
+                        font.family: "Hack Nerd Font"
                         font.pixelSize: window.s(18)
                         color: searchInput.activeFocus ? window.mauve : window.subtext0
                         
@@ -318,7 +318,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: "󰈈"
-                        font.family: "Iosevka Nerd Font"
+                        font.family: "Hack Nerd Font"
                         font.pixelSize: window.s(18)
                         color: window.mauve
                         
@@ -338,7 +338,7 @@ Item {
                     Layout.fillHeight: true
                     background: Item {} 
                     color: window.text
-                    font.family: "JetBrains Mono"
+                    font.family: "Hack Nerd Font"
                     font.pixelSize: window.s(16)
                     
                     placeholderText: "Search"
@@ -591,7 +591,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: (index + 1)
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.pixelSize: window.s(11)
                             font.weight: Font.Bold
                             color: index === clipList.currentIndex ? window.mauve : window.text
@@ -627,7 +627,7 @@ Item {
                         Text {
                             anchors.fill: parent
                             text: model.content
-                            font.family: "JetBrains Mono"
+                            font.family: "Hack Nerd Font"
                             font.pixelSize: window.s(13)
                             font.weight: index === clipList.currentIndex ? Font.Bold : Font.Medium
                             color: index === clipList.currentIndex ? window.base : window.text
@@ -741,7 +741,7 @@ Item {
                     }
                     
                     color: window.text
-                    font.family: "JetBrains Mono"
+                    font.family: "Hack Nerd Font"
                     font.pixelSize: window.s(14)
                     wrapMode: TextEdit.Wrap
                     readOnly: true

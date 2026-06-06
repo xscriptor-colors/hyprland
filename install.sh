@@ -238,8 +238,7 @@ CORE_PACKAGES_ARCH=(
     "kwallet5"
     "libsecret"
 
-    # Fonts
-    "ttf-jetbrains-mono-nerd"
+    # Fonts (Hack Nerd Font is installed separately via install_hack_nerd_font)
     "noto-fonts"
     "noto-fonts-emoji"
 
@@ -615,6 +614,42 @@ install_matugen_config() {
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
+# │ INSTALL HACK NERD FONT                                                            │
+# └───────────────────────────────────────────────────────────────────────────────────┘
+
+install_hack_nerd_font() {
+    log "Installing Hack Nerd Font..."
+    local FONT_DIR="$HOME/.local/share/fonts"
+    local FONT_URL="https://raw.githubusercontent.com/xscriptor/terminal/main/assets/fonts/HackNerdFont/HackNerdFont-Regular.ttf"
+    local FONT_PATH="$FONT_DIR/HackNerdFont-Regular.ttf"
+
+    mkdir -p "$FONT_DIR"
+
+    if [ -f "$FONT_PATH" ]; then
+        log "Hack Nerd Font already installed, skipping download."
+    else
+        if command -v wget &>/dev/null; then
+            wget -q --show-progress -O "$FONT_PATH" "$FONT_URL" || {
+                warn "Failed to download Hack Nerd Font. You can install it manually."
+                return
+            }
+        elif command -v curl &>/dev/null; then
+            curl -# -o "$FONT_PATH" "$FONT_URL" || {
+                warn "Failed to download Hack Nerd Font. You can install it manually."
+                return
+            }
+        else
+            warn "Neither wget nor curl found. Cannot download Hack Nerd Font."
+            return
+        fi
+        log "Hack Nerd Font downloaded successfully."
+    fi
+
+    fc-cache -f "$FONT_DIR" 2>/dev/null || true
+    log "Font cache updated."
+}
+
+# ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ INSTALL SDDM THEME                                                                │
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
@@ -831,6 +866,9 @@ main() {
     # Install Matugen config and generate colors
     install_matugen_config
 
+    # Install Hack Nerd Font
+    install_hack_nerd_font
+
     # Install SDDM theme
     prompt "Install SDDM theme (matugen-minimal) and configure display manager? [y/N] "
     read -r sddm_response
@@ -916,6 +954,7 @@ case "$1" in
         install_dotfiles
         install_kitty_config
         install_matugen_config
+        install_hack_nerd_font
         create_directories
         check_requirements
         log "Dotfiles installed!"
