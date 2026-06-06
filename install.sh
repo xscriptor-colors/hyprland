@@ -188,7 +188,6 @@ CORE_PACKAGES_ARCH=(
     "xorg-xwayland"
 
     # Bar and launcher
-    "waybar"
     "rofi-wayland"
     "jq"
     "imagemagick"
@@ -417,7 +416,7 @@ backup_config() {
     log "Creating backup of existing configurations..."
     mkdir -p "$BACKUP_DIR"
 
-    local configs=("hypr" "waybar" "rofi" "wlogout" "kitty" "dunst" "cava" "matugen" "swayosd")
+    local configs=("hypr" "rofi" "wlogout" "kitty" "dunst" "cava" "matugen" "swayosd")
 
     for config in "${configs[@]}"; do
         if [ -d "$CONFIG_DIR/$config" ]; then
@@ -498,12 +497,6 @@ install_dotfiles() {
         log "Copied $(ls -1 "$SCRIPT_DIR/wallpapers" | wc -l) wallpapers"
     fi
 
-    # Copy Waybar config
-    if [ -d "$SCRIPT_DIR/config/waybar" ]; then
-        mkdir -p "$CONFIG_DIR/waybar"
-        cp -r "$SCRIPT_DIR/config/waybar/"* "$CONFIG_DIR/waybar/"
-    fi
-
     # Copy Rofi config
     if [ -d "$SCRIPT_DIR/config/rofi" ]; then
         mkdir -p "$CONFIG_DIR/rofi"
@@ -559,7 +552,6 @@ install_dotfiles() {
     # Clean up GPU mode if user opted out
     if [ "$INSTALL_GPU_MODE" = "false" ]; then
         rm -f "$CONFIG_DIR/hypr/scripts/gpu-mode.sh"
-        sed -i '/custom\/gpu-mode/d' "$CONFIG_DIR/waybar/config.jsonc" 2>/dev/null || true
     fi
 
     log "Dotfiles installed successfully!"
@@ -734,7 +726,7 @@ create_directories() {
 
 check_requirements() {
     local missing=()
-    local cmds=(rofi waybar notify-send ip lspci)
+    local cmds=(rofi notify-send ip lspci)
 
     for c in "${cmds[@]}"; do
         if ! command -v "$c" >/dev/null 2>&1; then
@@ -810,7 +802,7 @@ main() {
         fedora)
             warn "Fedora support is experimental. Some packages may not be available."
             # Basic packages for Fedora
-            install_packages_fedora hyprland waybar rofi-wayland kitty dunst wlogout grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
+            install_packages_fedora hyprland rofi-wayland kitty dunst wlogout grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
             ;;
         debian|ubuntu|pop)
             error "Debian/Ubuntu requires manual Hyprland installation from source."

@@ -516,36 +516,6 @@ Item {
             border.width: 1
             clip: true
 
-            // =======================================================
-            // AMBIENT WIDGET COLOR BLOBS (Spread Out)
-            // =======================================================
-            Rectangle {
-                width: parent.width * 0.5; height: width; radius: width / 2
-                x: (parent.width * 0.75 - width / 2) + Math.cos(window.globalOrbitAngle * 1.5) * Math.round(350 * window.sf)
-                y: (parent.height * 0.3 - height / 2) + Math.sin(window.globalOrbitAngle * 1.5) * Math.round(200 * window.sf)
-                opacity: 0.025 * window.introAmbient
-                color: window.activeWeatherHex
-                Behavior on color { ColorAnimation { duration: 1000 } }
-            }
-
-            Rectangle {
-                width: parent.width * 0.6; height: width; radius: width / 2
-                x: (parent.width * 0.25 - width / 2) + Math.sin(window.globalOrbitAngle * 1.2) * Math.round(-300 * window.sf)
-                y: (parent.height * 0.7 - height / 2) + Math.cos(window.globalOrbitAngle * 1.2) * Math.round(-250 * window.sf)
-                opacity: 0.02 * window.introAmbient
-                color: window.timeColor
-                Behavior on color { ColorAnimation { duration: 1000 } }
-            }
-
-            Rectangle {
-                width: parent.width * 0.45; height: width; radius: width / 2
-                x: (parent.width * 0.5 - width / 2) + Math.cos(window.globalOrbitAngle * -1.8) * Math.round(400 * window.sf)
-                y: (parent.height * 0.5 - height / 2) + Math.sin(window.globalOrbitAngle * -1.8) * Math.round(-350 * window.sf)
-                opacity: 0.015 * window.introAmbient
-                color: window.timeAccent
-                Behavior on color { ColorAnimation { duration: 1000 } }
-            }
-
             // Big Parallax Weather Icon (Tied to Weather Transition)
             Text {
                 anchors.centerIn: parent

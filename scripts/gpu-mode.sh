@@ -11,7 +11,7 @@ export LC_NUMERIC="C"
 # ────────────────────────────────────────────────────────────────────────────
 
 if ! command -v envycontrol >/dev/null 2>&1; then
-    # Return silent error for waybar status, notify for actions
+    # Return silent error for status checks, notify for actions
     if [ "$1" != "status" ]; then
         notify-send -u critical "GPU Mode" "envycontrol is not installed.\nPlease install it via yay/pacman."
     fi

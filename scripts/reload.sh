@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Soft reload: refresh colors without killing workspace daemon
+# Reload QuickShell (full QML reload)
 QS=""; command -v quickshell >/dev/null 2>&1 && QS=quickshell || command -v qs >/dev/null 2>&1 && QS=qs
 if [ -n "$QS" ]; then
-    $QS -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar reloadColors 2>/dev/null || true
+    $QS -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar forceReload 2>/dev/null || true
 fi
