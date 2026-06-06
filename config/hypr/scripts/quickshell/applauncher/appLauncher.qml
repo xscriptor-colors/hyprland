@@ -98,8 +98,9 @@ Item {
         let filtered = [];
         
         for (let i = 0; i < allApps.length; i++) {
-            if (allApps[i].name.toLowerCase().includes(q)) {
-                filtered.push(allApps[i]);
+            let app = allApps[i];
+            if (app.name.toLowerCase().includes(q) || app.exec.toLowerCase().includes(q)) {
+                filtered.push(app);
             }
         }
 
