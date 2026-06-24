@@ -1,355 +1,196 @@
-<h1 align="center">Hyprland modernizeX</h1>
+<h1 align="center">Hyprland for X</h1>
 
-<div align="center">
+<p align="center">
+  <img src="https://img.shields.io/github/license/xscriptor/hyprland?style=flat-square&color=blue" alt="License">
+  <img src="https://img.shields.io/github/last-commit/xscriptor/hyprland?style=flat-square&color=blueviolet" alt="Last Commit">
+  <img src="https://img.shields.io/github/repo-size/xscriptor/hyprland?style=flat-square&color=success" alt="Repo Size">
+  <img src="https://img.shields.io/badge/Hyprland-v0.53+-8A2BE2?style=flat-square" alt="Hyprland">
+  <img src="https://img.shields.io/badge/Arch_Linux-supported-1793D1?style=flat-square&logo=arch-linux" alt="Arch">
+  <img src="https://img.shields.io/badge/X_Linux-supported-000000?style=flat-square" alt="X Linux">
+  <img src="https://img.shields.io/badge/QuickShell-QML-FF6F00?style=flat-square" alt="QuickShell">
+  <img src="https://img.shields.io/badge/Matugen-dynamic-FF69B4?style=flat-square" alt="Matugen">
+</p>
 
-**Hyprland configuration for the X environment (Arch Linux spin)**
+<p align="center">
+  <em>
+  QuickShell QML shell + Matugen dynamic theming for Hyprland on X.
+  </em>
+</p>
 
-*Based on imperative-dots by ilyamiro -- adapted, extended, and customized*
+<h2 align="center">Content</h2>
 
-
-
-</div>
+<p align="center">
+  <a href="#quick-install">Quick Install</a> &middot;
+  <a href="#features">Features</a> &middot;
+  <a href="#customization">Customization</a> &middot;
+  <a href="#quick-reference">Quick Reference</a> &middot;
+  <a href="#structure">Structure</a> &middot;
+  <a href="#documentation">Documentation</a> &middot;
+  <a href="#acknowledgments">Acknowledgments</a> &middot;
+  <a href="#x">X</a>
+</p>
 
 <a href="https://imgur.com/0fm1MOy">
 <img src="https://i.imgur.com/ahSvDyS.gif" width="900" alt="Demo" >
 </a>
 <p align="center"><em>Gif preview, follow the link to see the details.</em></p>
 
+<details>
+  <summary>Old Previews</summary>
+  <br>
+  <table>
+    <tr>
+      <td><img src="assets/previews/preview01.png" width="400" alt="Desktop"></td>
+      <td><img src="assets/previews/preview02.png" width="400" alt="Widgets"></td>
+    </tr>
+    <tr>
+      <td><img src="assets/previews/preview03.png" width="400" alt="Wallpaper Picker"></td>
+      <td><img src="assets/previews/preview04.png" width="400" alt="Lock Screen"></td>
+    </tr>
+  </table>
+</details>
 
+---
 
+## Quick Install
 
-## Table of Contents
-
-- [About](#about)
-- [Status](#status)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Keybindings](#keybindings)
-- [Structure](#structure)
-- [Customization](#customization)
-- [Acknowledgments](#acknowledgments)
-
-
-
-
-## About
-
-This configuration is derived from [imperative-dots](https://github.com/ilyamiro/imperative-dots) by ilyamiro, one of the most comprehensive Hyprland setups available. This fork is being updated and adapted for use in the X environment (an Arch Linux spin) with a mix of upstream changes and custom modifications.
-
-Some features from imperative-dots are preserved and updated. Others have been reworked or replaced with original implementations tailored to this environment. The goal is to maintain compatibility with upstream where possible while introducing variations that suit the X desktop experience.
-
-
-
-## Status
-
-This configuration is under active development. Components from imperative-dots are being progressively integrated, tested, and customized. Expect changes as the migration progresses.
-
-
-
-## Features
-
-- QuickShell QML-based interface (TopBar, widgets, app launcher, wallpaper picker)
-- Dynamic color theming via Matugen (Material You colors from wallpaper)
-- App icons displayed on workspace pills
-- Wallpaper picker with local files and DuckDuckGo image search
-- Network manager, Bluetooth, volume, and battery widgets
-- Calendar with weather integration
-- Clipboard manager with history
-- Music player controls (MPRIS)
-- Focus time tracker
-- SDDM theme with dynamic colors
-- Automated installation script
-- Theme switcher for kitty, waybar, and Hyprland colors
-- 13 city-inspired color themes
-- GPU performance mode switching (NVIDIA)
-- Multi-monitor support with monitor manager
-- SwayOSD on-screen display for volume and brightness
-- Named scratchpads for terminal, files, and apps
-- Hyprlock integration with blur and themes
-
-
-
-## Requirements
-
-### System
-
-- **Distribution**: Arch Linux or derivatives (EndeavourOS, Manjaro, CachyOS, Garuda, X)
-- **Kernel**: Linux 6.x or newer recommended
-- **RAM**: 4 GB minimum, 8 GB or more recommended
-
-
-## Installation
-
-### Quick Install
-
-```bash
-git clone https://github.com/xscriptor/hyprland.git
+<pre><code>git clone https://github.com/xscriptor/hyprland.git
 cd hyprland
-git checkout modernizex
 chmod +x install.sh
-./install.sh
-```
+./install.sh</code></pre>
 
-### Dotfiles Only (no system-wide changes)
+<p><strong>Options:</strong> <code>--dotfiles-only</code> (config only), <code>--nvidia-only</code> (NVIDIA setup only).</p>
 
-```bash
-./install.sh --dotfiles-only
-```
+<p>The installer detects your distro and GPU, installs packages (Hyprland, QuickShell, Matugen, SwayOSD, kitty, rofi, and more), backs up existing configs, deploys all dotfiles, optionally configures NVIDIA Optimus, installs the SDDM theme, and generates initial colors from your wallpaper.</p>
 
-### NVIDIA Configuration Only
+<hr>
 
-```bash
-./install.sh --nvidia-only
-```
+<h2>Features</h2>
 
-The installer will:
-1. Detect your distribution and GPU
-2. Install required packages (via yay or paru on Arch)
-3. Configure NVIDIA drivers (if applicable) with kernel parameters
-4. Back up existing configurations
-5. Deploy all configuration files
-6. Optionally download a wallpaper collection
-7. Generate initial Matugen color scheme
+<ul>
+  <li><strong>QuickShell QML Interface</strong> -- Animated popup widgets, persistent top bar with workspaces and system tray, notification center, floating sidebar, wallpaper picker with DuckDuckGo search, app launcher, clipboard manager, network/Bluetooth panel, audio controls, calendar with weather, music player (MPRIS), focus time tracker, screen recording overlay with virtual audio routing, QR scanner, and more.</li>
+  <li><strong>Matugen Dynamic Theming</strong> -- Every component (Hyprland, Kitty, Neovim, Cava, SwayOSD, GTK, Qt, SDDM) gets colors from the current wallpaper. Change wallpaper, colors update everywhere.</li>
+  <li><strong>Modular Hyprland Config</strong> -- Split across focused files (keybinds, animations, window rules, autostart, workspaces, env, colors). Template-based dynamic reload from <code>settings.json</code>.</li>
+  <li><strong>NVIDIA Optimus Support</strong> -- <code>envycontrol</code>-based GPU mode switching (integrated/hybrid/nvidia) with keybind shortcuts and Rofi selector.</li>
+  <li><strong>Multi-Monitor</strong> -- Workspace binding per monitor, Rofi-based monitor manager with position/resolution/refresh rate control.</li>
+  <li><strong>Custom SDDM Theme</strong> -- <code>matugen-minimal</code> with user switching, session selection, Matugen colors, and wallpaper blur.</li>
+  <li><strong>Screen Recording</strong> -- GPU-accelerated capture with independent desktop/mic audio channels via virtual PipeWire sinks.</li>
+  <li><strong>Neovim Config Included</strong> -- lazy.nvim, LSP via Mason, Treesitter, custom theme engine with Matugen color integration.</li>
+</ul>
 
+<hr>
 
+<h2>Customization</h2>
 
-## Keybindings
+<ul>
+  <li><strong>Wallpaper:</strong> <code>SUPER + W</code> opens the wallpaper picker. Colors update automatically.</li>
+  <li><strong>Keybindings:</strong> Edit <code>~/.config/hypr/keybinds.conf</code></li>
+  <li><strong>Autostart:</strong> Edit <code>~/.config/hypr/autostart.conf</code></li>
+  <li><strong>Settings UI:</strong> <code>SUPER + SHIFT + S</code> opens the settings panel (scale, workspace count, language, startup behavior). Changes are applied live.</li>
+  <li><strong>Environment:</strong> Edit <code>~/.config/hypr/env.conf</code></li>
+</ul>
 
-### Applications
+<hr>
 
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + Return` | Terminal (Kitty) |
-| `SUPER + D` | App launcher (QuickShell) |
-| `SUPER + E` | File manager (Nautilus) |
-| `SUPER + F` | Browser (Firefox) |
-| `SUPER + period` | Emoji picker |
+<h2>Quick Reference</h2>
 
-### QuickShell Widgets
+<p><strong>Applications</strong><br>
+<code>SUPER + Return</code> Terminal &middot; <code>SUPER + D</code> App launcher &middot; <code>SUPER + E</code> Files &middot; <code>SUPER + F</code> Browser</p>
 
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + Q` | Toggle music player |
-| `SUPER + C` | Toggle clipboard manager |
-| `SUPER + P` | Toggle movies widget |
-| `SUPER + B` | Toggle battery status |
-| `SUPER + W` | Toggle wallpaper picker |
-| `SUPER + S` | Toggle calendar |
-| `SUPER + N` | Toggle network panel |
-| `SUPER + V` | Toggle volume control |
-| `SUPER + H` | Toggle guide panel |
-| `SUPER + SHIFT + S` | Toggle settings panel |
-| `SUPER + SHIFT + T` | Toggle focus time tracker |
+<p><strong>Widgets</strong><br>
+<code>SUPER + M</code> Music &middot; <code>SUPER + C</code> Clipboard &middot; <code>SUPER + B</code> Battery &middot; <code>SUPER + W</code> Wallpaper &middot; <code>SUPER + S</code> Calendar &middot; <code>SUPER + N</code> Network &middot; <code>SUPER + V</code> Volume &middot; <code>SUPER + H</code> Guide &middot; <code>SUPER + SHIFT + S</code> Settings &middot; <code>SUPER + SHIFT + T</code> Focus Time</p>
 
-### Window Management
+<p><strong>Windows</strong><br>
+<code>ALT + F4</code> Close &middot; <code>SUPER + Space</code> Toggle float &middot; <code>SUPER + G</code> Center &middot; <code>SUPER + J</code> Toggle split</p>
 
-| Shortcut | Action |
-|----------|--------|
-| `ALT + F4` | Close active window |
-| `SUPER + Space` | Toggle floating |
-| `SUPER + SHIFT + Space` | Pin window |
-| `SUPER + F` | Fullscreen |
-| `SUPER + M` | Maximize (fullscreen, 1) |
-| `SUPER + G` | Center floating window |
-| `SUPER + J` | Toggle split layout |
-| `ALT + Tab` | Cycle through windows |
+<p><strong>Workspaces</strong><br>
+<code>SUPER + 1-0</code> Switch &middot; <code>SUPER + SHIFT + 1-0</code> Move to &middot; <code>SUPER + Tab</code> Previous &middot; <code>SUPER + A</code> Scratchpad</p>
 
-### Focus and Movement
+<p><strong>Lock / Power</strong><br>
+<code>SUPER + L</code> Lock &middot; <code>SUPER + Escape</code> Exit &middot; <code>SUPER + CTRL + L</code> Suspend &middot; <code>SUPER + CTRL + SHIFT + L</code> Shutdown</p>
 
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + Arrow Keys` | Move focus |
-| `SUPER + H/J/K/L` | Move focus (vim-style) |
-| `SUPER + SHIFT + Arrows` | Move window |
-| `SUPER + SHIFT + H/J/K/L` | Move window (vim-style) |
-| `SUPER + CTRL + Arrows` | Resize window |
-| `SUPER + CTRL + H/J/K/L` | Resize window (vim-style) |
+<p><strong>Screenshots</strong><br>
+<code>Print</code> Area &middot; <code>SUPER + Print</code> Full &middot; <code>SHIFT + Print</code> Area + edit &middot; <code>SUPER + SHIFT + Print</code> Full + edit</p>
 
-### Workspaces
+<p><strong>Display</strong><br>
+<code>SUPER + Z</code> Scale menu &middot; <code>SUPER + R</code> Reload QML &middot; <code>SUPER + SHIFT + R</code> Reload Hyprland</p>
 
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + 1-9,0` | Go to workspace 1-10 |
-| `SUPER + SHIFT + 1-9,0` | Move window to workspace |
-| `SUPER + Page Up/Down` | Previous / Next workspace |
-| `SUPER + Mouse Scroll` | Change workspace |
-| `SUPER + Tab` | Previous workspace (current monitor) |
-| `SUPER + A` | Toggle files scratchpad |
-| `SUPER + SHIFT + A` | Move window to files scratchpad |
+<p><strong>Multi-Monitor</strong><br>
+<code>SUPER + ALT + I/U</code> Focus monitor &middot; <code>SUPER + ALT + M</code> Monitor manager &middot; <code>SUPER + ALT + O</code> Swap workspaces</p>
 
-### Lock / Power
+<p><strong>GPU (NVIDIA)</strong><br>
+<code>SUPER + ALT + G</code> Cycle mode &middot; <code>SUPER + ALT + SHIFT + G</code> Mode selector</p>
 
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + L` | Lock screen |
-| `SUPER + Escape` | Exit Hyprland |
-| `SUPER + SHIFT + L` | Power menu (wlogout) |
-| `SUPER + CTRL + L` | Suspend |
-| `SUPER + CTRL + SHIFT + L` | Shutdown |
+<p>See <a href="docs/quick-reference.md">Quick Reference</a> for the full keybinding table.</p>
 
-### Screenshots
+<hr>
 
-| Shortcut | Action |
-|----------|--------|
-| `Print` | Screenshot (area) |
-| `SHIFT + Print` | Screenshot (edit) |
-| `SUPER + Print` | Full screenshot |
-| `SUPER + SHIFT + Print` | Full screenshot (edit) |
+<h2>Structure</h2>
 
-### Multimedia
+<pre><code>hyprland/
+  install.sh                  Automated installer
+  uninstall.sh                Config removal
+  config/hypr/                Hyprland modular configs + QuickShell QML widgets
+  config/kitty/               Terminal config + Matugen colors
+  config/rofi/                Launcher themes
+  config/dunst/               Notification daemon
+  config/cava/                Audio visualizer
+  config/hypridle/            Idle management (dim, lock, suspend)
+  config/matugen/             Matugen templates for all apps
+  config/sddm/                SDDM login theme (matugen-minimal)
+  config/nvim/                Neovim config with lazy.nvim
+  scripts/                    Shell scripts and daemons
+  assets/previews/            Screenshots</code></pre>
 
-| Shortcut | Action |
-|----------|--------|
-| `XF86AudioRaiseVolume` | Volume up |
-| `XF86AudioLowerVolume` | Volume down |
-| `XF86AudioMute` | Mute toggle |
-| `XF86MonBrightnessUp` | Brightness up |
-| `XF86MonBrightnessDown` | Brightness down |
-| `XF86AudioPlay/Pause` | Play / Pause |
-| `XF86AudioNext` | Next track |
-| `XF86AudioPrev` | Previous track |
+<hr>
 
-### Theme and Wallpaper
+<h2>Documentation</h2>
 
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + W` | Wallpaper picker |
-| `SUPER + ALT + T` | Theme switcher |
-| `SUPER + Z` | Scale menu (75% / 80% / 100%) |
-| `SUPER + R` | Reload QuickShell colors |
-| `SUPER + SHIFT + R` | Reload Hyprland config |
+<ul>
+  <li><a href="docs/installation.md">Installation</a> -- Full install, uninstall, and post-install guide</li>
+  <li><a href="docs/quick-reference.md">Quick Reference</a> -- All keybindings, widgets, and scripts at a glance</li>
+  <li><a href="docs/quickshell-widgets.md">QuickShell Widgets</a> -- Widget architecture, IPC system, and QML components</li>
+  <li><a href="docs/scripts.md">Scripts</a> -- All shell scripts and daemons</li>
+  <li><a href="docs/hyprland-config.md">Hyprland Configuration</a> -- Modular config structure and dynamic reload</li>
+  <li><a href="docs/matugen-integration.md">Matugen Integration</a> -- Dynamic color pipeline</li>
+  <li><a href="docs/screenshot-recording.md">Screenshots &amp; Recording</a> -- Capture system with virtual audio</li>
+  <li><a href="docs/neovim-config.md">Neovim Configuration</a> -- Included editor setup</li>
+  <li><a href="docs/multi-monitor.md">Multi-Monitor Setup</a> -- Display configuration guide</li>
+  <li><a href="docs/gpu-mode.md">GPU Mode Switching</a> -- NVIDIA Optimus control</li>
+</ul>
 
-### GPU Performance (NVIDIA)
-
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + ALT + G` | Cycle GPU mode (silent / normal / turbo) |
-| `SUPER + ALT + SHIFT + G` | Open GPU mode selector |
-
-### Multi-Monitor
-
-| Shortcut | Action |
-|----------|--------|
-| `SUPER + ALT + I` | Focus next monitor |
-| `SUPER + ALT + U` | Focus previous monitor |
-| `SUPER + ALT + SHIFT + I` | Move window to next monitor |
-| `SUPER + ALT + SHIFT + U` | Move window to previous monitor |
-| `SUPER + ALT + O` | Swap workspaces between monitors |
-| `SUPER + ALT + P` | Move workspace to next monitor |
-| `SUPER + ALT + M` | Open monitor manager |
-| `SUPER + ALT + SHIFT + M` | Show monitor info |
+<p align="center">
+  <a href="LICENSE">License</a> &middot;
+  <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> &middot;
+  <a href="ROADMAP.md">Roadmap</a> &middot;
+  <a href="CHANGELOG.md">Changelog</a> &middot;
+  <a href="SECURITY.md">Security</a>
+</p>
 
 
+<h2 align="center" id="related-repos">Related Repos</h2>
+<ul>
+  <li><a href="https://github.com/xscriptor/terminal">Terminal </a> <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/terminal-bash.svg" /></li>
+  <li><a href="https://github.com/xscriptor/nvim">Nvim </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/file-text.svg"/></li>
+  <li><a href="https://github.com/xscriptor/jetbrains">Jetbrains </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/project.svg"/></li>
+  <li><a href="https://github.com/xscriptor/vscode">VSCode </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/vscode-insiders.svg"/></li>
+  <li><a href="https://github.com/xscriptor/obsidian">Obsidian </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/markdown.svg"/></li>
+  <li><a href="https://github.com/xscriptor/xfetch">XFetch </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/git-fetch.svg"/></li>
+</ul>
 
-## Structure
+<div id="x" align="center">
+<h2>X</h2>
+<p><em>Based on imperative-dots by ilyamiro -- adapted, extended, and customized</em></p>
+<a href="https://dev.xscriptor.com">
+  <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/verified-filled.svg" width="24" alt="X Web" />
+</a>
+ & 
+<a href="https://github.com/xscriptor">
+  <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/github.svg" width="24" alt="X Github Profile" />
+</a>
+ & 
+<a href="https://www.xscriptor.com">
+  <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/quotes.svg" width="24" alt="Xscriptor web" />
+</a>
 
-```
-~/.config/
-├── hypr/
-│   ├── hyprland.conf          # Main configuration
-│   ├── keybinds.conf          # Keybindings
-│   ├── animations.conf        # Animation settings
-│   ├── windowrules.conf       # Window rules
-│   ├── workspaces.conf        # Workspace rules and multi-monitor
-│   ├── env.conf               # Environment variables (NVIDIA optimized)
-│   ├── autostart.conf         # Startup applications
-│   ├── theme.conf             # Current theme link
-│   ├── colors.conf            # Matugen-generated colors
-│   ├── themes/                # City color themes
-│   ├── templates/             # Template files
-│   ├── config/                # Additional config (variables, settings, rules)
-│   ├── scripts/
-│   │   ├── quickshell/        # QML-based UI components
-│   │   │   ├── Shell.qml      # Main shell entry point
-│   │   │   ├── TopBar.qml     # Top bar with workspaces, clock, system tray
-│   │   │   ├── Main.qml       # Widget overlay manager
-│   │   │   ├── Floating.qml   # Floating sidebar
-│   │   │   ├── wallpaper/     # Wallpaper picker with Matugen integration
-│   │   │   ├── applauncher/   # Application launcher
-│   │   │   ├── network/       # Network manager widget
-│   │   │   ├── volume/        # Volume control widget
-│   │   │   ├── battery/       # Battery status widget
-│   │   │   ├── music/         # Music player widget
-│   │   │   ├── calendar/      # Calendar and weather
-│   │   │   ├── clipboard/     # Clipboard manager
-│   │   │   └── ...            # Other widgets
-│   │   ├── qs_manager.sh      # QuickShell IPC manager
-│   │   ├── workspaces.sh      # Workspace data daemon
-│   │   ├── init.sh            # Initialization script
-│   │   ├── theme-switcher.sh  # Theme switcher
-│   │   └── ...                # Other utility scripts
-│   └── wallpapers/            # Wallpaper collection
-├── kitty/                     # Terminal configuration (with themes)
-├── waybar/                    # Status bar (legacy, not auto-started)
-├── rofi/                      # Application launcher themes (legacy)
-├── wlogout/                   # Logout menu
-├── dunst/                     # Notification daemon (legacy)
-├── cava/                      # Audio visualizer
-├── matugen/                   # Matugen templates and configuration
-└── swayosd/                   # On-screen display styles
-```
-
-
-
-## Customization
-
-### Theme and Wallpaper
-
-- Change wallpaper: `SUPER + W` (opens the QuickShell wallpaper picker)
-- Change theme (kitty, waybar, Hyprland): `SUPER + ALT + T`
-- Wallpapers are stored in `~/.config/hypr/wallpapers/`
-
-### Modifying Configuration
-
-- Keybindings: edit `~/.config/hypr/keybinds.conf`
-- Autostart applications: edit `~/.config/hypr/autostart.conf`
-- Environment variables: edit `~/.config/hypr/env.conf`
-- UI settings (scale, workspace count): use the settings panel (`SUPER + SHIFT + S`)
-
-### Multi-Monitor Setup
-
-1. Connect your external monitor.
-2. Identify your monitors: `hyprctl monitors all`
-3. Edit `~/.config/hypr/hyprland.conf` -- uncomment and adjust monitor lines.
-4. Edit `~/.config/hypr/workspaces.conf` -- replace `desc:` values with your monitor descriptions.
-5. Reload configuration: `SUPER + SHIFT + R`
-
-### GPU Mode Switching (NVIDIA Optimus)
-
-Switch between integrated, hybrid, and NVIDIA-only modes using `envycontrol`:
-
-| Mode | Effect | Use Case |
-|------|--------|----------|
-| Integrated | NVIDIA powered off | Maximum battery life, browsing, coding |
-| Hybrid | iGPU drives display, NVIDIA offloads | Balanced everyday use (default) |
-| NVIDIA | Dedicated GPU drives everything | Gaming, rendering, external monitors |
-
-Controls:
-- `SUPER + ALT + G` to cycle through modes
-- `SUPER + ALT + SHIFT + G` to open the mode selector
-
-Changing modes requires a reboot or logout to take effect.
-
-
-
-## Acknowledgments
-
-This configuration is based on [imperative-dots](https://github.com/ilyamiro/imperative-dots) by ilyamiro. The original project provided the foundation for the QuickShell-based UI, Matugen integration, and many of the QML widgets used here. This fork adapts and extends that work for the X environment, incorporating upstream changes where appropriate and introducing custom variations where the original design has been modified or replaced.
-
-- [ilyamiro / imperative-dots](https://github.com/ilyamiro/imperative-dots) -- original project
-- [Hyprland](https://hyprland.org/) -- the Wayland compositor
-- [QuickShell](https://github.com/Quickshell/Quickshell) -- QML shell environment
-- [Matugen](https://github.com/InioX/matugen) -- Material You color generation
-- [awww](https://github.com/desuwa/awww) -- wallpaper daemon
-- All upstream developers and the Hyprland community
-
-
-
-<div align="center">
-  <a href="./LICENSE">License</a>
-  &nbsp;|&nbsp;
-  <a href="./CODE_OF_CONDUCT.md">Code of Conduct</a>
-  &nbsp;|&nbsp;
-  <a href="./ROADMAP.md">Roadmap</a>
 </div>
