@@ -1,0 +1,10 @@
+[SddmGreeterTheme]
+Name=Matugen Minimal
+Description=A minimal, blurred SDDM theme synced with Matugen
+Copyright=2026
+License=MIT
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6
