@@ -10,13 +10,13 @@ echo "It will NOT uninstall packages or remove NVIDIA configuration."
 echo ""
 echo "The following will be removed:"
 echo "  - ~/.config/hypr"
-echo "  - ~/.config/waybar"
 echo "  - ~/.config/rofi"
-echo "  - ~/.config/wlogout"
 echo "  - ~/.config/dunst"
 echo "  - ~/.config/kitty"
-echo "  - ~/.config/hyprlock"
 echo "  - ~/.config/hypridle"
+echo "  - /usr/share/sddm/themes/matugen-minimal"
+echo "  - /etc/sddm.conf.d/10-matugen-theme.conf"
+echo "  - /etc/sddm.conf.d/z-disable-virtualkbd.conf"
 echo ""
 read -p "Continue? [y/N] " response
 
@@ -33,7 +33,7 @@ if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
     read -p "Restore from backup? [Y/n] " restore_response
     
     if [[ ! "$restore_response" =~ ^[Nn]$ ]]; then
-        for config in hypr waybar rofi wlogout kitty dunst hyprlock hypridle; do
+        for config in hypr rofi kitty dunst hypridle; do
             if [ -d "$BACKUP_DIR/$config" ]; then
                 rm -rf "$CONFIG_DIR/$config"
                 cp -r "$BACKUP_DIR/$config" "$CONFIG_DIR/"
@@ -48,13 +48,21 @@ fi
 # Remove configs
 echo "Removing configuration files..."
 rm -rf "$CONFIG_DIR/hypr"
-rm -rf "$CONFIG_DIR/waybar"
 rm -rf "$CONFIG_DIR/rofi"
-rm -rf "$CONFIG_DIR/wlogout"
 rm -rf "$CONFIG_DIR/dunst"
 rm -rf "$CONFIG_DIR/kitty"
-rm -rf "$CONFIG_DIR/hyprlock"
 rm -rf "$CONFIG_DIR/hypridle"
+
+# Restore SDDM theme override if it was backed up
+if [ -f /etc/sddm.conf.d/theme.conf.user.bak ]; then
+    sudo mv /etc/sddm.conf.d/theme.conf.user.bak /etc/sddm.conf.d/theme.conf.user
+    echo "Restored: theme.conf.user"
+fi
+
+# Remove SDDM theme and configs
+sudo rm -f /etc/sddm.conf.d/10-matugen-theme.conf
+sudo rm -f /etc/sddm.conf.d/z-disable-virtualkbd.conf
+sudo rm -rf /usr/share/sddm/themes/matugen-minimal
 
 # Remove wallpaper cache
 rm -rf "$HOME/.cache/wallpaper-thumbs"

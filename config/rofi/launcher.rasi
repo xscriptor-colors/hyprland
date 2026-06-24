@@ -7,7 +7,7 @@ configuration {
     window-format:              "{w} · {c} · {t}";
     
     /* Font */
-    font:                       "JetBrainsMono Nerd Font Bold 12";
+    font:                       "Hack Nerd Font Bold 12";
 }
 
 @import "colors.rasi"

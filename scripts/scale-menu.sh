@@ -32,8 +32,6 @@ hyprctl -j monitors | jq -r '.[] | [.name, .x, .y] | @tsv' | while IFS=$'\t' rea
     hyprctl keyword monitor "$name,preferred,${x}x${y},$scale" >/dev/null 2>&1
 done
 
-killall waybar 2>/dev/null
-sleep 0.2
-waybar &
-disown
+# Reload Quickshell to apply scale changes
+bash ~/.config/hypr/scripts/reload.sh 2>/dev/null || true
 

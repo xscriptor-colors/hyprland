@@ -1,530 +1,196 @@
-<h1 align="center"> Hyprland X Configuration</h1>
-
-<div align="center">
-
-![Hyprland](https://xscriptor.github.io/badges/desktops/hyprland.svg)
-![NVIDIA](https://xscriptor.github.io/badges/hardware/nvidia.svg)
-![Arch](https://xscriptor.github.io/badges/os/arch.svg) ![X](https://xscriptor.github.io/badges/os/x.svg) ![shell](https://xscriptor.github.io/badges/languages/shell.svg) ![mit](https://xscriptor.github.io/badges/licenses/mit.svg) 
-
-<br>
-
-**A premium, modern, and complete configuration for Hyprland**
-
-*13 color schemes - Optimized NVIDIA support - Automated installation*
-
-<br>
-
-<img src="./assets/icon.png" width="100" alt="Xscriptor logo" />
-
-</div>
-
-<br>
-<hr>
-
-<details open>
-  <summary><h2>Table of Contents</h2></summary>
-  <ul>
-    <li><a href="#previews">Previews</a></li>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#color-schemes">Color Schemes</a></li>
-    <li><a href="#requirements">Requirements</a>
-      <ul>
-        <li><a href="#system">System</a></li>
-        <li><a href="#gpu">GPU</a></li>
-      </ul>
-    </li>
-    <li><a href="#installation">Installation</a></li>
-    <li><a href="#keybindings">Keybindings</a></li>
-    <li><a href="#structure">Structure</a></li>
-    <li><a href="#customization">Customization</a></li>
-    <li><a href="#troubleshooting">Troubleshooting</a></li>
-    <li><a href="#related-documents">Related Documents</a></li>
-  </ul>
-</details>
-
-<hr>
-<br>
-
-<h2 id="previews" align="center">Previews</h2>
+<h1 align="center">Hyprland for X</h1>
 
 <p align="center">
-  <a href="./assets/previews/preview02.png">
-    <img src="./assets/previews/preview02.png" alt="Main preview" width="850"/>
-  </a>
+  <img src="https://img.shields.io/github/license/xscriptor/hyprland?style=flat-square&color=blue" alt="License">
+  <img src="https://img.shields.io/github/last-commit/xscriptor/hyprland?style=flat-square&color=blueviolet" alt="Last Commit">
+  <img src="https://img.shields.io/github/repo-size/xscriptor/hyprland?style=flat-square&color=success" alt="Repo Size">
+  <img src="https://img.shields.io/badge/Hyprland-v0.53+-8A2BE2?style=flat-square" alt="Hyprland">
+  <img src="https://img.shields.io/badge/Arch_Linux-supported-1793D1?style=flat-square&logo=arch-linux" alt="Arch">
+  <img src="https://img.shields.io/badge/X_Linux-supported-000000?style=flat-square" alt="X Linux">
+  <img src="https://img.shields.io/badge/QuickShell-QML-FF6F00?style=flat-square" alt="QuickShell">
+  <img src="https://img.shields.io/badge/Matugen-dynamic-FF69B4?style=flat-square" alt="Matugen">
 </p>
 
+<p align="center">
+  <em>
+  QuickShell QML shell + Matugen dynamic theming for Hyprland on X.
+  </em>
+</p>
+
+<h2 align="center">Content</h2>
+
+<p align="center">
+  <a href="#quick-install">Quick Install</a> &middot;
+  <a href="#features">Features</a> &middot;
+  <a href="#customization">Customization</a> &middot;
+  <a href="#quick-reference">Quick Reference</a> &middot;
+  <a href="#structure">Structure</a> &middot;
+  <a href="#documentation">Documentation</a> &middot;
+  <a href="#acknowledgments">Acknowledgments</a> &middot;
+  <a href="#x">X</a>
+</p>
+
+<a href="https://imgur.com/0fm1MOy">
+<img src="https://i.imgur.com/ahSvDyS.gif" width="900" alt="Demo" >
+</a>
+<p align="center"><em>Gif preview, follow the link to see the details.</em></p>
+
 <details>
-  <summary><b>Click to see more previews</b></summary>
+  <summary>Old Previews</summary>
   <br>
-  <table align="center">
+  <table>
     <tr>
-      <td align="center">
-        <a href="./assets/previews/preview01.png">
-          <img src="./assets/previews/preview01.png" alt="Preview 1" width="100%"/>
-        </a>
-      </td>
-      <td align="center">
-        <a href="./assets/previews/preview03.png">
-          <img src="./assets/previews/preview03.png" alt="Preview 3" width="100%"/>
-        </a>
-      </td>
-      <td align="center">
-        <a href="./assets/previews/preview04.png">
-          <img src="./assets/previews/preview04.png" alt="Preview 4" width="100%"/>
-        </a>
-      </td>
+      <td><img src="assets/previews/preview01.png" width="400" alt="Desktop"></td>
+      <td><img src="assets/previews/preview02.png" width="400" alt="Widgets"></td>
+    </tr>
+    <tr>
+      <td><img src="assets/previews/preview03.png" width="400" alt="Wallpaper Picker"></td>
+      <td><img src="assets/previews/preview04.png" width="400" alt="Lock Screen"></td>
     </tr>
   </table>
 </details>
 
-<br>
+---
 
-<h2 id="features">Features</h2>
+## Quick Install
 
-<ul>
-  <li><b>13 Color Themes</b> - From neon cyberpunk to elegant minimalism</li>
-  <li><b>NVIDIA Support</b> - Optimized for RTX 50xx, 40xx, 30xx, 20xx, and GTX series</li>
-  <li><b>GPU Performance Modes</b> - Switch between silent, normal, and turbo (NVIDIA)</li>
-  <li><b>Multi-Monitor</b> - Per-monitor workspace binding, smart workspace transitions</li>
-  <li><b>Monitor Manager</b> - Rofi menu to change layout, position, and refresh rate</li>
-  <li><b>Automated Installation</b> - Single command to configure everything</li>
-  <li><b>Premium Design</b> - Glassmorphism, smooth animations, and blur effects</li>
-  <li><b>Intuitive Keybindings</b> - GNOME/Windows style for easy transition</li>
-  <li><b>Smart Gaps</b> - Borders and gaps auto-hide with single window</li>
-  <li><b>Named Scratchpads</b> - Quick-toggle terminal, files, and music</li>
-  <li><b>Hyprlock</b> - Lock screen with blur and themes</li>
-  <li><b>Modular</b> - Configuration split into files for easy customization</li>
-</ul>
-
-<hr>
-
-<h2 id="color-schemes">Color Schemes</h2>
-
-<table align="center">
-  <thead>
-    <tr>
-      <th>Theme</th>
-      <th>Preview</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>X</b></td>
-      <td>Purple / Pink / Green</td>
-      <td>Main theme with magenta accents</td>
-    </tr>
-    <tr>
-      <td><b>Miami</b></td>
-      <td>Black / Pink / Cyan</td>
-      <td>Cyberpunk / Retrowave</td>
-    </tr>
-    <tr>
-      <td><b>Seul</b></td>
-      <td>Black / Pink / Cyan</td>
-      <td>Asian neon</td>
-    </tr>
-    <tr>
-      <td><b>Paris</b></td>
-      <td>Black / Pink / Blue</td>
-      <td>Elegant pastel blue</td>
-    </tr>
-    <tr>
-      <td><b>Tokio</b></td>
-      <td>Brown / Orange / Purple</td>
-      <td>Warm orange accents</td>
-    </tr>
-    <tr>
-      <td><b>Oslo</b></td>
-      <td>Blue / Red / Green</td>
-      <td>Nordic blue</td>
-    </tr>
-    <tr>
-      <td><b>Praha</b></td>
-      <td>Black / Red / Purple</td>
-      <td>Dracula-inspired</td>
-    </tr>
-    <tr>
-      <td><b>Bogota</b></td>
-      <td>Black / Cyan / Green</td>
-      <td>Vibrant cyan</td>
-    </tr>
-    <tr>
-      <td><b>Madrid</b></td>
-      <td>Black / Red / Green</td>
-      <td>Intense Spanish red</td>
-    </tr>
-    <tr>
-      <td><b>Lahabana</b></td>
-      <td>Brown / Pink / Green</td>
-      <td>Tropical lime green</td>
-    </tr>
-    <tr>
-      <td><b>Helsinki</b></td>
-      <td>White / Teal / Purple</td>
-      <td>Light Nordic theme</td>
-    </tr>
-    <tr>
-      <td><b>Berlin</b></td>
-      <td>Black / White / White</td>
-      <td>Elegant monochrome</td>
-    </tr>
-    <tr>
-      <td><b>London</b></td>
-      <td>Black / Gray / Gray</td>
-      <td>Subtle grayscale</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr>
-
-<h2 id="requirements">Requirements</h2>
-
-<h3 id="system">System</h3>
-<ul>
-  <li><b>Distribution</b>: Arch Linux (or derivatives: EndeavourOS, Manjaro, CachyOS, etc.)</li>
-  <li><b>Kernel</b>: Linux 6.x+ recommended</li>
-  <li><b>RAM</b>: 4GB minimum, 8GB+ recommended</li>
-</ul>
-
-<h3 id="gpu">GPU</h3>
-<table>
-  <thead>
-    <tr>
-      <th>GPU</th>
-      <th>Status</th>
-      <th>Notes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td><b>NVIDIA RTX 50xx</b></td><td>Supported</td><td><code>nvidia-dkms</code> driver recommended</td></tr>
-    <tr><td><b>NVIDIA RTX 40xx</b></td><td>Supported</td><td><code>nvidia-dkms</code> driver recommended</td></tr>
-    <tr><td><b>NVIDIA RTX 30xx</b></td><td>Supported</td><td><code>nvidia-dkms</code> driver recommended</td></tr>
-    <tr><td><b>NVIDIA RTX 20xx</b></td><td>Supported</td><td><code>nvidia-dkms</code> driver</td></tr>
-    <tr><td><b>NVIDIA GTX 16xx/10xx</b></td><td>Supported</td><td><code>nvidia-dkms</code> driver</td></tr>
-    <tr><td><b>AMD</b></td><td>Supported</td><td>Open source drivers</td></tr>
-    <tr><td><b>Intel</b></td><td>Supported</td><td>Open source drivers</td></tr>
-  </tbody>
-</table>
-
-<hr>
-
-<h2 id="installation">Installation</h2>
-
-<h3>Quick Install</h3>
-
-```bash
-git clone https://github.com/xscriptor/hyprland.git
+<pre><code>git clone https://github.com/xscriptor/hyprland.git
 cd hyprland
 chmod +x install.sh
-./install.sh
-```
+./install.sh</code></pre>
 
-<h3>Dotfiles Only (no system changes)</h3>
+<p><strong>Options:</strong> <code>--dotfiles-only</code> (config only), <code>--nvidia-only</code> (NVIDIA setup only).</p>
 
-```bash
-./install.sh --dotfiles-only
-```
-
-<h3>NVIDIA Configuration Only</h3>
-
-```bash
-./install.sh --nvidia-only
-```
+<p>The installer detects your distro and GPU, installs packages (Hyprland, QuickShell, Matugen, SwayOSD, kitty, rofi, and more), backs up existing configs, deploys all dotfiles, optionally configures NVIDIA Optimus, installs the SDDM theme, and generates initial colors from your wallpaper.</p>
 
 <hr>
 
-<h2 id="keybindings">Keybindings</h2>
-
-<details>
-  <summary><b>Applications</b></summary>
-  <br>
-  <table>
-    <tr><th>Shortcut</th><th>Action</th></tr>
-    <tr><td><code>SUPER + Return</code></td><td>Terminal (Kitty)</td></tr>
-    <tr><td><code>SUPER + T</code></td><td>Terminal (Kitty)</td></tr>
-    <tr><td><code>SUPER + Q</code></td><td>Close window</td></tr>
-    <tr><td><code>SUPER + SHIFT + Q</code></td><td>Exit Hyprland</td></tr>
-    <tr><td><code>SUPER + D</code></td><td>App launcher (Rofi)</td></tr>
-    <tr><td><code>SUPER + R</code></td><td>Run command (Rofi)</td></tr>
-    <tr><td><code>SUPER + E</code></td><td>File manager (Nautilus)</td></tr>
-    <tr><td><code>SUPER + B</code></td><td>Browser (Firefox)</td></tr>
-    <tr><td><code>SUPER + C</code></td><td>Code editor (VSCode)</td></tr>
-    <tr><td><code>SUPER + .</code></td><td>Emoji picker</td></tr>
-  </table>
-</details>
-
-<details>
-  <summary><b>Window Management</b></summary>
-  <br>
-  <table>
-    <tr><th>Shortcut</th><th>Action</th></tr>
-    <tr><td><code>SUPER + V</code></td><td>Toggle floating</td></tr>
-    <tr><td><code>SUPER + Space</code></td><td>Toggle floating</td></tr>
-    <tr><td><code>SUPER + F</code></td><td>Fullscreen</td></tr>
-    <tr><td><code>SUPER + M</code></td><td>Maximize</td></tr>
-    <tr><td><code>SUPER + G</code></td><td>Center window</td></tr>
-    <tr><td><code>SUPER + SHIFT + Space</code></td><td>Pin window</td></tr>
-    <tr><td><code>SUPER + P</code></td><td>Pseudo-tile</td></tr>
-    <tr><td><code>SUPER + J</code></td><td>Toggle split</td></tr>
-    <tr><td><code>ALT + Tab</code></td><td>Cycle windows (bring to top)</td></tr>
-  </table>
-</details>
-
-<details>
-  <summary><b>Focus and Movement</b></summary>
-  <br>
-  <table>
-    <tr><th>Shortcut</th><th>Action</th></tr>
-    <tr><td><code>SUPER + Arrow Keys</code></td><td>Move focus</td></tr>
-    <tr><td><code>SUPER + H/J/K/L</code></td><td>Move focus (vim)</td></tr>
-    <tr><td><code>SUPER + SHIFT + Arrows</code></td><td>Move window</td></tr>
-    <tr><td><code>SUPER + CTRL + Arrows</code></td><td>Resize window</td></tr>
-  </table>
-</details>
-
-<details>
-  <summary><b>Workspaces & Scratchpads</b></summary>
-  <br>
-  <table>
-    <tr><th>Shortcut</th><th>Action</th></tr>
-    <tr><td><code>SUPER + 1-9,0</code></td><td>Go to workspace 1-10</td></tr>
-    <tr><td><code>SUPER + SHIFT + 1-9,0</code></td><td>Move window to workspace</td></tr>
-    <tr><td><code>SUPER + CTRL + 1-9,0</code></td><td>Move window silently (stay on current)</td></tr>
-    <tr><td><code>SUPER + Page Up/Down</code></td><td>Previous/Next workspace</td></tr>
-    <tr><td><code>SUPER + Mouse Scroll</code></td><td>Change workspace</td></tr>
-    <tr><td><code>SUPER + Tab</code></td><td>Previous workspace (stays on current monitor)</td></tr>
-    <tr><td><code>SUPER + S</code></td><td>Toggle terminal scratchpad</td></tr>
-    <tr><td><code>SUPER + SHIFT + S</code></td><td>Move window to terminal scratchpad</td></tr>
-    <tr><td><code>SUPER + A</code></td><td>Toggle file manager scratchpad</td></tr>
-    <tr><td><code>SUPER + SHIFT + A</code></td><td>Move window to file manager scratchpad</td></tr>
-  </table>
-</details>
-
-<details>
-  <summary><b>Multi-Monitor</b></summary>
-  <br>
-  <table>
-    <tr><th>Shortcut</th><th>Action</th></tr>
-    <tr><td><code>SUPER + ALT + I</code></td><td>Focus next monitor</td></tr>
-    <tr><td><code>SUPER + ALT + U</code></td><td>Focus previous monitor</td></tr>
-    <tr><td><code>SUPER + ALT + SHIFT + I</code></td><td>Move window to next monitor</td></tr>
-    <tr><td><code>SUPER + ALT + SHIFT + U</code></td><td>Move window to previous monitor</td></tr>
-    <tr><td><code>SUPER + ALT + O</code></td><td>Swap workspaces between monitors</td></tr>
-    <tr><td><code>SUPER + ALT + P</code></td><td>Move workspace to next monitor</td></tr>
-    <tr><td><code>SUPER + ALT + M</code></td><td>Monitor manager (position/frequency)</td></tr>
-    <tr><td><code>SUPER + ALT + SHIFT + M</code></td><td>Show monitor info</td></tr>
-  </table>
-</details>
-
-<details>
-  <summary><b>GPU / Power / Media / Utils</b></summary>
-  <br>
-  <h4>GPU Performance (NVIDIA)</h4>
-  <table>
-    <tr><td><code>SUPER + ALT + G</code></td><td>Cycle GPU mode: silent / normal / turbo</td></tr>
-    <tr><td><code>SUPER + ALT + SHIFT + G</code></td><td>Open GPU mode selector (Rofi)</td></tr>
-  </table>
-  
-  <h4>Screenshots</h4>
-  <table>
-    <tr><td><code>Print</code></td><td>Full screenshot</td></tr>
-    <tr><td><code>SUPER + Print</code></td><td>Area screenshot</td></tr>
-    <tr><td><code>SUPER + SHIFT + S</code></td><td>Area screenshot</td></tr>
-    <tr><td><code>SUPER + SHIFT + Print</code></td><td>Window screenshot</td></tr>
-  </table>
-
-  <h4>Power and Lock</h4>
-  <table>
-    <tr><td><code>SUPER + L</code></td><td>Lock screen</td></tr>
-    <tr><td><code>SUPER + Escape</code></td><td>Power menu</td></tr>
-    <tr><td><code>SUPER + SHIFT + L</code></td><td>Power menu (wlogout)</td></tr>
-    <tr><td><code>SUPER + CTRL + L</code></td><td>Suspend</td></tr>
-    <tr><td><code>SUPER + CTRL + SHIFT + L</code></td><td>Shutdown</td></tr>
-  </table>
-
-  <h4>Brightness</h4>
-  <table>
-    <tr><td><code>XF86MonBrightnessUp</code></td><td>Brightness up</td></tr>
-    <tr><td><code>XF86MonBrightnessDown</code></td><td>Brightness down</td></tr>
-    <tr><td><code>SUPER + F3</code></td><td>Brightness up (fallback)</td></tr>
-    <tr><td><code>SUPER + F2</code></td><td>Brightness down (fallback)</td></tr>
-  </table>
-  <p><em>Note: Internal display uses brightnessctl. External monitors use ddcutil.</em></p>
-
-  <h4>Volume (without media keys)</h4>
-  <table>
-    <tr><td><code>SUPER + =</code></td><td>Volume up</td></tr>
-    <tr><td><code>SUPER + -</code></td><td>Volume down</td></tr>
-    <tr><td><code>SUPER + Backspace</code></td><td>Mute</td></tr>
-  </table>
-
-  <h4>Utilities</h4>
-  <table>
-    <tr><td><code>SUPER + ALT + T</code></td><td>Theme switcher</td></tr>
-    <tr><td><code>SUPER + W</code></td><td>Wallpaper selector</td></tr>
-    <tr><td><code>SUPER + Z</code></td><td>Scale menu (75%/80%/100%)</td></tr>
-    <tr><td><code>SUPER + SHIFT + C</code></td><td>Color picker</td></tr>
-    <tr><td><code>SUPER + SHIFT + V</code></td><td>Clipboard history</td></tr>
-    <tr><td><code>SUPER + N</code></td><td>Show notification</td></tr>
-    <tr><td><code>SUPER + SHIFT + N</code></td><td>Clear notifications</td></tr>
-    <tr><td><code>SUPER + SHIFT + B</code></td><td>Reload Waybar</td></tr>
-    <tr><td><code>SUPER + SHIFT + R</code></td><td>Reload Hyprland</td></tr>
-  </table>
-</details>
-
-<hr>
-
-<h2 id="structure">Structure</h2>
-
-```text
-~/.config/
-├── hypr/
-│   ├── hyprland.conf    # Main config
-│   ├── keybinds.conf    # Keybindings
-│   ├── animations.conf  # Animations
-│   ├── windowrules.conf # Window rules
-│   ├── workspaces.conf  # Workspace rules & multi-monitor
-│   ├── env.conf         # Variables (NVIDIA optimized)
-│   ├── autostart.conf   # Startup apps
-│   ├── theme.conf       # Current theme
-│   ├── themes/          # All themes
-│   ├── scripts/         # Helper scripts
-│   └── wallpapers/      # Wallpapers
-├── waybar/              # Status bar
-├── rofi/                # App launcher themes
-├── wlogout/             # Logout menu (layout/style/icons)
-└── dunst/               # Notifications
-```
-
-<hr>
-
-<h2 id="customization">Customization</h2>
-
-<details>
-  <summary><b>Change Theme & Wallpaper</b></summary>
-  <br>
-  <p><strong>Change Theme:</strong></p>
-  <pre><code>~/.config/hypr/scripts/theme-switcher.sh
-# Or use: SUPER + ALT + T</code></pre>
-  
-  <p><strong>Change Wallpaper:</strong></p>
-  <pre><code>~/.config/hypr/scripts/wallpaper.sh
-# Or use: SUPER + W</code></pre>
-</details>
-
-<details>
-  <summary><b>Modify Configurations</b></summary>
-  <br>
-  <ul>
-    <li><b>Modify Keybindings:</b> Edit <code>~/.config/hypr/keybinds.conf</code></li>
-    <li><b>Add Autostart Apps:</b> Edit <code>~/.config/hypr/autostart.conf</code></li>
-  </ul>
-</details>
-
-<details>
-  <summary><b>Multi-Monitor Setup</b></summary>
-  <br>
-  <ol>
-    <li>Connect your external monitor.</li>
-    <li>Identify your monitors: <code>hyprctl monitors all</code></li>
-    <li>Edit <code>~/.config/hypr/hyprland.conf</code> — uncomment and adjust the monitor lines.</li>
-    <li>Edit <code>~/.config/hypr/workspaces.conf</code> — uncomment the workspace bindings and replace the <code>desc:</code> values with your monitor descriptions.</li>
-    <li>Reload: <code>SUPER + SHIFT + R</code></li>
-  </ol>
-  <p><b>Example for laptop (eDP-1) + external (HDMI-A-1):</b></p>
-  <pre><code># hyprland.conf
-monitor = eDP-1, preferred, 0x0, 1
-monitor = HDMI-A-1, 1920x1080@60, 1920x0, 1
-
-# workspaces.conf
-workspace = 1, monitor:desc:BOE 0x0BCA (eDP-1), default:true
-workspace = 6, monitor:desc:Samsung Electric Company ... (HDMI-A-1), default:true</code></pre>
-</details>
-
-<details>
-  <summary><b>GPU Optimus Modes (EnvyControl)</b></summary>
-  <br>
-  <p>Safely switch between three graphics modes using <code>envycontrol</code> for NVIDIA Optimus laptops:</p>
-  <table>
-    <tr><th>Mode</th><th>Effect</th><th>Use Case</th></tr>
-    <tr><td><b>Integrated</b></td><td>NVIDIA completely powered off</td><td>Maximum battery life, coding, browsing</td></tr>
-    <tr><td><b>Hybrid</b></td><td>Intel/AMD drives display, NVIDIA offloads</td><td>Balanced everyday use (Default)</td></tr>
-    <tr><td><b>NVIDIA</b></td><td>NVIDIA drives everything</td><td>Gaming, rendering, external monitors</td></tr>
-  </table>
-  <blockquote><strong>Note:</strong> Changing modes requires a <strong>reboot</strong> or logging out to take effect.</blockquote>
-  <p><b>Control options:</b></p>
-  <ul>
-    <li><b>Waybar</b>: Click the GPU mode indicator to cycle, right-click for menu</li>
-    <li><b>Rofi menu</b>: <code>SUPER + ALT + SHIFT + G</code></li>
-    <li><b>Keybind</b>: <code>SUPER + ALT + G</code> to cycle modes</li>
-    <li><b>Terminal</b>: <code>~/.config/hypr/scripts/gpu-mode.sh [integrated|hybrid|nvidia]</code></li>
-  </ul>
-</details>
-
-<details>
-  <summary><b>Monitor Management</b></summary>
-  <br>
-  <p>Manage monitor position, layout, and refresh rate with a Rofi menu:</p>
-  <ul>
-    <li><b>Layout</b>: External on right / left / above / below</li>
-    <li><b>Mirror</b>: Mirror both displays</li>
-    <li><b>Single</b>: Only primary / only external</li>
-    <li><b>Refresh Rate</b>: 60 / 90 / 120 / 144 / 165 / 240 Hz</li>
-  </ul>
-  <p><b>Control options:</b></p>
-  <ul>
-    <li><b>Keybind</b>: <code>SUPER + ALT + M</code> to open menu</li>
-    <li><b>Info</b>: <code>SUPER + ALT + SHIFT + M</code> to show current monitor details</li>
-  </ul>
-</details>
-
-<hr>
-
-<h2 id="troubleshooting">Troubleshooting</h2>
-
-<details>
-  <summary><b>NVIDIA: Black screen or flickering</b></summary>
-  <br>
-  <ol>
-    <li>Verify that <code>nvidia_drm.modeset=1</code> is in kernel params.</li>
-    <li>Make sure to reboot after installing drivers.</li>
-    <li>Check services: <code>systemctl status nvidia-suspend</code></li>
-  </ol>
-</details>
-
-<details>
-  <summary><b>Waybar not showing</b></summary>
-  <br>
-  <pre><code>killall waybar
-waybar &</code></pre>
-</details>
-
-<details>
-  <summary><b>Rofi not responding</b></summary>
-  <br>
-  <pre><code>killall rofi</code></pre>
-</details>
-
-<details>
-  <summary><b>Hyprlock not working</b></summary>
-  <br>
-  <p>Verify hyprlock is installed:</p>
-  <pre><code>pacman -S hyprlock</code></pre>
-</details>
-
-<hr>
-
-
-
-<h2 id="related-documents">Related Documents</h2>
+<h2>Features</h2>
 
 <ul>
-  <li><a href="./LICENSE">License</a></li>
-  <li><a href="./CODE_OF_CONDUCT.md">Code of Conduct</a></li>
-  <li><a href="./CONTRIBUTING.md">Contributions</a></li>
-  <li><a href="./ROADMAP.md">Roadmap</a></li>
-  <li><a href="https://github.com/xscriptor">X Profile</a></li>
-  <li><a href="https://dev.xscriptor.com">Website</a></li>
+  <li><strong>QuickShell QML Interface</strong> -- Animated popup widgets, persistent top bar with workspaces and system tray, notification center, floating sidebar, wallpaper picker with DuckDuckGo search, app launcher, clipboard manager, network/Bluetooth panel, audio controls, calendar with weather, music player (MPRIS), focus time tracker, screen recording overlay with virtual audio routing, QR scanner, and more.</li>
+  <li><strong>Matugen Dynamic Theming</strong> -- Every component (Hyprland, Kitty, Neovim, Cava, SwayOSD, GTK, Qt, SDDM) gets colors from the current wallpaper. Change wallpaper, colors update everywhere.</li>
+  <li><strong>Modular Hyprland Config</strong> -- Split across focused files (keybinds, animations, window rules, autostart, workspaces, env, colors). Template-based dynamic reload from <code>settings.json</code>.</li>
+  <li><strong>NVIDIA Optimus Support</strong> -- <code>envycontrol</code>-based GPU mode switching (integrated/hybrid/nvidia) with keybind shortcuts and Rofi selector.</li>
+  <li><strong>Multi-Monitor</strong> -- Workspace binding per monitor, Rofi-based monitor manager with position/resolution/refresh rate control.</li>
+  <li><strong>Custom SDDM Theme</strong> -- <code>matugen-minimal</code> with user switching, session selection, Matugen colors, and wallpaper blur.</li>
+  <li><strong>Screen Recording</strong> -- GPU-accelerated capture with independent desktop/mic audio channels via virtual PipeWire sinks.</li>
+  <li><strong>Neovim Config Included</strong> -- lazy.nvim, LSP via Mason, Treesitter, custom theme engine with Matugen color integration.</li>
 </ul>
+
+<hr>
+
+<h2>Customization</h2>
+
+<ul>
+  <li><strong>Wallpaper:</strong> <code>SUPER + W</code> opens the wallpaper picker. Colors update automatically.</li>
+  <li><strong>Keybindings:</strong> Edit <code>~/.config/hypr/keybinds.conf</code></li>
+  <li><strong>Autostart:</strong> Edit <code>~/.config/hypr/autostart.conf</code></li>
+  <li><strong>Settings UI:</strong> <code>SUPER + SHIFT + S</code> opens the settings panel (scale, workspace count, language, startup behavior). Changes are applied live.</li>
+  <li><strong>Environment:</strong> Edit <code>~/.config/hypr/env.conf</code></li>
+</ul>
+
+<hr>
+
+<h2>Quick Reference</h2>
+
+<p><strong>Applications</strong><br>
+<code>SUPER + Return</code> Terminal &middot; <code>SUPER + D</code> App launcher &middot; <code>SUPER + E</code> Files &middot; <code>SUPER + F</code> Browser</p>
+
+<p><strong>Widgets</strong><br>
+<code>SUPER + M</code> Music &middot; <code>SUPER + C</code> Clipboard &middot; <code>SUPER + B</code> Battery &middot; <code>SUPER + W</code> Wallpaper &middot; <code>SUPER + S</code> Calendar &middot; <code>SUPER + N</code> Network &middot; <code>SUPER + V</code> Volume &middot; <code>SUPER + H</code> Guide &middot; <code>SUPER + SHIFT + S</code> Settings &middot; <code>SUPER + SHIFT + T</code> Focus Time</p>
+
+<p><strong>Windows</strong><br>
+<code>ALT + F4</code> Close &middot; <code>SUPER + Space</code> Toggle float &middot; <code>SUPER + G</code> Center &middot; <code>SUPER + J</code> Toggle split</p>
+
+<p><strong>Workspaces</strong><br>
+<code>SUPER + 1-0</code> Switch &middot; <code>SUPER + SHIFT + 1-0</code> Move to &middot; <code>SUPER + Tab</code> Previous &middot; <code>SUPER + A</code> Scratchpad</p>
+
+<p><strong>Lock / Power</strong><br>
+<code>SUPER + L</code> Lock &middot; <code>SUPER + Escape</code> Exit &middot; <code>SUPER + CTRL + L</code> Suspend &middot; <code>SUPER + CTRL + SHIFT + L</code> Shutdown</p>
+
+<p><strong>Screenshots</strong><br>
+<code>Print</code> Area &middot; <code>SUPER + Print</code> Full &middot; <code>SHIFT + Print</code> Area + edit &middot; <code>SUPER + SHIFT + Print</code> Full + edit</p>
+
+<p><strong>Display</strong><br>
+<code>SUPER + Z</code> Scale menu &middot; <code>SUPER + R</code> Reload QML &middot; <code>SUPER + SHIFT + R</code> Reload Hyprland</p>
+
+<p><strong>Multi-Monitor</strong><br>
+<code>SUPER + ALT + I/U</code> Focus monitor &middot; <code>SUPER + ALT + M</code> Monitor manager &middot; <code>SUPER + ALT + O</code> Swap workspaces</p>
+
+<p><strong>GPU (NVIDIA)</strong><br>
+<code>SUPER + ALT + G</code> Cycle mode &middot; <code>SUPER + ALT + SHIFT + G</code> Mode selector</p>
+
+<p>See <a href="docs/quick-reference.md">Quick Reference</a> for the full keybinding table.</p>
+
+<hr>
+
+<h2>Structure</h2>
+
+<pre><code>hyprland/
+  install.sh                  Automated installer
+  uninstall.sh                Config removal
+  config/hypr/                Hyprland modular configs + QuickShell QML widgets
+  config/kitty/               Terminal config + Matugen colors
+  config/rofi/                Launcher themes
+  config/dunst/               Notification daemon
+  config/cava/                Audio visualizer
+  config/hypridle/            Idle management (dim, lock, suspend)
+  config/matugen/             Matugen templates for all apps
+  config/sddm/                SDDM login theme (matugen-minimal)
+  config/nvim/                Neovim config with lazy.nvim
+  scripts/                    Shell scripts and daemons
+  assets/previews/            Screenshots</code></pre>
+
+<hr>
+
+<h2>Documentation</h2>
+
+<ul>
+  <li><a href="docs/installation.md">Installation</a> -- Full install, uninstall, and post-install guide</li>
+  <li><a href="docs/quick-reference.md">Quick Reference</a> -- All keybindings, widgets, and scripts at a glance</li>
+  <li><a href="docs/quickshell-widgets.md">QuickShell Widgets</a> -- Widget architecture, IPC system, and QML components</li>
+  <li><a href="docs/scripts.md">Scripts</a> -- All shell scripts and daemons</li>
+  <li><a href="docs/hyprland-config.md">Hyprland Configuration</a> -- Modular config structure and dynamic reload</li>
+  <li><a href="docs/matugen-integration.md">Matugen Integration</a> -- Dynamic color pipeline</li>
+  <li><a href="docs/screenshot-recording.md">Screenshots &amp; Recording</a> -- Capture system with virtual audio</li>
+  <li><a href="docs/neovim-config.md">Neovim Configuration</a> -- Included editor setup</li>
+  <li><a href="docs/multi-monitor.md">Multi-Monitor Setup</a> -- Display configuration guide</li>
+  <li><a href="docs/gpu-mode.md">GPU Mode Switching</a> -- NVIDIA Optimus control</li>
+</ul>
+
+<p align="center">
+  <a href="LICENSE">License</a> &middot;
+  <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> &middot;
+  <a href="ROADMAP.md">Roadmap</a> &middot;
+  <a href="CHANGELOG.md">Changelog</a> &middot;
+  <a href="SECURITY.md">Security</a>
+</p>
+
+
+<h2 align="center" id="related-repos">Related Repos</h2>
+<ul>
+  <li><a href="https://github.com/xscriptor/terminal">Terminal </a> <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/terminal-bash.svg" /></li>
+  <li><a href="https://github.com/xscriptor/nvim">Nvim </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/file-text.svg"/></li>
+  <li><a href="https://github.com/xscriptor/jetbrains">Jetbrains </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/project.svg"/></li>
+  <li><a href="https://github.com/xscriptor/vscode">VSCode </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/vscode-insiders.svg"/></li>
+  <li><a href="https://github.com/xscriptor/obsidian">Obsidian </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/markdown.svg"/></li>
+  <li><a href="https://github.com/xscriptor/xfetch">XFetch </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/git-fetch.svg"/></li>
+</ul>
+
+<div id="x" align="center">
+<h2>X</h2>
+<p><em>Based on imperative-dots by ilyamiro -- adapted, extended, and customized</em></p>
+<a href="https://dev.xscriptor.com">
+  <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/verified-filled.svg" width="24" alt="X Web" />
+</a>
+ & 
+<a href="https://github.com/xscriptor">
+  <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/github.svg" width="24" alt="X Github Profile" />
+</a>
+ & 
+<a href="https://www.xscriptor.com">
+  <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/quotes.svg" width="24" alt="Xscriptor web" />
+</a>
+
+</div>

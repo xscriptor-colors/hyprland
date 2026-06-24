@@ -1,0 +1,22 @@
+{
+  "videos": [
+    {
+      "version": "1.7.3",
+      "url": "https://github.com/xscriptor/media/releases/download/v1.7.3/update_1_7_3.mp4"
+    },
+    {
+      "version": "1.7.4-1",
+      "url": "",
+      "force_startup_overwrite": true,
+      "warning_message": "This update contains a major architectural change.\nYour startup overrides MUST be reset to upstream defaults to prevent system issues. I apologize for the inconvinience"
+    },
+    {
+      "version": "1.7.5",
+      "url": "https://github.com/xscriptor/media/releases/download/v1.7.5/update.mp4"
+    },
+    {
+      "version": "1.7.6",
+      "url": "https://github.com/xscriptor/media/releases/download/v1.7.6/update.mp4"
+    }
+  ]
+}
