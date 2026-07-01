@@ -240,6 +240,10 @@ Variants {
             property string weatherTemp: "--°"
             property string weatherHex: mocha.yellow
             
+            property string cpuPercent: "--"
+            property string ramPercent: "--"
+            property bool sysDataReady: false
+
             property string wifiStatus: "Off"
             property string wifiIcon: "󰤮"
             property string wifiSsid: ""
@@ -563,6 +567,23 @@ Variants {
             }
             Timer { interval: 150000; running: true; repeat: true; triggeredOnStart: true; onTriggered: { weatherPoller.running = false; weatherPoller.running = true; } }
 
+            Process {
+                id: sysmonPoller; running: true
+                command: ["bash", "-c", Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/system-monitor/fetch.sh"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        try {
+                            if (this.text && this.text.trim().length > 0) {
+                                let d = JSON.parse(this.text.trim())
+                                barWindow.cpuPercent = (d.cpu || 0) + "%"
+                                barWindow.ramPercent = (d.ram_pct || 0) + "%"
+                                barWindow.sysDataReady = true
+                            }
+                        } catch(e) {}
+                    }
+                }
+            }
+            Timer { interval: 8000; running: true; repeat: true; triggeredOnStart: false; onTriggered: { sysmonPoller.running = false; sysmonPoller.running = true } }
 
             Timer {
                 interval: 1000; running: true; repeat: true; triggeredOnStart: true
@@ -1454,6 +1475,48 @@ Variants {
                                     }
                                 }
                                 MouseArea { id: btMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"]) }
+                            }
+
+                            Rectangle {
+                                property bool isHovered: sysMouse.containsMouse
+                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
+                                radius: barWindow.s(20); height: sysLayout.pillHeight;
+                                clip: true
+
+                                Rectangle {
+                                    anchors.fill: parent; radius: barWindow.s(20)
+                                    opacity: barWindow.sysDataReady ? 1.0 : 0.0
+                                    Behavior on opacity { NumberAnimation { duration: 300 } }
+                                    color: mocha.sapphire
+                                }
+
+                                property real targetWidth: sysLayoutRow.implicitWidth + barWindow.s(24)
+                                width: targetWidth
+                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
+
+                                scale: isHovered ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+                                Behavior on color { ColorAnimation { duration: 200 } }
+
+                                property bool initAnimTrigger: false
+                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 140; onTriggered: parent.initAnimTrigger = true }
+                                opacity: initAnimTrigger ? 1 : 0
+                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
+                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+
+                                Row {
+                                    id: sysLayoutRow
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: barWindow.s(12)
+                                    spacing: barWindow.s(10)
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "\uF0E4"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); color: barWindow.sysDataReady ? mocha.base : mocha.subtext0 }
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.cpuPercent; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(12); font.weight: Font.Black; color: barWindow.sysDataReady ? mocha.base : mocha.text }
+                                    Rectangle { width: barWindow.s(1); height: barWindow.s(16); color: mocha.overlay0; opacity: 0.3 }
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "\uF538"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); color: barWindow.sysDataReady ? mocha.base : mocha.subtext0 }
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.ramPercent; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(12); font.weight: Font.Black; color: barWindow.sysDataReady ? mocha.base : mocha.text }
+                                }
+                                MouseArea { id: sysMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle system-monitor"]) }
                             }
 
                             Rectangle {
