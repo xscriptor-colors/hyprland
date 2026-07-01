@@ -27,6 +27,12 @@
 | SUPER + H | Toggle guide panel |
 | SUPER + SHIFT + S | Toggle settings panel |
 | SUPER + SHIFT + T | Toggle focus time tracker |
+| SUPER + U | Toggle system updater |
+| SUPER + X | Toggle Stewart (ambient visualizer) |
+| SUPER + Y | Toggle quick notes |
+| SUPER + I | Toggle system monitor (CPU/RAM/disk) |
+| SUPER + O | Toggle RSS reader |
+| SUPER + ' | Toggle file search |
 
 ## Window Management
 

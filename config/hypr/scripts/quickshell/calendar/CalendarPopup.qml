@@ -46,11 +46,6 @@ Item {
         if (typeof masterWindow !== "undefined") {
             masterWindow.animW = window.targetMasterWidth;
             masterWindow.targetW = window.targetMasterWidth;
-            
-            // Re-center horizontally to keep the popup perfectly in the middle when scaling changes
-            let newX = Math.floor((Screen.width / 2) - (window.targetMasterWidth / 2));
-            masterWindow.targetX = newX;
-            masterWindow.animX = newX;
         }
     }
 

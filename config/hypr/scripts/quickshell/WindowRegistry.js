@@ -46,8 +46,12 @@ function getLayout(name, mx, my, mw, mh, userScale) {
 
         // --- Extralarge / Custom Centered ---
         "guide":     { w: s(1200, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1200, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "guide/GuidePopup.qml" },
-        "calendar":  { w: s(1450, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1450, scale)/2)), ry: s(60, scale), comp: "calendar/CalendarPopup.qml" },
-	"updater": { w: s(950, scale), h: s(850, scale), rx: Math.floor((mw/2)-(s(950, scale)/2)), ry: Math.floor((mh/2)-(s(850, scale)/2)), comp: "updater/UpdaterPopup.qml" },
+        "calendar":  { w: s(1450, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1450, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "calendar/CalendarPopup.qml" },
+        "updater": { w: s(950, scale), h: s(850, scale), rx: Math.floor((mw/2)-(s(950, scale)/2)), ry: Math.floor((mh/2)-(s(850, scale)/2)), comp: "updater/UpdaterPopup.qml" },
+        "system-monitor": { w: s(580, scale), h: s(480, scale), rx: Math.floor((mw/2)-(s(580, scale)/2)), ry: Math.floor((mh/2)-(s(480, scale)/2)), comp: "system-monitor/SystemMonitor.qml" },
+        "quicknotes": { w: s(480, scale), h: s(460, scale), rx: Math.floor((mw/2)-(s(480, scale)/2)), ry: Math.floor((mh/2)-(s(460, scale)/2)), comp: "quicknotes/QuickNotes.qml" },
+        "rss-reader": { w: s(650, scale), h: s(560, scale), rx: Math.floor((mw/2)-(s(650, scale)/2)), ry: Math.floor((mh/2)-(s(560, scale)/2)), comp: "rss-reader/RssReader.qml" },
+        "file-search": { w: s(600, scale), h: s(500, scale), rx: Math.floor((mw/2)-(s(600, scale)/2)), ry: Math.floor((mh/2)-(s(500, scale)/2)), comp: "file-search/FileSearch.qml" },
         "wallpaper": { w: mw, h: s(650, scale), rx: 0, ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "wallpaper/WallpaperPicker.qml" },
         
         // --- Top Left Edge ---

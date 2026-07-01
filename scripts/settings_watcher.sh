@@ -92,12 +92,19 @@ compile_settings() {
 
     # 5. Regenerate monitors.conf
     echo "Regenerating monitors.conf..."
-    cp "$TMPL_DIR/monitors.conf.template" "$MONITORS_CONF"
     MONITOR_COUNT=$(jq '.monitors | length' "$SETTINGS_FILE" 2>/dev/null)
     if [[ "$MONITOR_COUNT" -gt 0 ]]; then
+        cp "$TMPL_DIR/monitors.conf.template" "$MONITORS_CONF"
         jq -r '.monitors[]? | "monitor = \(.name), \(.resW)x\(.resH)@\(.rate), \(.x)x\(.y), \(.scale)\(if .transform and .transform != 0 then ", transform, \(.transform)" else "" end)"' "$SETTINGS_FILE" >> "$MONITORS_CONF"
     else
-        echo "monitor = , preferred, auto, 1" >> "$MONITORS_CONF"
+        # Fallback: auto-detect with max refresh rate per monitor
+        DETECT_SCRIPT="$HOME/.config/hypr/scripts/detect-monitors.sh"
+        if [ -x "$DETECT_SCRIPT" ]; then
+            "$DETECT_SCRIPT" --silent
+        else
+            cp "$TMPL_DIR/monitors.conf.template" "$MONITORS_CONF"
+            echo "monitor = , preferred, auto, 1" >> "$MONITORS_CONF"
+        fi
     fi
 
     # Hash after changes

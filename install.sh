@@ -901,6 +901,14 @@ main() {
     # Create directories
     create_directories
 
+    # Run initial monitor detection (sets max refresh rate per monitor)
+    log "Running initial monitor detection..."
+    bash "$CONFIG_DIR/hypr/scripts/detect-monitors.sh" --silent 2>/dev/null || true
+
+    # Run initial monitor detection (sets max refresh rate per monitor)
+    log "Running initial monitor detection..."
+    bash "$CONFIG_DIR/hypr/scripts/detect-monitors.sh" --silent 2>/dev/null || true
+
     # Enable core system services
     log "Enabling core system services..."
     sudo systemctl enable NetworkManager.service 2>/dev/null || true
