@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+### Added
+- `scripts/detect-monitors.sh` -- auto-detects all connected monitors and generates `config/monitors.conf` with each monitor set to its highest available refresh rate. Runs on startup and at install time.
+
+### Changed
+- `hyprland.conf` -- replaced hardcoded `monitor = , preferred, auto, 1` with `source = ~/.config/hypr/config/monitors.conf`, enabling per-monitor max refresh rate detection and GUI-based monitor management to take effect.
+- `scripts/settings_watcher.sh` -- fallback path (no monitors in settings.json) now calls `detect-monitors.sh` instead of hardcoding `preferred`, ensuring new or unconfigured monitors always get the best rate.
+- `config/hypr/autostart.conf` -- added `exec-once = ~/.config/hypr/scripts/detect-monitors.sh` before init so monitors are configured at every session start.
+- `install.sh` -- runs `detect-monitors.sh --silent` after deploying dotfiles so the first boot already has the correct refresh rate.
+
+### Fixed
+- Monitor refresh rate resetting to 60Hz on systems that support higher rates (e.g. 144Hz). The root cause was `monitor = , preferred, auto, 1` picking the EDID default (usually 60Hz) and the generated `monitors.conf` never being sourced by `hyprland.conf`.
+
+### Changed
+- `scripts/quickshell/applauncher/app_fetcher.py` -- complete rewrite:
+  - Replaced broad substring blocklist with desktop file ID prefix/exact matching, keyword matching, and exec path matching. Prevents false positives where real apps were caught by overly broad terms like "network" or "arch".
+  - Parses additional .desktop fields: `GenericName`, `Comment`, `Categories`, `Keywords` for richer search.
+  - Honors `Hidden=true` and `NotShowIn=Hyprland` per the freedesktop spec.
+  - Hides zero-usage apps once the user has accumulated 15+ total launches across 3+ unique apps, keeping the list clean of never-used entries.
+- `scripts/quickshell/applauncher/appLauncher.qml`:
+  - Fixed usage tracking base64 key mismatch: `echo "$1"` (which appends `\n`) was replaced with `printf '%s' "$1"` so the bash-side key matches Python's `b64encode()`. This was the root cause of apps never being sorted by frequency despite being used repeatedly.
+  - Search now also matches `generic_name`, `comment`, `categories`, and `keywords` in addition to `name` and `exec`.
+
 ## [1.0.4] - 2026-01-25
 
 ### Fixed

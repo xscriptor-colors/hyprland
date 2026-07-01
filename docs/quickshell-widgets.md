@@ -30,8 +30,14 @@ Accessible via keybinds (SUPER + letter):
 | Settings | `settings/SettingsPopup.qml` | SUPER + SHIFT + S | Left edge |
 | Focus Time | `focustime/FocusTimePopup.qml` | SUPER + SHIFT + T | Center |
 | Movie Widget | `movies/MovieWidget.qml` | SUPER + P | Bottom center |
-| Stewart | `stewart/stewart.qml` | (internal) | Center |
-| Updater | `updater/UpdaterPopup.qml` | (auto) | Center |
+| Stewart | `stewart/stewart.qml` | SUPER + X | Center |
+| Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
+| Stewart | `stewart/stewart.qml` | SUPER + X | Center |
+| Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
+| System Monitor | `system-monitor/SystemMonitor.qml` | SUPER + I | Center |
+| Quick Notes | `quicknotes/QuickNotes.qml` | SUPER + Y | Center |
+| RSS Reader | `rss-reader/RssReader.qml` | SUPER + O | Center |
+| File Search | `file-search/FileSearch.qml` | SUPER + ' | Center |
 | Quick Actions | `quickactions/DrawAction.qml`, `SystemUsage.qml`, `Timer.qml` | (internal) | Varies |
 
 ## Specialty QML Windows

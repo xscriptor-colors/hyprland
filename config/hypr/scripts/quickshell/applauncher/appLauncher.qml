@@ -99,9 +99,13 @@ Item {
         
         for (let i = 0; i < allApps.length; i++) {
             let app = allApps[i];
-            if (app.name.toLowerCase().includes(q) || app.exec.toLowerCase().includes(q)) {
-                filtered.push(app);
-            }
+
+            if (app.name.toLowerCase().includes(q)) { filtered.push(app); continue; }
+            if (app.exec.toLowerCase().includes(q)) { filtered.push(app); continue; }
+            if (app.generic_name && app.generic_name.toLowerCase().includes(q)) { filtered.push(app); continue; }
+            if (app.comment && app.comment.toLowerCase().includes(q)) { filtered.push(app); continue; }
+            if (app.categories && app.categories.toLowerCase().includes(q)) { filtered.push(app); continue; }
+            if (app.keywords && app.keywords.toLowerCase().includes(q)) { filtered.push(app); continue; }
         }
 
         for (let i = appModel.count - 1; i >= 0; i--) {
@@ -147,7 +151,7 @@ Item {
     }
 
     function launchApp(execStr) {
-        Quickshell.execDetached(["bash", "-c", "mkdir -p ~/.cache/quickshell && USAGE=\"$HOME/.cache/quickshell/applauncher_usage.json\"; [ ! -f \"$USAGE\" ] && echo '{}' > \"$USAGE\"; KEY=$(echo \"$1\" | base64 -w0); COUNT=$(jq -r \".[\\\"$KEY\\\"].count // 0\" \"$USAGE\"); LAST=$(date +%s); jq \".[\\\"$KEY\\\"] = {\\\"count\\\": ($COUNT + 1), \\\"last_used\\\": $LAST}\" \"$USAGE\" > \"$USAGE.tmp\" && mv \"$USAGE.tmp\" \"$USAGE\"", "bash", execStr]);
+        Quickshell.execDetached(["bash", "-c", "mkdir -p ~/.cache/quickshell && USAGE=\"$HOME/.cache/quickshell/applauncher_usage.json\"; [ ! -f \"$USAGE\" ] && echo '{}' > \"$USAGE\"; KEY=$(printf '%s' \"$1\" | base64 -w0); COUNT=$(jq -r \".[\\\"$KEY\\\"].count // 0\" \"$USAGE\"); LAST=$(date +%s); jq \".[\\\"$KEY\\\"] = {\\\"count\\\": ($COUNT + 1), \\\"last_used\\\": $LAST}\" \"$USAGE\" > \"$USAGE.tmp\" && mv \"$USAGE.tmp\" \"$USAGE\"", "bash", execStr]);
         Quickshell.execDetached(["hyprctl", "dispatch", "exec", "--", execStr]);
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
     }
@@ -473,16 +477,27 @@ Item {
                                 }
                                 Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
 
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: model.name.charAt(0).toUpperCase()
+                                    color: window.subtext0
+                                    font.family: "Hack Nerd Font"
+                                    font.pixelSize: window.s(16)
+                                    font.weight: Font.Bold
+                                }
                                 Image {
                                     anchors.centerIn: parent
                                     width: window.s(24)
                                     height: window.s(24)
-                                    source: model.icon.startsWith("/") ? "file://" + model.icon : "image://icon/" + model.icon
+                                    source: model.icon && model.icon.length > 0
+                                        ? (model.icon.startsWith("/") ? "file://" + model.icon : "image://icon/" + model.icon)
+                                        : ""
                                     sourceSize: Qt.size(64, 64)
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
                                     smooth: true
                                     mipmap: true
+                                    visible: source !== ""
                                 }
                                 
                                 // The Matugen Tint Overlay
