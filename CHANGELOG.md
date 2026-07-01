@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+- `scripts/detect-monitors.sh` -- auto-detects all connected monitors and generates `config/monitors.conf` with each monitor set to its highest available refresh rate. Runs on startup and at install time.
+
+### Changed
+- `hyprland.conf` -- replaced hardcoded `monitor = , preferred, auto, 1` with `source = ~/.config/hypr/config/monitors.conf`, enabling per-monitor max refresh rate detection and GUI-based monitor management to take effect.
+- `scripts/settings_watcher.sh` -- fallback path (no monitors in settings.json) now calls `detect-monitors.sh` instead of hardcoding `preferred`, ensuring new or unconfigured monitors always get the best rate.
+- `config/hypr/autostart.conf` -- added `exec-once = ~/.config/hypr/scripts/detect-monitors.sh` before init so monitors are configured at every session start.
+- `install.sh` -- runs `detect-monitors.sh --silent` after deploying dotfiles so the first boot already has the correct refresh rate.
+
+### Fixed
+- Monitor refresh rate resetting to 60Hz on systems that support higher rates (e.g. 144Hz). The root cause was `monitor = , preferred, auto, 1` picking the EDID default (usually 60Hz) and the generated `monitors.conf` never being sourced by `hyprland.conf`.
+
 ## [1.0.4] - 2026-01-25
 
 ### Fixed
