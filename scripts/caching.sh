@@ -11,7 +11,7 @@ QS_DIR="$SCRIPT_DIR/quickshell"
 # Function to dynamically create and export cache directories for ANY module by request
 qs_ensure_cache() {
     local WIDGET_NAME="$1"
-    local WIDGET_UPPER=$(echo "$WIDGET_NAME" | tr '[:lower:]' '[:upper:]')
+    local WIDGET_UPPER=$(echo "$WIDGET_NAME" | tr '[:lower:]-' '[:upper:]_')
     
     local WIDGET_CACHE="$QS_CACHE_DIR/$WIDGET_NAME"
     local WIDGET_STATE="$QS_STATE_DIR/$WIDGET_NAME"

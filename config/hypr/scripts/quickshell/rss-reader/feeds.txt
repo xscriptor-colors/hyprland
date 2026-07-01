@@ -1,0 +1,13 @@
+# One RSS/Atom feed URL per line
+# Lines starting with # are ignored.
+
+# International
+https://hnrss.org/frontpage
+https://lobste.rs/rss
+https://www.phoronix.com/rss.php
+https://wiki.archlinux.org/index.php?title=Special:RecentChanges&feed=atom
+
+# Spanish
+https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml
+https://www.abc.es/rss/2.0/portada.xml

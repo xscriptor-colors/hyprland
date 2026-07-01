@@ -34,6 +34,10 @@ Accessible via keybinds (SUPER + letter):
 | Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
 | Stewart | `stewart/stewart.qml` | SUPER + X | Center |
 | Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
+| System Monitor | `system-monitor/SystemMonitor.qml` | SUPER + I | Center |
+| Quick Notes | `quicknotes/QuickNotes.qml` | SUPER + Y | Center |
+| RSS Reader | `rss-reader/RssReader.qml` | SUPER + O | Center |
+| File Search | `file-search/FileSearch.qml` | SUPER + ' | Center |
 | Quick Actions | `quickactions/DrawAction.qml`, `SystemUsage.qml`, `Timer.qml` | (internal) | Varies |
 
 ## Specialty QML Windows
