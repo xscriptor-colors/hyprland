@@ -47,16 +47,41 @@ KEYWORD_BLOCKLIST = [
 def is_system_app(name, desktop_id):
     name_lower = name.lower()
 
-    # Check by desktop file ID
     if desktop_id in DESKTOP_ID_BLOCKLIST:
         return True
 
-    # Check by keyword
     for keyword in KEYWORD_BLOCKLIST:
         if keyword in name_lower:
             return True
 
     return False
+
+
+# Icons known to look bad at launcher size (hardware diag, generic placeholders)
+BAD_ICONS = {
+    'hwinfo', 'krfb', 'krdc', 'preferences-system',
+    'utilities-log-viewer', 'utilities-file-archiver',
+    'document-print', 'accessories-calculator',
+    'nm-device-wireless', 'network-wired', 'network-server',
+    'emblem-system', 'computer', 'drive-harddisk',
+    'input-mouse', 'input-keyboard', 'input-tablet',
+    'media-optical', 'printer', 'camera-photo',
+    'phone', 'modem', 'multimedia-player',
+    'package-x-generic', 'text-x-generic', 'application-x-executable',
+    'application-default-icon',
+}
+
+
+def validate_icon(icon_name):
+    if not icon_name:
+        return ''
+    if icon_name.startswith('/'):
+        return icon_name if os.path.exists(icon_name) else ''
+
+    if icon_name in BAD_ICONS:
+        return ''
+
+    return icon_name
 
 
 def load_usage_db():
@@ -165,6 +190,8 @@ def fetch_apps():
 
                     if is_system_app(app['name'], desktop_id):
                         continue
+
+                    app['icon'] = validate_icon(app['icon'])
 
                     key = base64.b64encode(app['exec'].encode()).decode()
                     usage = usage_db.get(key, {})

@@ -497,6 +497,7 @@ Item {
                                     asynchronous: true
                                     smooth: true
                                     mipmap: true
+                                    visible: source !== ""
                                 }
                                 
                                 // The Matugen Tint Overlay
