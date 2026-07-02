@@ -633,6 +633,18 @@ install_hack_nerd_font() {
 
     fc-cache -f "$FONT_DIR" 2>/dev/null || true
     log "Font cache updated."
+
+    # Install system-wide for SDDM login screen
+    if [ -f "$FONT_PATH" ]; then
+        log "Installing font system-wide for SDDM..."
+        if sudo cp "$FONT_PATH" /usr/share/fonts/ 2>/dev/null; then
+            sudo fc-cache -f 2>/dev/null || true
+            log "System-wide font installed."
+        else
+            warn "Could not install font system-wide (sudo may have failed). SDDM may show missing icons."
+            warn "Run manually: sudo cp ~/.local/share/fonts/HackNerdFont-Regular.ttf /usr/share/fonts/ && sudo fc-cache -f"
+        fi
+    fi
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
