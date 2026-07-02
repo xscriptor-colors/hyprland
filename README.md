@@ -1,4 +1,4 @@
-<h1 align="center">Hyprland for X</h1>
+<h1 align="center">X  Hyprland</h1>
 
 <p align="center">
   <img src="https://img.shields.io/github/license/xscriptor/hyprland?style=flat-square&color=blue" alt="License">
@@ -30,10 +30,10 @@
   <a href="#x">X</a>
 </p>
 
-<a href="https://imgur.com/0fm1MOy">
-<img src="https://i.imgur.com/ahSvDyS.gif" width="900" alt="Demo" >
-</a>
-<p align="center"><em>Gif preview, follow the link to see the details.</em></p>
+<img src="https://i.imgur.com/VKgCm5c.gif" width="900" alt="Demo">
+
+<a href="https://imgur.com/aoKrCCB">
+<p align="center"><em>Gif preview, follow the link to see the video.</em></p></a>
 
 <details>
   <summary>Old Previews</summary>
@@ -68,60 +68,30 @@ chmod +x install.sh
 <h2>Features</h2>
 
 <ul>
-  <li><strong>QuickShell QML Interface</strong> -- Animated popup widgets, persistent top bar with workspaces and system tray, notification center, floating sidebar, wallpaper picker with DuckDuckGo search, app launcher, clipboard manager, network/Bluetooth panel, audio controls, calendar with weather, music player (MPRIS), focus time tracker, screen recording overlay with virtual audio routing, QR scanner, and more.</li>
-  <li><strong>Matugen Dynamic Theming</strong> -- Every component (Hyprland, Kitty, Neovim, Cava, SwayOSD, GTK, Qt, SDDM) gets colors from the current wallpaper. Change wallpaper, colors update everywhere.</li>
-  <li><strong>Modular Hyprland Config</strong> -- Split across focused files (keybinds, animations, window rules, autostart, workspaces, env, colors). Template-based dynamic reload from <code>settings.json</code>.</li>
-  <li><strong>NVIDIA Optimus Support</strong> -- <code>envycontrol</code>-based GPU mode switching (integrated/hybrid/nvidia) with keybind shortcuts and Rofi selector.</li>
-  <li><strong>Multi-Monitor</strong> -- Workspace binding per monitor, Rofi-based monitor manager with position/resolution/refresh rate control.</li>
-  <li><strong>Custom SDDM Theme</strong> -- <code>matugen-minimal</code> with user switching, session selection, Matugen colors, and wallpaper blur.</li>
-  <li><strong>Screen Recording</strong> -- GPU-accelerated capture with independent desktop/mic audio channels via virtual PipeWire sinks.</li>
-  <li><strong>Neovim Config Included</strong> -- lazy.nvim, LSP via Mason, Treesitter, custom theme engine with Matugen color integration.</li>
+  <li><strong>QuickShell QML UI</strong> -- App launcher, clipboard, calendar/weather, network, audio, battery, music (MPRIS), wallpaper picker, system monitor, RSS reader, file search, quick notes, focus timer, screen recording, QR scanner.</li>
+  <li><strong>Matugen Dynamic Theming</strong> -- Colors extracted from wallpaper, applied to Hyprland, Kitty, Neovim, Cava, SwayOSD, GTK, Qt, SDDM.</li>
+  <li><strong>Modular Config</strong> -- Split across focused files. Template-based reload from <code>settings.json</code>.</li>
+  <li><strong>NVIDIA Optimus</strong> -- GPU mode switching (integrated/hybrid/nvidia) via keybind or Rofi.</li>
+  <li><strong>Multi-Monitor</strong> -- Workspace binding, Rofi-based position/resolution/refresh rate manager.</li>
+  <li><strong>SDDM Theme</strong> -- <code>matugen-minimal</code> with Matugen colors and wallpaper blur.</li>
+  <li><strong>Screen Recording</strong> -- GPU capture with separate desktop/mic audio channels.</li>
+  <li><strong>Neovim Config</strong> -- lazy.nvim, LSP (Mason), Treesitter, custom themes with Matugen colors.</li>
 </ul>
 
 <hr>
 
 <h2>Customization</h2>
 
-<ul>
-  <li><strong>Wallpaper:</strong> <code>SUPER + W</code> opens the wallpaper picker. Colors update automatically.</li>
-  <li><strong>Keybindings:</strong> Edit <code>~/.config/hypr/keybinds.conf</code></li>
-  <li><strong>Autostart:</strong> Edit <code>~/.config/hypr/autostart.conf</code></li>
-  <li><strong>Settings UI:</strong> <code>SUPER + SHIFT + S</code> opens the settings panel (scale, workspace count, language, startup behavior). Changes are applied live.</li>
-  <li><strong>Environment:</strong> Edit <code>~/.config/hypr/env.conf</code></li>
-</ul>
+<p><code>SUPER + W</code> wallpaper picker &middot; <code>SUPER + SHIFT + S</code> settings panel (scale, language, startup) &middot; <code>SUPER + SHIFT + B</code> window effects (opacity, blur, rounding)</p>
+<p>See <a href="docs/hyprland-config.md">Hyprland Config</a> for file structure, <a href="docs/quick-reference.md">Quick Reference</a> for all keybinds, and <a href="docs/quickshell-widgets.md">Widgets</a> for widget details.</p>
 
 <hr>
 
 <h2>Quick Reference</h2>
 
-<p><strong>Applications</strong><br>
-<code>SUPER + Return</code> Terminal &middot; <code>SUPER + D</code> App launcher &middot; <code>SUPER + E</code> Files &middot; <code>SUPER + F</code> Browser</p>
+<p><code>SUPER + Return</code> Terminal &middot; <code>SUPER + D</code> Apps &middot; <code>SUPER + W</code> Wallpaper &middot; <code>SUPER + S</code> Calendar &middot; <code>SUPER + Space</code> Float &middot; <code>SUPER + L</code> Lock &middot; <code>Print</code> Screenshot &middot; <code>SUPER + Escape</code> Exit</p>
 
-<p><strong>Widgets</strong><br>
-<code>SUPER + M</code> Music &middot; <code>SUPER + C</code> Clipboard &middot; <code>SUPER + B</code> Battery &middot; <code>SUPER + W</code> Wallpaper &middot; <code>SUPER + S</code> Calendar &middot; <code>SUPER + N</code> Network &middot; <code>SUPER + V</code> Volume &middot; <code>SUPER + H</code> Guide &middot; <code>SUPER + SHIFT + S</code> Settings &middot; <code>SUPER + SHIFT + T</code> Focus Time</p>
-
-<p><strong>Windows</strong><br>
-<code>ALT + F4</code> Close &middot; <code>SUPER + Space</code> Toggle float &middot; <code>SUPER + G</code> Center &middot; <code>SUPER + J</code> Toggle split</p>
-
-<p><strong>Workspaces</strong><br>
-<code>SUPER + 1-0</code> Switch &middot; <code>SUPER + SHIFT + 1-0</code> Move to &middot; <code>SUPER + Tab</code> Previous &middot; <code>SUPER + A</code> Scratchpad</p>
-
-<p><strong>Lock / Power</strong><br>
-<code>SUPER + L</code> Lock &middot; <code>SUPER + Escape</code> Exit &middot; <code>SUPER + CTRL + L</code> Suspend &middot; <code>SUPER + CTRL + SHIFT + L</code> Shutdown</p>
-
-<p><strong>Screenshots</strong><br>
-<code>Print</code> Area &middot; <code>SUPER + Print</code> Full &middot; <code>SHIFT + Print</code> Area + edit &middot; <code>SUPER + SHIFT + Print</code> Full + edit</p>
-
-<p><strong>Display</strong><br>
-<code>SUPER + Z</code> Scale menu &middot; <code>SUPER + R</code> Reload QML &middot; <code>SUPER + SHIFT + R</code> Reload Hyprland</p>
-
-<p><strong>Multi-Monitor</strong><br>
-<code>SUPER + ALT + I/U</code> Focus monitor &middot; <code>SUPER + ALT + M</code> Monitor manager &middot; <code>SUPER + ALT + O</code> Swap workspaces</p>
-
-<p><strong>GPU (NVIDIA)</strong><br>
-<code>SUPER + ALT + G</code> Cycle mode &middot; <code>SUPER + ALT + SHIFT + G</code> Mode selector</p>
-
-<p>See <a href="docs/quick-reference.md">Quick Reference</a> for the full keybinding table.</p>
+<p>See <a href="docs/quick-reference.md">full keybinding table</a>.</p>
 
 <hr>
 
