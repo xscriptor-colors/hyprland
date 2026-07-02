@@ -3,26 +3,32 @@
 ## [Unreleased]
 
 ### Added
-- `scripts/detect-monitors.sh` -- auto-detects all connected monitors and generates `config/monitors.conf` with each monitor set to its highest available refresh rate. Runs on startup and at install time.
+- `scripts/detect-monitors.sh` -- auto-detects all connected monitors and generates `config/monitors.conf` with each monitor set to its highest available refresh rate.
+- `scripts/quickshell/quicknotes/QuickNotes.qml` -- lightweight text editor with auto-save, bound to SUPER+Y.
+- `scripts/quickshell/system-monitor/SystemMonitor.qml` and `fetch.sh` -- CPU, RAM, disk, temperature, processes, uptime display, bound to SUPER+I.
+- `scripts/quickshell/rss-reader/RssReader.qml` and `fetch.py`, `feeds.txt` -- RSS feed reader with per-source filtering, bound to SUPER+O.
+- `scripts/quickshell/file-search/FileSearch.qml` and `fetch.sh` -- local file search via fd/find, opens with xdg-open, bound to SUPER+'.
+- `scripts/quickshell/window-controls/WindowControls.qml` and `persist.sh` -- live window opacity, blur, and rounding sliders. Changes persist across Hyprland reloads via `config/window-effects.conf`. Bound to SUPER+SHIFT+B.
+- `config/window-effects.conf` -- persisted decoration overrides, sourced at the end of `hyprland.conf` so it properly overrides defaults.
 
 ### Changed
-- `hyprland.conf` -- replaced hardcoded `monitor = , preferred, auto, 1` with `source = ~/.config/hypr/config/monitors.conf`, enabling per-monitor max refresh rate detection and GUI-based monitor management to take effect.
-- `scripts/settings_watcher.sh` -- fallback path (no monitors in settings.json) now calls `detect-monitors.sh` instead of hardcoding `preferred`, ensuring new or unconfigured monitors always get the best rate.
-- `config/hypr/autostart.conf` -- added `exec-once = ~/.config/hypr/scripts/detect-monitors.sh` before init so monitors are configured at every session start.
-- `install.sh` -- runs `detect-monitors.sh --silent` after deploying dotfiles so the first boot already has the correct refresh rate.
+- `hyprland.conf` -- replaced hardcoded `monitor = , preferred, auto, 1` with `source = ~/.config/hypr/config/monitors.conf`; added `source = ~/.config/hypr/config/window-effects.conf` at the end.
+- `scripts/settings_watcher.sh` -- fallback path (no monitors in settings.json) calls `detect-monitors.sh` instead of `preferred`.
+- `config/hypr/autostart.conf` -- added `exec-once` for detect-monitors.
+- `install.sh` -- runs monitor detection after deploying dotfiles.
+- `scripts/quickshell/applauncher/app_fetcher.py` -- complete rewrite: desktop ID blocklist, Hidden/NotShowIn support, extra search fields, icon validation via `BAD_ICONS` blacklist.
+- `scripts/quickshell/applauncher/appLauncher.qml` -- fixed base64 key mismatch (echo -> printf); search now covers generic_name, comment, categories, keywords; letter fallback for missing icons.
+- `scripts/quickshell/calendar/CalendarPopup.qml` -- removed duplicate horizontal centering that conflicted with WindowRegistry.js.
+- `scripts/quickshell/WindowRegistry.js` -- registered all new widgets.
+- `config/hypr/keybinds.conf` -- added shortcuts for all new widgets.
+- `scripts/caching.sh` -- fixed invalid variable names when widget name contains hyphens.
+- `scripts/quickshell/TopBar.qml` -- added CPU/RAM pill in the system indicator bar.
 
 ### Fixed
-- Monitor refresh rate resetting to 60Hz on systems that support higher rates (e.g. 144Hz). The root cause was `monitor = , preferred, auto, 1` picking the EDID default (usually 60Hz) and the generated `monitors.conf` never being sourced by `hyprland.conf`.
-
-### Changed
-- `scripts/quickshell/applauncher/app_fetcher.py` -- complete rewrite:
-  - Replaced broad substring blocklist with desktop file ID prefix/exact matching, keyword matching, and exec path matching. Prevents false positives where real apps were caught by overly broad terms like "network" or "arch".
-  - Parses additional .desktop fields: `GenericName`, `Comment`, `Categories`, `Keywords` for richer search.
-  - Honors `Hidden=true` and `NotShowIn=Hyprland` per the freedesktop spec.
-  - Hides zero-usage apps once the user has accumulated 15+ total launches across 3+ unique apps, keeping the list clean of never-used entries.
-- `scripts/quickshell/applauncher/appLauncher.qml`:
-  - Fixed usage tracking base64 key mismatch: `echo "$1"` (which appends `\n`) was replaced with `printf '%s' "$1"` so the bash-side key matches Python's `b64encode()`. This was the root cause of apps never being sorted by frequency despite being used repeatedly.
-  - Search now also matches `generic_name`, `comment`, `categories`, and `keywords` in addition to `name` and `exec`.
+- Monitor refresh rate resetting to 60Hz on systems that support higher rates. Root cause: `preferred` picks EDID default (60Hz) and `monitors.conf` was never sourced.
+- App launcher usage tracking broken: `echo` added `\n` to base64 keys, preventing frequency sort from ever working.
+- System Monitor widget not loading: hyphen in widget name broke caching.sh; inline QML `component` keyword not supported by Quickshell 0.3.
+- Calendar popup not centered: QML was overriding X position set by WindowRegistry.js with a different scale calculation.
 
 ## [1.0.4] - 2026-01-25
 
