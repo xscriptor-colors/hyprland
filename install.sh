@@ -652,24 +652,67 @@ install_hack_nerd_font() {
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
 install_nvim_config() {
-    if [ -d "$SCRIPT_DIR/config/nvim" ]; then
-        log "Installing Neovim configuration..."
-        cp -r "$SCRIPT_DIR/config/nvim" "$CONFIG_DIR/nvim"
-        log "Neovim configuration installed!"
-        echo ""
-        echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════════╗${NC}"
-        echo -e "${YELLOW}║                    NVIM POST-INSTALL STEPS                      ║${NC}"
-        echo -e "${YELLOW}╚══════════════════════════════════════════════════════════════════╝${NC}"
-        echo ""
-        echo -e "${CYAN}1.${NC} Open Neovim:  ${WHITE}nvim${NC}"
-        echo -e "${CYAN}2.${NC} Run Lazy to install plugins:  ${WHITE}:Lazy${NC}"
-        echo -e "${CYAN}3.${NC} Run Mason to install LSP servers:  ${WHITE}:Mason${NC}"
-        echo ""
-        echo -e "${BLUE}Refer to the nvim README for more details.${NC}"
-        echo ""
-    else
-        warn "nvim config directory not found at config/nvim"
-    fi
+    local NVIM_DEST="$CONFIG_DIR/nvim"
+
+    echo ""
+    prompt "Which Neovim config do you want to install?"
+    echo -e "  ${CYAN}1)${NC} Bundled (config/nvim in this repo)"
+    echo -e "  ${CYAN}2)${NC} X Nvim (https://github.com/xscriptor/nvim)"
+    echo -e "  ${CYAN}3)${NC} Skip"
+    read -r nvim_choice
+
+    case "$nvim_choice" in
+        2)
+            log "Installing Neovim configuration from xscriptor/nvim..."
+            if command -v git &>/dev/null; then
+                if [ -d "$NVIM_DEST" ]; then
+                    warn "Existing nvim config found at $NVIM_DEST"
+                    prompt "Replace it? [Y/n] "
+                    read -r replace_response
+                    if [[ "$replace_response" =~ ^[Nn]$ ]]; then
+                        log "Skipping nvim installation."
+                        return
+                    fi
+                    rm -rf "$NVIM_DEST"
+                fi
+                git clone https://github.com/xscriptor/nvim.git "$NVIM_DEST" || {
+                    error "Failed to clone xscriptor/nvim."
+                    return
+                }
+                log "Neovim configuration installed from xscriptor/nvim!"
+            else
+                warn "git not found. Cannot clone external repo."
+                warn "Install git and run: git clone https://github.com/xscriptor/nvim.git ~/.config/nvim"
+            fi
+            ;;
+        3)
+            log "Skipping Neovim configuration installation."
+            return
+            ;;
+        *)
+            # Default: bundled
+            if [ -d "$SCRIPT_DIR/config/nvim" ]; then
+                log "Installing bundled Neovim configuration..."
+                cp -r "$SCRIPT_DIR/config/nvim" "$NVIM_DEST"
+                log "Neovim configuration installed!"
+            else
+                warn "Bundled nvim config not found at config/nvim"
+                return
+            fi
+            ;;
+    esac
+
+    echo ""
+    echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${YELLOW}║                    NVIM POST-INSTALL STEPS                      ║${NC}"
+    echo -e "${YELLOW}╚══════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${CYAN}1.${NC} Open Neovim:  ${WHITE}nvim${NC}"
+    echo -e "${CYAN}2.${NC} Run Lazy to install plugins:  ${WHITE}:Lazy${NC}"
+    echo -e "${CYAN}3.${NC} Run Mason to install LSP servers:  ${WHITE}:Mason${NC}"
+    echo ""
+    echo -e "${BLUE}Refer to the nvim README for more details.${NC}"
+    echo ""
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐

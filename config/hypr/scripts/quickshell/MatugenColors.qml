@@ -29,6 +29,26 @@ Item {
     property color maroon: "#eba0ac"
     property color teal: "#94e2d5"
 
+    // Terminal-style dynamic palette derived from Matugen colors
+    readonly property color color0: root.crust
+    readonly property color color1: root.red
+    readonly property color color2: root.green
+    readonly property color color3: root.yellow
+    readonly property color color4: root.peach
+    readonly property color color5: root.mauve
+    readonly property color color6: root.teal
+    readonly property color color7: root.text
+    readonly property color color8: root.mantle
+    readonly property color color9: root.maroon
+    readonly property color color10: root.green
+    readonly property color color11: root.yellow
+    readonly property color color12: root.peach
+    readonly property color color13: root.pink
+    readonly property color color14: root.sapphire
+    readonly property color color15: root.subtext1
+    readonly property color background: root.base
+    readonly property color foreground: root.text
+
     property string rawJson: ""
 
     function forceRefresh() {
