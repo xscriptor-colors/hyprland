@@ -1346,11 +1346,17 @@ Variants {
                                 color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
                                 radius: barWindow.s(20); height: sysLayout.pillHeight;
                                 clip: true
-                                
+
+                                Rectangle {
+                                    anchors.fill: parent; radius: barWindow.s(20)
+                                    opacity: 1.0; Behavior on opacity { NumberAnimation { duration: 300 } }
+                                    color: mocha.color5
+                                }
+
                                 property real targetWidth: kbLayoutRow.implicitWidth + barWindow.s(24)
                                 width: targetWidth
                                 Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-                                
+
                                 scale: isHovered ? 1.05 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
                                 Behavior on color { ColorAnimation { duration: 200 } }
@@ -1361,14 +1367,14 @@ Variants {
                                 transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
                                 Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
 
-                                Row { 
+                                Row {
                                     id: kbLayoutRow
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
                                     anchors.leftMargin: barWindow.s(12)
                                     spacing: barWindow.s(10)
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "󰌌"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16); color: parent.parent.isHovered ? mocha.text : mocha.overlay2 }
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.kbLayout; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black; color: mocha.text }
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "󰌌"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16); color: mocha.base }
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.kbLayout; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black; color: mocha.base }
                                 }
                                 MouseArea { id: kbMouse; anchors.fill: parent; hoverEnabled: true; onClicked: Quickshell.execDetached(["hyprctl", "switchxkblayout", "main", "next"]) }
                             }
@@ -1379,13 +1385,13 @@ Variants {
                                 radius: barWindow.s(20); height: sysLayout.pillHeight; 
                                 color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
                                 clip: true
-                                
+
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: barWindow.s(20)
                                     opacity: barWindow.showEthernet ? (barWindow.ethStatus === "Connected" ? 1.0 : 0.0) : (barWindow.isWifiOn ? 1.0 : 0.0)
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.blue
+                                    color: mocha.color6
                                 }
 
                                 property real targetWidth: wifiLayoutRow.implicitWidth + barWindow.s(24)
@@ -1439,7 +1445,7 @@ Variants {
                                     radius: barWindow.s(20)
                                     opacity: barWindow.isBtOn ? 1.0 : 0.0
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.mauve
+                                    color: mocha.color4
                                 }
 
                                 property real targetWidth: barWindow.isDesktop ? 0 : btLayoutRow.implicitWidth + barWindow.s(24)
@@ -1487,7 +1493,7 @@ Variants {
                                     anchors.fill: parent; radius: barWindow.s(20)
                                     opacity: barWindow.sysDataReady ? 1.0 : 0.0
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.sapphire
+                                    color: mocha.color1
                                 }
 
                                 property real targetWidth: sysLayoutRow.implicitWidth + barWindow.s(24)
@@ -1530,7 +1536,7 @@ Variants {
                                     radius: barWindow.s(20)
                                     opacity: barWindow.isSoundActive ? 1.0 : 0.0
                                     Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.peach
+                                    color: mocha.color3
                                 }
                                 
                                 property real targetWidth: volLayoutRow.implicitWidth + barWindow.s(24)
