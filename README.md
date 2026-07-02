@@ -30,10 +30,11 @@
   <a href="#x">X</a>
 </p>
 
+<img src="https://i.imgur.com/dxB6H2i.gif" width="900" alt="Demo">
+
+
 <a href="https://imgur.com/aoKrCCB">
-<img src="https://i.imgur.com/dxB6H2i.gif" width="900" alt="Demo" >
-</a>
-<p align="center"><em>Gif preview, follow the link to see the details.</em></p>
+<p align="center"><em>Gif preview, follow the link to see the video.</em></p></a>
 
 <details>
   <summary>Old Previews</summary>
