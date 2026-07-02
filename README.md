@@ -30,8 +30,8 @@
   <a href="#x">X</a>
 </p>
 
-<a href="https://imgur.com/0fm1MOy">
-<img src="https://i.imgur.com/ahSvDyS.gif" width="900" alt="Demo" >
+<a href="https://imgur.com/aoKrCCB">
+<img src="https://i.imgur.com/dxB6H2i.gif" width="900" alt="Demo" >
 </a>
 <p align="center"><em>Gif preview, follow the link to see the details.</em></p>
 
