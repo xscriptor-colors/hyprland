@@ -41,6 +41,10 @@ Item {
 
     property string debugText: "waiting..."
 
+    readonly property int historyLen: 30
+    ListModel { id: cpuHistoryModel }
+    ListModel { id: ramHistoryModel }
+
     Process {
         id: runner
         running: true
@@ -50,8 +54,15 @@ Item {
                 try {
                     if (!this.text || this.text.trim().length === 0) return
                     let d = JSON.parse(this.text.trim())
-                    window.cpuVal = (d.cpu || 0) + "%"
-                    window.ramVal = (d.ram_pct || 0) + "%"
+                    let rawCpu = d.cpu || 0
+                    let rawRam = d.ram_pct || 0
+                    window.cpuVal = rawCpu + "%"
+                    window.ramVal = rawRam + "%"
+
+                    while (cpuHistoryModel.count >= window.historyLen) cpuHistoryModel.remove(0);
+                    cpuHistoryModel.append({ pct: Math.min(rawCpu, 100) })
+                    while (ramHistoryModel.count >= window.historyLen) ramHistoryModel.remove(0);
+                    ramHistoryModel.append({ pct: Math.min(rawRam, 100) })
                     window.diskVal = (d.disk_pct || 0) + "%"
                     window.tempVal = (d.temp || 0) + "\u00B0C"
                     window.procVal = String(d.procs || 0)
@@ -121,6 +132,10 @@ Item {
                         ColumnLayout { Layout.fillWidth: true; spacing: s(2)
                             Text { text: "CPU"; font.family: "Hack Nerd Font"; font.pixelSize: s(10); color: window.overlay0 }
                             Text { text: window.cpuVal; font.family: "Hack Nerd Font"; font.pixelSize: s(16); font.weight: Font.Bold; color: window.text } }
+                        Item { Layout.preferredWidth: s(56); Layout.preferredHeight: s(28); Layout.alignment: Qt.AlignVCenter; clip: true
+                            Row { anchors.fill: parent; spacing: 2; layoutDirection: Qt.RightToLeft
+                                Repeater { model: cpuHistoryModel
+                                    delegate: Rectangle { width: 2; height: Math.max(2, parent.height * model.pct / 100); radius: 1; color: window.mauve; opacity: 0.7; anchors.bottom: parent.bottom } } } }
                     }
                 }
 
@@ -132,6 +147,10 @@ Item {
                         ColumnLayout { Layout.fillWidth: true; spacing: s(2)
                             Text { text: "RAM"; font.family: "Hack Nerd Font"; font.pixelSize: s(10); color: window.overlay0 }
                             Text { text: window.ramVal; font.family: "Hack Nerd Font"; font.pixelSize: s(16); font.weight: Font.Bold; color: window.text } }
+                        Item { Layout.preferredWidth: s(56); Layout.preferredHeight: s(28); Layout.alignment: Qt.AlignVCenter; clip: true
+                            Row { anchors.fill: parent; spacing: 2; layoutDirection: Qt.RightToLeft
+                                Repeater { model: ramHistoryModel
+                                    delegate: Rectangle { width: 2; height: Math.max(2, parent.height * model.pct / 100); radius: 1; color: window.blue; opacity: 0.7; anchors.bottom: parent.bottom } } } }
                     }
                 }
 
