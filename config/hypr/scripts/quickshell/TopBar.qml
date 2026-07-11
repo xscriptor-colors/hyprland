@@ -919,7 +919,7 @@ Variants {
                                         "kitty": "\uF489", "alacritty": "\uF489", "wezterm": "\uF489", "foot": "\uF489", "ghostty": "\uF489", "terminal": "\uF489",
                                         "firefox": "\uF269", "firefoxdeveloperedition": "\uF269", "brave": "\uF269", "brave-browser": "\uF269", "zen": "\uF269",
                                         "chromium": "\uF269", "google-chrome": "\uF269", "microsoft-edge": "\uF269", "edge": "\uF269",
-                                        "code": "\uF121", "code-oss": "\uF121", "codium": "\uF121", "vscodium": "\uF121", "visual-studio-code": "\uF121",
+                                        "code": "\uF121", "code-oss": "\uF121", "codium": "\uF121", "vscodium": "\uF121", "visual-studio-code": "\uF121", "code-insiders": "\uF121", "visual-studio-code-insiders": "\uF121",
                                         "nautilus": "\uF07C", "org.gnome.nautilus": "\uF07C", "dolphin": "\uF07C", "thunar": "\uF07C", "pcmanfm": "\uF07C",
                                         "spotify": "\uF1BC",
                                         "discord": "\uF392",
