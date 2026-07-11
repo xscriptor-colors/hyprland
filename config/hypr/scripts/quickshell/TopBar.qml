@@ -806,9 +806,11 @@ Variants {
                     
                     width: workspacesModel.count > 0 ? wsLayout.implicitWidth + barWindow.s(20) : 0
                     
-                    property real defaultX: leftContent.x + leftContent.width + barWindow.s(4)
-                    property real settingsX: mediaBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
-                                        
+                    property real pureCenter: (parent.width - width) / 2
+                    property real minCenterDefaultX: mediaBox.defaultX + mediaBox.width + (mediaBox.width > 0 ? barWindow.s(4) : 0)
+                    property real settingsX: barWindow.width - rightContent.width - width - barWindow.s(4)
+                    property real defaultX: Math.max(minCenterDefaultX, pureCenter)
+                    
                     x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
 
                     property bool limitActive: barWindow.isSettingsOpen && barWindow.isMediaActive
@@ -1025,8 +1027,8 @@ Variants {
                     width: barWindow.isMediaActive ? innerMediaLayout.implicitWidth + barWindow.s(24) : 0
                     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
 
-                    property real defaultX: workspacesBox.defaultX + workspacesBox.width + (workspacesBox.width > 0 ? barWindow.s(4) : 0)
-                    property real settingsX: centerBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
+                    property real defaultX: centerBox.defaultX + centerBox.width + (centerBox.width > 0 ? barWindow.s(4) : 0)
+                    property real settingsX: workspacesBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
 
                     x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
 
@@ -1159,20 +1161,16 @@ Variants {
 
                 Rectangle {
                     id: centerBox
-                    property bool isHovered: centerMouse.containsMouse
-                    color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.95) : Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                    radius: barWindow.s(28); border.width: 1; border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, isHovered ? 0.15 : 0.05)
+                    color: "transparent"
                     
                     y: (parent.height - barWindow.barHeight) / 2
                     height: barWindow.barHeight
                     
-                    width: centerLayout.implicitWidth + barWindow.s(36)
+                    width: centerLayout.childrenRect.width + barWindow.s(12)
                     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
                     
-                    property real pureCenter: (parent.width - width) / 2
-                    property real minCenterDefaultX: mediaBox.defaultX + mediaBox.width + (mediaBox.width > 0 ? barWindow.s(4) : 0)
-                    property real settingsX: barWindow.width - rightContent.width - width - barWindow.s(4)
-                    property real defaultX: Math.max(minCenterDefaultX, pureCenter)
+                    property real defaultX: leftContent.x + leftContent.width + barWindow.s(4)
+                    property real settingsX: mediaBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
                     
                     x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
                     
@@ -1191,28 +1189,74 @@ Variants {
 
                     Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
-                    scale: isHovered ? 1.03 : 1.0
-                    Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
-                    Behavior on color { ColorAnimation { duration: 250 } }
-                    
-                    MouseArea {
-                        id: centerMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
-                    }
-
-                    RowLayout {
+                    Row {
                         id: centerLayout
                         anchors.centerIn: parent
-                        spacing: barWindow.s(24)
+                        spacing: barWindow.s(12)
 
-                        ColumnLayout {
-                            spacing: -2
-                            Text { text: barWindow.timeStr; Layout.alignment: Qt.AlignLeft; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16); font.weight: Font.Black; color: mocha.blue }
-                            Text { text: barWindow.dateStr; Layout.alignment: Qt.AlignLeft; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(11); font.weight: Font.Bold; color: mocha.subtext0 }
+                        Rectangle {
+                            id: timePill
+                            property bool isHovered: timePillMouse.containsMouse
+                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.95) : Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
+                            radius: barWindow.s(28)
+                            border.width: 1
+                            border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, isHovered ? 0.15 : 0.05)
+                            height: barWindow.barHeight
+                            width: timeText.implicitWidth + barWindow.s(36)
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Behavior on color { ColorAnimation { duration: 250 } }
+                            Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
+
+                            Text {
+                                id: timeText
+                                anchors.centerIn: parent
+                                text: barWindow.timeStr
+                                font.family: "Hack Nerd Font"
+                                font.pixelSize: barWindow.s(16)
+                                font.weight: Font.Black
+                                color: mocha.blue
+                            }
+
+                            MouseArea {
+                                id: timePillMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
+                            }
                         }
 
+                        Rectangle {
+                            id: datePill
+                            property bool isHovered: datePillMouse.containsMouse
+                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.95) : Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
+                            radius: barWindow.s(28)
+                            border.width: 1
+                            border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, isHovered ? 0.15 : 0.05)
+                            height: barWindow.barHeight
+                            width: dateText.implicitWidth + barWindow.s(36)
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Behavior on color { ColorAnimation { duration: 250 } }
+                            Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
+
+                            Text {
+                                id: dateText
+                                anchors.centerIn: parent
+                                text: barWindow.dateStr
+                                font.family: "Hack Nerd Font"
+                                font.pixelSize: barWindow.s(11)
+                                font.weight: Font.Bold
+                                color: mocha.subtext0
+                            }
+
+                            MouseArea {
+                                id: datePillMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
+                            }
+                        }
 
                     }
                 }
