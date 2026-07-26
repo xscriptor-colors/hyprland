@@ -44,6 +44,20 @@ compile_settings() {
     # Read the hardware variables injected by install.sh directly out of the JSON
     HW_ENV=$(jq -r '.hardwareEnvs[]? // empty' "$SETTINGS_FILE")
 
+    # Application scaling. Deliberately avoids QT_SCALE_FACTOR: QuickShell is a
+    # Qt app, so setting it would rescale the shell itself instead of only the
+    # apps. GTK gets an integer scale plus a DPI correction for the remainder,
+    # Electron/Chromium take a fractional factor directly.
+    APP_SCALE=$(jq -r '.appScale // 1' "$SETTINGS_FILE")
+    APP_SCALE_ENV=""
+    if [[ "$APP_SCALE" != "1" && "$APP_SCALE" != "1.0" ]]; then
+        GDK_INT=$(awk -v s="$APP_SCALE" 'BEGIN{ i=int(s+0.0001); if (i<1) i=1; print i }')
+        GDK_DPI=$(awk -v s="$APP_SCALE" -v i="$GDK_INT" 'BEGIN{ printf "%.4f", s/i }')
+        APP_SCALE_ENV=$(printf 'env = GDK_SCALE,%s\nenv = GDK_DPI_SCALE,%s\nenv = ELECTRON_FORCE_DEVICE_SCALE_FACTOR,%s\nenv = XCURSOR_SIZE,%s' \
+            "$GDK_INT" "$GDK_DPI" "$APP_SCALE" \
+            "$(awk -v s="$APP_SCALE" 'BEGIN{ printf "%d", 24*s }')")
+    fi
+
     # 1. Regenerate env.conf using the template
     echo "Regenerating env.conf..."
     sed -e "s|{{XDG_PICTURES_DIR}}|$PIC_DIR|g" \
@@ -53,9 +67,11 @@ compile_settings() {
         "$TMPL_DIR/env.conf.template" > "${ENV_CONF}.tmp"
 
     # Use awk to safely substitute the multi-line HW_ENV array without breaking escapes
-    awk -v hw="$HW_ENV" '{
+    awk -v hw="$HW_ENV" -v apps="$APP_SCALE_ENV" '{
         if (index($0, "{{HARDWARE_ENV}}")) {
             print hw
+        } else if (index($0, "{{APP_SCALE_ENV}}")) {
+            if (apps != "") print apps
         } else {
             print $0
         }

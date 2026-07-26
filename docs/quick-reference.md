@@ -26,6 +26,7 @@
 | SUPER + V | Toggle volume control |
 | SUPER + H | Toggle guide panel |
 | SUPER + SHIFT + S | Toggle settings panel |
+| SUPER + SHIFT + E | Toggle settings panel on the Topbar tab |
 | SUPER + SHIFT + T | Toggle focus time tracker |
 | SUPER + U | Toggle system updater |
 | SUPER + X | Toggle Stewart (ambient visualizer) |
@@ -105,7 +106,9 @@
 | Shortcut | Action |
 |----------|--------|
 | SUPER + W | Wallpaper picker |
-| SUPER + Z | Scale menu (75% / 80% / 100%) |
+| SUPER + Z | Display scale picker (80% - 200%, scales apps and shell) |
+| SUPER + SHIFT + Z | Display scale: one step up |
+| SUPER + CTRL + Z | Display scale: one step down |
 | SUPER + R | Reload QuickShell colors |
 | SUPER + SHIFT + R | Reload Hyprland config |
 
