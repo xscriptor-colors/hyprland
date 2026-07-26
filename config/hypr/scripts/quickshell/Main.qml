@@ -477,6 +477,7 @@ PanelWindow {
         props["layoutWidth"]  = t.w;
         props["layoutHeight"] = t.h;
         if (newWidget === "wallpaper") props["widgetArg"] = arg;
+        if (newWidget === "settings") props["activeMode"] = arg;
 
         let cached = widgetCache[newWidget];
         if (cached) {

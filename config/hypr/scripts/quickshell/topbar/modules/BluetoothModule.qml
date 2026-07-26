@@ -1,0 +1,66 @@
+import QtQuick
+import Quickshell
+
+Item {
+    id: mod
+    required property var bar
+    required property var colors
+    required property bool zoneReady
+    required property int slotIndex
+
+    implicitWidth: pill.width
+    implicitHeight: bar.barHeight
+    visible: pill.targetWidth > 0
+
+    property bool initAnimTrigger: false
+    Timer { running: mod.zoneReady && !mod.initAnimTrigger; interval: mod.slotIndex * 50; onTriggered: mod.initAnimTrigger = true }
+
+    Rectangle {
+        id: pill
+        anchors.verticalCenter: parent.verticalCenter
+        property bool isHovered: btMouse.containsMouse
+        radius: bar.s(20); height: bar.pillHeight
+        clip: true
+        color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4)
+
+        Rectangle {
+            anchors.fill: parent
+            radius: bar.s(20)
+            opacity: bar.isBtOn ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 300 } }
+            color: colors.color4
+        }
+
+        property real targetWidth: bar.isDesktop ? 0 : btLayoutRow.implicitWidth + bar.s(24)
+        width: targetWidth
+        visible: targetWidth > 0
+        Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
+
+        scale: isHovered ? 1.05 : 1.0
+        Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+        Behavior on color { ColorAnimation { duration: 200 } }
+
+        opacity: mod.initAnimTrigger ? 1 : 0
+        transform: Translate { y: mod.initAnimTrigger ? 0 : bar.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
+        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+
+        Row {
+            id: btLayoutRow
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: bar.s(12)
+            spacing: bar.s(10)
+            Text { anchors.verticalCenter: parent.verticalCenter; text: bar.btIcon; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(16); color: bar.isBtOn ? colors.base : colors.subtext0 }
+            Text {
+                id: btText
+                anchors.verticalCenter: parent.verticalCenter
+                text: bar.btDevice
+                visible: text !== "";
+                font.family: "Hack Nerd Font"; font.pixelSize: bar.s(13); font.weight: Font.Black;
+                color: bar.isBtOn ? colors.base : colors.text;
+                width: Math.min(implicitWidth, bar.s(100)); elide: Text.ElideRight
+            }
+        }
+        MouseArea { id: btMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"]) }
+    }
+}

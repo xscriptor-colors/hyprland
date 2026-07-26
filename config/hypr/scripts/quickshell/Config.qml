@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "topbar/TopbarLayout.js" as TopbarLayout
 
 Item {
     id: config
@@ -100,6 +101,9 @@ Item {
     property var startupData: []
     signal startupLoaded()
 
+    property var topbarLayout: TopbarLayout.defaultLayout()
+    signal topbarLayoutLoaded()
+
     // =========================================================================
     // Settings Save Functions
     // =========================================================================
@@ -145,6 +149,13 @@ Item {
         config.startupData = startupArray;
         config.setSetting("startup", startupArray);
         sh("notify-send 'Quickshell' 'Startup entries saved!'");
+    }
+
+    // No notification here on purpose: the topbar tab edits live and the bar
+    // itself is the feedback, so a toast per keystroke would only be noise.
+    function saveTopbarLayout(layoutObj) {
+        config.topbarLayout = TopbarLayout.normalize(layoutObj);
+        config.setSetting("topbar", config.topbarLayout);
     }
 
     // =========================================================================
@@ -407,19 +418,25 @@ Item {
                         } else {
                             config.startupData = [];
                         }
+
+                        // Map Topbar layout
+                        config.topbarLayout = TopbarLayout.normalize(config.rawSettings.topbar);
                     } else {
                         config.saveAppSettings();
                         config.keybindsData = [];
                         config.saveAllKeybinds([]);
                         config.startupData = [];
+                        config.topbarLayout = TopbarLayout.defaultLayout();
                     }
                 } catch (e) {
                     console.log("Error parsing global settings:", e);
                     config.keybindsData = [];
                     config.startupData = [];
+                    config.topbarLayout = TopbarLayout.defaultLayout();
                 }
                 config.keybindsLoaded();
                 config.startupLoaded();
+                config.topbarLayoutLoaded();
                 config.dataReady = true;
             }
         }
