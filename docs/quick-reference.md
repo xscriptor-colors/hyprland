@@ -106,7 +106,9 @@
 | Shortcut | Action |
 |----------|--------|
 | SUPER + W | Wallpaper picker |
-| SUPER + Z | Scale menu (75% / 80% / 100%) |
+| SUPER + Z | Display scale picker (80% - 200%, scales apps and shell) |
+| SUPER + SHIFT + Z | Display scale: one step up |
+| SUPER + CTRL + Z | Display scale: one step down |
 | SUPER + R | Reload QuickShell colors |
 | SUPER + SHIFT + R | Reload Hyprland config |
 

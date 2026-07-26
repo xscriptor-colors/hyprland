@@ -6,7 +6,7 @@ The UI is built with QuickShell, a QML-based shell environment for Hyprland. It 
 
 Three panel windows run simultaneously:
 
-- **TopBar.qml** -- Persistent top bar visible on all monitors (workspaces, clock, system tray, update indicator)
+- **TopBar.qml** -- Persistent top bar visible on all monitors. Modules are not hardcoded: `topbar/TopbarLayout.js` holds the module catalog and the pure helpers that read and mutate the layout, `topbar/modules/*.qml` holds one file per module, and the bar renders three zones (left / center / right) from `settings.json`'s `topbar` key. Edit it from the settings panel's Topbar tab (SUPER + SHIFT + E); changes hot-reload with no restart.
 - **Main.qml** -- Full-screen overlay that handles widget popup positioning, animations, and IPC dispatch
 - **Floating.qml** -- Full-screen overlay for the persistent sidebar and exclusive UI surfaces
 
@@ -28,6 +28,7 @@ Accessible via keybinds (SUPER + letter):
 | Wallpaper Picker | `wallpaper/WallpaperPicker.qml` | SUPER + W | Center |
 | Guide/Help | `guide/GuidePopup.qml` | SUPER + H | Center |
 | Settings | `settings/SettingsPopup.qml` | SUPER + SHIFT + S | Left edge |
+| Display Scale | `scale/ScalePicker.qml` | SUPER + Z | Center |
 | Focus Time | `focustime/FocusTimePopup.qml` | SUPER + SHIFT + T | Center |
 | Movie Widget | `movies/MovieWidget.qml` | SUPER + P | Bottom center |
 | Stewart | `stewart/stewart.qml` | SUPER + X | Center |
