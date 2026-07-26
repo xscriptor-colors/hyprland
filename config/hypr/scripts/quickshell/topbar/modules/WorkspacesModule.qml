@@ -16,7 +16,7 @@ Item {
         id: box
         anchors.verticalCenter: parent.verticalCenter
         color: "transparent"
-        radius: bar.s(28); border.width: 0
+        radius: bar.pillRadius(bar.barHeight); border.width: 0
         height: bar.barHeight
         clip: false
 
@@ -33,7 +33,7 @@ Item {
             id: activeHighlight
             y: (box.height - bar.s(32)) / 2
             height: bar.s(32)
-            radius: bar.s(20)
+            radius: bar.pillRadius(bar.s(32))
             color: colors.mauve
             z: 0
 
@@ -92,7 +92,7 @@ Item {
                     width: targetWidth
                     Behavior on targetWidth { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
 
-                    height: bar.s(36); radius: bar.s(22)
+                    height: bar.s(36); radius: bar.pillRadius(bar.s(36))
 
                     color: isHovered ? Qt.rgba(colors.text.r, colors.text.g, colors.text.b, 0.1) : (stateLabel === "occupied" ? Qt.rgba(colors.text.r, colors.text.g, colors.text.b, 0.15) : "transparent")
 

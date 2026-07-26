@@ -19,13 +19,13 @@ Item {
         id: pill
         anchors.verticalCenter: parent.verticalCenter
         property bool isHovered: btMouse.containsMouse
-        radius: bar.s(20); height: bar.pillHeight
+        radius: bar.pillRadius(bar.pillHeight); height: bar.pillHeight
         clip: true
         color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4)
 
         Rectangle {
             anchors.fill: parent
-            radius: bar.s(20)
+            radius: parent.radius
             opacity: bar.isBtOn ? 1.0 : 0.0
             Behavior on opacity { NumberAnimation { duration: 300 } }
             color: colors.color4

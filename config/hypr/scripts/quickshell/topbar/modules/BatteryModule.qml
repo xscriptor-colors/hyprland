@@ -19,12 +19,12 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         property bool isHovered: batMouse.containsMouse
         color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4);
-        radius: bar.s(20); height: bar.pillHeight;
+        radius: bar.pillRadius(bar.pillHeight); height: bar.pillHeight;
         clip: true
 
         Rectangle {
             anchors.fill: parent
-            radius: bar.s(20)
+            radius: parent.radius
             opacity: 1.0
             Behavior on opacity { NumberAnimation { duration: 300 } }
             color: bar.isDesktop ? colors.red : bar.batDynamicColor
