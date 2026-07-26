@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.SystemTray
+import "topbar/TopbarLayout.js" as TopbarLayout
 
 Variants {
     model: Quickshell.screens
@@ -64,6 +65,11 @@ Variants {
             }
 
             property int barHeight: s(48)
+            property int pillHeight: s(36)
+
+            // Width of the settings panel, which docks to the left screen edge.
+            // Bar content shifts right by this much so nothing sits underneath it.
+            property int settingsPanelWidth: s(450)
 
             height: barHeight
             margins { top: s(8); bottom: 0; left: s(4); right: s(4) }
@@ -82,8 +88,13 @@ Variants {
             property bool isUpdateVisible: updateAvailable || forceUpdateShow
             
             property int workspaceCount: 8
-            
-            property string activeWidget: "" 
+
+            property var topbarLayout: TopbarLayout.defaultLayout()
+            readonly property var leftModules: TopbarLayout.zoneModel(topbarLayout, "left")
+            readonly property var centerModules: TopbarLayout.zoneModel(topbarLayout, "center")
+            readonly property var rightModules: TopbarLayout.zoneModel(topbarLayout, "right")
+
+            property string activeWidget: ""
             property bool isSettingsOpen: activeWidget === "settings"
 
             property real settingsSlideProgress: isSettingsOpen ? 1.0 : 0.0
@@ -186,6 +197,13 @@ Variants {
                                     wsDaemon.running = false;
                                     wsDaemon.running = true;
                                 }
+
+                                // Only reassign when the layout really changed, so writes to
+                                // unrelated keys don't tear down and rebuild every module.
+                                let nextLayout = TopbarLayout.normalize(parsed.topbar);
+                                if (JSON.stringify(nextLayout) !== JSON.stringify(barWindow.topbarLayout)) {
+                                    barWindow.topbarLayout = nextLayout;
+                                }
                             }
                         } catch (e) {}
                     }
@@ -262,11 +280,15 @@ Variants {
             
             property string kbLayout: "us"
             
-            ListModel { 
-                id: workspacesModel 
+            ListModel {
+                id: workspacesModel
                 property int activeIndex: 0
             }
-            
+
+            // Exposed to topbar modules, which cannot reach ids in this file.
+            readonly property var wsModel: workspacesModel
+            function refreshMusic() { musicForceRefresh.running = true; }
+
             property var musicData: { "status": "Stopped", "title": "", "artUrl": "", "timeStr": "" }
 
             property string displayTitle: ""
@@ -606,1123 +628,133 @@ Variants {
             }
 
             Item {
+                id: barContent
                 anchors.fill: parent
 
-                Rectangle {
-                    id: leftContent
-                    y: (parent.height - barWindow.barHeight) / 2
-                    height: barWindow.barHeight
+                // The settings panel docks to the left screen edge, so slide the whole
+                // bar out of its way instead of hiding individual modules.
+                anchors.leftMargin: barWindow.settingsSlideProgress * barWindow.settingsPanelWidth
 
-                    color: "transparent"
-                    clip: false
-                    
+                Row {
+                    id: leftZone
+                    anchors.left: parent.left
+                    anchors.leftMargin: barWindow.s(10)
+                    height: parent.height
+                    spacing: barWindow.s(8)
+
                     property bool showLayout: false
-                    
-                    opacity: (showLayout && !barWindow.isSettingsOpen) ? 1 : 0
-                    enabled: !barWindow.isSettingsOpen
-                    
-                    property real targetX: (showLayout && !barWindow.isSettingsOpen) ? 0 : barWindow.s(-200)
-                    x: targetX
-                    Behavior on x { NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
-                    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                    
                     Timer {
                         running: barWindow.isStartupReady
                         interval: 10
-                        onTriggered: leftContent.showLayout = true
+                        onTriggered: leftZone.showLayout = true
                     }
 
-                    width: leftLayout.implicitWidth
-
-                    Row {
-                        id: leftLayout
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: barWindow.s(10)
-                        spacing: barWindow.s(8)
-                        
-                        property int pillHeight: barWindow.s(36)
-
-                        Rectangle {
-                            property bool isHovered: helpMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                            radius: barWindow.s(20)
-                            
-                            property real targetWidth: barWindow.showHelpIcon ? barWindow.s(34) : 0
-                            width: targetWidth
-                            height: parent.pillHeight
-                            visible: targetWidth > 0 || opacity > 0
-                            opacity: barWindow.showHelpIcon ? 1.0 : 0.0
-                            clip: true
-                            
-                            Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-                            Behavior on opacity { NumberAnimation { duration: 300 } }
-                            Behavior on color { ColorAnimation { duration: 200 } }
-                            
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰅖"
-                                font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(22)
-                                color: parent.isHovered ? mocha.teal : mocha.text
-                                Behavior on color { ColorAnimation { duration: 200 } }
-                                scale: parent.isHovered ? 1.15 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                            }
-                            MouseArea {
-                                id: helpMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle guide"])
-                            }
-                        }
-
-                        Rectangle {
-                            property bool isHovered: searchMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                            radius: barWindow.s(20)
-                            height: parent.pillHeight; width: barWindow.s(34)
-                            
-                            Behavior on color { ColorAnimation { duration: 200 } }
-                            
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰍉"
-                                font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(22)
-                                color: parent.isHovered ? mocha.blue : mocha.text
-                                Behavior on color { ColorAnimation { duration: 200 } }
-                                scale: parent.isHovered ? 1.15 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                            }
-                            MouseArea {
-                                id: searchMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle applauncher"])
-                            }
-                        }
-
-                        Rectangle {
-                            property bool isHovered: settingsMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                            radius: barWindow.s(20)
-                            height: parent.pillHeight; width: barWindow.s(34)
-                            
-                            Behavior on color { ColorAnimation { duration: 200 } }
-                            
-                            Text {
-                                anchors.centerIn: parent
-                                text: ""
-                                font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(22)
-                                color: parent.isHovered ? mocha.blue : mocha.text
-                                Behavior on color { ColorAnimation { duration: 200 } }
-                                scale: parent.isHovered ? 1.15 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                            }
-                            MouseArea {
-                                id: settingsMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle settings"])
-                            }
-                        }
-
-                        Rectangle {
-                            id: updateButton
-                            property bool isHovered: updateMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.green.r, mocha.green.g, mocha.green.b, 0.15) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                            radius: barWindow.s(20)
-                            
-                            width: barWindow.isUpdateVisible ? barWindow.s(34) : 0
-                            height: parent.pillHeight
-                            
-                            visible: width > 0 || opacity > 0
-                            opacity: barWindow.isUpdateVisible ? 1.0 : 0.0
-                            clip: false 
-                            
-                            Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-                            Behavior on opacity { NumberAnimation { duration: 300 } }
-                            Behavior on color { ColorAnimation { duration: 200 } }
-                            
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: parent.width
-                                height: parent.height
-                                radius: parent.radius
-                                color: mocha.green
-                                z: -1
-                                
-                                SequentialAnimation on scale {
-                                    running: barWindow.isUpdateVisible && !updateButton.isHovered
-                                    loops: Animation.Infinite
-                                    NumberAnimation { from: 1.0; to: 1.3; duration: 2000; easing.type: Easing.OutCubic }
-                                }
-                                SequentialAnimation on opacity {
-                                    running: barWindow.isUpdateVisible && !updateButton.isHovered
-                                    loops: Animation.Infinite
-                                    NumberAnimation { from: 0.15; to: 0.0; duration: 2000; easing.type: Easing.OutCubic }
-                                }
-                            }
-                            
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰚰"
-                                font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(22)
-                                color: parent.isHovered ? mocha.text : mocha.green
-                                Behavior on color { ColorAnimation { duration: 200 } }
-                                
-                                rotation: parent.isHovered ? 360 : 0
-                                Behavior on rotation {
-                                    NumberAnimation { 
-                                        duration: 600
-                                        easing.type: Easing.OutBack
-                                    }
-                                }
-
-                                scale: parent.isHovered ? 1.15 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                            }
-
-                            MouseArea {
-                                id: updateMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: {
-                                    barWindow.updateAvailable = false;
-                                    barWindow.forceUpdateShow = false;
-                                    Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle updater"]);
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                Rectangle {
-                    id: workspacesBox
-                    color: "transparent"
-                    radius: barWindow.s(28); border.width: 0
-                    height: barWindow.barHeight
-                    y: (parent.height - barWindow.barHeight) / 2
-                    clip: false
-                    
-                    width: workspacesModel.count > 0 ? wsLayout.implicitWidth + barWindow.s(20) : 0
-                    
-                    property real pureCenter: (parent.width - width) / 2
-                    property real minCenterDefaultX: mediaBox.defaultX + mediaBox.width + (mediaBox.width > 0 ? barWindow.s(4) : 0)
-                    property real settingsX: barWindow.width - rightContent.width - width - barWindow.s(4)
-                    property real defaultX: Math.max(minCenterDefaultX, pureCenter)
-                    
-                    x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
-
-                    property bool limitActive: barWindow.isSettingsOpen && barWindow.isMediaActive
-
-                    visible: width > 0 || opacity > 0
-                    opacity: workspacesModel.count > 0 ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 300 } }
-
-                    Rectangle {
-                        id: activeHighlight
-                        y: (workspacesBox.height - barWindow.s(32)) / 2
-                        height: barWindow.s(32)
-                        radius: barWindow.s(20)
-                        color: mocha.mauve
-                        z: 0
-
-                        property int prevIdx: 0
-                        property int curIdx: workspacesModel.activeIndex
-
-                        onCurIdxChanged: {
-                            if (curIdx > prevIdx) {
-                                rightAnim.duration = 200; leftAnim.duration = 350;
-                            } else if (curIdx < prevIdx) {
-                                leftAnim.duration = 200; rightAnim.duration = 350;
-                            }
-                            prevIdx = curIdx;
-                        }
-
-                        property var activePill: wsPillRepeater.itemAt(curIdx)
-                        property real targetLeft: activePill ? wsLayout.x + activePill.x : 0
-                        property real targetRight: activePill ? targetLeft + activePill.width : barWindow.s(32)
-
-                        property real actualLeft: targetLeft
-                        property real actualRight: targetRight
-
-                        Behavior on actualLeft { NumberAnimation { id: leftAnim; duration: 250; easing.type: Easing.OutExpo } }
-                        Behavior on actualRight { NumberAnimation { id: rightAnim; duration: 250; easing.type: Easing.OutExpo } }
-
-                        x: actualLeft
-                        width: actualRight - actualLeft
-                        opacity: workspacesModel.count > 0 ? 1 : 0
-                    }
-
-                    Row {
-                        id: wsLayout
-                        anchors.centerIn: parent
-                        spacing: barWindow.s(8)
-                        
-                        Repeater {
-                            id: wsPillRepeater
-                            model: workspacesModel
-                            delegate: Rectangle {
-                                id: wsPill
-                                
-                                property bool isLimited: workspacesBox.limitActive && index >= 6
-                                visible: !isLimited
-                                
-                                property bool isHovered: wsPillMouse.containsMouse
-                                
-                                property string stateLabel: model.wsState
-                                property string wsName: model.wsId
-                                property int wsIndex: index
-                                
-                                property real targetWidth: appIconList.length > 0 ? barWindow.s(24) + appIconList.length * barWindow.s(16) + (hasManyIcons ? barWindow.s(18) : 0) : barWindow.s(36)
-                                width: targetWidth
-                                Behavior on targetWidth { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                
-                                height: barWindow.s(36); radius: barWindow.s(22)
-                                
-                                color: isHovered ? Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.1) : (stateLabel === "occupied" ? Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.15) : "transparent")
-
-                                scale: isHovered && stateLabel !== "active" ? 1.08 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                
-                                property bool initAnimTrigger: false
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate {
-                                    y: wsPill.initAnimTrigger ? 0 : barWindow.s(15)
-                                    Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } }
-                                }
-
-                                Component.onCompleted: {
-                                    if (!barWindow.startupCascadeFinished) {
-                                        animTimer.interval = index * 60;
-                                        animTimer.start();
-                                    } else {
-                                        initAnimTrigger = true;
-                                    }
-                                }
-
-                                Timer {
-                                    id: animTimer
-                                    running: false
-                                    repeat: false
-                                    onTriggered: wsPill.initAnimTrigger = true
-                                }
-                                
-                                Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
-                                Behavior on color { ColorAnimation { duration: 250 } }
-
-                                property string wsClassesStr: model.wsClasses || ""
-
-                                function classIcon(cls) {
-                                    var c = String(cls).toLowerCase();
-                                    var map = {
-                                        "kitty": "\uF489", "alacritty": "\uF489", "wezterm": "\uF489", "foot": "\uF489", "ghostty": "\uF489", "terminal": "\uF489",
-                                        "firefox": "\uF269", "firefoxdeveloperedition": "\uF269", "brave": "\uF269", "brave-browser": "\uF269", "zen": "\uF269",
-                                        "chromium": "\uF269", "google-chrome": "\uF269", "microsoft-edge": "\uF269", "edge": "\uF269",
-                                        "code": "\uF121", "code-oss": "\uF121", "codium": "\uF121", "vscodium": "\uF121", "visual-studio-code": "\uF121", "code-insiders": "\uF121", "visual-studio-code-insiders": "\uF121",
-                                        "nautilus": "\uF07C", "org.gnome.nautilus": "\uF07C", "dolphin": "\uF07C", "thunar": "\uF07C", "pcmanfm": "\uF07C",
-                                        "spotify": "\uF1BC",
-                                        "discord": "\uF392",
-                                        "slack": "\uF392",
-                                        "obsidian": "\uF4A5",
-                                        "gimp": "\uF338",
-                                        "inkscape": "\uF344",
-                                        "libreoffice": "\uF15C", "soffice": "\uF15C",
-                                        "evince": "\uF15C", "org.gnome.evince": "\uF15C",
-                                        "jetbrains-idea": "\uF121", "idea": "\uF121", "intellij": "\uF121",
-                                        "thunderbird": "\uF7E5",
-                                        "org.wezfurlong.wezterm": "\uF489",
-                                        "steam": "\uF1B7", "steamwebhelper": "\uF1B7",
-                                        "vlc": "\uF15C",
-                                        "virt-manager": "\uF17B",
-                                        "": ""
-                                    };
-                                    return map[c] || "\uF128";
-                                }
-
-                                property var appClassList: wsClassesStr !== "" ? wsClassesStr.split(",") : []
-                                property bool hasManyIcons: appClassList.length > 3
-                                property int maxShowIcons: hasManyIcons ? 2 : Math.min(appClassList.length, 3)
-                                property var appIconList: {
-                                    var icons = [];
-                                    for (var i = 0; i < appClassList.length && i < maxShowIcons; i++) {
-                                        icons.push(classIcon(appClassList[i]));
-                                    }
-                                    return icons;
-                                }
-
-                                Item {
-                                    anchors.fill: parent
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: wsName
-                                        font.family: "Hack Nerd Font"
-                                        font.pixelSize: barWindow.s(18)
-                                        font.weight: stateLabel === "active" ? Font.Black : (stateLabel === "occupied" ? Font.Bold : Font.Medium)
-                                        color: index === workspacesModel.activeIndex ? mocha.crust : (isHovered ? mocha.text : (stateLabel === "occupied" ? mocha.text : mocha.overlay0))
-                                        Behavior on color { ColorAnimation { duration: 250 } }
-                                        visible: appIconList.length === 0
-                                    }
-
-                                    Row {
-                                        anchors.centerIn: parent
-                                        spacing: barWindow.s(2)
-                                        visible: appIconList.length > 0
-
-                                        Repeater {
-                                            model: appIconList
-                                            delegate: Text {
-                                                text: modelData
-                                                font.family: "Hack Nerd Font"
-                                                font.pixelSize: barWindow.s(12)
-                                                color: wsPill.wsIndex === workspacesModel.activeIndex ? mocha.crust : (isHovered ? mocha.text : (stateLabel === "occupied" ? mocha.text : mocha.overlay0))
-                                                Behavior on color { ColorAnimation { duration: 250 } }
-                                            }
-                                        }
-
-                                        Text {
-                                            text: hasManyIcons ? "+" + (appClassList.length - 2) : ""
-                                            font.family: "Hack Nerd Font"
-                                            font.pixelSize: barWindow.s(10)
-                                            font.weight: Font.Black
-                                            color: index === workspacesModel.activeIndex ? mocha.crust : mocha.overlay0
-                                            visible: hasManyIcons
-                                        }
-                                    }
-
-                                    Text {
-                                        anchors.right: parent.right
-                                        anchors.bottom: parent.bottom
-                                        anchors.rightMargin: barWindow.s(2)
-                                        anchors.bottomMargin: barWindow.s(1)
-                                        text: wsName
-                                        font.family: "Hack Nerd Font"
-                                        font.pixelSize: barWindow.s(9)
-                                        font.weight: Font.Black
-                                        color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, 0.4)
-                                        visible: appIconList.length > 0
-                                    }
-                                }
-
-                                MouseArea {
-                                    id: wsPillMouse
-                                    hoverEnabled: true
-                                    anchors.fill: parent
-                                    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh " + wsName])
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: mediaBox
-                    color: "transparent"
-                    radius: barWindow.s(28); border.width: 0
-                    y: (parent.height - barWindow.barHeight) / 2
-                    height: barWindow.barHeight
-                    clip: false 
-                    
-                    width: barWindow.isMediaActive ? innerMediaLayout.implicitWidth + barWindow.s(24) : 0
-                    Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-
-                    property real defaultX: centerBox.defaultX + centerBox.width + (centerBox.width > 0 ? barWindow.s(4) : 0)
-                    property real settingsX: workspacesBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
-
-                    x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
-
-                    visible: width > 0 || opacity > 0
-                    opacity: barWindow.isMediaActive ? 1.0 : 0.0
-                    Behavior on opacity { NumberAnimation { duration: 400 } }
-                    
-                    Item {
-                        id: mediaLayoutContainer
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: barWindow.s(12)
-                        height: parent.height
-                        width: innerMediaLayout.implicitWidth
-                        
-                        opacity: barWindow.isMediaActive ? 1.0 : 0.0
-                        transform: Translate { 
-                            x: barWindow.isMediaActive ? 0 : barWindow.s(-20) 
-                            Behavior on x { NumberAnimation { duration: 700; easing.type: Easing.OutQuint } }
-                        }
-                        Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
-
-                        Row {
-                            id: innerMediaLayout
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: barWindow.width < 1920 ? barWindow.s(10) : barWindow.s(16)
-                            
-                            MouseArea {
-                                id: mediaInfoMouse
-                                width: infoLayout.width
-                                height: innerMediaLayout.height
-                                hoverEnabled: true
-                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle music"])
-                                
-                                Row {
-                                    id: infoLayout
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: barWindow.s(13)
-                                    
-                                    scale: mediaInfoMouse.containsMouse ? 1.02 : 1.0
-                                    Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-
-                                    Rectangle {
-                                        width: barWindow.s(32); height: barWindow.s(32); radius: barWindow.s(16); color: mocha.surface1
-                                        border.width: barWindow.musicData.status === "Playing" ? 1 : 0
-                                        border.color: mocha.mauve
-                                        clip: true
-                                        Image { 
-                                            anchors.fill: parent; 
-                                            source: barWindow.displayArtUrl || ""; 
-                                            fillMode: Image.PreserveAspectCrop 
-                                        }
-                                        
-                                        Rectangle {
-                                            anchors.fill: parent
-                                            color: Qt.rgba(mocha.mauve.r, mocha.mauve.g, mocha.mauve.b, 0.2)
-                                        }
-                                    }
-                                    Column {
-                                        spacing: -2
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        property real maxColWidth: barWindow.width < 1920 ? barWindow.s(120) : barWindow.s(180)
-                                        width: maxColWidth 
-                                        
-                                        Text { 
-                                            text: barWindow.displayTitle; 
-                                            font.family: "Hack Nerd Font"; 
-                                            font.weight: Font.Black; 
-                                            font.pixelSize: barWindow.s(13); 
-                                            color: mocha.text;
-                                            width: parent.width
-                                            elide: Text.ElideRight; 
-                                        }
-                                        Text { 
-                                            text: barWindow.displayTime; 
-                                            font.family: "Hack Nerd Font"; 
-                                            font.weight: Font.Black; 
-                                            font.pixelSize: barWindow.s(13); 
-                                            color: mocha.subtext0;
-                                            width: parent.width
-                                            elide: Text.ElideRight;
-                                        }
-                                    }
-                                }
-                            }
-
-                            Row {
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: barWindow.width < 1920 ? barWindow.s(4) : barWindow.s(10)
-                                Item { 
-                                    width: barWindow.s(24); height: barWindow.s(24); 
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    Text { 
-                                        anchors.centerIn: parent; text: "󰒮"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(26); 
-                                        color: prevMouse.containsMouse ? mocha.text : mocha.overlay2; 
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        scale: prevMouse.containsMouse ? 1.1 : 1.0
-                                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                                    }
-                                    MouseArea { id: prevMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "previous"]); musicForceRefresh.running = true; } } 
-                                }
-                                Item { 
-                                    width: barWindow.s(28); height: barWindow.s(28); 
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    Text { 
-                                        anchors.centerIn: parent; text: barWindow.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(30); 
-                                        color: playMouse.containsMouse ? mocha.green : mocha.text; 
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        scale: playMouse.containsMouse ? 1.15 : 1.0
-                                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                                    }
-                                    MouseArea { id: playMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "play-pause"]); musicForceRefresh.running = true; } } 
-                                }
-                                Item { 
-                                    width: barWindow.s(24); height: barWindow.s(24); 
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    Text { 
-                                        anchors.centerIn: parent; text: "󰒭"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(26); 
-                                        color: nextMouse.containsMouse ? mocha.text : mocha.overlay2; 
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        scale: nextMouse.containsMouse ? 1.1 : 1.0
-                                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                                    }
-                                    MouseArea { id: nextMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "next"]); musicForceRefresh.running = true; } } 
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: centerBox
-                    color: "transparent"
-                    
-                    y: (parent.height - barWindow.barHeight) / 2
-                    height: barWindow.barHeight
-                    
-                    width: centerLayout.childrenRect.width + barWindow.s(12)
-                    Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-                    
-                    property real defaultX: leftContent.x + leftContent.width + barWindow.s(4)
-                    property real settingsX: mediaBox.settingsX - width - (width > 0 ? barWindow.s(4) : 0)
-                    
-                    x: defaultX + (settingsX - defaultX) * barWindow.settingsSlideProgress
-                    
-                    property bool showLayout: false
                     opacity: showLayout ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
                     transform: Translate {
-                        y: centerBox.showLayout ? 0 : barWindow.s(-30)
-                        Behavior on y { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                        x: leftZone.showLayout ? 0 : barWindow.s(-200)
+                        Behavior on x { NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
                     }
 
-                    Timer {
-                        running: barWindow.isStartupReady
-                        interval: 150
-                        onTriggered: centerBox.showLayout = true
-                    }
-
-                    Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
-
-                    Row {
-                        id: centerLayout
-                        anchors.centerIn: parent
-                        spacing: barWindow.s(12)
-
-                        Rectangle {
-                            id: timePill
-                            property bool isHovered: timePillMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.95) : Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                            radius: barWindow.s(28)
-                            border.width: 1
-                            border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, isHovered ? 0.15 : 0.05)
-                            height: barWindow.barHeight
-                            width: timeText.implicitWidth + barWindow.s(36)
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Behavior on color { ColorAnimation { duration: 250 } }
-                            Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
-
-                            Text {
-                                id: timeText
-                                anchors.centerIn: parent
-                                text: barWindow.timeStr
-                                font.family: "Hack Nerd Font"
-                                font.pixelSize: barWindow.s(16)
-                                font.weight: Font.Black
-                                color: mocha.blue
-                            }
-
-                            MouseArea {
-                                id: timePillMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
+                    Repeater {
+                        model: barWindow.leftModules
+                        delegate: Loader {
+                            required property string modelData
+                            required property int index
+                            width: item ? item.implicitWidth : 0
+                            height: leftZone.height
+                            Component.onCompleted: {
+                                let mod = TopbarLayout.getModule(modelData);
+                                if (!mod) return;
+                                setSource(mod.component, {
+                                    "bar": barWindow,
+                                    "colors": mocha,
+                                    "zoneReady": Qt.binding(() => leftZone.showLayout),
+                                    "slotIndex": index
+                                });
                             }
                         }
-
-                        Rectangle {
-                            id: datePill
-                            property bool isHovered: datePillMouse.containsMouse
-                            color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.95) : Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                            radius: barWindow.s(28)
-                            border.width: 1
-                            border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, isHovered ? 0.15 : 0.05)
-                            height: barWindow.barHeight
-                            width: dateText.implicitWidth + barWindow.s(36)
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Behavior on color { ColorAnimation { duration: 250 } }
-                            Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
-
-                            Text {
-                                id: dateText
-                                anchors.centerIn: parent
-                                text: barWindow.dateStr
-                                font.family: "Hack Nerd Font"
-                                font.pixelSize: barWindow.s(11)
-                                font.weight: Font.Bold
-                                color: mocha.subtext0
-                            }
-
-                            MouseArea {
-                                id: datePillMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
-                            }
-                        }
-
                     }
                 }
 
                 Row {
-                    id: rightContent
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: barWindow.s(4)
-                    
+                    id: centerZone
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: parent.height
+                    spacing: barWindow.s(12)
+
                     property bool showLayout: false
-                    opacity: showLayout ? 1 : 0
-                    transform: Translate {
-                        x: rightContent.showLayout ? 0 : barWindow.s(30)
-                        Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                    Timer {
+                        running: barWindow.isStartupReady
+                        interval: 150
+                        onTriggered: centerZone.showLayout = true
                     }
-                    
+
+                    opacity: showLayout ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                    transform: Translate {
+                        y: centerZone.showLayout ? 0 : barWindow.s(-30)
+                        Behavior on y { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                    }
+
+                    Repeater {
+                        model: barWindow.centerModules
+                        delegate: Loader {
+                            required property string modelData
+                            required property int index
+                            width: item ? item.implicitWidth : 0
+                            height: centerZone.height
+                            Component.onCompleted: {
+                                let mod = TopbarLayout.getModule(modelData);
+                                if (!mod) return;
+                                setSource(mod.component, {
+                                    "bar": barWindow,
+                                    "colors": mocha,
+                                    "zoneReady": Qt.binding(() => centerZone.showLayout),
+                                    "slotIndex": index
+                                });
+                            }
+                        }
+                    }
+                }
+
+                Row {
+                    id: rightZone
+                    anchors.right: parent.right
+                    anchors.rightMargin: barWindow.s(10)
+                    height: parent.height
+                    spacing: barWindow.s(8)
+
+                    property bool showLayout: false
                     Timer {
                         running: barWindow.isStartupReady && barWindow.isDataReady
                         interval: 250
-                        onTriggered: rightContent.showLayout = true
+                        onTriggered: rightZone.showLayout = true
                     }
 
+                    opacity: showLayout ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
-
-                    Item {
-                        height: barWindow.barHeight
-                        
-                        property real targetWidth: trayRepeater.count > 0 ? trayLayout.width + barWindow.s(24) : 0
-                        width: targetWidth
-                        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-                        
-                        visible: targetWidth > 0
-                        opacity: targetWidth > 0 ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 300 } }
-
-                        Row {
-                            id: trayLayout
-                            anchors.centerIn: parent
-                            spacing: barWindow.s(13)
-
-                            Repeater {
-                                id: trayRepeater
-                                model: SystemTray.items
-                                delegate: Image {
-                                    id: trayIcon
-                                    source: modelData.icon || ""
-                                    fillMode: Image.PreserveAspectFit
-                                    
-                                    sourceSize: Qt.size(barWindow.s(18), barWindow.s(18))
-                                    width: barWindow.s(18)
-                                    height: barWindow.s(18)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    
-                                    property bool isHovered: trayMouse.containsMouse
-                                    property bool initAnimTrigger: false
-                                    opacity: initAnimTrigger ? (isHovered ? 1.0 : 0.8) : 0.0
-                                    scale: initAnimTrigger ? (isHovered ? 1.15 : 1.0) : 0.0
-
-                                    Component.onCompleted: {
-                                        if (!barWindow.startupCascadeFinished) {
-                                            trayAnimTimer.interval = index * 50;
-                                            trayAnimTimer.start();
-                                        } else {
-                                            initAnimTrigger = true;
-                                        }
-                                    }
-                                    Timer {
-                                        id: trayAnimTimer
-                                        running: false
-                                        repeat: false
-                                        onTriggered: trayIcon.initAnimTrigger = true
-                                    }
-
-                                    Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-                                    Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-
-                                    QsMenuAnchor {
-                                        id: menuAnchor
-                                        anchor.window: barWindow
-                                        anchor.item: trayIcon
-                                        menu: modelData.menu
-                                    }
-
-                                    MouseArea {
-                                        id: trayMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-                                        onClicked: mouse => {
-                                            if (mouse.button === Qt.LeftButton) {
-                                                if (modelData.isMenuOnly || modelData.onlyMenu) {
-                                                    menuAnchor.open();
-                                                } else if (typeof modelData.activate === "function") {
-                                                    modelData.activate(); 
-                                                }
-                                            } else if (mouse.button === Qt.MiddleButton) {
-                                                if (typeof modelData.secondaryActivate === "function") {
-                                                    modelData.secondaryActivate();
-                                                }
-                                            } else if (mouse.button === Qt.RightButton) {
-                                                if (modelData.menu) { 
-                                                    menuAnchor.open();
-                                                } else if (typeof modelData.contextMenu === "function") {
-                                                    modelData.contextMenu(mouse.x, mouse.y);
-                                                } else {
-                                                    modelData.activate(); 
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    transform: Translate {
+                        x: rightZone.showLayout ? 0 : barWindow.s(30)
+                        Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
                     }
 
-                    Item {
-                        height: barWindow.barHeight
-                        
-                        width: sysLayout.implicitWidth + barWindow.s(20)
-
-                        Row {
-                            id: sysLayout
-                            anchors.centerIn: parent
-                            spacing: barWindow.s(8) 
-
-                            property int pillHeight: barWindow.s(36)
-
-                            Rectangle {
-                                property bool isHovered: kbMouse.containsMouse
-                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                                radius: barWindow.s(20); height: sysLayout.pillHeight;
-                                clip: true
-
-                                Rectangle {
-                                    anchors.fill: parent; radius: barWindow.s(20)
-                                    opacity: 1.0; Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.color5
-                                }
-
-                                property real targetWidth: kbLayoutRow.implicitWidth + barWindow.s(24)
-                                width: targetWidth
-                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-
-                                scale: isHovered ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                                Behavior on color { ColorAnimation { duration: 200 } }
-
-                                property bool initAnimTrigger: false
-                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 0; onTriggered: parent.initAnimTrigger = true }
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-                                Row {
-                                    id: kbLayoutRow
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: barWindow.s(12)
-                                    spacing: barWindow.s(10)
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "󰌌"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16); color: mocha.base }
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.kbLayout; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black; color: mocha.base }
-                                }
-                                MouseArea { id: kbMouse; anchors.fill: parent; hoverEnabled: true; onClicked: Quickshell.execDetached(["hyprctl", "switchxkblayout", "main", "next"]) }
-                            }
-
-                            Rectangle {
-                                id: wifiPill
-                                property bool isHovered: wifiMouse.containsMouse
-                                radius: barWindow.s(20); height: sysLayout.pillHeight; 
-                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                                clip: true
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: barWindow.s(20)
-                                    opacity: barWindow.showEthernet ? (barWindow.ethStatus === "Connected" ? 1.0 : 0.0) : (barWindow.isWifiOn ? 1.0 : 0.0)
-                                    Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.color6
-                                }
-
-                                property real targetWidth: wifiLayoutRow.implicitWidth + barWindow.s(24)
-                                width: targetWidth
-                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-                                
-                                scale: isHovered ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                                Behavior on color { ColorAnimation { duration: 200 } }
-
-                                property bool initAnimTrigger: false
-                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 50; onTriggered: parent.initAnimTrigger = true }
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-                                Row { 
-                                    id: wifiLayoutRow
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: barWindow.s(12)
-                                    spacing: barWindow.s(10)
-                                    Text { 
-                                        anchors.verticalCenter: parent.verticalCenter; 
-                                        text: barWindow.showEthernet ? "󰈀" : barWindow.wifiIcon;
-                                        font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16);
-                                        color: barWindow.showEthernet ? (barWindow.ethStatus === "Connected" ? mocha.base : mocha.subtext0) : (barWindow.isWifiOn ? mocha.base : mocha.subtext0)
-                                    }
-                                    Text { 
-                                        id: wifiText
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: barWindow.showEthernet ? barWindow.ethStatus : ((barWindow.isWifiOn ? (barWindow.wifiSsid !== "" ? barWindow.wifiSsid : "On") : "Off"))
-                                        visible: text !== ""
-                                        font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black;
-                                        color: barWindow.showEthernet ? (barWindow.ethStatus === "Connected" ? mocha.base : mocha.text) : (barWindow.isWifiOn ? mocha.base : mocha.text);
-                                        width: Math.min(implicitWidth, barWindow.s(100)); elide: Text.ElideRight 
-                                    }
-                                }
-                                MouseArea { id: wifiMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network wifi"]) }
-                            }
-
-                            Rectangle {
-                                id: btPill
-                                property bool isHovered: btMouse.containsMouse
-                                radius: barWindow.s(20); height: sysLayout.pillHeight
-                                clip: true
-                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                                
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: barWindow.s(20)
-                                    opacity: barWindow.isBtOn ? 1.0 : 0.0
-                                    Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.color4
-                                }
-
-                                property real targetWidth: barWindow.isDesktop ? 0 : btLayoutRow.implicitWidth + barWindow.s(24)
-                                width: targetWidth
-                                visible: targetWidth > 0
-                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-
-                                scale: isHovered ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                                Behavior on color { ColorAnimation { duration: 200 } }
-
-                                property bool initAnimTrigger: false
-                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 100; onTriggered: parent.initAnimTrigger = true }
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-                                Row { 
-                                    id: btLayoutRow
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: barWindow.s(12)
-                                    spacing: barWindow.s(10)
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.btIcon; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16); color: barWindow.isBtOn ? mocha.base : mocha.subtext0 }
-                                    Text { 
-                                        id: btText
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: barWindow.btDevice
-                                        visible: text !== ""; 
-                                        font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black; 
-                                        color: barWindow.isBtOn ? mocha.base : mocha.text; 
-                                        width: Math.min(implicitWidth, barWindow.s(100)); elide: Text.ElideRight 
-                                    }
-                                }
-                                MouseArea { id: btMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"]) }
-                            }
-
-                            Rectangle {
-                                property bool isHovered: sysMouse.containsMouse
-                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                                radius: barWindow.s(20); height: sysLayout.pillHeight;
-                                clip: true
-
-                                Rectangle {
-                                    anchors.fill: parent; radius: barWindow.s(20)
-                                    opacity: barWindow.sysDataReady ? 1.0 : 0.0
-                                    Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.color1
-                                }
-
-                                property real targetWidth: sysLayoutRow.implicitWidth + barWindow.s(24)
-                                width: targetWidth
-                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-
-                                scale: isHovered ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                                Behavior on color { ColorAnimation { duration: 200 } }
-
-                                property bool initAnimTrigger: false
-                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 140; onTriggered: parent.initAnimTrigger = true }
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-                                Row {
-                                    id: sysLayoutRow
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: barWindow.s(12)
-                                    spacing: barWindow.s(10)
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "\uF0E4"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); color: barWindow.sysDataReady ? mocha.base : mocha.subtext0 }
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.cpuPercent; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(12); font.weight: Font.Black; color: barWindow.sysDataReady ? mocha.base : mocha.text }
-                                    Rectangle { width: barWindow.s(1); height: barWindow.s(16); color: mocha.overlay0; opacity: 0.3 }
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "\uF538"; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); color: barWindow.sysDataReady ? mocha.base : mocha.subtext0 }
-                                    Text { anchors.verticalCenter: parent.verticalCenter; text: barWindow.ramPercent; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(12); font.weight: Font.Black; color: barWindow.sysDataReady ? mocha.base : mocha.text }
-                                }
-                                MouseArea { id: sysMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle system-monitor"]) }
-                            }
-
-                            Rectangle {
-                                property bool isHovered: volMouse.containsMouse
-                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4)
-                                radius: barWindow.s(20); height: sysLayout.pillHeight;
-                                clip: true
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: barWindow.s(20)
-                                    opacity: barWindow.isSoundActive ? 1.0 : 0.0
-                                    Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: mocha.color3
-                                }
-                                
-                                property real targetWidth: volLayoutRow.implicitWidth + barWindow.s(24)
-                                width: targetWidth
-                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-                                
-                                scale: isHovered ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                                Behavior on color { ColorAnimation { duration: 200 } }
-
-                                property bool initAnimTrigger: false
-                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 150; onTriggered: parent.initAnimTrigger = true }
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-                                Row { 
-                                    id: volLayoutRow
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: barWindow.s(12)
-                                    spacing: barWindow.s(10)
-                                    Text { 
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: barWindow.volIcon; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(16); 
-                                        color: barWindow.isSoundActive ? mocha.base : mocha.subtext0 
-                                    }
-                                    Text { 
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: barWindow.volPercent; 
-                                        font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black; 
-                                        color: barWindow.isSoundActive ? mocha.base : mocha.text; 
-                                    }
-                                }
-                                MouseArea { id: volMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle volume"]) }
-                            }
-
-                            Rectangle {
-                                property bool isHovered: batMouse.containsMouse
-                                color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.6) : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.4); 
-                                radius: barWindow.s(20); height: sysLayout.pillHeight;
-                                clip: true
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: barWindow.s(20)
-                                    opacity: 1.0 
-                                    Behavior on opacity { NumberAnimation { duration: 300 } }
-                                    color: barWindow.isDesktop ? mocha.red : barWindow.batDynamicColor
-                                    Behavior on color { ColorAnimation { duration: 300 } }
-                                }
-                                
-                                property real targetWidth: barWindow.isDesktop ? barWindow.s(34) : batLayoutRow.implicitWidth + barWindow.s(24)
-                                width: targetWidth
-                                Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-                                
-                                scale: isHovered ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                                Behavior on color { ColorAnimation { duration: 200 } }
-
-                                property bool initAnimTrigger: false
-                                Timer { running: rightContent.showLayout && !parent.initAnimTrigger; interval: 200; onTriggered: parent.initAnimTrigger = true }
-                                opacity: initAnimTrigger ? 1 : 0
-                                transform: Translate { y: parent.initAnimTrigger ? 0 : barWindow.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-                                Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-                                Row { 
-                                    id: batLayoutRow
-                                    anchors.centerIn: parent
-                                    spacing: barWindow.s(10)
-                                    Text { 
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: barWindow.isDesktop ? "" : barWindow.batIcon; 
-                                        font.family: "Hack Nerd Font"; font.pixelSize: barWindow.isDesktop ? barWindow.s(18) : barWindow.s(16); 
-                                        color: mocha.base 
-                                        Behavior on color { ColorAnimation { duration: 300 } }
-                                    }
-                                    Text { 
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        visible: !barWindow.isDesktop
-                                        text: barWindow.batPercent; font.family: "Hack Nerd Font"; font.pixelSize: barWindow.s(13); font.weight: Font.Black; 
-                                        color: mocha.base 
-                                        Behavior on color { ColorAnimation { duration: 300 } }
-                                    }
-                                }
-                                MouseArea { id: batMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle battery"]) }
-                            }                       
-                 }
-            }
-            Rectangle {
-                        id: recButton
-                        property bool isHovered: recMouse.containsMouse
-                        
-                        color: isHovered ? Qt.rgba(mocha.surface1.r, mocha.surface1.g, mocha.surface1.b, 0.95) : Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.75)
-                        radius: barWindow.s(28)
-                        border.width: 1
-                        border.color: Qt.rgba(mocha.text.r, mocha.text.g, mocha.text.b, isHovered ? 0.15 : 0.05)
-
-                        property real targetWidth: barWindow.isRecording ? barWindow.barHeight : 0
-                        width: targetWidth
-                        height: barWindow.barHeight 
-
-                        visible: targetWidth > 0 || opacity > 0
-                        opacity: barWindow.isRecording ? 1.0 : 0.0
-                        clip: true
-
-                        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-                        Behavior on opacity { NumberAnimation { duration: 300 } }
-                        
-                        scale: isHovered ? 1.05 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-                        Behavior on color { ColorAnimation { duration: 200 } }
-
-                        Text {
-                            id: recIcon
-                            anchors.centerIn: parent
-                            text: "" 
-                            font.family: "Hack Nerd Font"
-                            font.pixelSize: barWindow.s(20)
-                            color: mocha.red
-                            
-                            SequentialAnimation on opacity {
-                                running: barWindow.isRecording && !recButton.isHovered
-                                loops: Animation.Infinite
-                                NumberAnimation { to: 0.3; duration: 600; easing.type: Easing.InOutSine }
-                                NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutSine }
-                            }
-                            SequentialAnimation on scale {
-                                running: barWindow.isRecording && !recButton.isHovered
-                                loops: Animation.Infinite
-                                NumberAnimation { to: 1.15; duration: 600; easing.type: Easing.InOutSine }
-                                NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutSine }
-                            }
-                        }
-                        
-                        MouseArea {
-                            id: recMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: {
-                                barWindow.isRecording = false; 
-                                Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/screenshot.sh"]); 
+                    Repeater {
+                        model: barWindow.rightModules
+                        delegate: Loader {
+                            required property string modelData
+                            required property int index
+                            width: item ? item.implicitWidth : 0
+                            height: rightZone.height
+                            Component.onCompleted: {
+                                let mod = TopbarLayout.getModule(modelData);
+                                if (!mod) return;
+                                setSource(mod.component, {
+                                    "bar": barWindow,
+                                    "colors": mocha,
+                                    "zoneReady": Qt.binding(() => rightZone.showLayout),
+                                    "slotIndex": index
+                                });
                             }
                         }
                     }

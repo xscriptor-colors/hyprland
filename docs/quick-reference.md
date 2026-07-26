@@ -26,6 +26,7 @@
 | SUPER + V | Toggle volume control |
 | SUPER + H | Toggle guide panel |
 | SUPER + SHIFT + S | Toggle settings panel |
+| SUPER + SHIFT + E | Toggle settings panel on the Topbar tab |
 | SUPER + SHIFT + T | Toggle focus time tracker |
 | SUPER + U | Toggle system updater |
 | SUPER + X | Toggle Stewart (ambient visualizer) |
