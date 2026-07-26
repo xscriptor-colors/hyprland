@@ -6,6 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../topbar/TopbarLayout.js" as TopbarLayout
 
 Item {
     id: root
@@ -75,6 +76,7 @@ Item {
             else if (card.tab === 1) root.tab1Loaded = true;
             else if (card.tab === 2) root.tab2Loaded = true;
             else if (card.tab === 3) root.tab3Loaded = true;
+            else if (card.tab === 5) root.tab5Loaded = true;
         } else {
             jumpToSettingTimer.targetTab = 2;
             jumpToSettingTimer.targetBox = item.kbIndex;
@@ -124,10 +126,11 @@ Item {
     }
 
     function maxHighlightForTab(tab) {
-        if (tab === 0) return 6;
+        if (tab === 0) return 7;
         if (tab === 1) return 3;
         if (tab === 2) return dynamicKeybindsModel.count - 1;
         if (tab === 4) return dynamicStartupModel.count - 1;
+        if (tab === 5) return root.topbarModules.length - 1;
         return -1;
     }
 
@@ -164,6 +167,9 @@ Item {
                 let isEd = dynamicStartupModel.get(root.highlightedBox).isEditing;
                 dynamicStartupModel.setProperty(root.highlightedBox, "isEditing", !isEd);
             }
+        } else if (root.currentTab === 5) {
+            let tbMod = root.topbarModuleAt(root.highlightedBox);
+            if (tbMod) root.topbarApply(TopbarLayout.toggleEnabled(root.topbarLayoutView, tbMod.id));
         }
     }
 
@@ -182,6 +188,7 @@ Item {
             else if (box === 3 || box === 4) approxY = root.s(240);
             else if (box === 5) approxY = root.s(400);
             else if (box === 6) approxY = root.s(520);
+            else if (box === 7) approxY = root.s(640);
             generalLoader.item.scrollToBox(approxY);
         } else if (root.currentTab === 1 && weatherLoader.item) {
             let approxY = 0;
@@ -196,19 +203,108 @@ Item {
         } else if (root.currentTab === 4 && startupLoader.item) {
             let approxY = box * root.s(56) + root.s(20);
             startupLoader.item.scrollToBox(approxY);
+        } else if (root.currentTab === 5 && topbarLoader.item) {
+            let approxY = box * root.s(64) + root.s(60);
+            topbarLoader.item.scrollToBox(approxY);
         }
     }
 
     property int currentTab: 0
-    property var tabNames: ["General", "Weather", "Keybinds", "Monitors", "Startup"]
-    property var tabIcons: ["󰒓", "󰖐", "󰌌", "󰍹", "󰐥"]
-    property var tabColors: ["teal", "blue", "peach", "green", "mauve"]
+
+    // Topbar layout editing. Edits land in a draft so a burst of keystrokes
+    // collapses into one settings.json write instead of one per keypress.
+    property var topbarDraft: null
+    readonly property var topbarLayoutView: topbarDraft ? topbarDraft : Config.topbarLayout
+    readonly property var topbarModules: TopbarLayout.flatten(topbarLayoutView)
+
+    function topbarModuleAt(idx) {
+        return (idx >= 0 && idx < root.topbarModules.length) ? root.topbarModules[idx] : null;
+    }
+
+    // Roundness writes go through the same debounce idea as the layout: the bar
+    // repaints from settings.json, so a burst of presses must not spam jq.
+    function roundnessStep(dir) {
+        let next = Math.max(0.0, Math.min(1.0, Config.topbarRoundness + dir * 0.1));
+        Config.topbarRoundness = Math.round(next * 100) / 100;
+        roundnessSaveTimer.restart();
+    }
+
+    Timer {
+        id: roundnessSaveTimer
+        interval: 250
+        onTriggered: Config.saveTopbarRoundness(Config.topbarRoundness)
+    }
+
+    // App scale is persisted by the General tab's Save button, matching how
+    // every other setting on that tab behaves.
+    function appScaleStep(dir) {
+        let next = Math.max(0.75, Math.min(2.0, Config.appScale + dir * 0.25));
+        Config.appScale = Math.round(next * 100) / 100;
+    }
+
+    function topbarApply(newLayout) {
+        root.topbarDraft = newLayout;
+        topbarSaveTimer.restart();
+    }
+
+    // Moves the highlighted module and keeps the highlight on it, so repeated
+    // presses keep acting on the same module instead of the same slot.
+    function topbarMove(delta) {
+        let mod = root.topbarModuleAt(root.highlightedBox);
+        if (!mod) return;
+        let next = TopbarLayout.move(root.topbarLayoutView, mod.id, delta);
+        root.topbarApply(next);
+        let flat = TopbarLayout.flatten(next);
+        for (let i = 0; i < flat.length; i++) {
+            if (flat[i].id === mod.id) { root.highlightedBox = i; break; }
+        }
+    }
+
+    Timer {
+        id: topbarSaveTimer
+        interval: 250
+        onTriggered: root.topbarFlush()
+    }
+
+    function topbarFlush() {
+        if (root.topbarDraft) Config.saveTopbarLayout(root.topbarDraft);
+        root.topbarDraft = null;
+    }
+
+    // Closing the panel inside the debounce window would otherwise drop the
+    // last edit on the floor.
+    Component.onDestruction: root.topbarFlush()
+
+    // Opened straight onto a tab via `qs_manager.sh toggle settings <mode>`.
+    property string activeMode: ""
+    onActiveModeChanged: root.applyActiveMode()
+
+    function applyActiveMode() {
+        if (root.activeMode === "topbar") {
+            root.tab5Loaded = true;
+            activeModeTimer.start();
+        }
+    }
+
+    // Switching tabs on a timer rather than immediately: the tab bar only
+    // scrolls the selection into view on a real transition, and it needs its
+    // layout resolved first or the scroll target clamps to zero.
+    Timer {
+        id: activeModeTimer
+        interval: 220
+        onTriggered: root.currentTab = 5
+    }
+
+    property var tabNames: ["General", "Weather", "Keybinds", "Monitors", "Startup", "Topbar"]
+    property var tabIcons: ["󰒓", "󰖐", "󰌌", "󰍹", "󰐥", ""]
+    property var tabColors: ["teal", "blue", "peach", "green", "mauve", "sapphire"]
 
     property bool tab0Loaded: false
     property bool tab1Loaded: false
     property bool tab2Loaded: false
     property bool tab3Loaded: false
     property bool tab4Loaded: false
+    property bool tab5Loaded: false
 
     onCurrentTabChanged: {
         root.clearHighlight();
@@ -217,6 +313,7 @@ Item {
         else if (currentTab === 2) root.tab2Loaded = true;
         else if (currentTab === 3) root.tab3Loaded = true;
         else if (currentTab === 4) root.tab4Loaded = true;
+        else if (currentTab === 5) root.tab5Loaded = true;
     }
 
     onTab3LoadedChanged: {
@@ -244,12 +341,12 @@ Item {
 
     Keys.onTabPressed: (event) => {
         if (root.isSearchMode) return;
-        root.currentTab = (root.currentTab + 1) % 5;
+        root.currentTab = (root.currentTab + 1) % 6;
         event.accepted = true;
     }
     Keys.onBacktabPressed: (event) => {
         if (root.isSearchMode) return;
-        root.currentTab = (root.currentTab + 4) % 5;
+        root.currentTab = (root.currentTab + 5) % 6;
         event.accepted = true;
     }
 
@@ -309,6 +406,10 @@ Item {
                 Config.workspaceCount = Math.max(2, Config.workspaceCount - 1);
                 event.accepted = true;
                 return;
+            } else if (root.currentTab === 0 && root.highlightedBox === 7) {
+                root.appScaleStep(-1);
+                event.accepted = true;
+                return;
             }
         }
         if (event.key === Qt.Key_Right) {
@@ -320,7 +421,26 @@ Item {
                 Config.workspaceCount = Math.min(10, Config.workspaceCount + 1);
                 event.accepted = true;
                 return;
+            } else if (root.currentTab === 0 && root.highlightedBox === 7) {
+                root.appScaleStep(1);
+                event.accepted = true;
+                return;
             }
+        }
+
+        if (root.currentTab === 5 && (event.modifiers & Qt.ShiftModifier)
+            && (event.key === Qt.Key_Up || event.key === Qt.Key_Down)) {
+            root.topbarMove(event.key === Qt.Key_Down ? 1 : -1);
+            event.accepted = true;
+            return;
+        }
+
+        // Island shape is a tab-wide control, so it answers to Left/Right
+        // whatever module happens to be highlighted.
+        if (root.currentTab === 5 && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
+            root.roundnessStep(event.key === Qt.Key_Right ? 1 : -1);
+            event.accepted = true;
+            return;
         }
 
         if (event.key === Qt.Key_Down) {
@@ -890,7 +1010,9 @@ Item {
         { tab: 0, boxIndex: 6, label: "Workspaces",        desc: "Static count in topbar", icon: "󰽿", color: "red" },
         { tab: 1, boxIndex: 1, label: "API Key",           desc: "OpenWeather API key",    icon: "󰌆", color: "blue" },
         { tab: 1, boxIndex: 2, label: "City ID",           desc: "OpenWeather city ID",    icon: "󰖐", color: "blue" },
-        { tab: 1, boxIndex: 3, label: "Temperature Unit",  desc: "Celsius / Fahrenheit / K", icon: "󰔄", color: "blue" }
+        { tab: 1, boxIndex: 3, label: "Temperature Unit",  desc: "Celsius / Fahrenheit / K", icon: "󰔄", color: "blue" },
+        { tab: 5, boxIndex: 0, label: "Topbar modules",    desc: "Toggle and reorder the bar", icon: "", color: "sapphire" },
+        { tab: 0, boxIndex: 7, label: "App scale",        desc: "Scale GTK / Electron apps", icon: "", color: "sapphire" }
     ]
 
     function getMatchingKeybindIndices(query) {
@@ -1008,6 +1130,7 @@ Item {
     property real introContent: 0.0
     Component.onCompleted: {
         root.tab0Loaded = true;
+        root.applyActiveMode();
         startupSequence.start();
         if (Config.dataReady && dynamicKeybindsModel.count === 0) {
             for (let i = 0; i < Config.keybindsData.length; i++) {
@@ -1841,6 +1964,98 @@ Item {
                                         }
                                         MouseArea { id: wsPlusMa; anchors.fill: parent; hoverEnabled: true; onClicked: Config.workspaceCount = Math.min(10, Config.workspaceCount + 1) }
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    // -- Box 7: App scale ------------------------------------
+                    Rectangle {
+                        id: box7
+                        property bool isActive: root.highlightedBox === 7
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: appScaleRow.implicitHeight + root.s(28)
+                        radius: root.s(26)
+                        color: isActive ? root.sapphire : root.surface0
+                        border.color: isActive ? root.sapphire : root.surface1
+                        border.width: 1
+                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+
+                        MouseArea { anchors.fill: parent; onClicked: root.highlightedBox = 7; z: -1 }
+
+                        RowLayout {
+                            id: appScaleRow
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.margins: root.s(16)
+                            spacing: root.s(14)
+                            Item {
+                                Layout.preferredWidth: root.s(22)
+                                Layout.alignment: Qt.AlignVCenter
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: ""
+                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
+                                    color: box7.isActive ? root.base : root.sapphire
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: root.s(3)
+                                Text {
+                                    text: "App scale"
+                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(14)
+                                    color: box7.isActive ? root.base : root.text
+                                    Layout.fillWidth: true
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                Text {
+                                    text: "GTK / Electron apps. Restart them to apply."
+                                    font.family: "Inter"; font.pixelSize: root.s(11)
+                                    color: box7.isActive ? Qt.alpha(root.base, 0.75) : Qt.alpha(root.subtext0, 0.7)
+                                    Layout.fillWidth: true
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                            }
+                            RowLayout {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(10)
+                                Rectangle {
+                                    width: root.s(28); height: root.s(28); radius: root.s(22)
+                                    color: asMinusMa.pressed ? Qt.alpha(root.base, 0.3) : (asMinusMa.containsMouse ? Qt.alpha(root.base, 0.2) : Qt.alpha(root.base, 0.15))
+                                    scale: asMinusMa.pressed ? 0.90 : (asMinusMa.containsMouse ? 1.08 : 1.0)
+                                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "-"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                        color: box7.isActive ? root.base : root.sapphire
+                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    }
+                                    MouseArea { id: asMinusMa; anchors.fill: parent; hoverEnabled: true; onClicked: root.appScaleStep(-1) }
+                                }
+                                Text {
+                                    text: Config.appScale.toFixed(2) + "x"
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(14)
+                                    color: box7.isActive ? root.base : root.sapphire
+                                    Layout.minimumWidth: root.s(46); horizontalAlignment: Text.AlignHCenter
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                Rectangle {
+                                    width: root.s(28); height: root.s(28); radius: root.s(22)
+                                    color: asPlusMa.pressed ? Qt.alpha(root.base, 0.3) : (asPlusMa.containsMouse ? Qt.alpha(root.base, 0.2) : Qt.alpha(root.base, 0.15))
+                                    scale: asPlusMa.pressed ? 0.90 : (asPlusMa.containsMouse ? 1.08 : 1.0)
+                                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "+"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                        color: box7.isActive ? root.base : root.sapphire
+                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    }
+                                    MouseArea { id: asPlusMa; anchors.fill: parent; hoverEnabled: true; onClicked: root.appScaleStep(1) }
                                 }
                             }
                         }
@@ -3544,6 +3759,18 @@ Item {
                     }
 
                     Loader {
+                        id: topbarLoader
+                        anchors.fill: parent
+                        active: root.tab5Loaded && Config.dataReady
+                        sourceComponent: topbarTabComponent
+                        visible: root.currentTab === 5 && !root.isSearchMode
+                        opacity: visible ? 1.0 : 0.0
+                        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+                        function scrollTo(y) { if (item) item.scrollTo(y); }
+                        function scrollToBox(y) { if (item) item.scrollToBox(y); }
+                    }
+
+                    Loader {
                         id: monitorsLoader
                         anchors.fill: parent
                         active: root.tab3Loaded
@@ -3551,6 +3778,302 @@ Item {
                         visible: root.currentTab === 3 && !root.isSearchMode
                         opacity: visible ? 1.0 : 0.0
                         Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: topbarTabComponent
+        Item {
+            id: topbarTabRoot
+
+            function scrollTo(y) {
+                let maxY = Math.max(0, topbarFlickable.contentHeight - topbarFlickable.height);
+                topbarFlickable.contentY = Math.max(0, Math.min(y - root.s(40), maxY > 0 ? maxY : y));
+            }
+            function scrollToBox(approxItemY) {
+                let viewH = topbarFlickable.height;
+                let itemTop = approxItemY;
+                let itemBottom = approxItemY + root.s(64);
+                let curY = topbarFlickable.contentY;
+                let maxY = Math.max(0, topbarFlickable.contentHeight - viewH);
+                if (itemTop < curY + root.s(10)) {
+                    topbarFlickable.contentY = Math.max(0, itemTop - root.s(20));
+                } else if (itemBottom > curY + viewH - root.s(10)) {
+                    topbarFlickable.contentY = Math.min(maxY, itemBottom - viewH + root.s(20));
+                }
+            }
+
+            Flickable {
+                id: topbarFlickable
+                anchors.fill: parent
+                contentWidth: width
+                contentHeight: topbarColLayout.implicitHeight + root.s(40)
+                clip: true
+                boundsBehavior: Flickable.DragAndOvershootBounds
+
+                ColumnLayout {
+                    id: topbarColLayout
+                    width: topbarFlickable.width
+                    spacing: root.s(10)
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: hintText.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(18)
+                        color: Qt.alpha(root.sapphire, 0.12)
+                        border.color: Qt.alpha(root.sapphire, 0.35)
+                        border.width: 1
+
+                        Text {
+                            id: hintText
+                            anchors.centerIn: parent
+                            width: parent.width - root.s(28)
+                            text: "Enter toggles  ·  Shift+Up / Shift+Down reorders  ·  Left / Right shapes the islands"
+                            font.family: "Inter"; font.pixelSize: root.s(10)
+                            color: root.sapphire
+                            wrapMode: Text.WordWrap
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+
+                    Rectangle {
+                        id: roundnessCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: roundRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: roundRow
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.margins: root.s(13)
+                            spacing: root.s(11)
+
+                            // Preview swatch: mirrors the shape the bar will use.
+                            Rectangle {
+                                Layout.preferredWidth: root.s(30)
+                                Layout.preferredHeight: root.s(20)
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: Math.round(root.s(20) * 0.5 * Config.topbarRoundness)
+                                color: root.sapphire
+                                Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutExpo } }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: root.s(2)
+                                Text {
+                                    text: "Island shape"
+                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
+                                    color: root.text
+                                    Layout.fillWidth: true
+                                }
+                                Text {
+                                    text: Config.topbarRoundness >= 0.999 ? "fully rounded"
+                                        : (Config.topbarRoundness <= 0.001 ? "square" : "rounded corners")
+                                    font.family: "Inter"; font.pixelSize: root.s(10)
+                                    color: Qt.alpha(root.subtext0, 0.7)
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(8)
+                                Rectangle {
+                                    width: root.s(26); height: root.s(26); radius: root.s(13)
+                                    color: rMinusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "-"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                        color: root.sapphire
+                                    }
+                                    MouseArea { id: rMinusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.roundnessStep(-1) }
+                                }
+                                Text {
+                                    text: Math.round(Config.topbarRoundness * 100) + "%"
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(13)
+                                    color: root.sapphire
+                                    Layout.minimumWidth: root.s(42); horizontalAlignment: Text.AlignHCenter
+                                }
+                                Rectangle {
+                                    width: root.s(26); height: root.s(26); radius: root.s(13)
+                                    color: rPlusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "+"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                        color: root.sapphire
+                                    }
+                                    MouseArea { id: rPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.roundnessStep(1) }
+                                }
+                            }
+                        }
+                    }
+
+                    Repeater {
+                        model: root.topbarModules
+
+                        Rectangle {
+                            id: modCard
+                            required property var modelData
+                            required property int index
+
+                            property bool isActive: root.highlightedBox === index
+                            property bool isOn: modelData.enabled
+
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: modRow.implicitHeight + root.s(22)
+                            radius: root.s(24)
+                            color: isActive ? root.sapphire : root.surface0
+                            border.color: isActive ? root.sapphire : root.surface1
+                            border.width: 1
+                            Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+
+                            opacity: isOn ? 1.0 : 0.55
+                            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutExpo } }
+
+                            MouseArea { anchors.fill: parent; onClicked: root.highlightedBox = modCard.index; z: -1 }
+
+                            RowLayout {
+                                id: modRow
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.margins: root.s(13)
+                                spacing: root.s(11)
+
+                                Item {
+                                    Layout.preferredWidth: root.s(22)
+                                    Layout.alignment: Qt.AlignVCenter
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modCard.modelData.icon
+                                        font.family: "Hack Nerd Font"
+                                        font.pixelSize: root.s(17)
+                                        color: modCard.isActive ? root.base : root.sapphire
+                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: root.s(2)
+                                    Text {
+                                        text: modCard.modelData.label
+                                        font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
+                                        color: modCard.isActive ? root.base : root.text
+                                        Layout.fillWidth: true
+                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    }
+                                    Text {
+                                        text: modCard.isOn ? modCard.modelData.zone : modCard.modelData.zone + "  ·  hidden"
+                                        font.family: "Inter"; font.pixelSize: root.s(10)
+                                        color: modCard.isActive ? Qt.alpha(root.base, 0.75) : Qt.alpha(root.subtext0, 0.7)
+                                        Layout.fillWidth: true
+                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    }
+                                }
+
+                                // Reorder controls. Enabled at a zone edge too, where they
+                                // hand the module over to the neighbouring zone.
+                                Row {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: root.s(3)
+
+                                    Rectangle {
+                                        width: root.s(26); height: root.s(26); radius: root.s(13)
+                                        color: upMa.containsMouse
+                                            ? (modCard.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.sapphire, 0.2))
+                                            : "transparent"
+                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "󰅃"
+                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
+                                            color: modCard.isActive ? root.base : root.subtext0
+                                        }
+                                        MouseArea {
+                                            id: upMa
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                root.highlightedBox = modCard.index;
+                                                root.topbarMove(-1);
+                                            }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        width: root.s(26); height: root.s(26); radius: root.s(13)
+                                        color: downMa.containsMouse
+                                            ? (modCard.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.sapphire, 0.2))
+                                            : "transparent"
+                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "󰅀"
+                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
+                                            color: modCard.isActive ? root.base : root.subtext0
+                                        }
+                                        MouseArea {
+                                            id: downMa
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                root.highlightedBox = modCard.index;
+                                                root.topbarMove(1);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                                    Layout.preferredWidth: root.s(40)
+                                    Layout.preferredHeight: root.s(22)
+                                    radius: root.s(22)
+                                    scale: modToggleMa.containsMouse ? 1.05 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                    color: modCard.isOn
+                                        ? (modCard.isActive ? root.base : root.sapphire)
+                                        : Qt.alpha(root.surface2, modCard.isActive ? 0.4 : 1.0)
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    Rectangle {
+                                        width: root.s(16); height: root.s(16); radius: root.s(18)
+                                        color: modCard.isOn
+                                            ? (modCard.isActive ? root.sapphire : root.base)
+                                            : (modCard.isActive ? root.sapphire : root.surface0)
+                                        y: root.s(3); x: modCard.isOn ? root.s(21) : root.s(3)
+                                        Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                    }
+                                    MouseArea {
+                                        id: modToggleMa
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            root.highlightedBox = modCard.index;
+                                            root.topbarApply(TopbarLayout.toggleEnabled(root.topbarLayoutView, modCard.modelData.id));
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
