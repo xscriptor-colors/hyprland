@@ -16,7 +16,7 @@ Item {
         id: box
         anchors.verticalCenter: parent.verticalCenter
         color: "transparent"
-        radius: bar.s(28); border.width: 0
+        radius: bar.pillRadius(bar.barHeight); border.width: 0
         height: bar.barHeight
         clip: false
 

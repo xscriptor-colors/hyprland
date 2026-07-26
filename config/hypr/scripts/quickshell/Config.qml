@@ -85,6 +85,8 @@ Item {
     property real uiScale: 1.0
     property bool openGuideAtStartup: true
     property bool topbarHelpIcon: true
+    property real topbarRoundness: 1.0
+    property real appScale: 1.0
     property int workspaceCount: 8
     property int initialWorkspaceCount: 8
     property string wallpaperDir: Quickshell.env("WALLPAPER_DIR") || (homeDir + "/Pictures/Wallpapers")
@@ -112,6 +114,7 @@ Item {
             "uiScale": config.uiScale,
             "openGuideAtStartup": config.openGuideAtStartup,
             "topbarHelpIcon": config.topbarHelpIcon,
+            "appScale": config.appScale,
             "wallpaperDir": config.wallpaperDir,
             "language": config.language,
             "kbOptions": config.kbOptions,
@@ -149,6 +152,11 @@ Item {
         config.startupData = startupArray;
         config.setSetting("startup", startupArray);
         sh("notify-send 'Quickshell' 'Startup entries saved!'");
+    }
+
+    function saveTopbarRoundness(value) {
+        config.topbarRoundness = value;
+        config.setSetting("topbarRoundness", value);
     }
 
     // No notification here on purpose: the topbar tab edits live and the bar
@@ -382,6 +390,8 @@ Item {
                         if (config.rawSettings.uiScale !== undefined) config.uiScale = config.rawSettings.uiScale;
                         if (config.rawSettings.openGuideAtStartup !== undefined) config.openGuideAtStartup = config.rawSettings.openGuideAtStartup;
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
+                        if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
+                        if (config.rawSettings.appScale !== undefined) config.appScale = config.rawSettings.appScale;
                         if (config.rawSettings.wallpaperDir !== undefined) config.wallpaperDir = config.rawSettings.wallpaperDir;
                         if (config.rawSettings.language !== undefined && config.rawSettings.language !== "") config.language = config.rawSettings.language;
                         if (config.rawSettings.kbOptions !== undefined) config.kbOptions = config.rawSettings.kbOptions;

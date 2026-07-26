@@ -67,6 +67,10 @@ Variants {
             property int barHeight: s(48)
             property int pillHeight: s(36)
 
+            // 1.0 = fully rounded pills, 0.0 = square corners.
+            property real islandRoundness: 1.0
+            function pillRadius(h) { return Math.round(h * 0.5 * islandRoundness); }
+
             // Width of the settings panel, which docks to the left screen edge.
             // Bar content shifts right by this much so nothing sits underneath it.
             property int settingsPanelWidth: s(450)
@@ -192,6 +196,10 @@ Variants {
                                     barWindow.showHelpIcon = parsed.topbarHelpIcon;
                                 }
                                 
+                                if (parsed.topbarRoundness !== undefined && barWindow.islandRoundness !== parsed.topbarRoundness) {
+                                    barWindow.islandRoundness = parsed.topbarRoundness;
+                                }
+
                                 if (parsed.workspaceCount !== undefined && barWindow.workspaceCount !== parsed.workspaceCount) {
                                     barWindow.workspaceCount = parsed.workspaceCount;
                                     wsDaemon.running = false;

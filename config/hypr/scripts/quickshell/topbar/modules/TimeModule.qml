@@ -16,7 +16,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         property bool isHovered: timePillMouse.containsMouse
         color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.75)
-        radius: bar.s(28)
+        radius: bar.pillRadius(bar.barHeight)
         border.width: 1
         border.color: Qt.rgba(colors.text.r, colors.text.g, colors.text.b, isHovered ? 0.15 : 0.05)
         height: bar.barHeight
