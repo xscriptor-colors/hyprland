@@ -18,7 +18,9 @@ Item {
     Rectangle {
         id: box
         anchors.verticalCenter: parent.verticalCenter
-        color: "transparent"
+        color: bar.topbarPillBg
+            ? (bar.topbarPillSolid ? colors.crust : Qt.rgba(colors.crust.r, colors.crust.g, colors.crust.b, 0.6))
+            : "transparent"
         radius: bar.pillRadius(bar.barHeight)
         border.width: unified ? 0 : effectiveBorderWidth
         border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)

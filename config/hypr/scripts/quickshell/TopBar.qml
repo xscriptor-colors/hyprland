@@ -713,9 +713,7 @@ Variants {
                     Rectangle {
                         anchors.fill: parent
                         radius: barWindow.pillRadius(barWindow.pillHeight)
-                        color: barWindow.topbarUnifyLeft
-                            ? (barWindow.topbarPillSolid ? mocha.surface0 : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.5))
-                            : "transparent"
+                        color: barWindow.topbarUnifyLeft ? mocha.surface0 : "transparent"
                         border.width: barWindow.topbarUnifyLeft ? barWindow.topbarBorderWidth : 0
                         border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
                         visible: barWindow.topbarUnifyLeft
@@ -779,9 +777,7 @@ Variants {
                     Rectangle {
                         anchors.fill: parent
                         radius: barWindow.pillRadius(barWindow.pillHeight)
-                        color: barWindow.topbarUnifyCenter
-                            ? (barWindow.topbarPillSolid ? mocha.surface0 : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.5))
-                            : "transparent"
+                        color: barWindow.topbarUnifyCenter ? mocha.surface0 : "transparent"
                         border.width: barWindow.topbarUnifyCenter ? barWindow.topbarBorderWidth : 0
                         border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
                         visible: barWindow.topbarUnifyCenter
@@ -845,9 +841,7 @@ Variants {
                     Rectangle {
                         anchors.fill: parent
                         radius: barWindow.pillRadius(barWindow.pillHeight)
-                        color: barWindow.topbarUnifyRight
-                            ? (barWindow.topbarPillSolid ? mocha.surface0 : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.5))
-                            : "transparent"
+                        color: barWindow.topbarUnifyRight ? mocha.surface0 : "transparent"
                         border.width: barWindow.topbarUnifyRight ? barWindow.topbarBorderWidth : 0
                         border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
                         visible: barWindow.topbarUnifyRight
