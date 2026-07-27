@@ -86,8 +86,15 @@ Item {
     property bool openGuideAtStartup: true
     property bool topbarHelpIcon: true
     property real topbarRoundness: 1.0
+    property string topbarBorderMode: "unified"
     property real topbarBorderWidth: 0
     property string topbarBorderColor: "surface1"
+    property real topbarBorderWidthLeft: 0
+    property string topbarBorderColorLeft: "surface1"
+    property real topbarBorderWidthCenter: 0
+    property string topbarBorderColorCenter: "surface1"
+    property real topbarBorderWidthRight: 0
+    property string topbarBorderColorRight: "surface1"
     property real appScale: 1.0
     property int workspaceCount: 8
     property int initialWorkspaceCount: 8
@@ -169,6 +176,36 @@ Item {
     function saveTopbarBorderColor(value) {
         config.topbarBorderColor = value;
         config.setSetting("topbarBorderColor", value);
+    }
+
+    function saveTopbarBorderMode(value) {
+        config.topbarBorderMode = value;
+        config.setSetting("topbarBorderMode", value);
+    }
+
+    function saveTopbarBorderWidthLeft(value) {
+        config.topbarBorderWidthLeft = value;
+        config.setSetting("topbarBorderWidthLeft", value);
+    }
+    function saveTopbarBorderColorLeft(value) {
+        config.topbarBorderColorLeft = value;
+        config.setSetting("topbarBorderColorLeft", value);
+    }
+    function saveTopbarBorderWidthCenter(value) {
+        config.topbarBorderWidthCenter = value;
+        config.setSetting("topbarBorderWidthCenter", value);
+    }
+    function saveTopbarBorderColorCenter(value) {
+        config.topbarBorderColorCenter = value;
+        config.setSetting("topbarBorderColorCenter", value);
+    }
+    function saveTopbarBorderWidthRight(value) {
+        config.topbarBorderWidthRight = value;
+        config.setSetting("topbarBorderWidthRight", value);
+    }
+    function saveTopbarBorderColorRight(value) {
+        config.topbarBorderColorRight = value;
+        config.setSetting("topbarBorderColorRight", value);
     }
 
     // No notification here on purpose: the topbar tab edits live and the bar
@@ -403,8 +440,15 @@ Item {
                         if (config.rawSettings.openGuideAtStartup !== undefined) config.openGuideAtStartup = config.rawSettings.openGuideAtStartup;
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
                         if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
+                        if (config.rawSettings.topbarBorderMode !== undefined) config.topbarBorderMode = config.rawSettings.topbarBorderMode;
                         if (config.rawSettings.topbarBorderWidth !== undefined) config.topbarBorderWidth = config.rawSettings.topbarBorderWidth;
                         if (config.rawSettings.topbarBorderColor !== undefined) config.topbarBorderColor = config.rawSettings.topbarBorderColor;
+                        if (config.rawSettings.topbarBorderWidthLeft !== undefined) config.topbarBorderWidthLeft = config.rawSettings.topbarBorderWidthLeft;
+                        if (config.rawSettings.topbarBorderColorLeft !== undefined) config.topbarBorderColorLeft = config.rawSettings.topbarBorderColorLeft;
+                        if (config.rawSettings.topbarBorderWidthCenter !== undefined) config.topbarBorderWidthCenter = config.rawSettings.topbarBorderWidthCenter;
+                        if (config.rawSettings.topbarBorderColorCenter !== undefined) config.topbarBorderColorCenter = config.rawSettings.topbarBorderColorCenter;
+                        if (config.rawSettings.topbarBorderWidthRight !== undefined) config.topbarBorderWidthRight = config.rawSettings.topbarBorderWidthRight;
+                        if (config.rawSettings.topbarBorderColorRight !== undefined) config.topbarBorderColorRight = config.rawSettings.topbarBorderColorRight;
                         if (config.rawSettings.appScale !== undefined) config.appScale = config.rawSettings.appScale;
                         if (config.rawSettings.wallpaperDir !== undefined) config.wallpaperDir = config.rawSettings.wallpaperDir;
                         if (config.rawSettings.language !== undefined && config.rawSettings.language !== "") config.language = config.rawSettings.language;
@@ -454,6 +498,10 @@ Item {
                     }
                 } catch (e) {
                     console.log("Error parsing global settings:", e);
+                    // Overwrite the corrupted file with a fresh empty object so
+                    // the bar can start and jq saves will work going forward.
+                    config.sh("echo '{}' > '" + config.settingsJsonPath + "'");
+                    config.rawSettings = {};
                     config.keybindsData = [];
                     config.startupData = [];
                     config.topbarLayout = TopbarLayout.defaultLayout();

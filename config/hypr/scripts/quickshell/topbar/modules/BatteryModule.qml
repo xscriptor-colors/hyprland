@@ -7,6 +7,8 @@ Item {
     required property var colors
     required property bool zoneReady
     required property int slotIndex
+    required property real effectiveBorderWidth
+    required property string effectiveBorderColor
 
     implicitWidth: pill.width
     implicitHeight: bar.barHeight
@@ -20,8 +22,8 @@ Item {
         property bool isHovered: batMouse.containsMouse
         color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4);
         radius: bar.pillRadius(bar.pillHeight); height: bar.pillHeight;
-        border.width: bar.topbarBorderWidth
-        border.color: colors[bar.topbarBorderColor] || colors.surface1
+        border.width: effectiveBorderWidth
+        border.color: colors[effectiveBorderColor] || colors.surface1
         clip: true
 
         Rectangle {

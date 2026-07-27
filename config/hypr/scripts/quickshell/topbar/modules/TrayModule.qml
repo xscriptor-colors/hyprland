@@ -8,6 +8,8 @@ Item {
     required property var colors
     required property bool zoneReady
     required property int slotIndex
+    required property real effectiveBorderWidth
+    required property string effectiveBorderColor
 
     property real targetWidth: trayRepeater.count > 0 ? trayLayout.width + bar.s(24) : 0
     implicitWidth: targetWidth

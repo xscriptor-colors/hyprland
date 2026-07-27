@@ -7,6 +7,8 @@ Item {
     required property var colors
     required property bool zoneReady
     required property int slotIndex
+    required property real effectiveBorderWidth
+    required property string effectiveBorderColor
 
     implicitWidth: pill.width
     implicitHeight: bar.barHeight
@@ -19,8 +21,8 @@ Item {
 
         color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.75)
         radius: bar.pillRadius(bar.barHeight)
-        border.width: bar.topbarBorderWidth
-        border.color: colors[bar.topbarBorderColor] || colors.surface1
+        border.width: effectiveBorderWidth
+        border.color: colors[effectiveBorderColor] || colors.surface1
 
         property real targetWidth: bar.isRecording ? bar.barHeight : 0
         width: targetWidth

@@ -71,9 +71,16 @@ Variants {
             property real islandRoundness: 1.0
             function pillRadius(h) { return Math.round(h * 0.5 * islandRoundness); }
 
-            // Configurable border around every island pill.
+            // Configurable border around island pills.
+            property string topbarBorderMode: "unified"
             property real topbarBorderWidth: 0
             property string topbarBorderColor: "surface1"
+            property real topbarBorderWidthLeft: 0
+            property string topbarBorderColorLeft: "surface1"
+            property real topbarBorderWidthCenter: 0
+            property string topbarBorderColorCenter: "surface1"
+            property real topbarBorderWidthRight: 0
+            property string topbarBorderColorRight: "surface1"
 
             // Width of the settings panel, which docks to the left screen edge.
             // Bar content shifts right by this much so nothing sits underneath it.
@@ -210,6 +217,22 @@ Variants {
                                 if (parsed.topbarBorderColor !== undefined && barWindow.topbarBorderColor !== parsed.topbarBorderColor) {
                                     barWindow.topbarBorderColor = parsed.topbarBorderColor;
                                 }
+                                if (parsed.topbarBorderMode !== undefined && barWindow.topbarBorderMode !== parsed.topbarBorderMode) {
+                                    barWindow.topbarBorderMode = parsed.topbarBorderMode;
+                                }
+
+                                if (parsed.topbarBorderWidthLeft !== undefined && barWindow.topbarBorderWidthLeft !== parsed.topbarBorderWidthLeft)
+                                    barWindow.topbarBorderWidthLeft = parsed.topbarBorderWidthLeft;
+                                if (parsed.topbarBorderColorLeft !== undefined && barWindow.topbarBorderColorLeft !== parsed.topbarBorderColorLeft)
+                                    barWindow.topbarBorderColorLeft = parsed.topbarBorderColorLeft;
+                                if (parsed.topbarBorderWidthCenter !== undefined && barWindow.topbarBorderWidthCenter !== parsed.topbarBorderWidthCenter)
+                                    barWindow.topbarBorderWidthCenter = parsed.topbarBorderWidthCenter;
+                                if (parsed.topbarBorderColorCenter !== undefined && barWindow.topbarBorderColorCenter !== parsed.topbarBorderColorCenter)
+                                    barWindow.topbarBorderColorCenter = parsed.topbarBorderColorCenter;
+                                if (parsed.topbarBorderWidthRight !== undefined && barWindow.topbarBorderWidthRight !== parsed.topbarBorderWidthRight)
+                                    barWindow.topbarBorderWidthRight = parsed.topbarBorderWidthRight;
+                                if (parsed.topbarBorderColorRight !== undefined && barWindow.topbarBorderColorRight !== parsed.topbarBorderColorRight)
+                                    barWindow.topbarBorderColorRight = parsed.topbarBorderColorRight;
 
                                 if (parsed.workspaceCount !== undefined && barWindow.workspaceCount !== parsed.workspaceCount) {
                                     barWindow.workspaceCount = parsed.workspaceCount;
@@ -689,7 +712,9 @@ Variants {
                                     "bar": barWindow,
                                     "colors": mocha,
                                     "zoneReady": Qt.binding(() => leftZone.showLayout),
-                                    "slotIndex": index
+                                    "slotIndex": index,
+                                    "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthLeft),
+                                    "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorLeft)
                                 });
                             }
                         }
@@ -730,7 +755,9 @@ Variants {
                                     "bar": barWindow,
                                     "colors": mocha,
                                     "zoneReady": Qt.binding(() => centerZone.showLayout),
-                                    "slotIndex": index
+                                    "slotIndex": index,
+                                    "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthCenter),
+                                    "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorCenter)
                                 });
                             }
                         }
@@ -772,7 +799,9 @@ Variants {
                                     "bar": barWindow,
                                     "colors": mocha,
                                     "zoneReady": Qt.binding(() => rightZone.showLayout),
-                                    "slotIndex": index
+                                    "slotIndex": index,
+                                    "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthRight),
+                                    "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorRight)
                                 });
                             }
                         }
