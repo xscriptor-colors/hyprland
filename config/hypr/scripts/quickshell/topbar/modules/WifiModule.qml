@@ -20,6 +20,8 @@ Item {
         property bool isHovered: wifiMouse.containsMouse
         radius: bar.pillRadius(bar.pillHeight); height: bar.pillHeight;
         color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4)
+        border.width: bar.topbarBorderWidth
+        border.color: colors[bar.topbarBorderColor] || colors.surface1
         clip: true
 
         Rectangle {

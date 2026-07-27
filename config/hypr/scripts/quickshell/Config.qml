@@ -86,6 +86,8 @@ Item {
     property bool openGuideAtStartup: true
     property bool topbarHelpIcon: true
     property real topbarRoundness: 1.0
+    property real topbarBorderWidth: 0
+    property string topbarBorderColor: "surface1"
     property real appScale: 1.0
     property int workspaceCount: 8
     property int initialWorkspaceCount: 8
@@ -157,6 +159,16 @@ Item {
     function saveTopbarRoundness(value) {
         config.topbarRoundness = value;
         config.setSetting("topbarRoundness", value);
+    }
+
+    function saveTopbarBorderWidth(value) {
+        config.topbarBorderWidth = value;
+        config.setSetting("topbarBorderWidth", value);
+    }
+
+    function saveTopbarBorderColor(value) {
+        config.topbarBorderColor = value;
+        config.setSetting("topbarBorderColor", value);
     }
 
     // No notification here on purpose: the topbar tab edits live and the bar
@@ -391,6 +403,8 @@ Item {
                         if (config.rawSettings.openGuideAtStartup !== undefined) config.openGuideAtStartup = config.rawSettings.openGuideAtStartup;
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
                         if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
+                        if (config.rawSettings.topbarBorderWidth !== undefined) config.topbarBorderWidth = config.rawSettings.topbarBorderWidth;
+                        if (config.rawSettings.topbarBorderColor !== undefined) config.topbarBorderColor = config.rawSettings.topbarBorderColor;
                         if (config.rawSettings.appScale !== undefined) config.appScale = config.rawSettings.appScale;
                         if (config.rawSettings.wallpaperDir !== undefined) config.wallpaperDir = config.rawSettings.wallpaperDir;
                         if (config.rawSettings.language !== undefined && config.rawSettings.language !== "") config.language = config.rawSettings.language;

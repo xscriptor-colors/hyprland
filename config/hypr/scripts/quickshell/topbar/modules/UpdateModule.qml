@@ -18,6 +18,8 @@ Item {
         property bool isHovered: updateMouse.containsMouse
         color: isHovered ? Qt.rgba(colors.green.r, colors.green.g, colors.green.b, 0.15) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4)
         radius: bar.pillRadius(bar.pillHeight)
+        border.width: bar.topbarBorderWidth
+        border.color: colors[bar.topbarBorderColor] || colors.surface1
 
         width: bar.isUpdateVisible ? bar.s(34) : 0
         height: bar.pillHeight

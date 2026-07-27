@@ -71,6 +71,10 @@ Variants {
             property real islandRoundness: 1.0
             function pillRadius(h) { return Math.round(h * 0.5 * islandRoundness); }
 
+            // Configurable border around every island pill.
+            property real topbarBorderWidth: 0
+            property string topbarBorderColor: "surface1"
+
             // Width of the settings panel, which docks to the left screen edge.
             // Bar content shifts right by this much so nothing sits underneath it.
             property int settingsPanelWidth: s(450)
@@ -198,6 +202,13 @@ Variants {
                                 
                                 if (parsed.topbarRoundness !== undefined && barWindow.islandRoundness !== parsed.topbarRoundness) {
                                     barWindow.islandRoundness = parsed.topbarRoundness;
+                                }
+
+                                if (parsed.topbarBorderWidth !== undefined && barWindow.topbarBorderWidth !== parsed.topbarBorderWidth) {
+                                    barWindow.topbarBorderWidth = parsed.topbarBorderWidth;
+                                }
+                                if (parsed.topbarBorderColor !== undefined && barWindow.topbarBorderColor !== parsed.topbarBorderColor) {
+                                    barWindow.topbarBorderColor = parsed.topbarBorderColor;
                                 }
 
                                 if (parsed.workspaceCount !== undefined && barWindow.workspaceCount !== parsed.workspaceCount) {

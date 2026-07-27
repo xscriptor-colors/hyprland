@@ -235,6 +235,44 @@ Item {
         onTriggered: Config.saveTopbarRoundness(Config.topbarRoundness)
     }
 
+    // Border width follows the same debounce pattern as roundness.
+    function borderWidthStep(dir) {
+        let next = Math.max(0, Math.min(4, Config.topbarBorderWidth + dir));
+        Config.topbarBorderWidth = next;
+        borderWidthSaveTimer.restart();
+    }
+
+    Timer {
+        id: borderWidthSaveTimer
+        interval: 250
+        onTriggered: Config.saveTopbarBorderWidth(Config.topbarBorderWidth)
+    }
+
+    property var topbarBorderColorOptions: [
+        "mauve", "blue", "sapphire", "peach", "green", "red",
+        "pink", "yellow", "teal", "maroon", "text", "subtext0",
+        "surface1", "surface2"
+    ]
+
+    function borderColorIndex() {
+        let idx = root.topbarBorderColorOptions.indexOf(Config.topbarBorderColor);
+        return idx >= 0 ? idx : 0;
+    }
+
+    function borderColorCycle(dir) {
+        let opts = root.topbarBorderColorOptions;
+        let idx = root.borderColorIndex();
+        idx = (idx + dir + opts.length) % opts.length;
+        Config.topbarBorderColor = opts[idx];
+        borderColorSaveTimer.restart();
+    }
+
+    Timer {
+        id: borderColorSaveTimer
+        interval: 250
+        onTriggered: Config.saveTopbarBorderColor(Config.topbarBorderColor)
+    }
+
     // App scale is persisted by the General tab's Save button, matching how
     // every other setting on that tab behaves.
     function appScaleStep(dir) {
@@ -439,6 +477,14 @@ Item {
         // whatever module happens to be highlighted.
         if (root.currentTab === 5 && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
             root.roundnessStep(event.key === Qt.Key_Right ? 1 : -1);
+            event.accepted = true;
+            return;
+        }
+
+        // Border width with Alt+Left / Alt+Right in the topbar tab.
+        if (root.currentTab === 5 && (event.modifiers & Qt.AltModifier)
+            && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
+            root.borderWidthStep(event.key === Qt.Key_Right ? 1 : -1);
             event.accepted = true;
             return;
         }
@@ -3832,7 +3878,7 @@ Item {
                             id: hintText
                             anchors.centerIn: parent
                             width: parent.width - root.s(28)
-                            text: "Enter toggles  ·  Shift+Up / Shift+Down reorders  ·  Left / Right shapes the islands"
+                            text: "Enter toggles  ·  Shift+Up / Shift+Down reorders  ·  Left / Right shapes the islands  ·  Alt+Left / Alt+Right border width"
                             font.family: "Inter"; font.pixelSize: root.s(10)
                             color: root.sapphire
                             wrapMode: Text.WordWrap
@@ -3916,6 +3962,173 @@ Item {
                                         color: root.sapphire
                                     }
                                     MouseArea { id: rPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.roundnessStep(1) }
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Border width ─────────────────────────────────────────
+                    Rectangle {
+                        id: borderWidthCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: borderWidthRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: borderWidthRow
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.margins: root.s(13)
+                            spacing: root.s(11)
+
+                            // Preview swatch: shows the current border thickness.
+                            Rectangle {
+                                Layout.preferredWidth: root.s(30)
+                                Layout.preferredHeight: root.s(20)
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: Math.round(root.s(20) * 0.5 * Config.topbarRoundness)
+                                color: "transparent"
+                                border.width: Math.min(Config.topbarBorderWidth, 4)
+                                border.color: root[Config.topbarBorderColor] || root.surface1
+                                Behavior on border.width { NumberAnimation { duration: 200; easing.type: Easing.OutExpo } }
+                                Behavior on border.color { ColorAnimation { duration: 200 } }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: root.s(2)
+                                Text {
+                                    text: "Border width"
+                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
+                                    color: root.text
+                                    Layout.fillWidth: true
+                                }
+                                Text {
+                                    text: Config.topbarBorderWidth === 0 ? "no border"
+                                        : (Config.topbarBorderWidth + "px")
+                                    font.family: "Inter"; font.pixelSize: root.s(10)
+                                    color: Qt.alpha(root.subtext0, 0.7)
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(8)
+                                Rectangle {
+                                    width: root.s(26); height: root.s(26); radius: root.s(13)
+                                    color: bwMinusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "-"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                        color: root.sapphire
+                                    }
+                                    MouseArea { id: bwMinusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(-1) }
+                                }
+                                Text {
+                                    text: Config.topbarBorderWidth + "px"
+                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(13)
+                                    color: root.sapphire
+                                    Layout.minimumWidth: root.s(36); horizontalAlignment: Text.AlignHCenter
+                                }
+                                Rectangle {
+                                    width: root.s(26); height: root.s(26); radius: root.s(13)
+                                    color: bwPlusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "+"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
+                                        color: root.sapphire
+                                    }
+                                    MouseArea { id: bwPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(1) }
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Border color ─────────────────────────────────────────
+                    Rectangle {
+                        id: borderColorCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: borderColorRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: borderColorRow
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.margins: root.s(13)
+                            spacing: root.s(11)
+
+                            // Color swatch preview.
+                            Rectangle {
+                                Layout.preferredWidth: root.s(30)
+                                Layout.preferredHeight: root.s(20)
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: Math.round(root.s(20) * 0.5 * Config.topbarRoundness)
+                                color: root[Config.topbarBorderColor] || root.surface1
+                                Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: root.s(2)
+                                Text {
+                                    text: "Border color"
+                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
+                                    color: root.text
+                                    Layout.fillWidth: true
+                                }
+                                Text {
+                                    text: Config.topbarBorderColor
+                                    font.family: "Inter"; font.pixelSize: root.s(10)
+                                    color: Qt.alpha(root.subtext0, 0.7)
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(8)
+                                Rectangle {
+                                    width: root.s(26); height: root.s(26); radius: root.s(13)
+                                    color: bcMinusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "◀"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12)
+                                        color: root.sapphire
+                                    }
+                                    MouseArea { id: bcMinusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(-1) }
+                                }
+                                Rectangle {
+                                    width: root.s(30); height: root.s(30); radius: root.s(15)
+                                    color: root[Config.topbarBorderColor] || root.surface1
+                                    border.width: 1
+                                    border.color: root.surface2
+                                    Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
+                                }
+                                Rectangle {
+                                    width: root.s(26); height: root.s(26); radius: root.s(13)
+                                    color: bcPlusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
+                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Text {
+                                        anchors.centerIn: parent; text: "▶"
+                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12)
+                                        color: root.sapphire
+                                    }
+                                    MouseArea { id: bcPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(1) }
                                 }
                             }
                         }
