@@ -17,7 +17,7 @@ Item {
         id: pill
         anchors.verticalCenter: parent.verticalCenter
         property bool isHovered: timePillMouse.containsMouse
-        color: isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.75)
+        color: bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.75)) : "transparent"
         radius: bar.pillRadius(bar.barHeight)
         border.width: effectiveBorderWidth
         border.color: colors[effectiveBorderColor] || colors.surface1

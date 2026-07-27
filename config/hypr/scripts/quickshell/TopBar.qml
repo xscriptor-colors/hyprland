@@ -71,6 +71,9 @@ Variants {
             property real islandRoundness: 1.0
             function pillRadius(h) { return Math.round(h * 0.5 * islandRoundness); }
 
+            // Whether island pills show a background fill.
+            property bool topbarPillBg: true
+
             // Configurable border around island pills.
             property string topbarBorderMode: "unified"
             property real topbarBorderWidth: 0
@@ -209,6 +212,10 @@ Variants {
                                 
                                 if (parsed.topbarRoundness !== undefined && barWindow.islandRoundness !== parsed.topbarRoundness) {
                                     barWindow.islandRoundness = parsed.topbarRoundness;
+                                }
+
+                                if (parsed.topbarPillBg !== undefined && barWindow.topbarPillBg !== parsed.topbarPillBg) {
+                                    barWindow.topbarPillBg = parsed.topbarPillBg;
                                 }
 
                                 if (parsed.topbarBorderWidth !== undefined && barWindow.topbarBorderWidth !== parsed.topbarBorderWidth) {

@@ -317,6 +317,12 @@ Item {
         })
     }
 
+    Timer {
+        id: pillBgSaveTimer
+        interval: 250
+        onTriggered: Config.saveTopbarPillBg(Config.topbarPillBg)
+    }
+
     // App scale is persisted by the General tab's Save button, matching how
     // every other setting on that tab behaves.
     function appScaleStep(dir) {
@@ -4007,6 +4013,75 @@ Item {
                                         color: root.sapphire
                                     }
                                     MouseArea { id: rPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.roundnessStep(1) }
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Pill background toggle ────────────────────────────────
+                    Rectangle {
+                        id: pillBgCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: pillBgRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: pillBgRow
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.margins: root.s(13)
+                            spacing: root.s(11)
+
+                            Item {
+                                Layout.preferredWidth: root.s(22)
+                                Layout.alignment: Qt.AlignVCenter
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: Config.topbarPillBg ? "󰈙" : "󰉁"
+                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
+                                    color: root.sapphire
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: root.s(2)
+                                Text {
+                                    text: "Pill background"
+                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
+                                    color: root.text; Layout.fillWidth: true
+                                }
+                                Text {
+                                    text: Config.topbarPillBg ? "filled" : "transparent"
+                                    font.family: "Inter"; font.pixelSize: root.s(10)
+                                    color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
+                                scale: pillBgMa.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                color: Config.topbarPillBg ? root.sapphire : Qt.alpha(root.surface2, 1.0)
+                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                Rectangle {
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
+                                    color: Config.topbarPillBg ? root.base : root.surface0
+                                    y: root.s(3); x: Config.topbarPillBg ? root.s(21) : root.s(3)
+                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                MouseArea {
+                                    id: pillBgMa; anchors.fill: parent; hoverEnabled: true
+                                    onClicked: { Config.topbarPillBg = !Config.topbarPillBg; pillBgSaveTimer.restart() }
+                                    cursorShape: Qt.PointingHandCursor
                                 }
                             }
                         }

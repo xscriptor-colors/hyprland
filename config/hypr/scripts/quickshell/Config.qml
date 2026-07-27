@@ -39,6 +39,8 @@ Item {
         return rawSettings.hasOwnProperty(key) ? rawSettings[key] : fallbackValue;
     }
 
+    // Uses a unique temp file per call (mktemp) so concurrent saves never
+    // overwrite each other's temp file, preventing JSON corruption.
     function setSetting(key, value) {
         rawSettings[key] = value;
         let safeValue = typeof value === "string" ? `"${value}"` : value;
@@ -46,8 +48,9 @@ Item {
 
         let cmd = `mkdir -p "$(dirname '${settingsJsonPath}')" && ` +
                   `[ ! -f '${settingsJsonPath}' ] && echo '{}' > '${settingsJsonPath}'; ` +
-                  `jq '. + {"${key}": ${safeValue}}' '${settingsJsonPath}' > '${settingsJsonPath}.tmp' && ` +
-                  `mv '${settingsJsonPath}.tmp' '${settingsJsonPath}'`;
+                  `tmp=$(mktemp '${settingsJsonPath}'.tmp.XXXXXX) && ` +
+                  `jq '. + {"${key}": ${safeValue}}' '${settingsJsonPath}' > "$tmp" && ` +
+                  `mv "$tmp" '${settingsJsonPath}'`;
         sh(cmd);
     }
 
@@ -55,10 +58,11 @@ Item {
         let jsonStr = JSON.stringify(dataObj).replace(/'/g, "'\\''");
         let cmd = `mkdir -p "$(dirname '${settingsJsonPath}')" && ` +
                   `[ ! -f '${settingsJsonPath}' ] && echo '{}' > '${settingsJsonPath}'; ` +
-                  `jq '. + ${jsonStr}' '${settingsJsonPath}' > '${settingsJsonPath}.tmp' && ` +
-                  `mv '${settingsJsonPath}.tmp' '${settingsJsonPath}'`;
+                  `tmp=$(mktemp '${settingsJsonPath}'.tmp.XXXXXX) && ` +
+                  `jq '. + ${jsonStr}' '${settingsJsonPath}' > "$tmp" && ` +
+                  `mv "$tmp" '${settingsJsonPath}'`;
         sh(cmd);
-        
+
         for (let key in dataObj) rawSettings[key] = dataObj[key];
     }
 
@@ -86,6 +90,7 @@ Item {
     property bool openGuideAtStartup: true
     property bool topbarHelpIcon: true
     property real topbarRoundness: 1.0
+    property bool topbarPillBg: true
     property string topbarBorderMode: "unified"
     property real topbarBorderWidth: 0
     property string topbarBorderColor: "surface1"
@@ -166,6 +171,11 @@ Item {
     function saveTopbarRoundness(value) {
         config.topbarRoundness = value;
         config.setSetting("topbarRoundness", value);
+    }
+
+    function saveTopbarPillBg(value) {
+        config.topbarPillBg = value;
+        config.setSetting("topbarPillBg", value);
     }
 
     function saveTopbarBorderWidth(value) {
@@ -440,6 +450,7 @@ Item {
                         if (config.rawSettings.openGuideAtStartup !== undefined) config.openGuideAtStartup = config.rawSettings.openGuideAtStartup;
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
                         if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
+                        if (config.rawSettings.topbarPillBg !== undefined) config.topbarPillBg = config.rawSettings.topbarPillBg;
                         if (config.rawSettings.topbarBorderMode !== undefined) config.topbarBorderMode = config.rawSettings.topbarBorderMode;
                         if (config.rawSettings.topbarBorderWidth !== undefined) config.topbarBorderWidth = config.rawSettings.topbarBorderWidth;
                         if (config.rawSettings.topbarBorderColor !== undefined) config.topbarBorderColor = config.rawSettings.topbarBorderColor;

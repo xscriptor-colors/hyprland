@@ -2,6 +2,7 @@
   "uiScale": 1.0,
   "openGuideAtStartup": true,
   "topbarHelpIcon": true,
+  "topbarPillBg": true,
   "topbarRoundness": 1.0,
   "topbarBorderMode": "unified",
   "topbarBorderWidth": 0,
