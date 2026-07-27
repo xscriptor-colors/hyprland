@@ -9,6 +9,7 @@ Item {
     required property int slotIndex
     required property real effectiveBorderWidth
     required property string effectiveBorderColor
+    required property bool unified
 
     implicitWidth: box.width
     implicitHeight: bar.barHeight
@@ -19,8 +20,8 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         color: "transparent"
         radius: bar.pillRadius(bar.barHeight)
-        border.width: effectiveBorderWidth
-        border.color: colors[effectiveBorderColor] || colors.surface1
+        border.width: unified ? 0 : effectiveBorderWidth
+        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
         height: bar.barHeight
         clip: false
 

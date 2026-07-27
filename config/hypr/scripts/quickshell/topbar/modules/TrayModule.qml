@@ -10,6 +10,7 @@ Item {
     required property int slotIndex
     required property real effectiveBorderWidth
     required property string effectiveBorderColor
+    required property bool unified
 
     property real targetWidth: trayRepeater.count > 0 ? trayLayout.width + bar.s(24) : 0
     implicitWidth: targetWidth

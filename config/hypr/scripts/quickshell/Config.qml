@@ -91,6 +91,9 @@ Item {
     property bool topbarHelpIcon: true
     property real topbarRoundness: 1.0
     property bool topbarPillBg: true
+    property bool topbarUnifyLeft: false
+    property bool topbarUnifyCenter: false
+    property bool topbarUnifyRight: false
     property string topbarBorderMode: "unified"
     property real topbarBorderWidth: 0
     property string topbarBorderColor: "surface1"
@@ -176,6 +179,19 @@ Item {
     function saveTopbarPillBg(value) {
         config.topbarPillBg = value;
         config.setSetting("topbarPillBg", value);
+    }
+
+    function saveTopbarUnifyLeft(value) {
+        config.topbarUnifyLeft = value;
+        config.setSetting("topbarUnifyLeft", value);
+    }
+    function saveTopbarUnifyCenter(value) {
+        config.topbarUnifyCenter = value;
+        config.setSetting("topbarUnifyCenter", value);
+    }
+    function saveTopbarUnifyRight(value) {
+        config.topbarUnifyRight = value;
+        config.setSetting("topbarUnifyRight", value);
     }
 
     function saveTopbarBorderWidth(value) {
@@ -451,6 +467,9 @@ Item {
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
                         if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
                         if (config.rawSettings.topbarPillBg !== undefined) config.topbarPillBg = config.rawSettings.topbarPillBg;
+                        if (config.rawSettings.topbarUnifyLeft !== undefined) config.topbarUnifyLeft = config.rawSettings.topbarUnifyLeft;
+                        if (config.rawSettings.topbarUnifyCenter !== undefined) config.topbarUnifyCenter = config.rawSettings.topbarUnifyCenter;
+                        if (config.rawSettings.topbarUnifyRight !== undefined) config.topbarUnifyRight = config.rawSettings.topbarUnifyRight;
                         if (config.rawSettings.topbarBorderMode !== undefined) config.topbarBorderMode = config.rawSettings.topbarBorderMode;
                         if (config.rawSettings.topbarBorderWidth !== undefined) config.topbarBorderWidth = config.rawSettings.topbarBorderWidth;
                         if (config.rawSettings.topbarBorderColor !== undefined) config.topbarBorderColor = config.rawSettings.topbarBorderColor;

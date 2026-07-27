@@ -4087,6 +4087,155 @@ Item {
                         }
                     }
 
+                    // ── Unify zone toggles ───────────────────────────────────
+                    Rectangle {
+                        id: unifyLeftCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: unifyLeftRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: unifyLeftRow
+                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                            anchors.margins: root.s(13); spacing: root.s(11)
+                            Item {
+                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
+                                Text { anchors.centerIn: parent; text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
+                                Text { text: "Unify left zone"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
+                                Text { text: Config.topbarUnifyLeft ? "one continuous island" : "separate pills"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
+                            }
+                            Rectangle {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
+                                scale: ulMa.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                color: Config.topbarUnifyLeft ? root.sapphire : Qt.alpha(root.surface2, 1.0)
+                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                Rectangle {
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
+                                    color: Config.topbarUnifyLeft ? root.base : root.surface0
+                                    y: root.s(3); x: Config.topbarUnifyLeft ? root.s(21) : root.s(3)
+                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                MouseArea {
+                                    id: ulMa; anchors.fill: parent; hoverEnabled: true
+                                    onClicked: { Config.topbarUnifyLeft = !Config.topbarUnifyLeft; unifySaveTimer.restart() }
+                                    cursorShape: Qt.PointingHandCursor
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        id: unifyCenterCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: unifyCenterRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: unifyCenterRow
+                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                            anchors.margins: root.s(13); spacing: root.s(11)
+                            Item {
+                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
+                                Text { anchors.centerIn: parent; text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
+                                Text { text: "Unify center zone"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
+                                Text { text: Config.topbarUnifyCenter ? "one continuous island" : "separate pills"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
+                            }
+                            Rectangle {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
+                                scale: ucMa.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                color: Config.topbarUnifyCenter ? root.sapphire : Qt.alpha(root.surface2, 1.0)
+                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                Rectangle {
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
+                                    color: Config.topbarUnifyCenter ? root.base : root.surface0
+                                    y: root.s(3); x: Config.topbarUnifyCenter ? root.s(21) : root.s(3)
+                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                MouseArea {
+                                    id: ucMa; anchors.fill: parent; hoverEnabled: true
+                                    onClicked: { Config.topbarUnifyCenter = !Config.topbarUnifyCenter; unifySaveTimer.restart() }
+                                    cursorShape: Qt.PointingHandCursor
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        id: unifyRightCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: unifyRightRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: unifyRightRow
+                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                            anchors.margins: root.s(13); spacing: root.s(11)
+                            Item {
+                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
+                                Text { anchors.centerIn: parent; text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
+                                Text { text: "Unify right zone"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
+                                Text { text: Config.topbarUnifyRight ? "one continuous island" : "separate pills"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
+                            }
+                            Rectangle {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
+                                scale: urMa.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                color: Config.topbarUnifyRight ? root.sapphire : Qt.alpha(root.surface2, 1.0)
+                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                Rectangle {
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
+                                    color: Config.topbarUnifyRight ? root.base : root.surface0
+                                    y: root.s(3); x: Config.topbarUnifyRight ? root.s(21) : root.s(3)
+                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                MouseArea {
+                                    id: urMa; anchors.fill: parent; hoverEnabled: true
+                                    onClicked: { Config.topbarUnifyRight = !Config.topbarUnifyRight; unifySaveTimer.restart() }
+                                    cursorShape: Qt.PointingHandCursor
+                                }
+                            }
+                        }
+                    }
+
+                    Timer {
+                        id: unifySaveTimer
+                        interval: 250
+                        onTriggered: {
+                            Config.saveTopbarUnifyLeft(Config.topbarUnifyLeft);
+                            Config.saveTopbarUnifyCenter(Config.topbarUnifyCenter);
+                            Config.saveTopbarUnifyRight(Config.topbarUnifyRight);
+                        }
+                    }
+
                     // ── Border mode toggle ───────────────────────────────────
                     Rectangle {
                         id: borderModeCard

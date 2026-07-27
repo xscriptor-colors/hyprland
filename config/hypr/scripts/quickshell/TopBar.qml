@@ -74,6 +74,11 @@ Variants {
             // Whether island pills show a background fill.
             property bool topbarPillBg: true
 
+            // Merge every module in a zone into one continuous pill.
+            property bool topbarUnifyLeft: false
+            property bool topbarUnifyCenter: false
+            property bool topbarUnifyRight: false
+
             // Configurable border around island pills.
             property string topbarBorderMode: "unified"
             property real topbarBorderWidth: 0
@@ -217,6 +222,13 @@ Variants {
                                 if (parsed.topbarPillBg !== undefined && barWindow.topbarPillBg !== parsed.topbarPillBg) {
                                     barWindow.topbarPillBg = parsed.topbarPillBg;
                                 }
+
+                                if (parsed.topbarUnifyLeft !== undefined && barWindow.topbarUnifyLeft !== parsed.topbarUnifyLeft)
+                                    barWindow.topbarUnifyLeft = parsed.topbarUnifyLeft;
+                                if (parsed.topbarUnifyCenter !== undefined && barWindow.topbarUnifyCenter !== parsed.topbarUnifyCenter)
+                                    barWindow.topbarUnifyCenter = parsed.topbarUnifyCenter;
+                                if (parsed.topbarUnifyRight !== undefined && barWindow.topbarUnifyRight !== parsed.topbarUnifyRight)
+                                    barWindow.topbarUnifyRight = parsed.topbarUnifyRight;
 
                                 if (parsed.topbarBorderWidth !== undefined && barWindow.topbarBorderWidth !== parsed.topbarBorderWidth) {
                                     barWindow.topbarBorderWidth = parsed.topbarBorderWidth;
@@ -684,132 +696,200 @@ Variants {
                 // bar out of its way instead of hiding individual modules.
                 anchors.leftMargin: barWindow.settingsSlideProgress * barWindow.settingsPanelWidth
 
-                Row {
-                    id: leftZone
+                // ── Left zone ───────────────────────────────────────────────
+                Item {
+                    id: leftWrapper
                     anchors.left: parent.left
                     anchors.leftMargin: barWindow.s(10)
                     height: parent.height
-                    spacing: barWindow.s(8)
+                    width: leftZone.width + (barWindow.topbarUnifyLeft ? barWindow.s(12) : 0)
 
-                    property bool showLayout: false
-                    Timer {
-                        running: barWindow.isStartupReady
-                        interval: 10
-                        onTriggered: leftZone.showLayout = true
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: barWindow.pillRadius(barWindow.pillHeight)
+                        color: barWindow.topbarUnifyLeft && barWindow.topbarPillBg
+                            ? Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.5)
+                            : "transparent"
+                        border.width: barWindow.topbarUnifyLeft ? barWindow.topbarBorderWidth : 0
+                        border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
+                        visible: barWindow.topbarUnifyLeft
+                        Behavior on border.width { NumberAnimation { duration: 200 } }
+                        Behavior on color { ColorAnimation { duration: 200 } }
                     }
 
-                    opacity: showLayout ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-                    transform: Translate {
-                        x: leftZone.showLayout ? 0 : barWindow.s(-200)
-                        Behavior on x { NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
-                    }
+                    Row {
+                        id: leftZone
+                        anchors.left: parent.left
+                        anchors.leftMargin: barWindow.topbarUnifyLeft ? barWindow.s(6) : 0
+                        height: parent.height
+                        spacing: barWindow.topbarUnifyLeft ? 0 : barWindow.s(8)
 
-                    Repeater {
-                        model: barWindow.leftModules
-                        delegate: Loader {
-                            required property string modelData
-                            required property int index
-                            width: item ? item.implicitWidth : 0
-                            height: leftZone.height
-                            Component.onCompleted: {
-                                let mod = TopbarLayout.getModule(modelData);
-                                if (!mod) return;
-                                setSource(mod.component, {
-                                    "bar": barWindow,
-                                    "colors": mocha,
-                                    "zoneReady": Qt.binding(() => leftZone.showLayout),
-                                    "slotIndex": index,
-                                    "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthLeft),
-                                    "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorLeft)
-                                });
+                        property bool showLayout: false
+                        Timer {
+                            running: barWindow.isStartupReady
+                            interval: 10
+                            onTriggered: leftZone.showLayout = true
+                        }
+
+                        opacity: showLayout ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+                        transform: Translate {
+                            x: leftZone.showLayout ? 0 : barWindow.s(-200)
+                            Behavior on x { NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
+                        }
+
+                        Repeater {
+                            model: barWindow.leftModules
+                            delegate: Loader {
+                                required property string modelData
+                                required property int index
+                                width: item ? item.implicitWidth : 0
+                                height: leftZone.height
+                                Component.onCompleted: {
+                                    let mod = TopbarLayout.getModule(modelData);
+                                    if (!mod) return;
+                                    setSource(mod.component, {
+                                        "bar": barWindow,
+                                        "colors": mocha,
+                                        "zoneReady": Qt.binding(() => leftZone.showLayout),
+                                        "slotIndex": index,
+                                        "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthLeft),
+                                        "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorLeft),
+                                        "unified": Qt.binding(() => barWindow.topbarUnifyLeft)
+                                    });
+                                }
                             }
                         }
                     }
                 }
 
-                Row {
-                    id: centerZone
+                // ── Center zone ─────────────────────────────────────────────
+                Item {
+                    id: centerWrapper
                     anchors.horizontalCenter: parent.horizontalCenter
                     height: parent.height
-                    spacing: barWindow.s(12)
+                    width: centerZone.width + (barWindow.topbarUnifyCenter ? barWindow.s(12) : 0)
 
-                    property bool showLayout: false
-                    Timer {
-                        running: barWindow.isStartupReady
-                        interval: 150
-                        onTriggered: centerZone.showLayout = true
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: barWindow.pillRadius(barWindow.pillHeight)
+                        color: barWindow.topbarUnifyCenter && barWindow.topbarPillBg
+                            ? Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.5)
+                            : "transparent"
+                        border.width: barWindow.topbarUnifyCenter ? barWindow.topbarBorderWidth : 0
+                        border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
+                        visible: barWindow.topbarUnifyCenter
+                        Behavior on border.width { NumberAnimation { duration: 200 } }
+                        Behavior on color { ColorAnimation { duration: 200 } }
                     }
 
-                    opacity: showLayout ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
-                    transform: Translate {
-                        y: centerZone.showLayout ? 0 : barWindow.s(-30)
-                        Behavior on y { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
-                    }
+                    Row {
+                        id: centerZone
+                        anchors.centerIn: parent
+                        height: parent.height
+                        spacing: barWindow.topbarUnifyCenter ? 0 : barWindow.s(12)
 
-                    Repeater {
-                        model: barWindow.centerModules
-                        delegate: Loader {
-                            required property string modelData
-                            required property int index
-                            width: item ? item.implicitWidth : 0
-                            height: centerZone.height
-                            Component.onCompleted: {
-                                let mod = TopbarLayout.getModule(modelData);
-                                if (!mod) return;
-                                setSource(mod.component, {
-                                    "bar": barWindow,
-                                    "colors": mocha,
-                                    "zoneReady": Qt.binding(() => centerZone.showLayout),
-                                    "slotIndex": index,
-                                    "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthCenter),
-                                    "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorCenter)
-                                });
+                        property bool showLayout: false
+                        Timer {
+                            running: barWindow.isStartupReady
+                            interval: 150
+                            onTriggered: centerZone.showLayout = true
+                        }
+
+                        opacity: showLayout ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                        transform: Translate {
+                            y: centerZone.showLayout ? 0 : barWindow.s(-30)
+                            Behavior on y { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                        }
+
+                        Repeater {
+                            model: barWindow.centerModules
+                            delegate: Loader {
+                                required property string modelData
+                                required property int index
+                                width: item ? item.implicitWidth : 0
+                                height: centerZone.height
+                                Component.onCompleted: {
+                                    let mod = TopbarLayout.getModule(modelData);
+                                    if (!mod) return;
+                                    setSource(mod.component, {
+                                        "bar": barWindow,
+                                        "colors": mocha,
+                                        "zoneReady": Qt.binding(() => centerZone.showLayout),
+                                        "slotIndex": index,
+                                        "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthCenter),
+                                        "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorCenter),
+                                        "unified": Qt.binding(() => barWindow.topbarUnifyCenter)
+                                    });
+                                }
                             }
                         }
                     }
                 }
 
-                Row {
-                    id: rightZone
+                // ── Right zone ──────────────────────────────────────────────
+                Item {
+                    id: rightWrapper
                     anchors.right: parent.right
                     anchors.rightMargin: barWindow.s(10)
                     height: parent.height
-                    spacing: barWindow.s(8)
+                    width: rightZone.width + (barWindow.topbarUnifyRight ? barWindow.s(12) : 0)
 
-                    property bool showLayout: false
-                    Timer {
-                        running: barWindow.isStartupReady && barWindow.isDataReady
-                        interval: 250
-                        onTriggered: rightZone.showLayout = true
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: barWindow.pillRadius(barWindow.pillHeight)
+                        color: barWindow.topbarUnifyRight && barWindow.topbarPillBg
+                            ? Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.5)
+                            : "transparent"
+                        border.width: barWindow.topbarUnifyRight ? barWindow.topbarBorderWidth : 0
+                        border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
+                        visible: barWindow.topbarUnifyRight
+                        Behavior on border.width { NumberAnimation { duration: 200 } }
+                        Behavior on color { ColorAnimation { duration: 200 } }
                     }
 
-                    opacity: showLayout ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
-                    transform: Translate {
-                        x: rightZone.showLayout ? 0 : barWindow.s(30)
-                        Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
-                    }
+                    Row {
+                        id: rightZone
+                        anchors.right: parent.right
+                        anchors.rightMargin: barWindow.topbarUnifyRight ? barWindow.s(6) : 0
+                        height: parent.height
+                        spacing: barWindow.topbarUnifyRight ? 0 : barWindow.s(8)
 
-                    Repeater {
-                        model: barWindow.rightModules
-                        delegate: Loader {
-                            required property string modelData
-                            required property int index
-                            width: item ? item.implicitWidth : 0
-                            height: rightZone.height
-                            Component.onCompleted: {
-                                let mod = TopbarLayout.getModule(modelData);
-                                if (!mod) return;
-                                setSource(mod.component, {
-                                    "bar": barWindow,
-                                    "colors": mocha,
-                                    "zoneReady": Qt.binding(() => rightZone.showLayout),
-                                    "slotIndex": index,
-                                    "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthRight),
-                                    "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorRight)
-                                });
+                        property bool showLayout: false
+                        Timer {
+                            running: barWindow.isStartupReady && barWindow.isDataReady
+                            interval: 250
+                            onTriggered: rightZone.showLayout = true
+                        }
+
+                        opacity: showLayout ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                        transform: Translate {
+                            x: rightZone.showLayout ? 0 : barWindow.s(30)
+                            Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                        }
+
+                        Repeater {
+                            model: barWindow.rightModules
+                            delegate: Loader {
+                                required property string modelData
+                                required property int index
+                                width: item ? item.implicitWidth : 0
+                                height: rightZone.height
+                                Component.onCompleted: {
+                                    let mod = TopbarLayout.getModule(modelData);
+                                    if (!mod) return;
+                                    setSource(mod.component, {
+                                        "bar": barWindow,
+                                        "colors": mocha,
+                                        "zoneReady": Qt.binding(() => rightZone.showLayout),
+                                        "slotIndex": index,
+                                        "effectiveBorderWidth": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderWidth : barWindow.topbarBorderWidthRight),
+                                        "effectiveBorderColor": Qt.binding(() => barWindow.topbarBorderMode === "unified" ? barWindow.topbarBorderColor : barWindow.topbarBorderColorRight),
+                                        "unified": Qt.binding(() => barWindow.topbarUnifyRight)
+                                    });
+                                }
                             }
                         }
                     }

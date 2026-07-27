@@ -9,6 +9,7 @@ Item {
     required property int slotIndex
     required property real effectiveBorderWidth
     required property string effectiveBorderColor
+    required property bool unified
 
     implicitWidth: pill.width
     implicitHeight: bar.barHeight
@@ -17,10 +18,10 @@ Item {
         id: pill
         anchors.verticalCenter: parent.verticalCenter
         property bool isHovered: timePillMouse.containsMouse
-        color: bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.75)) : "transparent"
-        radius: bar.pillRadius(bar.barHeight)
-        border.width: effectiveBorderWidth
-        border.color: colors[effectiveBorderColor] || colors.surface1
+        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.75)) : "transparent")
+        radius: unified ? 0 : bar.pillRadius(bar.barHeight)
+        border.width: unified ? 0 : effectiveBorderWidth
+        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
         height: bar.barHeight
         width: timeText.implicitWidth + bar.s(36)
 
