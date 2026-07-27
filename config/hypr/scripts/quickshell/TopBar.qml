@@ -73,6 +73,9 @@ Variants {
 
             // Whether island pills show a background fill.
             property bool topbarPillBg: true
+            // When true the pill background uses solid (opaque) colors instead
+            // of the default semi‑transparent surface tones.
+            property bool topbarPillSolid: false
 
             // Merge every module in a zone into one continuous pill.
             property bool topbarUnifyLeft: false
@@ -221,6 +224,9 @@ Variants {
 
                                 if (parsed.topbarPillBg !== undefined && barWindow.topbarPillBg !== parsed.topbarPillBg) {
                                     barWindow.topbarPillBg = parsed.topbarPillBg;
+                                }
+                                if (parsed.topbarPillSolid !== undefined && barWindow.topbarPillSolid !== parsed.topbarPillSolid) {
+                                    barWindow.topbarPillSolid = parsed.topbarPillSolid;
                                 }
 
                                 if (parsed.topbarUnifyLeft !== undefined && barWindow.topbarUnifyLeft !== parsed.topbarUnifyLeft)

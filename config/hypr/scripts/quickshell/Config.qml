@@ -91,6 +91,7 @@ Item {
     property bool topbarHelpIcon: true
     property real topbarRoundness: 1.0
     property bool topbarPillBg: true
+    property bool topbarPillSolid: false
     property bool topbarUnifyLeft: false
     property bool topbarUnifyCenter: false
     property bool topbarUnifyRight: false
@@ -179,6 +180,11 @@ Item {
     function saveTopbarPillBg(value) {
         config.topbarPillBg = value;
         config.setSetting("topbarPillBg", value);
+    }
+
+    function saveTopbarPillSolid(value) {
+        config.topbarPillSolid = value;
+        config.setSetting("topbarPillSolid", value);
     }
 
     function saveTopbarUnifyLeft(value) {
@@ -467,6 +473,7 @@ Item {
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
                         if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
                         if (config.rawSettings.topbarPillBg !== undefined) config.topbarPillBg = config.rawSettings.topbarPillBg;
+                        if (config.rawSettings.topbarPillSolid !== undefined) config.topbarPillSolid = config.rawSettings.topbarPillSolid;
                         if (config.rawSettings.topbarUnifyLeft !== undefined) config.topbarUnifyLeft = config.rawSettings.topbarUnifyLeft;
                         if (config.rawSettings.topbarUnifyCenter !== undefined) config.topbarUnifyCenter = config.rawSettings.topbarUnifyCenter;
                         if (config.rawSettings.topbarUnifyRight !== undefined) config.topbarUnifyRight = config.rawSettings.topbarUnifyRight;

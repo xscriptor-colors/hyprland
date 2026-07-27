@@ -22,7 +22,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         property bool isHovered: wifiMouse.containsMouse
         radius: unified ? 0 : bar.pillRadius(bar.pillHeight); height: bar.pillHeight;
-        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4)) : "transparent")
+        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, bar.topbarPillSolid ? 1.0 : 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, bar.topbarPillSolid ? 1.0 : 0.4)) : "transparent")
         border.width: unified ? 0 : effectiveBorderWidth
         border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
         clip: true

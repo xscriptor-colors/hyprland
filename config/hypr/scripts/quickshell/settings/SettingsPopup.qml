@@ -323,6 +323,12 @@ Item {
         onTriggered: Config.saveTopbarPillBg(Config.topbarPillBg)
     }
 
+    Timer {
+        id: solidFillSaveTimer
+        interval: 250
+        onTriggered: Config.saveTopbarPillSolid(Config.topbarPillSolid)
+    }
+
     // App scale is persisted by the General tab's Save button, matching how
     // every other setting on that tab behaves.
     function appScaleStep(dir) {
@@ -4081,6 +4087,53 @@ Item {
                                 MouseArea {
                                     id: pillBgMa; anchors.fill: parent; hoverEnabled: true
                                     onClicked: { Config.topbarPillBg = !Config.topbarPillBg; pillBgSaveTimer.restart() }
+                                    cursorShape: Qt.PointingHandCursor
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Solid fill toggle ────────────────────────────────────
+                    Rectangle {
+                        id: solidFillCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: solidFillRow.implicitHeight + root.s(22)
+                        Layout.bottomMargin: root.s(2)
+                        radius: root.s(24)
+                        color: root.surface0
+                        border.color: root.surface1
+                        border.width: 1
+
+                        RowLayout {
+                            id: solidFillRow
+                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
+                            anchors.margins: root.s(13); spacing: root.s(11)
+                            Item {
+                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
+                                Text { anchors.centerIn: parent; text: Config.topbarPillSolid ? "󰈙" : "󰉁"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
+                                Text { text: "Solid fill"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
+                                Text { text: Config.topbarPillSolid ? "opaque background" : "translucent background"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
+                            }
+                            Rectangle {
+                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
+                                scale: sfMa.containsMouse ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                color: Config.topbarPillSolid ? root.sapphire : Qt.alpha(root.surface2, 1.0)
+                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                Rectangle {
+                                    width: root.s(16); height: root.s(16); radius: root.s(18)
+                                    color: Config.topbarPillSolid ? root.base : root.surface0
+                                    y: root.s(3); x: Config.topbarPillSolid ? root.s(21) : root.s(3)
+                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                                }
+                                MouseArea {
+                                    id: sfMa; anchors.fill: parent; hoverEnabled: true
+                                    onClicked: { Config.topbarPillSolid = !Config.topbarPillSolid; solidFillSaveTimer.restart() }
                                     cursorShape: Qt.PointingHandCursor
                                 }
                             }
