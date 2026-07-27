@@ -713,8 +713,8 @@ Variants {
                     Rectangle {
                         anchors.fill: parent
                         radius: barWindow.pillRadius(barWindow.pillHeight)
-                        color: barWindow.topbarUnifyLeft && barWindow.topbarPillBg
-                            ? Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.5)
+                        color: barWindow.topbarUnifyLeft
+                            ? (barWindow.topbarPillSolid ? mocha.surface0 : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.5))
                             : "transparent"
                         border.width: barWindow.topbarUnifyLeft ? barWindow.topbarBorderWidth : 0
                         border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
@@ -779,8 +779,8 @@ Variants {
                     Rectangle {
                         anchors.fill: parent
                         radius: barWindow.pillRadius(barWindow.pillHeight)
-                        color: barWindow.topbarUnifyCenter && barWindow.topbarPillBg
-                            ? Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.5)
+                        color: barWindow.topbarUnifyCenter
+                            ? (barWindow.topbarPillSolid ? mocha.surface0 : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.5))
                             : "transparent"
                         border.width: barWindow.topbarUnifyCenter ? barWindow.topbarBorderWidth : 0
                         border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1
@@ -845,8 +845,8 @@ Variants {
                     Rectangle {
                         anchors.fill: parent
                         radius: barWindow.pillRadius(barWindow.pillHeight)
-                        color: barWindow.topbarUnifyRight && barWindow.topbarPillBg
-                            ? Qt.rgba(mocha.base.r, mocha.base.g, mocha.base.b, 0.5)
+                        color: barWindow.topbarUnifyRight
+                            ? (barWindow.topbarPillSolid ? mocha.surface0 : Qt.rgba(mocha.surface0.r, mocha.surface0.g, mocha.surface0.b, 0.5))
                             : "transparent"
                         border.width: barWindow.topbarUnifyRight ? barWindow.topbarBorderWidth : 0
                         border.color: mocha[barWindow.topbarBorderColor] || mocha.surface1

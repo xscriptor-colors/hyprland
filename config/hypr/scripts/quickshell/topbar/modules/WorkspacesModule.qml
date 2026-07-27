@@ -99,7 +99,7 @@ Item {
 
                     height: bar.s(36); radius: bar.pillRadius(bar.s(36))
 
-                    color: isHovered ? Qt.rgba(colors.text.r, colors.text.g, colors.text.b, 0.1) : (stateLabel === "occupied" ? Qt.rgba(colors.text.r, colors.text.g, colors.text.b, 0.15) : "transparent")
+                    color: stateLabel === "active" ? "transparent" : (bar.topbarPillBg ? (isHovered ? (bar.topbarPillSolid ? colors.surface1 : Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.6)) : (stateLabel === "occupied" ? (bar.topbarPillSolid ? colors.surface0 : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.4)) : (bar.topbarPillSolid ? colors.base : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.4)))) : (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.2) : (stateLabel === "occupied" ? Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.3) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.2))))
 
                     scale: isHovered && stateLabel !== "active" ? 1.08 : 1.0
                     Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
