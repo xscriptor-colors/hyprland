@@ -1,0 +1,45 @@
+{
+  "uiScale": 1.0,
+  "openGuideAtStartup": true,
+  "topbarHelpIcon": true,
+  "topbarPillBg": true,
+  "topbarRoundness": 1.0,
+  "topbarBorderMode": "unified",
+  "topbarBorderWidth": 0,
+  "topbarBorderColor": "surface1",
+  "topbarBorderWidthLeft": 0,
+  "topbarBorderColorLeft": "surface1",
+  "topbarBorderWidthCenter": 0,
+  "topbarBorderColorCenter": "surface1",
+  "topbarBorderWidthRight": 0,
+  "topbarBorderColorRight": "surface1",
+  "appScale": 1.0,
+  "workspaceCount": 8,
+  "wallpaperDir": "~/Pictures/Wallpapers",
+  "language": "",
+  "kbOptions": "grp:alt_shift_toggle",
+  "topbar": {
+    "left": [
+      { "id": "help", "enabled": true },
+      { "id": "search", "enabled": true },
+      { "id": "settings", "enabled": true },
+      { "id": "update", "enabled": true },
+      { "id": "time", "enabled": true },
+      { "id": "date", "enabled": true },
+      { "id": "media", "enabled": true }
+    ],
+    "center": [
+      { "id": "workspaces", "enabled": true }
+    ],
+    "right": [
+      { "id": "tray", "enabled": true },
+      { "id": "keyboard", "enabled": true },
+      { "id": "wifi", "enabled": true },
+      { "id": "bluetooth", "enabled": true },
+      { "id": "sysmon", "enabled": true },
+      { "id": "volume", "enabled": true },
+      { "id": "battery", "enabled": true },
+      { "id": "recording", "enabled": true }
+    ]
+  }
+}

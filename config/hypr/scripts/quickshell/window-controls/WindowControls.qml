@@ -36,6 +36,10 @@ Item {
     property int gapsIn: 16
     property int gapsOut: 25
     property int borderSize: 2
+    property int shadowRange: 35
+    property int shadowRenderPower: 5
+    property int shadowOffsetX: 0
+    property int shadowOffsetY: 10
 
     property bool isDirty: false
 
@@ -52,6 +56,9 @@ Item {
         setOpt("general:gaps_in", Math.round(window.gapsIn))
         setOpt("general:gaps_out", Math.round(window.gapsOut))
         setOpt("general:border_size", Math.round(window.borderSize))
+        setOpt("decoration:shadow:range", Math.round(window.shadowRange))
+        setOpt("decoration:shadow:render_power", Math.round(window.shadowRenderPower))
+        setOpt("decoration:shadow:offset", Math.round(window.shadowOffsetX) + " " + Math.round(window.shadowOffsetY))
         Quickshell.execDetached(["bash",
             Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/window-controls/persist.sh",
             window.activeOpacity.toFixed(2),
@@ -62,6 +69,10 @@ Item {
             String(Math.round(window.gapsIn)),
             String(Math.round(window.gapsOut)),
             String(Math.round(window.borderSize)),
+            String(Math.round(window.shadowRange)),
+            String(Math.round(window.shadowRenderPower)),
+            String(Math.round(window.shadowOffsetX)),
+            String(Math.round(window.shadowOffsetY)),
         ])
         window.isDirty = false
     }
@@ -69,6 +80,7 @@ Item {
     function resetDefaults() {
         activeOpacity = 0.85; inactiveOpacity = 0.80
         blurSize = 8; blurPasses = 3; roundness = 20
+        shadowRange = 35; shadowRenderPower = 5; shadowOffsetX = 0; shadowOffsetY = 10
         window.isDirty = true
     }
 
@@ -83,7 +95,10 @@ Item {
             "echo blur_passes=$(hyprctl getoption decoration:blur:passes | grep 'int:' | awk '{print $2}');" +
             "echo gaps_in=$(hyprctl getoption general:gaps_in | grep 'int:' | awk '{print $2}');" +
             "echo gaps_out=$(hyprctl getoption general:gaps_out | grep 'int:' | awk '{print $2}');" +
-            "echo border_size=$(hyprctl getoption general:border_size | grep 'int:' | awk '{print $2}')"
+            "echo border_size=$(hyprctl getoption general:border_size | grep 'int:' | awk '{print $2}');" +
+            "echo shadow_range=$(hyprctl getoption decoration:shadow:range | grep 'int:' | awk '{print $2}');" +
+            "echo shadow_render_power=$(hyprctl getoption decoration:shadow:render_power | grep 'int:' | awk '{print $2}');" +
+            "echo shadow_offset=$(hyprctl getoption decoration:shadow:offset | grep 'vec2:' | awk '{print $2, $3}')"
         ]
         reader.running = true
     }
@@ -107,6 +122,13 @@ Item {
                         else if (parts[0] === 'gaps_in') window.gapsIn = parseInt(v) || 16
                         else if (parts[0] === 'gaps_out') window.gapsOut = parseInt(v) || 25
                         else if (parts[0] === 'border_size') window.borderSize = parseInt(v) || 2
+                        else if (parts[0] === 'shadow_range') window.shadowRange = parseInt(v) || 35
+                        else if (parts[0] === 'shadow_render_power') window.shadowRenderPower = parseInt(v) || 5
+                        else if (parts[0] === 'shadow_offset') {
+                            let offsets = v.split(' ')
+                            window.shadowOffsetX = parseInt(offsets[0]) || 0
+                            window.shadowOffsetY = parseInt(offsets[1]) || 10
+                        }
                     }
                 } catch(e) {}
             }
@@ -223,6 +245,44 @@ Item {
                     onDragged: function(v) { window.borderSize = v; markDirty() }
                 }
                 Text { text: Math.round(bwDs.current) + "px"; font.family: "Hack Nerd Font"; font.pixelSize: s(12); font.weight: Font.Bold; color: window.text; Layout.preferredWidth: s(45); horizontalAlignment: Text.AlignRight }
+            }
+
+            Rectangle { Layout.fillWidth: true; Layout.preferredHeight: s(1); color: window.surface1; opacity: 0.2 }
+
+            RowLayout { Layout.fillWidth: true; Layout.preferredHeight: s(44); spacing: s(10)
+                Text { text: "\uF042"; font.family: "Hack Nerd Font"; font.pixelSize: s(14); color: window.peach; Layout.preferredWidth: s(20) }
+                Text { text: "Shadow Range"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: window.subtext0; Layout.preferredWidth: s(100) }
+                DragSlider { id: srDs; from: 0; to: 50; step: 1; initial: window.shadowRange; barColor: window.peach
+                    onDragged: function(v) { window.shadowRange = v; markDirty() }
+                }
+                Text { text: Math.round(srDs.current) + "px"; font.family: "Hack Nerd Font"; font.pixelSize: s(12); font.weight: Font.Bold; color: window.text; Layout.preferredWidth: s(45); horizontalAlignment: Text.AlignRight }
+            }
+
+            RowLayout { Layout.fillWidth: true; Layout.preferredHeight: s(44); spacing: s(10)
+                Text { text: "\uF0E7"; font.family: "Hack Nerd Font"; font.pixelSize: s(14); color: window.sapphire; Layout.preferredWidth: s(20) }
+                Text { text: "Shadow Power"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: window.subtext0; Layout.preferredWidth: s(100) }
+                DragSlider { id: spDs; from: 0; to: 10; step: 1; initial: window.shadowRenderPower; barColor: window.sapphire
+                    onDragged: function(v) { window.shadowRenderPower = v; markDirty() }
+                }
+                Text { text: Math.round(spDs.current); font.family: "Hack Nerd Font"; font.pixelSize: s(12); font.weight: Font.Bold; color: window.text; Layout.preferredWidth: s(45); horizontalAlignment: Text.AlignRight }
+            }
+
+            RowLayout { Layout.fillWidth: true; Layout.preferredHeight: s(44); spacing: s(10)
+                Text { text: "\uF061"; font.family: "Hack Nerd Font"; font.pixelSize: s(14); color: window.mauve; Layout.preferredWidth: s(20) }
+                Text { text: "Shadow Offset X"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: window.subtext0; Layout.preferredWidth: s(100) }
+                DragSlider { id: soxDs; from: -30; to: 30; step: 1; initial: window.shadowOffsetX; barColor: window.mauve
+                    onDragged: function(v) { window.shadowOffsetX = v; markDirty() }
+                }
+                Text { text: Math.round(soxDs.current) + "px"; font.family: "Hack Nerd Font"; font.pixelSize: s(12); font.weight: Font.Bold; color: window.text; Layout.preferredWidth: s(45); horizontalAlignment: Text.AlignRight }
+            }
+
+            RowLayout { Layout.fillWidth: true; Layout.preferredHeight: s(44); spacing: s(10)
+                Text { text: "\uF063"; font.family: "Hack Nerd Font"; font.pixelSize: s(14); color: window.green; Layout.preferredWidth: s(20) }
+                Text { text: "Shadow Offset Y"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: window.subtext0; Layout.preferredWidth: s(100) }
+                DragSlider { id: soyDs; from: -30; to: 30; step: 1; initial: window.shadowOffsetY; barColor: window.green
+                    onDragged: function(v) { window.shadowOffsetY = v; markDirty() }
+                }
+                Text { text: Math.round(soyDs.current) + "px"; font.family: "Hack Nerd Font"; font.pixelSize: s(12); font.weight: Font.Bold; color: window.text; Layout.preferredWidth: s(45); horizontalAlignment: Text.AlignRight }
             }
         }
     }

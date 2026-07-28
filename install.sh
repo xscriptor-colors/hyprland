@@ -539,6 +539,18 @@ install_dotfiles() {
         rm -f "$CONFIG_DIR/hypr/scripts/gpu-mode.sh"
     fi
 
+    # Validate settings.json and replace with defaults if corrupted
+    if [ -f "$CONFIG_DIR/hypr/settings.json" ]; then
+        if ! jq . "$CONFIG_DIR/hypr/settings.json" > /dev/null 2>&1; then
+            warn "settings.json is corrupted — replacing with defaults"
+            if [ -f "$SCRIPT_DIR/config/hypr/default_settings.json" ]; then
+                cp "$SCRIPT_DIR/config/hypr/default_settings.json" "$CONFIG_DIR/hypr/settings.json"
+            else
+                echo '{}' > "$CONFIG_DIR/hypr/settings.json"
+            fi
+        fi
+    fi
+
     log "Dotfiles installed successfully!"
 }
 
