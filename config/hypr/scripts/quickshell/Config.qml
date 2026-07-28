@@ -39,6 +39,8 @@ Item {
         return rawSettings.hasOwnProperty(key) ? rawSettings[key] : fallbackValue;
     }
 
+    // Uses a unique temp file per call (mktemp) so concurrent saves never
+    // overwrite each other's temp file, preventing JSON corruption.
     function setSetting(key, value) {
         rawSettings[key] = value;
         let safeValue = typeof value === "string" ? `"${value}"` : value;
@@ -46,8 +48,9 @@ Item {
 
         let cmd = `mkdir -p "$(dirname '${settingsJsonPath}')" && ` +
                   `[ ! -f '${settingsJsonPath}' ] && echo '{}' > '${settingsJsonPath}'; ` +
-                  `jq '. + {"${key}": ${safeValue}}' '${settingsJsonPath}' > '${settingsJsonPath}.tmp' && ` +
-                  `mv '${settingsJsonPath}.tmp' '${settingsJsonPath}'`;
+                  `tmp=$(mktemp '${settingsJsonPath}'.tmp.XXXXXX) && ` +
+                  `jq '. + {"${key}": ${safeValue}}' '${settingsJsonPath}' > "$tmp" && ` +
+                  `mv "$tmp" '${settingsJsonPath}'`;
         sh(cmd);
     }
 
@@ -55,10 +58,11 @@ Item {
         let jsonStr = JSON.stringify(dataObj).replace(/'/g, "'\\''");
         let cmd = `mkdir -p "$(dirname '${settingsJsonPath}')" && ` +
                   `[ ! -f '${settingsJsonPath}' ] && echo '{}' > '${settingsJsonPath}'; ` +
-                  `jq '. + ${jsonStr}' '${settingsJsonPath}' > '${settingsJsonPath}.tmp' && ` +
-                  `mv '${settingsJsonPath}.tmp' '${settingsJsonPath}'`;
+                  `tmp=$(mktemp '${settingsJsonPath}'.tmp.XXXXXX) && ` +
+                  `jq '. + ${jsonStr}' '${settingsJsonPath}' > "$tmp" && ` +
+                  `mv "$tmp" '${settingsJsonPath}'`;
         sh(cmd);
-        
+
         for (let key in dataObj) rawSettings[key] = dataObj[key];
     }
 
@@ -86,6 +90,20 @@ Item {
     property bool openGuideAtStartup: true
     property bool topbarHelpIcon: true
     property real topbarRoundness: 1.0
+    property bool topbarPillBg: true
+    property bool topbarPillSolid: false
+    property bool topbarUnifyLeft: false
+    property bool topbarUnifyCenter: false
+    property bool topbarUnifyRight: false
+    property string topbarBorderMode: "unified"
+    property real topbarBorderWidth: 0
+    property string topbarBorderColor: "surface1"
+    property real topbarBorderWidthLeft: 0
+    property string topbarBorderColorLeft: "surface1"
+    property real topbarBorderWidthCenter: 0
+    property string topbarBorderColorCenter: "surface1"
+    property real topbarBorderWidthRight: 0
+    property string topbarBorderColorRight: "surface1"
     property real appScale: 1.0
     property int workspaceCount: 8
     property int initialWorkspaceCount: 8
@@ -157,6 +175,69 @@ Item {
     function saveTopbarRoundness(value) {
         config.topbarRoundness = value;
         config.setSetting("topbarRoundness", value);
+    }
+
+    function saveTopbarPillBg(value) {
+        config.topbarPillBg = value;
+        config.setSetting("topbarPillBg", value);
+    }
+
+    function saveTopbarPillSolid(value) {
+        config.topbarPillSolid = value;
+        config.setSetting("topbarPillSolid", value);
+    }
+
+    function saveTopbarUnifyLeft(value) {
+        config.topbarUnifyLeft = value;
+        config.setSetting("topbarUnifyLeft", value);
+    }
+    function saveTopbarUnifyCenter(value) {
+        config.topbarUnifyCenter = value;
+        config.setSetting("topbarUnifyCenter", value);
+    }
+    function saveTopbarUnifyRight(value) {
+        config.topbarUnifyRight = value;
+        config.setSetting("topbarUnifyRight", value);
+    }
+
+    function saveTopbarBorderWidth(value) {
+        config.topbarBorderWidth = value;
+        config.setSetting("topbarBorderWidth", value);
+    }
+
+    function saveTopbarBorderColor(value) {
+        config.topbarBorderColor = value;
+        config.setSetting("topbarBorderColor", value);
+    }
+
+    function saveTopbarBorderMode(value) {
+        config.topbarBorderMode = value;
+        config.setSetting("topbarBorderMode", value);
+    }
+
+    function saveTopbarBorderWidthLeft(value) {
+        config.topbarBorderWidthLeft = value;
+        config.setSetting("topbarBorderWidthLeft", value);
+    }
+    function saveTopbarBorderColorLeft(value) {
+        config.topbarBorderColorLeft = value;
+        config.setSetting("topbarBorderColorLeft", value);
+    }
+    function saveTopbarBorderWidthCenter(value) {
+        config.topbarBorderWidthCenter = value;
+        config.setSetting("topbarBorderWidthCenter", value);
+    }
+    function saveTopbarBorderColorCenter(value) {
+        config.topbarBorderColorCenter = value;
+        config.setSetting("topbarBorderColorCenter", value);
+    }
+    function saveTopbarBorderWidthRight(value) {
+        config.topbarBorderWidthRight = value;
+        config.setSetting("topbarBorderWidthRight", value);
+    }
+    function saveTopbarBorderColorRight(value) {
+        config.topbarBorderColorRight = value;
+        config.setSetting("topbarBorderColorRight", value);
     }
 
     // No notification here on purpose: the topbar tab edits live and the bar
@@ -391,6 +472,20 @@ Item {
                         if (config.rawSettings.openGuideAtStartup !== undefined) config.openGuideAtStartup = config.rawSettings.openGuideAtStartup;
                         if (config.rawSettings.topbarHelpIcon !== undefined) config.topbarHelpIcon = config.rawSettings.topbarHelpIcon;
                         if (config.rawSettings.topbarRoundness !== undefined) config.topbarRoundness = config.rawSettings.topbarRoundness;
+                        if (config.rawSettings.topbarPillBg !== undefined) config.topbarPillBg = config.rawSettings.topbarPillBg;
+                        if (config.rawSettings.topbarPillSolid !== undefined) config.topbarPillSolid = config.rawSettings.topbarPillSolid;
+                        if (config.rawSettings.topbarUnifyLeft !== undefined) config.topbarUnifyLeft = config.rawSettings.topbarUnifyLeft;
+                        if (config.rawSettings.topbarUnifyCenter !== undefined) config.topbarUnifyCenter = config.rawSettings.topbarUnifyCenter;
+                        if (config.rawSettings.topbarUnifyRight !== undefined) config.topbarUnifyRight = config.rawSettings.topbarUnifyRight;
+                        if (config.rawSettings.topbarBorderMode !== undefined) config.topbarBorderMode = config.rawSettings.topbarBorderMode;
+                        if (config.rawSettings.topbarBorderWidth !== undefined) config.topbarBorderWidth = config.rawSettings.topbarBorderWidth;
+                        if (config.rawSettings.topbarBorderColor !== undefined) config.topbarBorderColor = config.rawSettings.topbarBorderColor;
+                        if (config.rawSettings.topbarBorderWidthLeft !== undefined) config.topbarBorderWidthLeft = config.rawSettings.topbarBorderWidthLeft;
+                        if (config.rawSettings.topbarBorderColorLeft !== undefined) config.topbarBorderColorLeft = config.rawSettings.topbarBorderColorLeft;
+                        if (config.rawSettings.topbarBorderWidthCenter !== undefined) config.topbarBorderWidthCenter = config.rawSettings.topbarBorderWidthCenter;
+                        if (config.rawSettings.topbarBorderColorCenter !== undefined) config.topbarBorderColorCenter = config.rawSettings.topbarBorderColorCenter;
+                        if (config.rawSettings.topbarBorderWidthRight !== undefined) config.topbarBorderWidthRight = config.rawSettings.topbarBorderWidthRight;
+                        if (config.rawSettings.topbarBorderColorRight !== undefined) config.topbarBorderColorRight = config.rawSettings.topbarBorderColorRight;
                         if (config.rawSettings.appScale !== undefined) config.appScale = config.rawSettings.appScale;
                         if (config.rawSettings.wallpaperDir !== undefined) config.wallpaperDir = config.rawSettings.wallpaperDir;
                         if (config.rawSettings.language !== undefined && config.rawSettings.language !== "") config.language = config.rawSettings.language;
@@ -440,6 +535,10 @@ Item {
                     }
                 } catch (e) {
                     console.log("Error parsing global settings:", e);
+                    // Overwrite the corrupted file with a fresh empty object so
+                    // the bar can start and jq saves will work going forward.
+                    config.sh("echo '{}' > '" + config.settingsJsonPath + "'");
+                    config.rawSettings = {};
                     config.keybindsData = [];
                     config.startupData = [];
                     config.topbarLayout = TopbarLayout.defaultLayout();

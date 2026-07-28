@@ -10,6 +10,10 @@ BLUR_PASSES="$5"
 GAPS_IN="${6:-16}"
 GAPS_OUT="${7:-25}"
 BORDER_SIZE="${8:-2}"
+SHADOW_RANGE="${9:-35}"
+SHADOW_RENDER_POWER="${10:-5}"
+SHADOW_OFFSET_X="${11:-0}"
+SHADOW_OFFSET_Y="${12:-10}"
 
 CONF_DIR="$HOME/.config/hypr/config"
 mkdir -p "$CONF_DIR"
@@ -23,6 +27,11 @@ decoration {
     blur {
         size = $BLUR_SIZE
         passes = $BLUR_PASSES
+    }
+    shadow {
+        range = $SHADOW_RANGE
+        render_power = $SHADOW_RENDER_POWER
+        offset = $SHADOW_OFFSET_X $SHADOW_OFFSET_Y
     }
 }
 CONF
