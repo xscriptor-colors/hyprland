@@ -197,7 +197,7 @@ Item {
                     fi
                     
                     notify-send "Wallpaper" "Applied: $(basename "$DEST_FILE")" -i preferences-desktop-wallpaper -t 2000
-( command -v matugen >/dev/null 2>&1 && matugen image "$FINAL_THUMB"  2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
+( bash "$HOME/.config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
                     `;
                 Quickshell.execDetached(["bash", "-c", applyScript]);
             } else {
@@ -245,7 +245,7 @@ Item {
                             awww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         fi
                         
-                        ( command -v matugen >/dev/null 2>&1 && matugen image "$FINAL_THUMB"  2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
+                        ( bash "$HOME/.config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
                     fi
                 `;
                 Quickshell.execDetached(["bash", "-c", downloadScript]);
@@ -296,7 +296,7 @@ Item {
             ${wallpaperCmd}
             if command -v matugen >/dev/null 2>&1; then
                 mkdir -p /tmp/quickshell/logs
-                matugen image "${escOriginal}" --source-color-index 0  >>/tmp/quickshell/logs/matugen.log 2>&1
+                bash "$HOME/.config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "${escOriginal}" >>/tmp/quickshell/logs/matugen.log 2>&1
                 echo "matugen exit code: $?" >> /tmp/quickshell/logs/matugen.log
             fi
             bash "${escReload}" 2>/dev/null || true

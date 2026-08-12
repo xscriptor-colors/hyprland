@@ -141,5 +141,4 @@
 | `gpu-mode.sh` | `~/.config/hypr/scripts/` | NVIDIA Optimus mode switcher |
 | `monitor-manager.sh` | `~/.config/hypr/scripts/` | Multi-monitor layout management |
 | `workspaces.sh` | `~/.config/hypr/scripts/` | Workspace event listener daemon |
-| `settings_watcher.sh` | `~/.config/hypr/scripts/` | Watches settings.json, regenerates configs |
 | `init.sh` | `~/.config/hypr/scripts/` | First-run wallpaper and color init |
