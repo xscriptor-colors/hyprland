@@ -1,5 +1,29 @@
 # Changelog
 
+## [2026-08-12]
+
+### Added
+- Migrated the Hyprland config from hyprlang to the Lua format (Hyprland 0.55+): `hyprland.lua` entry point plus `env.lua`, `colors.lua`, `variables.lua`, `settings.lua`, `monitors.lua`, `keybinds.lua`, `animations.lua`, `windowrules.lua`, `workspaces.lua` and `autostart.lua`.
+- `config/matugen/scheme` -- configurable Matugen color scheme (defaults to `scheme-fruit-salad` for celeste tones instead of the default blue).
+- `config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh` -- central helper that runs Matugen with the configured scheme; used by the wallpaper picker, init and installer.
+- `config/matugen/templates/hyprland.lua.template` -- regenerates dynamic window border colors from the wallpaper into `matugen-colors.lua`, consumed by `colors.lua` with a fallback to the fixed X palette.
+
+### Changed
+- Removed the dynamic config generator (`settings_watcher.sh`, `detect-monitors.sh`, `templates/`) and all legacy `.conf` files. `monitors.lua` auto-detects monitors at the highest refresh rate via `mode = "highrr"`.
+- `scripts/monitor-manager.sh` and `scripts/scale-menu.sh` -- now apply monitors via `hyprctl eval 'hl.monitor(...)'` (the old `hyprctl keyword monitor` no longer exists).
+- `scripts/quickshell/window-controls/persist.sh` -- writes `config/window-effects.lua` and `config/gaps.lua` instead of `.conf`; `WindowControls.qml` no longer uses `hyprctl keyword`.
+- `scripts/quickshell/Config.qml` -- `applyMonitors()` uses the Lua API so refresh rate changes from the settings panel actually apply.
+- `scripts/quickshell/settings/SettingsPopup.qml` -- replaced legacy `hyprctl dispatch` calls with `hyprctl eval`.
+- `scripts/qs_manager.sh` -- workspace switching uses `hl.dsp.focus`/`hl.dsp.window.move` via `hyprctl eval`.
+- `scripts/exit.sh` -- session exit uses `hyprctl eval 'hl.dispatch(hl.dsp.exit())'`.
+- `install.sh` -- cleans up legacy config on install; runs Matugen through `matugen-apply.sh`.
+- `config/matugen/config.toml` -- Hyprland template now outputs `matugen-colors.lua` instead of `colors.conf`.
+
+### Fixed
+- Refresh rate changes from the settings panel (gear) staying at 60Hz: `applyMonitors()` used the removed `hyprctl keyword monitor` and failed silently. Now applies 60Hz/144Hz correctly via the Lua API.
+- Display scaling (SUPER+Z) not applying: a leftover `settings_watcher.sh` process from before the migration was regenerating old configs and reloading Hyprland, reverting the scale. The zombie process was removed.
+- Workspace switching and session exit broken by legacy `hyprctl dispatch` syntax.
+
 ## [Unreleased]
 
 ### Added

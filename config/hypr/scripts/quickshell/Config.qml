@@ -323,11 +323,11 @@ Item {
         if (monitorsModel.count === 0) return;
         if (monitorsModel.count === 1) {
             let m = monitorsModel.get(0);
-            let monitorStr = m.name + "," + m.resW + "x" + m.resH + "@" + m.rate + ",0x0," + m.sysScale;
-            if (m.transform !== 0) monitorStr += ",transform," + m.transform;
+            // Hyprland 0.55+ has no `hyprctl keyword monitor`; use the Lua API.
+            let lua = `hl.monitor({ output = \"${m.name}\", mode = \"${m.resW}x${m.resH}@${m.rate}\", position = \"0x0\", scale = ${m.sysScale}${m.transform !== 0 ? `, transform = ${m.transform}` : ""} })`;
             let jsonArr = [{ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: 0, y: 0, scale: m.sysScale, transform: m.transform }];
             config.setSetting("monitors", jsonArr);
-            config.sh("hyprctl keyword monitor " + monitorStr + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon &");
+            config.sh(`hyprctl eval '${lua.replace(/'/g, "'\\''")}' ; pkill awww-daemon 2>/dev/null || true; awww-daemon &`);
             Quickshell.execDetached(["notify-send", "Display Update", "Applied: " + m.resW + "x" + m.resH + " @ " + m.rate + "Hz"]);
         } else {
             let rects = [];
@@ -365,19 +365,19 @@ Item {
                 if (rects[i].x < finalMinX) finalMinX = rects[i].x;
                 if (rects[i].y < finalMinY) finalMinY = rects[i].y;
             }
-            let batchCmds = [], summaryString = "", jsonArr = [];
+            let evalCmds = [], summaryString = "", jsonArr = [];
             for (let i = 0; i < rects.length; i++) {
                 let r = rects[i];
                 r.x = Math.round(r.x - finalMinX);
                 r.y = Math.round(r.y - finalMinY);
-                let monitorStr = r.name + "," + r.resW + "x" + r.resH + "@" + r.rate + "," + r.x + "x" + r.y + "," + r.sysScale;
-                if (r.transform !== 0) monitorStr += ",transform," + r.transform;
-                batchCmds.push("keyword monitor " + monitorStr);
+                // Hyprland 0.55+ has no `hyprctl keyword monitor`; use the Lua API.
+                let lua = `hl.monitor({ output = \"${r.name}\", mode = \"${r.resW}x${r.resH}@${r.rate}\", position = \"${r.x}x${r.y}\", scale = ${r.sysScale}${r.transform !== 0 ? `, transform = ${r.transform}` : ""} })`;
+                evalCmds.push(`hyprctl eval '${lua.replace(/'/g, "'\\''")}'`);
                 summaryString += r.name + " ";
                 jsonArr.push({ name: r.name, resW: r.resW, resH: r.resH, rate: parseInt(r.rate), x: r.x, y: r.y, scale: r.sysScale, transform: r.transform });
             }
             config.setSetting("monitors", jsonArr);
-            config.sh("hyprctl --batch '" + batchCmds.join(" ; ") + "' ; pkill awww-daemon 2>/dev/null || true; awww-daemon &");
+            config.sh(evalCmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon &");
             Quickshell.execDetached(["notify-send", "Display Update", "Applied layout for: " + summaryString.trim()]);
         }
     }
