@@ -38,3 +38,5 @@ require("autostart")    -- Startup applications (hl.on "hyprland.start")
 
 pcall(require, "config.window-effects")
 pcall(require, "config.gaps")
+pcall(require, "config.user-keybinds")
+pcall(require, "config.user-startup")
