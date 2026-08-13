@@ -2,11 +2,9 @@
 # Global display scale: makes EVERYTHING bigger or smaller (apps, windows and
 # the shell) by changing the Hyprland output scale.
 #
-# This deliberately only edits settings.json and stops there. settings_watcher.sh
-# picks the change up, regenerates config/monitors.conf and runs `hyprctl reload`,
-# so Hyprland applies the mode exactly once from its own config. Doing an extra
-# `hyprctl keyword monitor` here as well used to apply it twice and fight the
-# reload that followed.
+# settings.json stays as the record for QuickShell, but the actual scale is
+# applied through the Lua API (`hyprctl eval 'hl.monitor(...)'`) — Hyprland
+# 0.55+ has no `hyprctl keyword monitor` and no config generator daemon.
 #
 # Usage:
 #   scale-menu.sh            rofi menu
@@ -89,9 +87,14 @@ esac
 
 [ "$scale" = "$CURRENT" ] && exit 0
 
-# The only write. Everything downstream is Hyprland's job.
+# Record in settings.json (QuickShell reads this for its own UI scale).
 jq --argjson s "$scale" '.monitors = [ .monitors[] | .scale = $s ]' "$SETTINGS" > "${SETTINGS}.tmp" \
     && mv "${SETTINGS}.tmp" "$SETTINGS" || { rm -f "${SETTINGS}.tmp"; exit 1; }
+
+# Apply to every connected monitor through the Lua API.
+if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl -j monitors 2>/dev/null | jq -r --argjson s "$scale" '.[] | "hyprctl eval '\''hl.monitor({ output = \"\(.name)\", mode = \"preferred\", position = \"\(.x)x\(.y)\", scale = \($s) })'\''"' | bash
+fi
 
 if command -v notify-send >/dev/null 2>&1; then
     notify-send "Display Scale" "$(awk -v s="$scale" 'BEGIN{ printf "%d%%", s*100 }') — applied to all monitors"

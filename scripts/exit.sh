@@ -5,5 +5,5 @@ systemctl --user stop graphical-session-pre.target
 
 sleep 0.5
 
-hyprctl dispatch exit
+hyprctl eval 'hl.dispatch(hl.dsp.exit())'
 

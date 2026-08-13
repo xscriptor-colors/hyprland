@@ -18,7 +18,7 @@ All scripts reside in the repository root `scripts/` directory and are deployed 
 | `brightness.sh` | Controls display brightness via `brightnessctl` (internal backlight) with fallback to `ddcutil` (external monitors via DDC/CI). Sends desktop notifications with percentage. |
 | `volume.sh` | Controls audio volume via `pamixer`. Sends desktop notifications with percentage and mute state. |
 | `volume_listener.sh` | Listens to PipeWire events via `pactl subscribe`. Triggers `swayosd-client` on volume changes without altering levels. Prevents duplicate popups from the same device. |
-| `scale-menu.sh` | Rofi-based display scale selector (100%, 80%, 75%). Applies scale per-monitor via `hyprctl` and triggers QuickShell reload. |
+| `scale-menu.sh` | Rofi-based display scale selector (100%, 80%, 75%). Applies scale per-monitor through the Lua API (`hyprctl eval 'hl.monitor(...)'`) and records it in `settings.json`. |
 
 ## System Scripts
 
@@ -27,8 +27,7 @@ All scripts reside in the repository root `scripts/` directory and are deployed 
 | `lock.sh` | Locks the session by launching `Lock.qml` via QuickShell, which acquires a `WlSessionLock`. |
 | `exit.sh` | Gracefully ends the Hyprland session by stopping user targets and dispatching `hyprctl dispatch exit`. |
 | `gpu-mode.sh` | NVIDIA Optimus mode switcher wrapping `envycontrol`. Supports cycle (silent/hybrid/nvidia), Rofi menu selector, and Waybar status output. Requires passwordless sudo rule (set up by installer). |
-| `monitor-manager.sh` | Rofi-based multi-monitor manager. Supports positioning (left/right/above/below/mirror), single display modes, and refresh rate changes per monitor. Displays monitor info via notification. |
+| `monitor-manager.sh` | Rofi-based multi-monitor manager. Supports positioning (left/right/above/below/mirror), single display modes, and refresh rate changes per monitor. Applies changes through the Lua API (`hyprctl eval 'hl.monitor(...)'`). Displays monitor info via notification. |
 | `screenshot.sh` | Comprehensive screenshot and screen recording system. Supports area selection, full screen, active window, edit mode (satty), screen recording (gpu-screen-recorder with virtual audio routing), and QR code scanning (zbarimg). Records multi-track audio with independent desktop/mic volume and mute controls. |
-| `settings_watcher.sh` | Watches `settings.json` and `.env` for changes. Regenerates Hyprland config files (env, keybindings, autostart, monitors) from templates and JSON settings. Triggers `hyprctl reload` only on actual changes to avoid flicker. |
 | `update_notifier.sh` | Checks for updates every 10 minutes. Compares local version against remote, shows notification if newer version is available, and signals the topbar to show an update icon. |
 | `workspaces.sh` | Daemon that listens to Hyprland socket events and generates workspace state JSON (id, state: active/occupied/empty, tooltip, app classes). Uses 50ms debouncing to prevent CPU overload during rapid window events. Includes zombie cleanup of stale instances. |

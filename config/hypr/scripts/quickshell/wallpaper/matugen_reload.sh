@@ -51,7 +51,6 @@ TEXT_FILES=(
     "$HOME/.config/qt6ct/colors/matugen.conf"
     "$HOME/.config/qt5ct/qss/matugen-style.qss"
     "$HOME/.config/qt6ct/qss/matugen-style.qss"
-    "$HOME/.config/hypr/colors.conf"
 )
 
 for file in "${TEXT_FILES[@]}"; do

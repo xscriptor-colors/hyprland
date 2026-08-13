@@ -43,22 +43,10 @@ Item {
 
     property bool isDirty: false
 
-    function setOpt(opt, val) {
-        Quickshell.execDetached(["bash", "-c", "hyprctl keyword " + opt + " " + val])
-    }
-
     function saveChanges() {
-        setOpt("decoration:active_opacity", window.activeOpacity.toFixed(2))
-        setOpt("decoration:inactive_opacity", window.inactiveOpacity.toFixed(2))
-        setOpt("decoration:blur:size", Math.round(window.blurSize))
-        setOpt("decoration:blur:passes", Math.round(window.blurPasses))
-        setOpt("decoration:rounding", Math.round(window.roundness))
-        setOpt("general:gaps_in", Math.round(window.gapsIn))
-        setOpt("general:gaps_out", Math.round(window.gapsOut))
-        setOpt("general:border_size", Math.round(window.borderSize))
-        setOpt("decoration:shadow:range", Math.round(window.shadowRange))
-        setOpt("decoration:shadow:render_power", Math.round(window.shadowRenderPower))
-        setOpt("decoration:shadow:offset", Math.round(window.shadowOffsetX) + " " + Math.round(window.shadowOffsetY))
+        // Hyprland 0.55+ has no `hyprctl keyword`; the Lua override modules are
+        // written by persist.sh and loaded at the end of hyprland.lua, then a
+        // reload applies them.
         Quickshell.execDetached(["bash",
             Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/window-controls/persist.sh",
             window.activeOpacity.toFixed(2),
