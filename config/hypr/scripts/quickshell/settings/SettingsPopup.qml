@@ -1279,7 +1279,7 @@ Item {
         }
         ScriptAction { 
             script: {
-                Quickshell.execDetached(["hyprctl", "dispatch", "submap", "reset"]);
+                Quickshell.execDetached(["hyprctl", "eval", "hl.dispatch(hl.dsp.submap(\"reset\"))"]);
                 Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
             } 
         }    
@@ -2833,7 +2833,8 @@ Item {
                                         hoverEnabled: true; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.LeftButton; enabled: !model.isEditing
                                         onClicked: {
                                             if (model.dispatcher.startsWith("exec")) { Quickshell.execDetached(["bash", "-c", model.command]); }
-                                            else { Quickshell.execDetached(["hyprctl", "dispatch", model.dispatcher, model.command]); }
+                                            // NOTE: Hyprland 0.55+ has no string dispatchers; dynamic keybinds are
+                                            // configured in keybinds.lua. The live-preview click is a no-op now.
                                         }
                                     }
                                 }
@@ -2925,8 +2926,8 @@ Item {
                                                 dynamicKeybindsModel.setProperty(outerIndex, "key", k);
                                             }
                                             onActiveFocusChanged: {
-                                                if (!activeFocus) { accumulatedMods = []; accumulatedKey = ""; Quickshell.execDetached(["hyprctl", "dispatch", "submap", "reset"]); }
-                                                else { Quickshell.execDetached(["hyprctl", "dispatch", "submap", "passthru"]); }
+                                                if (!activeFocus) { accumulatedMods = []; accumulatedKey = ""; Quickshell.execDetached(["hyprctl", "eval", "hl.dispatch(hl.dsp.submap(\"reset\"))"]); }
+                                                else { Quickshell.execDetached(["hyprctl", "eval", "hl.dispatch(hl.dsp.submap(\"passthru\"))"]); }
                                             }
                                         }
                                     }

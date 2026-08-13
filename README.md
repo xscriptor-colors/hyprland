@@ -69,10 +69,11 @@ chmod +x install.sh
 
 <ul>
   <li><strong>QuickShell QML UI</strong> -- App launcher, clipboard, calendar/weather, network, audio, battery, music (MPRIS), wallpaper picker, system monitor, RSS reader, file search, quick notes, focus timer, screen recording, QR scanner.</li>
-  <li><strong>Matugen Dynamic Theming</strong> -- Colors extracted from wallpaper, applied to Hyprland, Kitty, Neovim, Cava, SwayOSD, GTK, Qt, SDDM.</li>
-  <li><strong>Modular Config</strong> -- Split across focused files. Template-based reload from <code>settings.json</code>.</li>
+  <li><strong>Lua Config</strong> -- Hyprland 0.55+ <code>hyprland.lua</code> modular config (env, colors, keybinds, animations, rules, autostart) with the fixed X palette.</li>
+  <li><strong>Matugen Dynamic Theming</strong> -- Colors extracted from wallpaper, applied to Kitty, Neovim, Cava, SwayOSD, GTK, Qt, SDDM (Hyprland uses the fixed X palette).</li>
+  <li><strong>Modular Config</strong> -- Split across focused Lua modules. QuickShell reads <code>settings.json</code> for its widgets.</li>
   <li><strong>NVIDIA Optimus</strong> -- GPU mode switching (integrated/hybrid/nvidia) via keybind or Rofi.</li>
-  <li><strong>Multi-Monitor</strong> -- Workspace binding, Rofi-based position/resolution/refresh rate manager.</li>
+  <li><strong>Multi-Monitor</strong> -- Auto-detection at max refresh rate (Lua wildcard), Rofi-based position/resolution/refresh rate manager.</li>
   <li><strong>SDDM Theme</strong> -- <code>matugen-minimal</code> with Matugen colors and wallpaper blur.</li>
   <li><strong>Screen Recording</strong> -- GPU capture with separate desktop/mic audio channels.</li>
   <li><strong>Neovim Config</strong> -- lazy.nvim, LSP (Mason), Treesitter, custom themes with Matugen colors.</li>
@@ -100,7 +101,7 @@ chmod +x install.sh
 <pre><code>hyprland/
   install.sh                  Automated installer
   uninstall.sh                Config removal
-  config/hypr/                Hyprland modular configs + QuickShell QML widgets
+  config/hypr/                Hyprland Lua configs (hyprland.lua + modules) + QuickShell QML widgets
   config/kitty/               Terminal config + Matugen colors
   config/rofi/                Launcher themes
   config/dunst/               Notification daemon

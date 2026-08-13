@@ -1,6 +1,6 @@
 # Matugen Integration
 
-Matugen (Material You color generator) is the sole theming engine. It analyzes the current wallpaper and generates a cohesive color palette applied across all UI components.
+Matugen (Material You color generator) is the theming engine for the *applications* (not Hyprland). It analyzes the current wallpaper and generates a cohesive color palette applied across the UI components. Hyprland itself uses the fixed **X palette** defined in `config/hypr/colors.lua`.
 
 ## Configuration
 
@@ -29,8 +29,9 @@ Located at `config/hypr/scripts/quickshell/wallpaper/matugen_reload.sh`. This sc
 - **SwayOSD** -- `style.css` for on-screen display styling
 - **GTK** -- `colors-gtk.css` for GTK3/4 applications
 - **Qt5/Qt6** -- `matugen.conf` and `matugen-style.qss` for Qt application theming
-- **Hyprland** -- `colors.conf` for window decorations, borders
 - **SDDM** -- `sddm-colors.qml` for the login screen theme
+
+> **Hyprland** no longer uses Matugen colors: window decorations and borders come from the fixed X palette in `config/hypr/colors.lua`.
 
 ## Template Directory
 

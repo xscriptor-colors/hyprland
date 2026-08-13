@@ -12,6 +12,15 @@
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 # ────────────────────────────────────────────────────────────────────────────
+# Apply a monitor via the Lua API (Hyprland 0.55+ has no `hyprctl keyword`)
+# ────────────────────────────────────────────────────────────────────────────
+
+apply_monitor_lua() {
+    # $1: lua snippet, e.g. { output = "eDP-1", mode = "preferred", position = "0x0", scale = 1 }
+    hyprctl eval 'hl.monitor('"$1"')' >/dev/null 2>&1
+}
+
+# ────────────────────────────────────────────────────────────────────────────
 # Get monitor info from hyprctl
 # ────────────────────────────────────────────────────────────────────────────
 
@@ -100,35 +109,35 @@ apply_position() {
 
     case "$layout" in
         "right")
-            hyprctl keyword monitor "$primary, preferred, 0x0, 1"
-            hyprctl keyword monitor "$secondary, preferred, ${primary_w}x0, 1"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"${primary_w}x0\", scale = 1 }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External on the RIGHT"
             ;;
         "left")
-            hyprctl keyword monitor "$secondary, preferred, 0x0, 1"
-            hyprctl keyword monitor "$primary, preferred, ${secondary_w}x0, 1"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"${secondary_w}x0\", scale = 1 }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External on the LEFT"
             ;;
         "above")
-            hyprctl keyword monitor "$secondary, preferred, 0x0, 1"
-            hyprctl keyword monitor "$primary, preferred, 0x${secondary_h}, 1"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0${secondary_h}\", scale = 1 }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External ABOVE"
             ;;
         "below")
-            hyprctl keyword monitor "$primary, preferred, 0x0, 1"
-            hyprctl keyword monitor "$secondary, preferred, 0x${primary_h}, 1"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0${primary_h}\", scale = 1 }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External BELOW"
             ;;
         "mirror")
-            hyprctl keyword monitor "$secondary, preferred, auto, 1, mirror, $primary"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"auto\", scale = 1, mirror = \"$primary\" }"
             notify-send -t 3000 "󰍹 Monitor Layout" "MIRRORED displays"
             ;;
         "only-primary")
-            hyprctl keyword monitor "$secondary, disable"
+            apply_monitor_lua "{ output = \"$secondary\", disabled = true }"
             notify-send -t 3000 "󰍹 Monitor Layout" "Only PRIMARY ($primary)"
             ;;
         "only-external")
-            hyprctl keyword monitor "$primary, disable"
+            apply_monitor_lua "{ output = \"$primary\", disabled = true }"
             notify-send -t 3000 "󰍹 Monitor Layout" "Only EXTERNAL ($secondary)"
             ;;
     esac
@@ -159,7 +168,7 @@ change_refresh_rate() {
         local mon rate
         mon=$(echo "$choice" | awk '{print $1}')
         rate=$(echo "$choice" | awk '{print $3}' | sed 's/Hz//')
-        hyprctl keyword monitor "$mon, preferred@${rate}, auto, 1"
+        apply_monitor_lua "{ output = \"$mon\", mode = \"preferred@${rate}\", position = \"auto\", scale = 1 }"
         notify-send -t 3000 "󰍹 Refresh Rate" "$mon set to ${rate}Hz"
     fi
 }

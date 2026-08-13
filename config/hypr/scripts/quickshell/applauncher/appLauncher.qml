@@ -152,7 +152,9 @@ Item {
 
     function launchApp(execStr) {
         Quickshell.execDetached(["bash", "-c", "mkdir -p ~/.cache/quickshell && USAGE=\"$HOME/.cache/quickshell/applauncher_usage.json\"; [ ! -f \"$USAGE\" ] && echo '{}' > \"$USAGE\"; KEY=$(printf '%s' \"$1\" | base64 -w0); COUNT=$(jq -r \".[\\\"$KEY\\\"].count // 0\" \"$USAGE\"); LAST=$(date +%s); jq \".[\\\"$KEY\\\"] = {\\\"count\\\": ($COUNT + 1), \\\"last_used\\\": $LAST}\" \"$USAGE\" > \"$USAGE.tmp\" && mv \"$USAGE.tmp\" \"$USAGE\"", "bash", execStr]);
-        Quickshell.execDetached(["hyprctl", "dispatch", "exec", "--", execStr]);
+        // Hyprland 0.55+ has no `hyprctl dispatch exec`; use the Lua API.
+        let luaCmd = "hl.dispatch(hl.dsp.exec_cmd(\"" + execStr.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + "\"))";
+        Quickshell.execDetached(["bash", "-c", "hyprctl eval '" + luaCmd.replace(/'/g, "'\\''") + "'"]);
         Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
     }
 

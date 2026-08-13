@@ -449,6 +449,20 @@ install_dotfiles() {
     mkdir -p "$CONFIG_DIR/hypr"
     cp -r "$SCRIPT_DIR/config/hypr/"* "$CONFIG_DIR/hypr/"
 
+    # Remove legacy hyprlang config files. Since Hyprland 0.55 the config is a
+    # Lua file (hyprland.lua); leaving hyprland.conf around could make Hyprland
+    # load the old syntax instead.
+    rm -f "$CONFIG_DIR/hypr/hyprland.conf"
+    rm -f "$CONFIG_DIR/hypr/colors.conf"
+    rm -f "$CONFIG_DIR/hypr/animations.conf" "$CONFIG_DIR/hypr/autostart.conf" \
+          "$CONFIG_DIR/hypr/env.conf" "$CONFIG_DIR/hypr/keybinds.conf" \
+          "$CONFIG_DIR/hypr/theme.conf" "$CONFIG_DIR/hypr/windowrules.conf" \
+          "$CONFIG_DIR/hypr/workspaces.conf"
+    rm -f "$CONFIG_DIR/hypr/config/gaps.conf" "$CONFIG_DIR/hypr/config/settings.conf" \
+          "$CONFIG_DIR/hypr/config/variables.conf" "$CONFIG_DIR/hypr/config/window-effects.conf"
+    rm -f "$CONFIG_DIR/hypr/scripts/settings_watcher.sh" \
+          "$CONFIG_DIR/hypr/scripts/detect-monitors.sh"
+
     # Copy themes
     mkdir -p "$CONFIG_DIR/hypr/themes"
     cp -r "$SCRIPT_DIR/themes/"* "$CONFIG_DIR/hypr/themes/"
@@ -467,18 +481,12 @@ install_dotfiles() {
         log "Installed quickshell scripts"
     fi
 
-    # Copy hypr config/ subdirectory files
+    # Copy hypr config/ subdirectory files (runtime override modules for the
+    # Window Controls widget: config/window-effects.lua, config/gaps.lua)
+    mkdir -p "$CONFIG_DIR/hypr/config"
     if [ -d "$SCRIPT_DIR/config/hypr/config" ]; then
-        mkdir -p "$CONFIG_DIR/hypr/config"
         cp -r "$SCRIPT_DIR/config/hypr/config/"* "$CONFIG_DIR/hypr/config/"
         log "Installed hypr config subdirectory files"
-    fi
-
-    # Copy hypr templates
-    if [ -d "$SCRIPT_DIR/config/hypr/templates" ]; then
-        mkdir -p "$CONFIG_DIR/hypr/templates"
-        cp -r "$SCRIPT_DIR/config/hypr/templates/"* "$CONFIG_DIR/hypr/templates/"
-        log "Installed hypr templates"
     fi
 
     # Copy default_settings.json
@@ -599,7 +607,7 @@ install_matugen_config() {
 
     if [ -n "$first_wallpaper" ] && command -v matugen &>/dev/null; then
         log "Generating initial Matugen colors from $first_wallpaper..."
-        matugen image "$first_wallpaper" --source-color-index 0 || warn "Matugen color generation failed (non-fatal)"
+        bash "$CONFIG_DIR/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$first_wallpaper" || warn "Matugen color generation failed (non-fatal)"
     else
         if [ -z "$first_wallpaper" ]; then
             warn "No wallpapers found for Matugen color generation. Run matugen manually after setting a wallpaper."
@@ -968,13 +976,8 @@ main() {
     # Create directories
     create_directories
 
-    # Run initial monitor detection (sets max refresh rate per monitor)
-    log "Running initial monitor detection..."
-    bash "$CONFIG_DIR/hypr/scripts/detect-monitors.sh" --silent 2>/dev/null || true
-
-    # Run initial monitor detection (sets max refresh rate per monitor)
-    log "Running initial monitor detection..."
-    bash "$CONFIG_DIR/hypr/scripts/detect-monitors.sh" --silent 2>/dev/null || true
+    # The Lua config auto-detects all monitors at the highest refresh rate
+    # (mode "highrr"), so no monitor-detection script is needed anymore.
 
     # Enable core system services
     log "Enabling core system services..."
