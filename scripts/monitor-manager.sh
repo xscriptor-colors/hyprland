@@ -20,6 +20,34 @@ apply_monitor_lua() {
     hyprctl eval 'hl.monitor('"$1"')' >/dev/null 2>&1
 }
 
+# Current scale for a monitor: the persisted value when available, otherwise the
+# live one. Keeps layout changes from clobbering the scale chosen in scale-menu.
+get_scale() {
+    local mon="$1"
+    if [ -f "$HOME/.config/hypr/display-config" ]; then
+        local saved
+        saved=$(awk -F'|' -v m="$mon" '$1 == m {print $4; exit}' "$HOME/.config/hypr/display-config")
+        [ -n "$saved" ] && echo "$saved" && return
+    fi
+    get_monitors | python3 -c "
+import json, sys
+for m in json.load(sys.stdin):
+    if m['name'] == sys.argv[1]:
+        print(m.get('scale', 1))
+        break
+" "$mon" 2>/dev/null || echo "1"
+}
+
+# Persist the current monitor layout (name|x|y|scale) so monitors.lua restores
+# it on the next session instead of falling back to "auto".
+persist_monitors() {
+    get_monitors | python3 -c "
+import json, sys
+for m in json.load(sys.stdin):
+    print(f\"{m['name']}|{m['x']}|{m['y']}|{m['scale']}\")
+" > "$HOME/.config/hypr/display-config" 2>/dev/null || true
+}
+
 # ────────────────────────────────────────────────────────────────────────────
 # Get monitor info from hyprctl
 # ────────────────────────────────────────────────────────────────────────────
@@ -109,27 +137,27 @@ apply_position() {
 
     case "$layout" in
         "right")
-            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
-            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"${primary_w}x0\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0x0\", scale = $(get_scale "$primary") }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"${primary_w}x0\", scale = $(get_scale "$secondary") }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External on the RIGHT"
             ;;
         "left")
-            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
-            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"${secondary_w}x0\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0x0\", scale = $(get_scale "$secondary") }"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"${secondary_w}x0\", scale = $(get_scale "$primary") }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External on the LEFT"
             ;;
         "above")
-            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
-            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0${secondary_h}\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0x0\", scale = $(get_scale "$secondary") }"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0${secondary_h}\", scale = $(get_scale "$primary") }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External ABOVE"
             ;;
         "below")
-            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0x0\", scale = 1 }"
-            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0${primary_h}\", scale = 1 }"
+            apply_monitor_lua "{ output = \"$primary\", mode = \"preferred\", position = \"0x0\", scale = $(get_scale "$primary") }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"0${primary_h}\", scale = $(get_scale "$secondary") }"
             notify-send -t 3000 "󰍹 Monitor Layout" "External BELOW"
             ;;
         "mirror")
-            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"auto\", scale = 1, mirror = \"$primary\" }"
+            apply_monitor_lua "{ output = \"$secondary\", mode = \"preferred\", position = \"auto\", scale = $(get_scale "$secondary"), mirror = \"$primary\" }"
             notify-send -t 3000 "󰍹 Monitor Layout" "MIRRORED displays"
             ;;
         "only-primary")
@@ -141,6 +169,8 @@ apply_position() {
             notify-send -t 3000 "󰍹 Monitor Layout" "Only EXTERNAL ($secondary)"
             ;;
     esac
+
+    persist_monitors
 }
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -168,7 +198,8 @@ change_refresh_rate() {
         local mon rate
         mon=$(echo "$choice" | awk '{print $1}')
         rate=$(echo "$choice" | awk '{print $3}' | sed 's/Hz//')
-        apply_monitor_lua "{ output = \"$mon\", mode = \"preferred@${rate}\", position = \"auto\", scale = 1 }"
+        apply_monitor_lua "{ output = \"$mon\", mode = \"preferred@${rate}\", position = \"auto\", scale = $(get_scale "$mon") }"
+        persist_monitors
         notify-send -t 3000 "󰍹 Refresh Rate" "$mon set to ${rate}Hz"
     fi
 }

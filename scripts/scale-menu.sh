@@ -91,9 +91,12 @@ esac
 jq --argjson s "$scale" '.monitors = [ .monitors[] | .scale = $s ]' "$SETTINGS" > "${SETTINGS}.tmp" \
     && mv "${SETTINGS}.tmp" "$SETTINGS" || { rm -f "${SETTINGS}.tmp"; exit 1; }
 
-# Apply to every connected monitor through the Lua API.
+# Apply to every connected monitor through the Lua API, then persist the layout
+# to display-config so monitors.lua restores it on the next session instead of
+# falling back to the "auto" DPI scale (which resets to 125%/150% on login).
 if command -v hyprctl >/dev/null 2>&1; then
     hyprctl -j monitors 2>/dev/null | jq -r --argjson s "$scale" '.[] | "hyprctl eval '\''hl.monitor({ output = \"\(.name)\", mode = \"preferred\", position = \"\(.x)x\(.y)\", scale = \($s) })'\''"' | bash
+    hyprctl -j monitors 2>/dev/null | jq -r '.[] | "\(.name)|\(.x)|\(.y)|\(.scale)"' > "$(dirname "$SETTINGS")/display-config"
 fi
 
 if command -v notify-send >/dev/null 2>&1; then
