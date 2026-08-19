@@ -56,3 +56,5 @@ This ensures that:
 - Monitors capable of high refresh rates (120Hz, 144Hz, 165Hz, 240Hz, etc.) are automatically set to the maximum rate without manual configuration.
 - The same dotfiles work across machines with different monitor capabilities -- a 60Hz laptop panel gets 60Hz, a 144Hz panel gets 144Hz.
 - To use a static layout instead, uncomment and edit the per-monitor `hl.monitor({...})` entries inside `monitors.lua`.
+
+The scale/position chosen with the scale menu (SUPER + Z) or the monitor manager (SUPER + ALT + M) is written to `~/.config/hypr/display-config` by those scripts. `monitors.lua` reads that file on every session (one line per monitor, `name|x|y|scale`) and re-applies it, so a saved scale survives logins and monitor reconnects instead of snapping back to the `"auto"` DPI guess. Unknown monitors still fall back to the wildcard above.
