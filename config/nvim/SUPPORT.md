@@ -7,7 +7,7 @@ Please read the README.md and check out the documentation within the repository.
 
 ## 2. GitHub Issues
 If you have found a bug or have a feature request, please open an issue on our GitHub repository:
-https://github.com/xscriptor/nvim/issues
+https://github.com/xscriptor-colors/nvim/issues
 
 Before opening a new issue, please search existing issues to see if your problem has already been reported by someone else.
 

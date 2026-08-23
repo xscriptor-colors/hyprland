@@ -626,7 +626,7 @@ install_matugen_config() {
 install_hack_nerd_font() {
     log "Installing Hack Nerd Font..."
     local FONT_DIR="$HOME/.local/share/fonts"
-    local FONT_URL="https://raw.githubusercontent.com/xscriptor/terminal/main/assets/fonts/HackNerdFont/HackNerdFont-Regular.ttf"
+    local FONT_URL="https://raw.githubusercontent.com/xscriptor-colors/terminal/main/assets/fonts/HackNerdFont/HackNerdFont-Regular.ttf"
     local FONT_PATH="$FONT_DIR/HackNerdFont-Regular.ttf"
 
     mkdir -p "$FONT_DIR"
@@ -677,13 +677,13 @@ install_nvim_config() {
     echo ""
     prompt "Which Neovim config do you want to install?"
     echo -e "  ${CYAN}1)${NC} Bundled (config/nvim in this repo)"
-    echo -e "  ${CYAN}2)${NC} X Nvim (https://github.com/xscriptor/nvim)"
+    echo -e "  ${CYAN}2)${NC} X Nvim (https://github.com/xscriptor-colors/nvim)"
     echo -e "  ${CYAN}3)${NC} Skip"
     read -r nvim_choice
 
     case "$nvim_choice" in
         2)
-            log "Installing Neovim configuration from xscriptor/nvim..."
+            log "Installing Neovim configuration from xscriptor-colors/nvim..."
             if command -v git &>/dev/null; then
                 if [ -d "$NVIM_DEST" ]; then
                     warn "Existing nvim config found at $NVIM_DEST"
@@ -695,14 +695,14 @@ install_nvim_config() {
                     fi
                     rm -rf "$NVIM_DEST"
                 fi
-                git clone https://github.com/xscriptor/nvim.git "$NVIM_DEST" || {
-                    error "Failed to clone xscriptor/nvim."
+                git clone https://github.com/xscriptor-colors/nvim.git "$NVIM_DEST" || {
+                    error "Failed to clone xscriptor-colors/nvim."
                     return
                 }
-                log "Neovim configuration installed from xscriptor/nvim!"
+                log "Neovim configuration installed from xscriptor-colors/nvim!"
             else
                 warn "git not found. Cannot clone external repo."
-                warn "Install git and run: git clone https://github.com/xscriptor/nvim.git ~/.config/nvim"
+                warn "Install git and run: git clone https://github.com/xscriptor-colors/nvim.git ~/.config/nvim"
             fi
             ;;
         3)
