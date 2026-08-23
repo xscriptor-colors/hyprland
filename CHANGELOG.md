@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026-08-23]
+
+- Migrate all customizations to xscriptor-colors
+
 ## [2026-08-12]
 
 ### Added
@@ -53,7 +57,7 @@
 - `scripts/caching.sh` -- fixed invalid variable names when widget name contains hyphens.
 - `scripts/quickshell/MatugenColors.qml` -- added terminal-style dynamic colors (color0 through color15, background, foreground) derived from the Matugen palette.
 - `scripts/quickshell/TopBar.qml` -- added CPU/RAM pill in the system indicator bar; assigned distinct dynamic palette colors to each indicator (KB=color5, WiFi=color6, BT=color4, CPU/RAM=color1, Volume=color3).
-- `install.sh` -- install_nvim_config now asks whether to use bundled config, clone xscriptor/nvim, or skip; install_hack_nerd_font now copies font to /usr/share/fonts/ via sudo for SDDM.
+- `install.sh` -- install_nvim_config now asks whether to use bundled config, clone xscriptor-colors/nvim, or skip; install_hack_nerd_font now copies font to /usr/share/fonts/ via sudo for SDDM.
 
 ### Fixed
 - Monitor refresh rate resetting to 60Hz on systems that support higher rates. Root cause: `preferred` picks EDID default (60Hz) and `monitors.conf` was never sourced.

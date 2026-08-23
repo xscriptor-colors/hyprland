@@ -1,9 +1,9 @@
 <h1 align="center">X  Hyprland</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/xscriptor/hyprland?style=flat-square&color=blue" alt="License">
-  <img src="https://img.shields.io/github/last-commit/xscriptor/hyprland?style=flat-square&color=blueviolet" alt="Last Commit">
-  <img src="https://img.shields.io/github/repo-size/xscriptor/hyprland?style=flat-square&color=success" alt="Repo Size">
+  <img src="https://img.shields.io/github/license/xscriptor-colors/hyprland?style=flat-square&color=blue" alt="License">
+  <img src="https://img.shields.io/github/last-commit/xscriptor-colors/hyprland?style=flat-square&color=blueviolet" alt="Last Commit">
+  <img src="https://img.shields.io/github/repo-size/xscriptor-colors/hyprland?style=flat-square&color=success" alt="Repo Size">
   <img src="https://img.shields.io/badge/Hyprland-v0.53+-8A2BE2?style=flat-square" alt="Hyprland">
   <img src="https://img.shields.io/badge/Arch_Linux-supported-1793D1?style=flat-square&logo=arch-linux" alt="Arch">
   <img src="https://img.shields.io/badge/X_Linux-supported-000000?style=flat-square" alt="X Linux">
@@ -54,7 +54,7 @@
 
 ## Quick Install
 
-<pre><code>git clone https://github.com/xscriptor/hyprland.git
+<pre><code>git clone https://github.com/xscriptor-colors/hyprland.git
 cd hyprland
 chmod +x install.sh
 ./install.sh</code></pre>
@@ -141,18 +141,18 @@ chmod +x install.sh
 
 <h2 align="center" id="related-repos">Related Repos</h2>
 <ul>
-  <li><a href="https://github.com/xscriptor/terminal">Terminal </a> <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/terminal-bash.svg" /></li>
-  <li><a href="https://github.com/xscriptor/nvim">Nvim </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/file-text.svg"/></li>
-  <li><a href="https://github.com/xscriptor/jetbrains">Jetbrains </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/project.svg"/></li>
-  <li><a href="https://github.com/xscriptor/vscode">VSCode </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/vscode-insiders.svg"/></li>
-  <li><a href="https://github.com/xscriptor/obsidian">Obsidian </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/markdown.svg"/></li>
+  <li><a href="https://github.com/xscriptor-colors/terminal">Terminal </a> <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/terminal-bash.svg" /></li>
+  <li><a href="https://github.com/xscriptor-colors/nvim">Nvim </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/file-text.svg"/></li>
+  <li><a href="https://github.com/xscriptor-colors/jetbrains">Jetbrains </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/project.svg"/></li>
+  <li><a href="https://github.com/xscriptor-colors/vscode">VSCode </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/vscode-insiders.svg"/></li>
+  <li><a href="https://github.com/xscriptor-colors/obsidian">Obsidian </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/markdown.svg"/></li>
   <li><a href="https://github.com/xscriptor/xfetch">XFetch </a><img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/git-fetch.svg"/></li>
 </ul>
 
 <div id="x" align="center">
 <h2>X</h2>
 <p><em>Based on imperative-dots by ilyamiro -- adapted, extended, and customized</em></p>
-<a href="https://dev.xscriptor.com">
+<a href="https://xscriptor.io">
   <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/verified-filled.svg" width="24" alt="X Web" />
 </a>
  & 
