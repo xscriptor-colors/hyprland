@@ -1,6 +1,6 @@
 <h1 align="center"> NVIM </h1>
 
-Complete and modern Neovim configuration with essential plugins, LSP, DAP, formatting, linting, and custom themes with the same scheme than <em><a href="https://github.com/xscriptor/terminal"> terminal X repo</a>. </em>
+Complete and modern Neovim configuration with essential plugins, LSP, DAP, formatting, linting, and custom themes with the same scheme than <em><a href="https://github.com/xscriptor-colors/terminal"> terminal X repo</a>. </em>
 
 <h2><em>Index</em></h2>
 
@@ -129,7 +129,7 @@ vim.g.langmap_en = ""
 <div id="x" align="center">
 <h2>X</h2>
 
-<a href="https://dev.xscriptor.com">
+<a href="https://xscriptor.io">
   <img src="https://xscriptor.github.io/icons/icons/code/product-design/xsvg/verified-filled.svg" width="24" alt="X Web" />
 </a>
  & 

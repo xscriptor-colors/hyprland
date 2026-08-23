@@ -168,7 +168,7 @@ Item {
 
     Process {
         id: updateChecker
-        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
+        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor-colors/hyprland/modernizex/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -622,7 +622,7 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor/hyprland/modernizex/install.sh)\"'; fi";
+                            let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor-colors/hyprland/modernizex/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor-colors/hyprland/modernizex/install.sh)\"'; fi";
                             Quickshell.execDetached(["bash", "-c", cmd]);
                         }
                     }
@@ -980,7 +980,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/xscriptor/hyprland/tree/modernizex"]) 
+                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/xscriptor-colors/hyprland/tree/modernizex"]) 
                         }
                     }
 
@@ -1543,8 +1543,8 @@ Item {
 
                     Repeater {
                         model: [
-                            { name: "NixOS Config", icon: "", color: "blue", url: "https://github.com/xscriptor/hyprland" },
-                            { name: "Hyprland Config", icon: "󰣇", color: "mauve", url: "https://github.com/xscriptor/hyprland" },
+                            { name: "NixOS Config", icon: "", color: "blue", url: "https://github.com/xscriptor-colors/hyprland" },
+                            { name: "Hyprland Config", icon: "󰣇", color: "mauve", url: "https://github.com/xscriptor-colors/hyprland" },
                             { name: "Wallpapers", icon: "", color: "peach", url: "https://github.com/xscriptor/xwall" }
                         ]
 
