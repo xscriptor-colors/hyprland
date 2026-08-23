@@ -9,7 +9,7 @@
 ## Quick Install
 
 ```bash
-git clone https://github.com/xscriptor/hyprland.git
+git clone https://github.com/xscriptor-colors/hyprland.git
 cd hyprland
 chmod +x install.sh
 ./install.sh

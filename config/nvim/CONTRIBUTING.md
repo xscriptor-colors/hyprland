@@ -1,10 +1,10 @@
-# Contributing to xscriptor/nvim
+# Contributing to xscriptor-colors/nvim
 
 First off, thank you for considering contributing to this Neovim configuration! It's people like you that make Neovim such a great tool.
 
 ## Where do I go from here?
 
-If you've noticed a bug or have a feature request, make sure to check our issues (https://github.com/xscriptor/nvim/issues) to see if someone else in the community has already created a ticket. If not, go ahead and make one!
+If you've noticed a bug or have a feature request, make sure to check our issues (https://github.com/xscriptor-colors/nvim/issues) to see if someone else in the community has already created a ticket. If not, go ahead and make one!
 
 ## Fork & create a branch
 
