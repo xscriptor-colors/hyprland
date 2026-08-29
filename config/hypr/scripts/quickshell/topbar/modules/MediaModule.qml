@@ -1,156 +1,146 @@
 import QtQuick
 import Quickshell
+import "../../dock"
 
-Item {
+// Media — transparent island with album art + title + player controls.
+// Compact (vertical): album art only (or a music note) so the dock stays tiny.
+ModulePill {
     id: mod
-    required property var bar
-    required property var colors
-    required property bool zoneReady
-    required property int slotIndex
-    required property real effectiveBorderWidth
-    required property string effectiveBorderColor
-    required property bool unified
 
-    implicitWidth: box.width
-    implicitHeight: bar.barHeight
-    visible: box.width > 0 || box.opacity > 0
+    noFill: true
+    fullHeight: true
+    showState: bar.isMediaActive
 
-    Rectangle {
-        id: box
-        anchors.verticalCenter: parent.verticalCenter
-        color: "transparent"
-        radius: bar.pillRadius(bar.barHeight)
-        border.width: unified ? 0 : effectiveBorderWidth
-        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
-        height: bar.barHeight
-        clip: false
+    // --- horizontal: art + info + controls -------------------------------------
+    Row {
+        visible: mod.horizontal
+        spacing: bar.width < 1920 ? bar.s(10) : bar.s(16)
 
-        width: bar.isMediaActive ? innerMediaLayout.implicitWidth + bar.s(24) : 0
-        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-
-        opacity: bar.isMediaActive ? 1.0 : 0.0
-        Behavior on opacity { NumberAnimation { duration: 400 } }
-
-        Item {
-            id: mediaLayoutContainer
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: bar.s(12)
-            height: parent.height
-            width: innerMediaLayout.implicitWidth
-
-            opacity: bar.isMediaActive ? 1.0 : 0.0
-            transform: Translate {
-                x: bar.isMediaActive ? 0 : bar.s(-20)
-                Behavior on x { NumberAnimation { duration: 700; easing.type: Easing.OutQuint } }
-            }
-            Behavior on opacity { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
+        MouseArea {
+            id: mediaInfoMouse
+            width: infoLayout.width
+            height: bar.barHeight
+            hoverEnabled: true
+            onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle music"])
 
             Row {
-                id: innerMediaLayout
+                id: infoLayout
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: bar.width < 1920 ? bar.s(10) : bar.s(16)
+                spacing: bar.s(13)
 
-                MouseArea {
-                    id: mediaInfoMouse
-                    width: infoLayout.width
-                    height: innerMediaLayout.height
-                    hoverEnabled: true
-                    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle music"])
+                scale: mediaInfoMouse.containsMouse ? 1.02 : 1.0
+                Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
 
-                    Row {
-                        id: infoLayout
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: bar.s(13)
-
-                        scale: mediaInfoMouse.containsMouse ? 1.02 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-
-                        Rectangle {
-                            width: bar.s(32); height: bar.s(32); radius: bar.s(16); color: colors.surface1
-                            border.width: bar.musicData.status === "Playing" ? 1 : 0
-                            border.color: colors.mauve
-                            clip: true
-                            Image {
-                                anchors.fill: parent;
-                                source: bar.displayArtUrl || "";
-                                fillMode: Image.PreserveAspectCrop
-                            }
-
-                            Rectangle {
-                                anchors.fill: parent
-                                color: Qt.rgba(colors.mauve.r, colors.mauve.g, colors.mauve.b, 0.2)
-                            }
-                        }
-                        Column {
-                            spacing: -2
-                            anchors.verticalCenter: parent.verticalCenter
-                            property real maxColWidth: bar.width < 1920 ? bar.s(120) : bar.s(180)
-                            width: maxColWidth
-
-                            Text {
-                                text: bar.displayTitle;
-                                font.family: "Hack Nerd Font";
-                                font.weight: Font.Black;
-                                font.pixelSize: bar.s(13);
-                                color: colors.text;
-                                width: parent.width
-                                elide: Text.ElideRight;
-                            }
-                            Text {
-                                text: bar.displayTime;
-                                font.family: "Hack Nerd Font";
-                                font.weight: Font.Black;
-                                font.pixelSize: bar.s(13);
-                                color: colors.subtext0;
-                                width: parent.width
-                                elide: Text.ElideRight;
-                            }
-                        }
+                Rectangle {
+                    width: bar.s(32); height: bar.s(32); radius: bar.s(16); color: colors.surface1
+                    border.width: bar.musicData.status === "Playing" ? 1 : 0
+                    border.color: colors.mauve
+                    clip: true
+                    Image {
+                        anchors.fill: parent
+                        source: bar.displayArtUrl || ""
+                        fillMode: Image.PreserveAspectCrop
+                    }
+                    Rectangle {
+                        anchors.fill: parent
+                        color: Qt.rgba(colors.mauve.r, colors.mauve.g, colors.mauve.b, 0.2)
                     }
                 }
 
-                Row {
+                Column {
+                    spacing: -2
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: bar.width < 1920 ? bar.s(4) : bar.s(10)
-                    Item {
-                        width: bar.s(24); height: bar.s(24);
-                        anchors.verticalCenter: parent.verticalCenter
-                        Text {
-                            anchors.centerIn: parent; text: "󰒮"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(26);
-                            color: prevMouse.containsMouse ? colors.text : colors.overlay2;
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            scale: prevMouse.containsMouse ? 1.1 : 1.0
-                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                        }
-                        MouseArea { id: prevMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "previous"]); bar.refreshMusic(); } }
+                    property real maxColWidth: bar.width < 1920 ? bar.s(120) : bar.s(180)
+                    width: maxColWidth
+
+                    Text {
+                        text: bar.displayTitle
+                        font.family: "Hack Nerd Font"
+                        font.weight: Font.Black
+                        font.pixelSize: bar.s(13)
+                        color: colors.text
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
-                    Item {
-                        width: bar.s(28); height: bar.s(28);
-                        anchors.verticalCenter: parent.verticalCenter
-                        Text {
-                            anchors.centerIn: parent; text: bar.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(30);
-                            color: playMouse.containsMouse ? colors.green : colors.text;
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            scale: playMouse.containsMouse ? 1.15 : 1.0
-                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                        }
-                        MouseArea { id: playMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "play-pause"]); bar.refreshMusic(); } }
-                    }
-                    Item {
-                        width: bar.s(24); height: bar.s(24);
-                        anchors.verticalCenter: parent.verticalCenter
-                        Text {
-                            anchors.centerIn: parent; text: "󰒭"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(26);
-                            color: nextMouse.containsMouse ? colors.text : colors.overlay2;
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            scale: nextMouse.containsMouse ? 1.1 : 1.0
-                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                        }
-                        MouseArea { id: nextMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "next"]); bar.refreshMusic(); } }
+                    Text {
+                        text: bar.displayTime
+                        font.family: "Hack Nerd Font"
+                        font.weight: Font.Black
+                        font.pixelSize: bar.s(13)
+                        color: colors.subtext0
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
                 }
             }
+        }
+
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: bar.width < 1920 ? bar.s(4) : bar.s(10)
+
+            Item {
+                width: bar.s(24); height: bar.s(24)
+                anchors.verticalCenter: parent.verticalCenter
+                Text {
+                    anchors.centerIn: parent; text: "󰒮"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(26)
+                    color: prevMouse.containsMouse ? colors.text : colors.overlay2
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    scale: prevMouse.containsMouse ? 1.1 : 1.0
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                }
+                MouseArea { id: prevMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "previous"]); bar.refreshMusic(); } }
+            }
+            Item {
+                width: bar.s(28); height: bar.s(28)
+                anchors.verticalCenter: parent.verticalCenter
+                Text {
+                    anchors.centerIn: parent; text: bar.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(30)
+                    color: playMouse.containsMouse ? colors.green : colors.text
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    scale: playMouse.containsMouse ? 1.15 : 1.0
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                }
+                MouseArea { id: playMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "play-pause"]); bar.refreshMusic(); } }
+            }
+            Item {
+                width: bar.s(24); height: bar.s(24)
+                anchors.verticalCenter: parent.verticalCenter
+                Text {
+                    anchors.centerIn: parent; text: "󰒭"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(26)
+                    color: nextMouse.containsMouse ? colors.text : colors.overlay2
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    scale: nextMouse.containsMouse ? 1.1 : 1.0
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                }
+                MouseArea { id: nextMouse; hoverEnabled: true; anchors.fill: parent; onClicked: { Quickshell.execDetached(["playerctl", "next"]); bar.refreshMusic(); } }
+            }
+        }
+    }
+
+    // --- compact: album art (or note) ------------------------------------------
+    Rectangle {
+        visible: mod.compact
+        width: bar.pillWidth - bar.s(8)
+        height: bar.pillWidth - bar.s(8)
+        radius: bar.s(8)
+        color: colors.surface1
+        border.width: bar.musicData.status === "Playing" ? 1 : 0
+        border.color: colors.mauve
+        clip: true
+
+        Image {
+            anchors.fill: parent
+            source: bar.displayArtUrl || ""
+            fillMode: Image.PreserveAspectCrop
+        }
+        Text {
+            anchors.centerIn: parent
+            visible: !bar.displayArtUrl || bar.displayArtUrl === ""
+            text: bar.musicData.status === "Playing" ? "󰝚" : "󰝛"
+            font.family: "Hack Nerd Font"
+            font.pixelSize: bar.s(16)
+            color: colors.mauve
         }
     }
 }

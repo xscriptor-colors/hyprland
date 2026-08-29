@@ -459,7 +459,10 @@ install_dotfiles() {
           "$CONFIG_DIR/hypr/theme.conf" "$CONFIG_DIR/hypr/windowrules.conf" \
           "$CONFIG_DIR/hypr/workspaces.conf"
     rm -f "$CONFIG_DIR/hypr/config/gaps.conf" "$CONFIG_DIR/hypr/config/settings.conf" \
-          "$CONFIG_DIR/hypr/config/variables.conf" "$CONFIG_DIR/hypr/config/window-effects.conf"
+          "$CONFIG_DIR/hypr/config/variables.conf" "$CONFIG_DIR/hypr/config/window-effects.conf" \
+          "$CONFIG_DIR/hypr/config/autostart.conf" "$CONFIG_DIR/hypr/config/env.conf" \
+          "$CONFIG_DIR/hypr/config/keybindings.conf" "$CONFIG_DIR/hypr/config/monitors.conf" \
+          "$CONFIG_DIR/hypr/config/rules.conf"
     rm -f "$CONFIG_DIR/hypr/scripts/settings_watcher.sh" \
           "$CONFIG_DIR/hypr/scripts/detect-monitors.sh"
 

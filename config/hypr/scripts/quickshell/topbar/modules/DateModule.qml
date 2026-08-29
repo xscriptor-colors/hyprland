@@ -1,48 +1,26 @@
 import QtQuick
 import Quickshell
+import "../../dock"
 
-Item {
+// Date — soft base-tone island with the typewriter date. Hidden in vertical docks
+// (the clock already carries the day info; reduced = less clutter).
+ModulePill {
     id: mod
-    required property var bar
-    required property var colors
-    required property bool zoneReady
-    required property int slotIndex
-    required property real effectiveBorderWidth
-    required property string effectiveBorderColor
-    required property bool unified
 
-    implicitWidth: pill.width
-    implicitHeight: bar.barHeight
+    fullHeight: true
+    bgRole: "base"
+    bgHoverRole: "base"
+    idleRole: "subtext0"
+    padH: bar.s(18)
+    showState: mod.horizontal
 
-    Rectangle {
-        id: pill
-        anchors.verticalCenter: parent.verticalCenter
-        property bool isHovered: datePillMouse.containsMouse
-        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, bar.topbarPillSolid ? 1.0 : 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, bar.topbarPillSolid ? 1.0 : 0.75)) : "transparent")
-        radius: unified ? 0 : bar.pillRadius(bar.barHeight)
-        border.width: unified ? 0 : effectiveBorderWidth
-        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
-        height: bar.barHeight
-        width: dateText.implicitWidth + bar.s(36)
+    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
 
-        Behavior on color { ColorAnimation { duration: 250 } }
-        Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
-
-        Text {
-            id: dateText
-            anchors.centerIn: parent
-            text: bar.dateStr
-            font.family: "Hack Nerd Font"
-            font.pixelSize: bar.s(11)
-            font.weight: Font.Bold
-            color: colors.subtext0
-        }
-
-        MouseArea {
-            id: datePillMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
-        }
+    Text {
+        text: bar.dateStr
+        font.family: "Hack Nerd Font"
+        font.pixelSize: bar.s(11)
+        font.weight: Font.Bold
+        color: mod.contentColor
     }
 }
