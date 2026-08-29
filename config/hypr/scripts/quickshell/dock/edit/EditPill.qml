@@ -13,7 +13,7 @@ Rectangle {
     height: bar ? bar.s(34) : 34
     implicitWidth: txt.implicitWidth + (bar ? bar.s(24) : 24)
     radius: height / 2
-    color: (accentFill || active) ? bar.colors.accent : bar.colors.surface1
+    color: (accentFill || active) ? bar.colors.accent : bar.colors.surface2
     opacity: (accentFill || active) ? 1 : 0.55
     Behavior on color { ColorAnimation { duration: 150 } }
 

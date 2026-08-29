@@ -14,7 +14,7 @@ Rectangle {
     height: contentCol.implicitHeight + bar.s(20)
     radius: bar.s(16)
     color: bar.colors.surface0
-    border.width: bar.s(1); border.color: bar.colors.surface1
+    border.width: bar.s(1); border.color: bar.colors.surface2
 
     function patch(fn) { bar.applyDock(fn(bar.dock)); }
 
@@ -70,7 +70,7 @@ Rectangle {
             }
         }
 
-        Rectangle { Layout.fillWidth: true; height: bar.s(1); color: bar.colors.surface1; opacity: 0.4 }
+        Rectangle { Layout.fillWidth: true; height: bar.s(1); color: bar.colors.surface2; opacity: 0.4 }
 
         // module chips (wrap; card grows)
         Flow {
@@ -85,7 +85,7 @@ Rectangle {
                     width: chipRow.implicitWidth + bar.s(42)
                     height: bar.s(30)
                     radius: bar.s(8)
-                    color: modelData.enabled === false ? bar.colors.surface1 : bar.colors.surface2
+                    color: modelData.enabled === false ? bar.colors.surface2 : bar.colors.surface2
                     opacity: modelData.enabled === false ? 0.4 : 1
 
                     Row {
@@ -108,13 +108,13 @@ Rectangle {
                         spacing: bar.s(2)
                         Rectangle {
                             width: bar.s(18); height: bar.s(18); radius: bar.s(4)
-                            color: bar.colors.surface1
+                            color: bar.colors.surface2
                             Text { anchors.centerIn: parent; text: "◀"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(10); color: bar.colors.text }
                             MouseArea { anchors.fill: parent; onClicked: patch(d => DockLayout.moduleMove(d, modelData.id, -1)) }
                         }
                         Rectangle {
                             width: bar.s(18); height: bar.s(18); radius: bar.s(4)
-                            color: bar.colors.surface1
+                            color: bar.colors.surface2
                             Text { anchors.centerIn: parent; text: "▶"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(10); color: bar.colors.text }
                             MouseArea { anchors.fill: parent; onClicked: patch(d => DockLayout.moduleMove(d, modelData.id, 1)) }
                         }

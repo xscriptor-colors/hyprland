@@ -10,7 +10,7 @@ Rectangle {
     width: bar ? bar.s(46) : 46
     height: bar ? bar.s(26) : 26
     radius: height / 2
-    color: checked ? bar.colors.accent : bar.colors.surface1
+    color: checked ? bar.colors.accent : bar.colors.surface2
     Behavior on color { ColorAnimation { duration: 150 } }
 
     Rectangle {
