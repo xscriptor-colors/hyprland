@@ -15,18 +15,18 @@ import "edit"
 // Concentrates ALL dock customization: position, palette, appearance
 // (roundness/fill/thickness/gap/border) and the zone/module layout. Every edit
 // writes live to settings.json "dock"; the dock hot-reloads via its watcher.
+// Layout is RowLayout/ColumnLayout based so nothing ever overlaps.
 // ═══════════════════════════════════════════════════════════════════════════
 
 Item {
     id: root
 
-    // Widget contract (injected by Main.qml)
     property var notifModel: null
     property var liveNotifs: null
     property int layoutWidth: 0
     property int layoutHeight: 0
-    implicitWidth: layoutWidth > 0 ? layoutWidth : s(780)
-    implicitHeight: layoutHeight > 0 ? layoutHeight : s(680)
+    implicitWidth: layoutWidth > 0 ? layoutWidth : s(920)
+    implicitHeight: layoutHeight > 0 ? layoutHeight : s(740)
 
     property real uiScale: 1.0
     readonly property real baseScale: LayoutMath.getScale(Screen.width, Screen.height, root.uiScale)
@@ -87,24 +87,26 @@ Item {
         border.color: colors.surface1
         clip: true
 
-        Column {
+        ColumnLayout {
             anchors.fill: parent
             anchors.margins: s(16)
+            spacing: s(10)
 
-            Row {
-                width: parent.width
+            // ── header ────────────────────────────────────────────────────────
+            RowLayout {
+                Layout.fillWidth: true
                 spacing: s(12)
-                Text { anchors.verticalCenter: parent.verticalCenter; text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: s(24); color: colors.accent }
-                Text { anchors.verticalCenter: parent.verticalCenter; text: "Dock Editor"; font.family: "Hack Nerd Font"; font.pixelSize: s(20); font.weight: Font.Black; color: colors.text }
-                Item { width: parent.width - s(260); height: 1 }
-                Text { anchors.verticalCenter: parent.verticalCenter; text: "SUPER+SHIFT+D · ESC cerrar"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: colors.overlay1 }
+                Text { text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: s(24); color: colors.accent }
+                Text { text: "Dock Editor"; font.family: "Hack Nerd Font"; font.pixelSize: s(20); font.weight: Font.Black; color: colors.text }
+                Item { Layout.fillWidth: true; height: 1 }
+                Text { text: "SUPER+SHIFT+D · ESC cerrar"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: colors.overlay1 }
             }
 
-            Rectangle { width: parent.width; height: 1; color: colors.surface1; opacity: 0.5 }
+            Rectangle { Layout.fillWidth: true; height: 1; color: colors.surface1; opacity: 0.5 }
 
             Flickable {
-                width: parent.width
-                height: parent.height - s(86)
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 contentHeight: bodyCol.height
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
@@ -112,11 +114,12 @@ Item {
                 Column {
                     id: bodyCol
                     width: parent.width
-                    spacing: s(12)
+                    spacing: s(14)
 
                     // ── POSICIÓN ──────────────────────────────────────────────
                     SectionTitle { bar: root; text: "Posición" }
-                    Row {
+                    RowLayout {
+                        width: parent.width
                         spacing: s(8)
                         Repeater {
                             model: ["top", "bottom", "left", "right"]
@@ -134,16 +137,18 @@ Item {
                     SectionTitle { bar: root; text: "Paleta" }
                     Flow {
                         width: parent.width
-                        spacing: s(6)
+                        spacing: s(8)
                         Repeater {
                             model: root.palettes
                             delegate: Item {
                                 required property var modelData
                                 property var pal: modelData
-                                width: s(78)
-                                height: s(46)
+                                width: s(84)
+                                height: s(64)
+
                                 Rectangle {
-                                    anchors.fill: parent
+                                    width: parent.width
+                                    height: s(46)
                                     radius: s(10)
                                     color: root.dock.palette === pal.slug ? colors.accent : colors.surface1
                                     opacity: root.dock.palette === pal.slug ? 1 : 0.4
@@ -173,8 +178,8 @@ Item {
                                     }
                                 }
                                 Text {
-                                    anchors.top: parent.bottom
-                                    anchors.topMargin: s(2)
+                                    anchors.top: parent.top
+                                    anchors.topMargin: s(50)
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: pal.name
                                     font.family: "Hack Nerd Font"
@@ -188,24 +193,22 @@ Item {
                             }
                         }
                     }
-                    Item { width: 1; height: s(6) }
 
-                    // ── ASPECTO ───────────────────────────────────────────────
+                    // ── ASPECTO ────────────────────────────────────────────────
                     SectionTitle { bar: root; text: "Aspecto" }
                     Rectangle {
                         width: parent.width
-                        height: s(152)
                         radius: s(16)
                         color: colors.surface0
                         border.width: s(1); border.color: colors.surface1
-                        Column {
+                        ColumnLayout {
                             anchors.fill: parent
                             anchors.margins: s(12)
                             spacing: s(8)
-                            Row {
-                                width: parent.width
+                            RowLayout {
+                                Layout.fillWidth: true
                                 EditLabel { bar: root; text: "Redondez" }
-                                Item { width: parent.width - s(220); height: 1 }
+                                Item { Layout.fillWidth: true; height: 1 }
                                 Stepper {
                                     bar: root
                                     label: Math.round(root.dock.roundness * 100) + "%"
@@ -213,10 +216,10 @@ Item {
                                     onInc: root.applyDock(Object.assign({}, root.dock, { roundness: Math.min(1, +(root.dock.roundness + 0.1).toFixed(1)) }))
                                 }
                             }
-                            Row {
-                                width: parent.width
+                            RowLayout {
+                                Layout.fillWidth: true
                                 EditLabel { bar: root; text: "Grosor" }
-                                Item { width: parent.width - s(220); height: 1 }
+                                Item { Layout.fillWidth: true; height: 1 }
                                 Stepper {
                                     bar: root
                                     label: Math.round(root.dock.thickness) + "px"
@@ -224,10 +227,10 @@ Item {
                                     onInc: root.applyDock(Object.assign({}, root.dock, { thickness: Math.min(96, root.dock.thickness + 4) }))
                                 }
                             }
-                            Row {
-                                width: parent.width
+                            RowLayout {
+                                Layout.fillWidth: true
                                 EditLabel { bar: root; text: "Margen del borde" }
-                                Item { width: parent.width - s(220); height: 1 }
+                                Item { Layout.fillWidth: true; height: 1 }
                                 Stepper {
                                     bar: root
                                     label: Math.round(root.dock.edgeGap) + "px"
@@ -235,33 +238,33 @@ Item {
                                     onInc: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.min(24, root.dock.edgeGap + 2) }))
                                 }
                             }
-                            Row {
-                                width: parent.width
+                            RowLayout {
+                                Layout.fillWidth: true
                                 EditLabel { bar: root; text: "Relleno de islas" }
-                                Item { width: parent.width - s(220); height: 1 }
+                                Item { Layout.fillWidth: true; height: 1 }
                                 ToggleSwitch { bar: root; checked: root.dock.pillBg; onToggled: root.applyDock(Object.assign({}, root.dock, { pillBg: !root.dock.pillBg })) }
                             }
-                            Row {
-                                width: parent.width
+                            RowLayout {
+                                Layout.fillWidth: true
                                 EditLabel { bar: root; text: "Relleno sólido" }
-                                Item { width: parent.width - s(220); height: 1 }
+                                Item { Layout.fillWidth: true; height: 1 }
                                 ToggleSwitch { bar: root; checked: root.dock.pillSolid; onToggled: root.applyDock(Object.assign({}, root.dock, { pillSolid: !root.dock.pillSolid })) }
                             }
                         }
                     }
 
-                    // ── BORDE GLOBAL ──────────────────────────────────────────
+                    // ── BORDE GLOBAL ───────────────────────────────────────────
                     Rectangle {
                         width: parent.width
                         height: s(52)
                         radius: s(16)
                         color: colors.surface0
                         border.width: s(1); border.color: colors.surface1
-                        Row {
+                        RowLayout {
                             anchors.fill: parent
                             anchors.margins: s(12)
                             EditLabel { bar: root; text: "Borde (global)" }
-                            Item { width: parent.width - s(280); height: 1 }
+                            Item { Layout.fillWidth: true; height: 1 }
                             Stepper {
                                 bar: root
                                 label: Math.round(root.dock.borderWidth) + "px"
@@ -276,7 +279,7 @@ Item {
                         }
                     }
 
-                    // ── ZONAS ─────────────────────────────────────────────────
+                    // ── ZONAS ──────────────────────────────────────────────────
                     SectionTitle { bar: root; text: "Zonas" }
                     Repeater {
                         model: root.dock.zones
@@ -289,10 +292,12 @@ Item {
                         }
                     }
 
-                    Row {
+                    RowLayout {
+                        width: parent.width
                         spacing: s(8)
                         EditPill { bar: root; modelData: "add"; text: "+ Añadir zona"; accentFill: true; onActivated: root.applyDock(DockLayout.addZone(root.dock, "start")) }
                         EditPill { bar: root; modelData: "reset"; text: "Restaurar por defecto"; onActivated: root.applyDock(DockLayout.defaultDock()) }
+                        Item { Layout.fillWidth: true; height: 1 }
                     }
                     Item { width: 1; height: s(12) }
                 }

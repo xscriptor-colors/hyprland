@@ -1,7 +1,9 @@
 import QtQuick
+import QtQuick.Layouts
 import "../DockLayout.js" as DockLayout
 
-// Per-zone editor card for the DockEditor.
+// Per-zone editor card for the DockEditor. Height grows with content so the
+// module chips never overlap the rows below.
 Rectangle {
     id: zoneCard
     required property var bar
@@ -9,24 +11,25 @@ Rectangle {
     required property int zoneIndex
 
     width: parent ? parent.width : 0
-    height: bar.s(200)
+    height: contentCol.implicitHeight + bar.s(20)
     radius: bar.s(16)
     color: bar.colors.surface0
     border.width: bar.s(1); border.color: bar.colors.surface1
 
     function patch(fn) { bar.applyDock(fn(bar.dock)); }
 
-    Column {
+    ColumnLayout {
+        id: contentCol
         anchors.fill: parent
         anchors.margins: bar.s(10)
         spacing: bar.s(6)
 
         // header: id + align + unify + delete
-        Row {
-            width: parent.width
+        RowLayout {
+            Layout.fillWidth: true
             spacing: bar.s(8)
+
             Text {
-                anchors.verticalCenter: parent.verticalCenter
                 text: "◈ " + zoneData.id
                 font.family: "Hack Nerd Font"
                 font.pixelSize: bar.s(13)
@@ -36,7 +39,7 @@ Rectangle {
             EditPill { bar: zoneCard.bar; modelData: "start"; text: "Start"; active: zoneData.align === "start"; onActivated: patch(d => DockLayout.setZoneAlign(d, zoneData.id, "start")) }
             EditPill { bar: zoneCard.bar; modelData: "center"; text: "Center"; active: zoneData.align === "center"; onActivated: patch(d => DockLayout.setZoneAlign(d, zoneData.id, "center")) }
             EditPill { bar: zoneCard.bar; modelData: "end"; text: "End"; active: zoneData.align === "end"; onActivated: patch(d => DockLayout.setZoneAlign(d, zoneData.id, "end")) }
-            Item { width: parent.width - bar.s(280); height: 1 }
+            Item { Layout.fillWidth: true; height: 1 }
             EditLabel { bar: zoneCard.bar; text: "Unify" }
             ToggleSwitch { bar: zoneCard.bar; checked: zoneData.unify === true; onToggled: patch(d => DockLayout.setZoneUnify(d, zoneData.id, !zoneData.unify)) }
             Rectangle {
@@ -48,10 +51,12 @@ Rectangle {
         }
 
         // zone border
-        Row {
-            width: parent.width
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: bar.s(8)
+
             EditLabel { bar: zoneCard.bar; text: "Borde zona" }
-            Item { width: parent.width - bar.s(230); height: 1 }
+            Item { Layout.fillWidth: true; height: 1 }
             Stepper {
                 bar: zoneCard.bar
                 label: Math.round(zoneData.borderWidth || 0) + "px"
@@ -65,9 +70,11 @@ Rectangle {
             }
         }
 
-        // module chips
+        Rectangle { Layout.fillWidth: true; height: bar.s(1); color: bar.colors.surface1; opacity: 0.4 }
+
+        // module chips (wrap; card grows)
         Flow {
-            width: parent.width
+            Layout.fillWidth: true
             spacing: bar.s(5)
             Repeater {
                 model: zoneData.modules

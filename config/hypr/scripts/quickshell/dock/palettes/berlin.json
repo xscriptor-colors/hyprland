@@ -12,13 +12,15 @@
     "color6": "#cccccc",
     "color7": "#ffffff",
     "color8": "#333333",
-    "color9": "#bbbbbb",
-    "color10": "#dddddd",
-    "color11": "#ffffff",
-    "color12": "#aaaaaa",
-    "color13": "#cccccc",
-    "color14": "#eeeeee",
+    "color9": "#999999",
+    "color10": "#bbbbbb",
+    "color11": "#dddddd",
+    "color12": "#888888",
+    "color13": "#aaaaaa",
+    "color14": "#cccccc",
     "color15": "#ffffff"
   },
+  "background": "#000000",
+  "foreground": "#cccccc",
   "roles": {}
 }

@@ -15,9 +15,9 @@
  },
  {
   "slug": "bogota",
-  "name": "Bogotá",
+  "name": "Bogota",
   "colors": [
-   "#222222",
+   "#200b0a",
    "#fc618d",
    "#7bd88f",
    "#ffed89",
@@ -31,21 +31,21 @@
   "slug": "helsinki",
   "name": "Helsinki",
   "colors": [
-   "#c0bbae",
+   "#f8fafe",
    "#1faa9e",
    "#733d9a",
    "#2e70ad",
    "#b55a0f",
    "#3e9d21",
    "#bd4c3d",
-   "#191919"
+   "#544d40"
   ]
  },
  {
   "slug": "lahabana",
   "name": "Lahabana",
   "colors": [
-   "#363537",
+   "#19191a",
    "#fc618d",
    "#7bd88f",
    "#e5ff9d",
@@ -59,27 +59,27 @@
   "slug": "london",
   "name": "London",
   "colors": [
-   "#000000",
+   "#ffffff",
    "#333333",
    "#444444",
    "#555555",
    "#666666",
    "#777777",
    "#888888",
-   "#999999"
+   "#333333"
   ]
  },
  {
   "slug": "madrid",
   "name": "Madrid",
   "colors": [
-   "#333333",
-   "#cc0033",
-   "#009933",
-   "#b8860b",
-   "#0099cc",
-   "#6633cc",
-   "#0099cc",
+   "#fafafa",
+   "#990026",
+   "#007a28",
+   "#8a6408",
+   "#007a9e",
+   "#4d2699",
+   "#007a9e",
    "#1a1a1a"
   ]
  },
@@ -88,12 +88,12 @@
   "name": "Miami",
   "colors": [
    "#000000",
-   "#FF4C8B",
-   "#7FFFD4",
-   "#FFD84C",
-   "#00FFA8",
-   "#D36CFF",
-   "#47CFFF",
+   "#ff4c8b",
+   "#7fffd4",
+   "#ffd84c",
+   "#00ffa8",
+   "#d36cff",
+   "#47cfff",
    "#f7f1ff"
   ]
  },
@@ -115,49 +115,35 @@
   "slug": "paris",
   "name": "Paris",
   "colors": [
-   "#222222",
+   "#1a0a30",
    "#fc618d",
    "#7bd88f",
    "#fce566",
    "#a3f3ff",
    "#c4bdff",
    "#a3f3ff",
-   "#f7f1ff"
+   "#1a0a30"
   ]
  },
  {
   "slug": "praha",
   "name": "Praha",
   "colors": [
-   "#1A1A1A",
-   "#FF5555",
-   "#B8E6A0",
-   "#FFE4A3",
-   "#BD93F9",
-   "#FF9AA2",
-   "#8BE9FD",
-   "#FFFFFF"
-  ]
- },
- {
-  "slug": "seul",
-  "name": "Seul",
-  "colors": [
-   "#1b1b1bff",
-   "#FF4C8B",
-   "#7FFFD4",
-   "#FFD84C",
-   "#00FFA8",
-   "#D36CFF",
-   "#47CFFF",
-   "#f7f1ff"
+   "#1a1a1a",
+   "#ff5555",
+   "#b8e6a0",
+   "#ffe4a3",
+   "#bd93f9",
+   "#ff9aa2",
+   "#8be9fd",
+   "#ffffff"
   ]
  },
  {
   "slug": "tokio",
   "name": "Tokio",
   "colors": [
-   "#363537",
+   "#1c1c1d",
    "#fc618d",
    "#7bd88f",
    "#fce566",
@@ -171,7 +157,7 @@
   "slug": "x",
   "name": "X",
   "colors": [
-   "#363537",
+   "#0a0a0a",
    "#fc618d",
    "#7bd88f",
    "#fce566",

@@ -112,21 +112,22 @@ Item {
         root.color14 = b.color14 || root.color14;
         root.color15 = b.color15 || root.color15;
 
-        // Backgrounds — always derived so light/dark themes keep sane contrast.
-        root.background = root.color0;
-        root.foreground = root.color7;
-        root.base   = root.color0;
-        root.mantle = root.mix(root.color0, "#000000", 0.15);
-        root.crust  = root.mix(root.color0, "#000000", 0.30);
-        root.text   = root.color7;
-        root.subtext0 = root.mix(root.color7, root.color0, 0.20);
-        root.subtext1 = root.mix(root.color7, root.color0, 0.10);
-        root.surface0 = root.mix(root.color0, root.color7, 0.06);
-        root.surface1 = root.mix(root.color0, root.color7, 0.12);
-        root.surface2 = root.mix(root.color0, root.color7, 0.20);
-        root.overlay0 = root.mix(root.color7, root.color0, 0.45);
-        root.overlay1 = root.mix(root.color7, root.color0, 0.35);
-        root.overlay2 = root.mix(root.color7, root.color0, 0.25);
+        // Backgrounds — prefer the palette's explicit background/foreground
+        // (they can differ from color0/color7), derive everything else from them.
+        root.background = b.background || root.color0;
+        root.foreground = b.foreground || root.color7;
+        root.base   = root.background;
+        root.mantle = root.mix(root.base, "#000000", 0.15);
+        root.crust  = root.mix(root.base, "#000000", 0.30);
+        root.text   = root.foreground;
+        root.subtext0 = root.mix(root.text, root.base, 0.20);
+        root.subtext1 = root.mix(root.text, root.base, 0.10);
+        root.surface0 = root.mix(root.base, root.text, 0.06);
+        root.surface1 = root.mix(root.base, root.text, 0.12);
+        root.surface2 = root.mix(root.base, root.text, 0.20);
+        root.overlay0 = root.mix(root.text, root.base, 0.45);
+        root.overlay1 = root.mix(root.text, root.base, 0.35);
+        root.overlay2 = root.mix(root.text, root.base, 0.25);
 
         // Accents — mapped from base-16, overridable per palette.
         root.red     = root.color1;
