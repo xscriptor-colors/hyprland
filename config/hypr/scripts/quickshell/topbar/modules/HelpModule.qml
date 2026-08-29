@@ -1,53 +1,25 @@
 import QtQuick
 import Quickshell
+import "../../dock"
 
-Item {
+// CUSTOMIZATION HOOK: action / icon / colors can be overridden from the mega menu
+// via future dock.modules.help.{icon,action,accent}. Idle/hover roles are declared
+// here as the defaults.
+ModulePill {
     id: mod
-    required property var bar
-    required property var colors
-    required property bool zoneReady
-    required property int slotIndex
-    required property real effectiveBorderWidth
-    required property string effectiveBorderColor
-    required property bool unified
 
-    implicitWidth: pill.width
-    implicitHeight: bar.barHeight
-    visible: pill.width > 0 || pill.opacity > 0
+    padH: bar.s(6)
+    idleRole: "text"
+    hoverRole: "teal"
+    showState: bar.showHelpIcon
 
-    Rectangle {
-        id: pill
-        anchors.verticalCenter: parent.verticalCenter
-        property bool isHovered: helpMouse.containsMouse
-        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, bar.topbarPillSolid ? 1.0 : 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, bar.topbarPillSolid ? 1.0 : 0.4)) : "transparent")
-        radius: unified ? 0 : bar.pillRadius(bar.pillHeight)
-        border.width: unified ? 0 : effectiveBorderWidth
-        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
+    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle guide"])
 
-        property real targetWidth: bar.showHelpIcon ? bar.s(34) : 0
-        width: targetWidth
-        height: bar.pillHeight
-        opacity: bar.showHelpIcon ? 1.0 : 0.0
-        clip: true
-
-        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-        Behavior on opacity { NumberAnimation { duration: 300 } }
+    Text {
+        text: "󰅖"
+        font.family: "Hack Nerd Font"
+        font.pixelSize: bar.s(22)
+        color: mod.contentColor
         Behavior on color { ColorAnimation { duration: 200 } }
-
-        Text {
-            anchors.centerIn: parent
-            text: "󰅖"
-            font.family: "Hack Nerd Font"; font.pixelSize: bar.s(22)
-            color: pill.isHovered ? colors.teal : colors.text
-            Behavior on color { ColorAnimation { duration: 200 } }
-            scale: pill.isHovered ? 1.15 : 1.0
-            Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-        }
-        MouseArea {
-            id: helpMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle guide"])
-        }
     }
 }

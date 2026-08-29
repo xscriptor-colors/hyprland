@@ -50,6 +50,7 @@ hl.bind(mod .. "I", run("bash " .. scripts .. "/qs_manager.sh", "toggle system-m
 hl.bind(mod .. "O", run("bash " .. scripts .. "/qs_manager.sh", "toggle rss-reader"))
 hl.bind(mod .. "apostrophe", run("bash " .. scripts .. "/qs_manager.sh", "toggle file-search"))
 hl.bind(mod .. "SHIFT + B", run("bash " .. scripts .. "/qs_manager.sh", "toggle window-controls"))
+hl.bind(mod .. "SHIFT + D", run("bash " .. scripts .. "/qs_manager.sh", "toggle dock-editor"))
 hl.bind(mod .. "R", run(scripts .. "/reload.sh"))
 
 -- ┌───────────────────────────────────────────────────────────────────────────┐

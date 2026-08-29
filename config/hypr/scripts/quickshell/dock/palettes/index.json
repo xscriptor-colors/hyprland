@@ -1,0 +1,184 @@
+[
+ {
+  "slug": "berlin",
+  "name": "Berlin",
+  "colors": [
+   "#000000",
+   "#999999",
+   "#bbbbbb",
+   "#dddddd",
+   "#888888",
+   "#aaaaaa",
+   "#cccccc",
+   "#ffffff"
+  ]
+ },
+ {
+  "slug": "bogota",
+  "name": "Bogotá",
+  "colors": [
+   "#222222",
+   "#fc618d",
+   "#7bd88f",
+   "#ffed89",
+   "#47e6ff",
+   "#ff9999",
+   "#47e6ff",
+   "#f7f1ff"
+  ]
+ },
+ {
+  "slug": "helsinki",
+  "name": "Helsinki",
+  "colors": [
+   "#c0bbae",
+   "#1faa9e",
+   "#733d9a",
+   "#2e70ad",
+   "#b55a0f",
+   "#3e9d21",
+   "#bd4c3d",
+   "#191919"
+  ]
+ },
+ {
+  "slug": "lahabana",
+  "name": "Lahabana",
+  "colors": [
+   "#363537",
+   "#fc618d",
+   "#7bd88f",
+   "#e5ff9d",
+   "#fd9353",
+   "#948ae3",
+   "#5ad4e6",
+   "#f7f1ff"
+  ]
+ },
+ {
+  "slug": "london",
+  "name": "London",
+  "colors": [
+   "#000000",
+   "#333333",
+   "#444444",
+   "#555555",
+   "#666666",
+   "#777777",
+   "#888888",
+   "#999999"
+  ]
+ },
+ {
+  "slug": "madrid",
+  "name": "Madrid",
+  "colors": [
+   "#333333",
+   "#cc0033",
+   "#009933",
+   "#b8860b",
+   "#0099cc",
+   "#6633cc",
+   "#0099cc",
+   "#1a1a1a"
+  ]
+ },
+ {
+  "slug": "miami",
+  "name": "Miami",
+  "colors": [
+   "#000000",
+   "#FF4C8B",
+   "#7FFFD4",
+   "#FFD84C",
+   "#00FFA8",
+   "#D36CFF",
+   "#47CFFF",
+   "#f7f1ff"
+  ]
+ },
+ {
+  "slug": "oslo",
+  "name": "Oslo",
+  "colors": [
+   "#3f4451",
+   "#e05561",
+   "#8cc265",
+   "#d18f52",
+   "#4aa5f0",
+   "#c162de",
+   "#42b3c2",
+   "#e6e6e6"
+  ]
+ },
+ {
+  "slug": "paris",
+  "name": "Paris",
+  "colors": [
+   "#222222",
+   "#fc618d",
+   "#7bd88f",
+   "#fce566",
+   "#a3f3ff",
+   "#c4bdff",
+   "#a3f3ff",
+   "#f7f1ff"
+  ]
+ },
+ {
+  "slug": "praha",
+  "name": "Praha",
+  "colors": [
+   "#1A1A1A",
+   "#FF5555",
+   "#B8E6A0",
+   "#FFE4A3",
+   "#BD93F9",
+   "#FF9AA2",
+   "#8BE9FD",
+   "#FFFFFF"
+  ]
+ },
+ {
+  "slug": "seul",
+  "name": "Seul",
+  "colors": [
+   "#1b1b1bff",
+   "#FF4C8B",
+   "#7FFFD4",
+   "#FFD84C",
+   "#00FFA8",
+   "#D36CFF",
+   "#47CFFF",
+   "#f7f1ff"
+  ]
+ },
+ {
+  "slug": "tokio",
+  "name": "Tokio",
+  "colors": [
+   "#363537",
+   "#fc618d",
+   "#7bd88f",
+   "#fce566",
+   "#fd9353",
+   "#948ae3",
+   "#5ad4e6",
+   "#f7f1ff"
+  ]
+ },
+ {
+  "slug": "x",
+  "name": "X",
+  "colors": [
+   "#363537",
+   "#fc618d",
+   "#7bd88f",
+   "#fce566",
+   "#fd9353",
+   "#948ae3",
+   "#5ad4e6",
+   "#f7f1ff"
+  ]
+ }
+]

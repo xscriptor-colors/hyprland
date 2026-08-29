@@ -122,6 +122,8 @@ chmod +x install.sh
   <li><a href="docs/quick-reference.md">Quick Reference</a> -- All keybindings, widgets, and scripts at a glance</li>
   <li><a href="docs/quickshell-widgets.md">QuickShell Widgets</a> -- Widget architecture, IPC system, and QML components</li>
   <li><a href="docs/scripts.md">Scripts</a> -- All shell scripts and daemons</li>
+  <li><a href="docs/dock.md">Dock System</a> -- Position-agnostic dock: architecture, config schema, customization hooks</li>
+  <li><a href="docs/dock-modules.md">Dock Modules</a> -- Module contract, ModulePill API, adding/customizing modules</li>
   <li><a href="docs/hyprland-config.md">Hyprland Configuration</a> -- Modular config structure and dynamic reload</li>
   <li><a href="docs/matugen-integration.md">Matugen Integration</a> -- Dynamic color pipeline</li>
   <li><a href="docs/screenshot-recording.md">Screenshots &amp; Recording</a> -- Capture system with virtual audio</li>
