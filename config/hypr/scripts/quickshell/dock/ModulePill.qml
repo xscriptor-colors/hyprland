@@ -96,6 +96,8 @@ Item {
         readonly property color idleBg: {
             if (root.noFill || root.unified || !bar.topbarPillBg) return "transparent";
             if (accentVisible) return root.hasAccentColor ? root.accentColor : (colors[root.accentRole] || colors.surface1);
+            // barBg: standard islands become transparent and float on the bar strip.
+            if (bar.barBg) return "transparent";
             let role = root.bgRole;
             let c = colors[role] || colors.surface0;
             return Qt.rgba(c.r, c.g, c.b, bar.topbarPillSolid ? 1.0 : (role === "surface0" ? 0.4 : 0.6));
@@ -103,6 +105,11 @@ Item {
         readonly property color hoverBg: {
             if (root.noFill || root.unified || !bar.topbarPillBg) return "transparent";
             if (accentVisible) return root.hasAccentColor ? root.accentColor : (colors[root.accentRole] || colors.surface1);
+            if (bar.barBg) {
+                // subtle hover highlight floating on the bar strip
+                let c = colors.surface1;
+                return Qt.rgba(c.r, c.g, c.b, 0.28);
+            }
             let role = root.bgHoverRole;
             let c = colors[role] || colors.surface1;
             return Qt.rgba(c.r, c.g, c.b, bar.topbarPillSolid ? 1.0 : (role === "surface1" ? 0.6 : 0.9));

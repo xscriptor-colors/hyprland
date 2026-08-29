@@ -3,14 +3,14 @@ import QtQuick.Layouts
 import "../DockLayout.js" as DockLayout
 
 // Per-zone editor card for the DockEditor. Height grows with content so the
-// module chips never overlap the rows below.
+// module chips never overlap the rows below. Width is managed by the parent
+// layout (Layout.fillWidth) so it never fights the container.
 Rectangle {
     id: zoneCard
     required property var bar
     required property var zoneData
     required property int zoneIndex
 
-    width: parent ? parent.width : 0
     height: contentCol.implicitHeight + bar.s(20)
     radius: bar.s(16)
     color: bar.colors.surface0
