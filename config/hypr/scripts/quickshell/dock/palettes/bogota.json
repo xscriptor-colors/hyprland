@@ -1,9 +1,9 @@
 {
-  "name": "Bogotá",
+  "name": "Bogota",
   "slug": "bogota",
   "author": "xscriptor",
   "base16": {
-    "color0": "#222222",
+    "color0": "#200b0a",
     "color1": "#fc618d",
     "color2": "#7bd88f",
     "color3": "#ffed89",
@@ -20,5 +20,7 @@
     "color14": "#47e6ff",
     "color15": "#f7f1ff"
   },
+  "background": "#200b0a",
+  "foreground": "#f7f1ff",
   "roles": {}
 }

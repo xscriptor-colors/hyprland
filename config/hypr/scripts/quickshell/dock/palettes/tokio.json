@@ -3,7 +3,7 @@
   "slug": "tokio",
   "author": "xscriptor",
   "base16": {
-    "color0": "#363537",
+    "color0": "#1c1c1d",
     "color1": "#fc618d",
     "color2": "#7bd88f",
     "color3": "#fce566",
@@ -11,7 +11,7 @@
     "color5": "#948ae3",
     "color6": "#5ad4e6",
     "color7": "#f7f1ff",
-    "color8": "#69676c",
+    "color8": "#1c1c1d",
     "color9": "#fc618d",
     "color10": "#7bd88f",
     "color11": "#fce566",
@@ -20,5 +20,7 @@
     "color14": "#5ad4e6",
     "color15": "#f7f1ff"
   },
+  "background": "#1c1c1d",
+  "foreground": "#f7f1ff",
   "roles": {}
 }
