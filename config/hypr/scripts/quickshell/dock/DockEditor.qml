@@ -12,10 +12,10 @@ import "edit"
 // ═══════════════════════════════════════════════════════════════════════════
 // DockEditor — the dock mega menu (SUPER+SHIFT+D).
 //
-// Concentrates ALL dock customization: position, palette, appearance
-// (roundness/fill/thickness/gap/border) and the zone/module layout. Every edit
-// writes live to settings.json "dock"; the dock hot-reloads via its watcher.
-// Layout is RowLayout/ColumnLayout based so nothing ever overlaps.
+// Two-pane settings UI (sidebar navigation + content). Layout uses explicit
+// anchors with a fixed-width sidebar (no nested panel RowLayout — that caused
+// the content pane to collapse to 4px). Every edit writes live to settings.json
+// "dock"; the dock hot-reloads via its own watcher.
 // ═══════════════════════════════════════════════════════════════════════════
 
 Item {
@@ -26,7 +26,7 @@ Item {
     property int layoutWidth: 0
     property int layoutHeight: 0
     implicitWidth: layoutWidth > 0 ? layoutWidth : s(920)
-    implicitHeight: layoutHeight > 0 ? layoutHeight : s(740)
+    implicitHeight: layoutHeight > 0 ? layoutHeight : s(720)
 
     property real uiScale: 1.0
     readonly property real baseScale: LayoutMath.getScale(Screen.width, Screen.height, root.uiScale)
@@ -38,6 +38,7 @@ Item {
     property var dock: DockLayout.defaultDock()
     property var palettes: ([])
     property bool _dirty: false
+    property int currentSection: 0
 
     Timer { id: saveTimer; interval: 220; onTriggered: flushSave() }
     function markDirty() { _dirty = true; saveTimer.restart(); }
@@ -78,228 +79,308 @@ Item {
         }
     }
 
+    // ════ PANEL SHELL ════
     Rectangle {
         anchors.fill: parent
         anchors.margins: s(10)
         radius: s(24)
-        color: Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.94)
+        color: Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.95)
         border.width: s(1)
         border.color: colors.surface1
         clip: true
 
-        ColumnLayout {
+        Item {
             anchors.fill: parent
-            anchors.margins: s(16)
-            spacing: s(10)
+            anchors.margins: s(14)
 
-            // ── header ────────────────────────────────────────────────────────
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: s(12)
-                Text { text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: s(24); color: colors.accent }
-                Text { text: "Dock Editor"; font.family: "Hack Nerd Font"; font.pixelSize: s(20); font.weight: Font.Black; color: colors.text }
-                Item { Layout.fillWidth: true; height: 1 }
-                Text { text: "SUPER+SHIFT+D · ESC cerrar"; font.family: "Hack Nerd Font"; font.pixelSize: s(11); color: colors.overlay1 }
+            // ── SIDEBAR (fixed width, anchored left) ──────────────────────────
+            Column {
+                id: sideBar
+                width: s(180)
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                spacing: s(6)
+
+                Row {
+                    width: parent.width
+                    spacing: s(8)
+                    Text { text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: s(22); anchors.verticalCenter: parent.verticalCenter; color: colors.accent }
+                    Text { text: "Dock"; font.family: "Hack Nerd Font"; font.pixelSize: s(17); font.weight: Font.Black; anchors.verticalCenter: parent.verticalCenter; color: colors.text }
+                }
+                Rectangle { width: parent.width; height: 1; color: colors.surface1; opacity: 0.5 }
+
+                NavItem { width: parent.width; bar: root; icon: "󰁪"; label: "Posición"; active: currentSection === 0; onActivated: root.currentSection = 0 }
+                NavItem { width: parent.width; bar: root; icon: "󰨷"; label: "Paleta"; active: currentSection === 1; onActivated: root.currentSection = 1 }
+                NavItem { width: parent.width; bar: root; icon: "󰦖"; label: "Aspecto"; active: currentSection === 2; onActivated: root.currentSection = 2 }
+                NavItem { width: parent.width; bar: root; icon: "󰕪"; label: "Zonas"; active: currentSection === 3; onActivated: root.currentSection = 3 }
+
+                Rectangle { width: parent.width; height: 1; color: colors.surface1; opacity: 0.5 }
+                Text {
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: "SUPER+SHIFT+D\nESC para cerrar"
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: s(10)
+                    color: colors.overlay1
+                }
             }
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: colors.surface1; opacity: 0.5 }
+            // divider between sidebar and content
+            Rectangle {
+                width: 1
+                anchors.left: sideBar.right
+                anchors.leftMargin: s(14)
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                color: colors.surface1
+                opacity: 0.5
+            }
 
-            Flickable {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                contentHeight: bodyCol.height
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
+            // ── CONTENT (anchored right of sidebar) ───────────────────────────
+            Item {
+                id: contentArea
+                anchors.left: sideBar.right
+                anchors.leftMargin: s(28)
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
 
-                Column {
-                    id: bodyCol
-                    width: parent.width
-                    spacing: s(14)
+                Flickable {
+                    id: flick
+                    anchors.fill: parent
+                    contentHeight: contentPane.height
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
 
-                    // ── POSICIÓN ──────────────────────────────────────────────
-                    SectionTitle { bar: root; text: "Posición" }
-                    RowLayout {
+                    Column {
+                        id: contentPane
                         width: parent.width
-                        spacing: s(8)
-                        Repeater {
-                            model: ["top", "bottom", "left", "right"]
-                            delegate: EditPill {
-                                required property string modelData
-                                bar: root
-                                text: modelData === "top" ? "↑ Arriba" : modelData === "bottom" ? "↓ Abajo" : modelData === "left" ? "← Izquierda" : "→ Derecha"
-                                active: root.dock.position === modelData
-                                onActivated: root.applyDock(Object.assign({}, root.dock, { position: modelData }))
+                        spacing: s(14)
+
+                        // ════ SECCIÓN: POSICIÓN ════
+                        Column {
+                            id: posSection
+                            width: parent.width
+                            visible: currentSection === 0
+                            spacing: s(10)
+
+                            SectionTitle { bar: root; text: "Posición de la barra" }
+
+                            Row {
+                                width: parent.width
+                                spacing: s(8)
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "top";    label: "Arriba";    glyph: "↑" }
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "bottom"; label: "Abajo";     glyph: "↓" }
+                            }
+                            Row {
+                                width: parent.width
+                                spacing: s(8)
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "left";   label: "Izquierda"; glyph: "←" }
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "right";  label: "Derecha";   glyph: "→" }
                             }
                         }
-                    }
 
-                    // ── PALETA ────────────────────────────────────────────────
-                    SectionTitle { bar: root; text: "Paleta" }
-                    Flow {
-                        width: parent.width
-                        spacing: s(8)
-                        Repeater {
-                            model: root.palettes
-                            delegate: Item {
-                                required property var modelData
-                                property var pal: modelData
-                                width: s(84)
-                                height: s(64)
-
-                                Rectangle {
-                                    width: parent.width
-                                    height: s(46)
-                                    radius: s(10)
-                                    color: root.dock.palette === pal.slug ? colors.accent : colors.surface1
-                                    opacity: root.dock.palette === pal.slug ? 1 : 0.4
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        anchors.margins: s(2)
-                                        radius: s(8)
-                                        color: colors.base
-                                        Column {
-                                            anchors.centerIn: parent
-                                            spacing: s(3)
-                                            Row {
-                                                spacing: s(3)
-                                                Repeater {
-                                                    model: [0, 1, 2]
-                                                    delegate: Rectangle { width: s(14); height: s(9); radius: s(3); color: pal.colors[0] }
+                        // ════ SECCIÓN: PALETA ════
+                        Column {
+                            width: parent.width
+                            visible: currentSection === 1
+                            spacing: s(10)
+                            SectionTitle { bar: root; text: "Paleta de colores" }
+                            Flow {
+                                width: parent.width
+                                spacing: s(8)
+                                Repeater {
+                                    model: root.palettes
+                                    delegate: Item {
+                                        required property var modelData
+                                        property var pal: modelData
+                                        width: s(92)
+                                        height: s(74)
+                                        Rectangle {
+                                            width: parent.width
+                                            height: s(56)
+                                            radius: s(12)
+                                            color: root.dock.palette === pal.slug ? colors.accent : colors.surface1
+                                            opacity: root.dock.palette === pal.slug ? 1 : 0.45
+                                            Behavior on color { ColorAnimation { duration: 150 } }
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                anchors.margins: s(2)
+                                                radius: s(10)
+                                                color: colors.base
+                                                Column {
+                                                    anchors.centerIn: parent
+                                                    spacing: s(3)
+                                                    Row {
+                                                        spacing: s(3)
+                                                        Repeater {
+                                                            model: [0, 1, 2]
+                                                            delegate: Rectangle { width: s(15); height: s(10); radius: s(3); color: pal.colors[0] }
+                                                        }
+                                                    }
+                                                    Row {
+                                                        spacing: s(3)
+                                                        Repeater {
+                                                            model: [0, 1, 2]
+                                                            delegate: Rectangle { width: s(15); height: s(10); radius: s(3); color: pal.colors[1 + index] }
+                                                        }
+                                                    }
                                                 }
                                             }
-                                            Row {
-                                                spacing: s(3)
-                                                Repeater {
-                                                    model: [0, 1, 2]
-                                                    delegate: Rectangle { width: s(14); height: s(9); radius: s(3); color: pal.colors[1 + index] }
-                                                }
+                                            Rectangle {
+                                                anchors.right: parent.right; anchors.top: parent.top
+                                                anchors.margins: s(4)
+                                                width: s(16); height: s(16); radius: s(8)
+                                                visible: root.dock.palette === pal.slug
+                                                color: colors.base
+                                                Text { anchors.centerIn: parent; text: "✓"; font.family: "Hack Nerd Font"; font.pixelSize: s(10); color: colors.accent }
                                             }
+                                        }
+                                        Text {
+                                            anchors.top: parent.top
+                                            anchors.topMargin: s(60)
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            text: pal.name
+                                            font.family: "Hack Nerd Font"
+                                            font.pixelSize: s(10)
+                                            font.weight: Font.Bold
+                                            color: root.dock.palette === pal.slug ? colors.text : colors.overlay1
+                                        }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: root.applyDock(Object.assign({}, root.dock, { palette: pal.slug }))
                                         }
                                     }
                                 }
-                                Text {
-                                    anchors.top: parent.top
-                                    anchors.topMargin: s(50)
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    text: pal.name
-                                    font.family: "Hack Nerd Font"
-                                    font.pixelSize: s(9)
-                                    color: root.dock.palette === pal.slug ? colors.text : colors.overlay1
-                                }
-                                MouseArea {
+                            }
+                        }
+
+                        // ════ SECCIÓN: ASPECTO ════
+                        Column {
+                            width: parent.width
+                            visible: currentSection === 2
+                            spacing: s(10)
+                            SectionTitle { bar: root; text: "Aspecto y tamaño" }
+
+                            Rectangle {
+                                width: parent.width
+                                height: s(300)
+                                radius: s(16)
+                                color: colors.surface0
+                                border.width: s(1); border.color: colors.surface1
+                                Column {
                                     anchors.fill: parent
-                                    onClicked: root.applyDock(Object.assign({}, root.dock, { palette: pal.slug }))
+                                    anchors.margins: s(14)
+                                    spacing: s(10)
+                                    Row {
+                                        width: parent.width
+                                        EditLabel { bar: root; text: "Redondez" }
+                                        Item { width: parent.width - s(220); height: 1 }
+                                        Stepper {
+                                            bar: root
+                                            label: Math.round(root.dock.roundness * 100) + "%"
+                                            onDec: root.applyDock(Object.assign({}, root.dock, { roundness: Math.max(0, +(root.dock.roundness - 0.1).toFixed(1)) }))
+                                            onInc: root.applyDock(Object.assign({}, root.dock, { roundness: Math.min(1, +(root.dock.roundness + 0.1).toFixed(1)) }))
+                                        }
+                                    }
+                                    Row {
+                                        width: parent.width
+                                        EditLabel { bar: root; text: "Grosor" }
+                                        Item { width: parent.width - s(220); height: 1 }
+                                        Stepper {
+                                            bar: root
+                                            label: Math.round(root.dock.thickness) + "px"
+                                            onDec: root.applyDock(Object.assign({}, root.dock, { thickness: Math.max(32, root.dock.thickness - 4) }))
+                                            onInc: root.applyDock(Object.assign({}, root.dock, { thickness: Math.min(96, root.dock.thickness + 4) }))
+                                        }
+                                    }
+                                    Row {
+                                        width: parent.width
+                                        EditLabel { bar: root; text: "Margen del borde" }
+                                        Item { width: parent.width - s(220); height: 1 }
+                                        Stepper {
+                                            bar: root
+                                            label: Math.round(root.dock.edgeGap) + "px"
+                                            onDec: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.max(0, root.dock.edgeGap - 2) }))
+                                            onInc: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.min(24, root.dock.edgeGap + 2) }))
+                                        }
+                                    }
+                                    Row {
+                                        width: parent.width
+                                        EditLabel { bar: root; text: "Relleno de islas" }
+                                        Item { width: parent.width - s(220); height: 1 }
+                                        ToggleSwitch { bar: root; checked: root.dock.pillBg; onToggled: root.applyDock(Object.assign({}, root.dock, { pillBg: !root.dock.pillBg })) }
+                                    }
+                                    Row {
+                                        width: parent.width
+                                        EditLabel { bar: root; text: "Relleno sólido" }
+                                        Item { width: parent.width - s(220); height: 1 }
+                                        ToggleSwitch { bar: root; checked: root.dock.pillSolid; onToggled: root.applyDock(Object.assign({}, root.dock, { pillSolid: !root.dock.pillSolid })) }
+                                    }
+                                    Row {
+                                        width: parent.width
+                                        EditLabel { bar: root; text: "Barra unificada" }
+                                        Item { width: parent.width - s(220); height: 1 }
+                                        ToggleSwitch { bar: root; checked: root.dock.barBg; onToggled: root.applyDock(Object.assign({}, root.dock, { barBg: !root.dock.barBg })) }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                width: parent.width
+                                height: s(56)
+                                radius: s(16)
+                                color: colors.surface0
+                                border.width: s(1); border.color: colors.surface1
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.margins: s(12)
+                                    EditLabel { bar: root; text: "Borde (global)" }
+                                    Item { width: parent.width - s(280); height: 1 }
+                                    Stepper {
+                                        bar: root
+                                        label: Math.round(root.dock.borderWidth) + "px"
+                                        onDec: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.max(0, root.dock.borderWidth - 1) }))
+                                        onInc: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.min(8, root.dock.borderWidth + 1) }))
+                                    }
+                                    ColorCycle {
+                                        bar: root
+                                        role: root.dock.borderColor
+                                        onCycled: (role) => root.applyDock(Object.assign({}, root.dock, { borderColor: role }))
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // ── ASPECTO ────────────────────────────────────────────────
-                    SectionTitle { bar: root; text: "Aspecto" }
-                    Rectangle {
-                        width: parent.width
-                        radius: s(16)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: s(12)
-                            spacing: s(8)
-                            RowLayout {
-                                Layout.fillWidth: true
-                                EditLabel { bar: root; text: "Redondez" }
-                                Item { Layout.fillWidth: true; height: 1 }
-                                Stepper {
+                        // ════ SECCIÓN: ZONAS ════
+                        Column {
+                            width: parent.width
+                            visible: currentSection === 3
+                            spacing: s(10)
+                            SectionTitle { bar: root; text: "Zonas y módulos" }
+
+                            Repeater {
+                                model: root.dock.zones
+                                delegate: ZoneEditorCard {
+                                    required property var modelData
+                                    required property int index
+                                    width: parent.width
                                     bar: root
-                                    label: Math.round(root.dock.roundness * 100) + "%"
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { roundness: Math.max(0, +(root.dock.roundness - 0.1).toFixed(1)) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { roundness: Math.min(1, +(root.dock.roundness + 0.1).toFixed(1)) }))
+                                    zoneData: modelData
+                                    zoneIndex: index
                                 }
                             }
-                            RowLayout {
-                                Layout.fillWidth: true
-                                EditLabel { bar: root; text: "Grosor" }
-                                Item { Layout.fillWidth: true; height: 1 }
-                                Stepper {
-                                    bar: root
-                                    label: Math.round(root.dock.thickness) + "px"
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { thickness: Math.max(32, root.dock.thickness - 4) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { thickness: Math.min(96, root.dock.thickness + 4) }))
-                                }
-                            }
-                            RowLayout {
-                                Layout.fillWidth: true
-                                EditLabel { bar: root; text: "Margen del borde" }
-                                Item { Layout.fillWidth: true; height: 1 }
-                                Stepper {
-                                    bar: root
-                                    label: Math.round(root.dock.edgeGap) + "px"
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.max(0, root.dock.edgeGap - 2) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.min(24, root.dock.edgeGap + 2) }))
-                                }
-                            }
-                            RowLayout {
-                                Layout.fillWidth: true
-                                EditLabel { bar: root; text: "Relleno de islas" }
-                                Item { Layout.fillWidth: true; height: 1 }
-                                ToggleSwitch { bar: root; checked: root.dock.pillBg; onToggled: root.applyDock(Object.assign({}, root.dock, { pillBg: !root.dock.pillBg })) }
-                            }
-                            RowLayout {
-                                Layout.fillWidth: true
-                                EditLabel { bar: root; text: "Relleno sólido" }
-                                Item { Layout.fillWidth: true; height: 1 }
-                                ToggleSwitch { bar: root; checked: root.dock.pillSolid; onToggled: root.applyDock(Object.assign({}, root.dock, { pillSolid: !root.dock.pillSolid })) }
+
+                            Row {
+                                width: parent.width
+                                spacing: s(8)
+                                EditPill { bar: root; modelData: "add"; text: "+ Añadir zona"; accentFill: true; onActivated: root.applyDock(DockLayout.addZone(root.dock, "start")) }
+                                EditPill { bar: root; modelData: "reset"; text: "Restaurar por defecto"; onActivated: root.applyDock(DockLayout.defaultDock()) }
                             }
                         }
+                        Item { width: 1; height: s(12) }
                     }
-
-                    // ── BORDE GLOBAL ───────────────────────────────────────────
-                    Rectangle {
-                        width: parent.width
-                        height: s(52)
-                        radius: s(16)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: s(12)
-                            EditLabel { bar: root; text: "Borde (global)" }
-                            Item { Layout.fillWidth: true; height: 1 }
-                            Stepper {
-                                bar: root
-                                label: Math.round(root.dock.borderWidth) + "px"
-                                onDec: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.max(0, root.dock.borderWidth - 1) }))
-                                onInc: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.min(8, root.dock.borderWidth + 1) }))
-                            }
-                            ColorCycle {
-                                bar: root
-                                role: root.dock.borderColor
-                                onCycled: (role) => root.applyDock(Object.assign({}, root.dock, { borderColor: role }))
-                            }
-                        }
-                    }
-
-                    // ── ZONAS ──────────────────────────────────────────────────
-                    SectionTitle { bar: root; text: "Zonas" }
-                    Repeater {
-                        model: root.dock.zones
-                        delegate: ZoneEditorCard {
-                            required property var modelData
-                            required property int index
-                            bar: root
-                            zoneData: modelData
-                            zoneIndex: index
-                        }
-                    }
-
-                    RowLayout {
-                        width: parent.width
-                        spacing: s(8)
-                        EditPill { bar: root; modelData: "add"; text: "+ Añadir zona"; accentFill: true; onActivated: root.applyDock(DockLayout.addZone(root.dock, "start")) }
-                        EditPill { bar: root; modelData: "reset"; text: "Restaurar por defecto"; onActivated: root.applyDock(DockLayout.defaultDock()) }
-                        Item { Layout.fillWidth: true; height: 1 }
-                    }
-                    Item { width: 1; height: s(12) }
                 }
             }
         }

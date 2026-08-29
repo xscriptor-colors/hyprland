@@ -115,6 +115,9 @@ Variants {
             property real roundness: 1.0
             property bool pillBg: true
             property bool pillSolid: false
+            // "barBg" — solid/translucent background strip behind the whole bar;
+            // islands then float INSIDE it instead of being standalone pills.
+            property bool barBg: false
             property real borderWidth: 0
             property string borderColor: "surface1"
 
@@ -131,6 +134,7 @@ Variants {
                 dockWindow.roundness = dockConfig.roundness;
                 dockWindow.pillBg = dockConfig.pillBg;
                 dockWindow.pillSolid = dockConfig.pillSolid;
+                dockWindow.barBg = dockConfig.barBg;
                 dockWindow.borderWidth = dockConfig.borderWidth;
                 dockWindow.borderColor = dockConfig.borderColor;
                 dockWindow.zones = dockConfig.zones;
@@ -741,6 +745,27 @@ Variants {
             // ================================================================
             // ZONES
             // ================================================================
+
+            // Bar background strip (dock.barBg): a solid/translucent band behind
+            // the whole bar with only the inner corners rounded, so the islands
+            // float INSIDE it like a taskbar. Pill backgrounds then go transparent
+            // (see ModulePill) and the accent islands stay as colored pills.
+            Rectangle {
+                id: barBackground
+                anchors.fill: parent
+                visible: dockWindow.barBg
+                radius: dockWindow.pillRadius(dockWindow.pillHeight)
+                topLeftRadius: orientation === "vertical" ? 0 : (position === "top" ? 0 : radius)
+                topRightRadius: orientation === "vertical" ? 0 : (position === "top" ? 0 : radius)
+                bottomLeftRadius: orientation === "vertical" ? 0 : (position === "bottom" ? 0 : radius)
+                bottomRightRadius: orientation === "vertical" ? 0 : (position === "bottom" ? 0 : radius)
+                // vertical: flat on the screen-edge side
+                color: Qt.rgba(dockColors.base.r, dockColors.base.g, dockColors.base.b, dockWindow.pillSolid ? 1.0 : 0.85)
+                border.width: dockWindow.borderWidth
+                border.color: dockColors[borderColor] || dockColors.surface1
+                Behavior on color { ColorAnimation { duration: 300 } }
+            }
+
             Item {
                 id: barContent
                 anchors.fill: parent

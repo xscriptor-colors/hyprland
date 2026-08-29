@@ -110,6 +110,7 @@ function defaultDock() {
         roundness: 1.0,
         pillBg: true,
         pillSolid: false,
+        barBg: false,
         borderWidth: 0,
         borderColor: "surface1",
         zones: zones
@@ -132,6 +133,7 @@ function normalizeDock(raw) {
         roundness: (typeof raw.roundness === "number") ? Math.max(0, Math.min(1, raw.roundness)) : def.roundness,
         pillBg: raw.pillBg !== undefined ? (raw.pillBg === true) : def.pillBg,
         pillSolid: raw.pillSolid !== undefined ? (raw.pillSolid === true) : def.pillSolid,
+        barBg: raw.barBg !== undefined ? (raw.barBg === true) : def.barBg,
         borderWidth: (typeof raw.borderWidth === "number") ? raw.borderWidth : def.borderWidth,
         borderColor: (typeof raw.borderColor === "string" && raw.borderColor !== "") ? raw.borderColor : def.borderColor,
         zones: []
