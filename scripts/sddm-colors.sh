@@ -56,16 +56,35 @@ out = {
     "red":      roles.get("red") or color("color1", "#fc618d"),
 }
 
+# Dark/light flag so the theme can tint its backdrop accordingly
+# (dark base -> thin dark overlay; light base -> stronger light tint).
+def luminance(h):
+    r, g, bl = rgb(h)
+    return (0.2126 * r + 0.7152 * g + 0.0722 * bl) / 255.0
+
+is_dark = luminance(base) < 0.5
+
 lines = ["pragma Singleton", "import QtQuick", "QtObject {"]
 for k, v in out.items():
     lines.append('    readonly property color %s: "%s"' % (k, v))
+lines.append('    readonly property bool isDark: %s' % ("true" if is_dark else "false"))
 lines.append("}")
 open(out_path, "w").write("\n".join(lines) + "\n")
-print("SDDM colors from palette '%s': base=%s mauve=%s blue=%s" % (palette, base, out["mauve"], out["blue"]))
+print("SDDM colors from palette '%s': base=%s mauve=%s blue=%s isDark=%s" % (palette, base, out["mauve"], out["blue"], is_dark))
 PYEOF
 
 # Sync into the installed theme dir if present (silent; sudo may not be available).
 THEME="/usr/share/sddm/themes/x"
 if [ -d "$THEME" ]; then
     cp "$OUT" "$THEME/Colors.qml" 2>/dev/null || sudo cp "$OUT" "$THEME/Colors.qml" 2>/dev/null || true
+fi
+
+# Point the login background at the live wallpaper cache (dynamic: it updates
+# automatically whenever the wallpaper changes). Falls back to the bundled
+# wallpaper.jpg when the cache doesn't exist yet.
+CACHE_WALL="$HOME/.cache/quickshell/wallpaper_picker/current_wallpaper.png"
+THEME_CONF="$THEME/theme.conf"
+if [ -f "$CACHE_WALL" ] && [ -f "$THEME_CONF" ]; then
+    sed -i "s|^background=.*|background=$CACHE_WALL|" "$THEME_CONF" 2>/dev/null \
+        || sudo sed -i "s|^background=.*|background=$CACHE_WALL|" "$THEME_CONF" 2>/dev/null || true
 fi
