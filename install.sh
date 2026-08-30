@@ -558,27 +558,31 @@ install_dotfiles() {
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
 install_kitty_config() {
-    log "Installing Kitty configuration..."
+    log "Installing Kitty configuration from xscriptor-colors/terminal..."
 
-    # Copy Kitty config from local
-    mkdir -p "$CONFIG_DIR/kitty/themes"
-
-    if [ -f "$SCRIPT_DIR/config/kitty/kitty.conf" ]; then
-        cp "$SCRIPT_DIR/config/kitty/kitty.conf" "$CONFIG_DIR/kitty/"
-        log "Installed kitty.conf"
+    if ! command -v git >/dev/null 2>&1; then
+        warn "git not found. Cannot clone xscriptor-colors/terminal."
+        warn "Install git and run: wget -qO- https://raw.githubusercontent.com/xscriptor-colors/terminal/main/emulators/kitty/install.sh | bash"
+        return
     fi
 
-    if [ -d "$SCRIPT_DIR/config/kitty/themes" ]; then
-        cp -r "$SCRIPT_DIR/config/kitty/themes/"* "$CONFIG_DIR/kitty/themes/"
-        log "Installed Kitty themes"
+    local TMP_DIR
+    TMP_DIR="$(mktemp -d)"
+    if ! git clone --depth 1 https://github.com/xscriptor-colors/terminal.git "$TMP_DIR/terminal" >/dev/null 2>&1; then
+        warn "Failed to clone xscriptor-colors/terminal."
+        rm -rf "$TMP_DIR"
+        return
     fi
 
-    # Set default theme
-    if [ -f "$CONFIG_DIR/kitty/themes/x.conf" ]; then
-        cp "$CONFIG_DIR/kitty/themes/x.conf" "$CONFIG_DIR/kitty/current-theme.conf"
+    local KITTY_INSTALLER="$TMP_DIR/terminal/emulators/kitty/install.sh"
+    if [ -f "$KITTY_INSTALLER" ]; then
+        log "Running kitty installer (packages, font, themes, aliases)..."
+        bash "$KITTY_INSTALLER" || warn "Kitty installer finished with warnings (non-fatal)"
+        log "Kitty configuration installed from xscriptor-colors/terminal!"
+    else
+        warn "kitty installer not found in cloned repo."
     fi
-
-    log "Kitty configuration installed!"
+    rm -rf "$TMP_DIR"
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -640,53 +644,30 @@ install_hack_nerd_font() {
 install_nvim_config() {
     local NVIM_DEST="$CONFIG_DIR/nvim"
 
-    echo ""
-    prompt "Which Neovim config do you want to install?"
-    echo -e "  ${CYAN}1)${NC} Bundled (config/nvim in this repo)"
-    echo -e "  ${CYAN}2)${NC} X Nvim (https://github.com/xscriptor-colors/nvim)"
-    echo -e "  ${CYAN}3)${NC} Skip"
-    read -r nvim_choice
+    log "Installing Neovim configuration from xscriptor-colors/nvim..."
 
-    case "$nvim_choice" in
-        2)
-            log "Installing Neovim configuration from xscriptor-colors/nvim..."
-            if command -v git &>/dev/null; then
-                if [ -d "$NVIM_DEST" ]; then
-                    warn "Existing nvim config found at $NVIM_DEST"
-                    prompt "Replace it? [Y/n] "
-                    read -r replace_response
-                    if [[ "$replace_response" =~ ^[Nn]$ ]]; then
-                        log "Skipping nvim installation."
-                        return
-                    fi
-                    rm -rf "$NVIM_DEST"
-                fi
-                git clone https://github.com/xscriptor-colors/nvim.git "$NVIM_DEST" || {
-                    error "Failed to clone xscriptor-colors/nvim."
-                    return
-                }
-                log "Neovim configuration installed from xscriptor-colors/nvim!"
-            else
-                warn "git not found. Cannot clone external repo."
-                warn "Install git and run: git clone https://github.com/xscriptor-colors/nvim.git ~/.config/nvim"
-            fi
-            ;;
-        3)
-            log "Skipping Neovim configuration installation."
+    if ! command -v git >/dev/null 2>&1; then
+        warn "git not found. Cannot clone nvim repo."
+        warn "Install git and run: git clone https://github.com/xscriptor-colors/nvim.git ~/.config/nvim"
+        return
+    fi
+
+    if [ -d "$NVIM_DEST" ]; then
+        warn "Existing nvim config found at $NVIM_DEST"
+        prompt "Replace it? [Y/n] "
+        read -r replace_response
+        if [[ "$replace_response" =~ ^[Nn]$ ]]; then
+            log "Skipping nvim installation."
             return
-            ;;
-        *)
-            # Default: bundled
-            if [ -d "$SCRIPT_DIR/config/nvim" ]; then
-                log "Installing bundled Neovim configuration..."
-                cp -r "$SCRIPT_DIR/config/nvim" "$NVIM_DEST"
-                log "Neovim configuration installed!"
-            else
-                warn "Bundled nvim config not found at config/nvim"
-                return
-            fi
-            ;;
-    esac
+        fi
+        rm -rf "$NVIM_DEST"
+    fi
+
+    git clone --depth 1 https://github.com/xscriptor-colors/nvim.git "$NVIM_DEST" || {
+        error "Failed to clone xscriptor-colors/nvim."
+        return
+    }
+    log "Neovim configuration installed from xscriptor-colors/nvim!"
 
     echo ""
     echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════════╗${NC}"
@@ -698,7 +679,6 @@ install_nvim_config() {
     echo -e "${CYAN}3.${NC} Run Mason to install LSP servers:  ${WHITE}:Mason${NC}"
     echo ""
     echo -e "${BLUE}Refer to the nvim README for more details.${NC}"
-    echo ""
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐

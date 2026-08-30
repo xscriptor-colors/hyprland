@@ -138,6 +138,8 @@ Item {
         // always regenerates; the sudo copy to /usr/share silently no-ops when
         // passwordless sudo is unavailable).
         Quickshell.execDetached(["bash", "-c", "bash ~/.config/hypr/scripts/sddm-colors.sh >/dev/null 2>&1"]);
+        // Sync kitty + nvim themes to the active palette.
+        Quickshell.execDetached(["bash", "-c", "bash ~/.config/hypr/scripts/theme-sync.sh >/dev/null 2>&1"]);
     }
 
     function applyPalette(c) {
