@@ -24,7 +24,7 @@ nvim/
 
 ## Theme System
 
-The theme engine in `lua/themes/` applies highlight groups from `palettes.lua`. Neovim keeps **its own upstream config** (its own `palettes.lua` and `theme.lua`) — it is intentionally **not** modified by `theme-sync.sh`.
+The theme engine in `lua/themes/` applies highlight groups from `palettes.lua`. The plugin/keymap/option config comes from the user's own repo (cloned to `~/.config/nvim`), but **`theme-sync.sh` regenerates** `lua/themes/palettes.lua` and `lua/config/theme.lua` from `dock/palettes` so Neovim follows the same palette as the bar, kitty, starship and VS Code.
 
 ## Post-install
 
