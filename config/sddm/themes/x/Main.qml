@@ -134,8 +134,10 @@ Rectangle {
         
         Rectangle {
             anchors.fill: parent
-            color: "black"
-            opacity: 0.25 
+            // Palette-aware tint: dark base -> subtle dark overlay; light base
+            // (e.g. madrid/london/helsinki) -> stronger light overlay.
+            color: Colors.base
+            opacity: Colors.isDark ? 0.25 : 0.5
         }
     }
 
