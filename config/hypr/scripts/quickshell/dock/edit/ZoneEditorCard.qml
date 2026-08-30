@@ -55,7 +55,7 @@ Rectangle {
             Layout.fillWidth: true
             spacing: bar.s(8)
 
-            EditLabel { bar: zoneCard.bar; text: "Borde zona" }
+            EditLabel { bar: zoneCard.bar; text: "Zone border" }
             Item { Layout.fillWidth: true; height: 1 }
             Stepper {
                 bar: zoneCard.bar

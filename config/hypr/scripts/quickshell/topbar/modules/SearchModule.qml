@@ -13,7 +13,7 @@ ModulePill {
     onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle applauncher"])
 
     Text {
-        text: "󰍉"
+        text: "󰊨"
         font.family: bar.fontFamily
         font.pixelSize: bar.s(22)
         color: mod.contentColor

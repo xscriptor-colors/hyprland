@@ -797,8 +797,8 @@ Variants {
 
                 // Settings panel occupies an edge while open; shift the dock
                 // content so nothing sits underneath it.
-                anchors.leftMargin: settingsSlideProgress * (dockWindow.panelFromLeft ? s(450) : 0)
-                anchors.rightMargin: settingsSlideProgress * (dockWindow.panelFromLeft ? 0 : s(450))
+                anchors.leftMargin: settingsSlideProgress * (dockWindow.panelFromLeft ? s(780) : 0)
+                anchors.rightMargin: settingsSlideProgress * (dockWindow.panelFromLeft ? 0 : s(780))
 
                 // Zones only build once uiScale/baseScale are final (bar.s() is a
                 // function, so modules can't reactively rescale after creation).
