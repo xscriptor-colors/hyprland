@@ -6,6 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: root
@@ -101,7 +102,7 @@ Item {
     }
     Keys.onEnterPressed: { Keys.onReturnPressed(event); }
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     // -------------------------------------------------------------------------
     // COLORS
     // -------------------------------------------------------------------------
@@ -506,14 +507,15 @@ Item {
                                     Behavior on color { ColorAnimation { duration: 150 } }
 
                                     RowLayout {
+                                        id: tabHeaderRow
                                         anchors.fill: parent
                                         anchors.leftMargin: root.s(15)
                                         spacing: root.s(12)
 
                                         // The "Slide Right" text effect from snippet 2
-                                        property real contentShift: parent.isActive ? root.s(6) : 0
+                                        property real contentShift: parent && parent.isActive ? root.s(6) : 0
                                         Behavior on contentShift { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-                                        transform: Translate { x: contentShift }
+                                        transform: Translate { x: tabHeaderRow.contentShift }
                                         
                                         Item {
                                             Layout.preferredWidth: root.s(24)
@@ -680,20 +682,20 @@ Item {
             // TAB 1: SYSTEM OVERVIEW
             // ------------------------------------------
             Item {
+                id: tab1Pane
                 anchors.fill: parent
                 visible: root.currentTab === 1
                 opacity: visible ? 1.0 : 0.0
-                property real slideY: visible ? 0 : root.s(10)
+                property real slideY: visible ? 0 : (root ? root.s(10) : 0)
                 
                 Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                transform: Translate { y: slideY }
+                transform: Translate { y: tab1Pane.slideY }
                 Behavior on opacity { NumberAnimation { duration: 250 } }
 
                 ListModel {
                     id: systemDataModel
                     ListElement { pkg: "Hyprland"; role: "Wayland Compositor"; icon: ""; clr: "blue"; link: "https://hyprland.org/" }
                     ListElement { pkg: "Quickshell"; role: "UI Framework"; icon: "󰣆"; clr: "mauve"; link: "https://git.outfoxxed.me/outfoxxed/quickshell" }
-                    ListElement { pkg: "Matugen"; role: "Theme Engine"; icon: "󰏘"; clr: "peach"; link: "https://github.com/InioX/matugen" }
                     ListElement { pkg: "Rofi Wayland"; role: "App Launcher"; icon: ""; clr: "green"; link: "https://github.com/lbonn/rofi" }
                     ListElement { pkg: "Kitty"; role: "Terminal Emulator"; icon: "󰄛"; clr: "yellow"; link: "https://sw.kovidgoyal.net/kitty/" }
                     ListElement { pkg: "SwayOSD / NC"; role: "Overlays & Notifs"; icon: "󰂚"; clr: "pink"; link: "https://github.com/ErikReider/SwayOSD" }
@@ -1105,13 +1107,14 @@ Item {
             // TAB 2: MODULES
             // ------------------------------------------
             Item {
+                id: tab2Pane
                 anchors.fill: parent
                 visible: root.currentTab === 2
                 opacity: visible ? 1.0 : 0.0
-                property real slideY: visible ? 0 : root.s(10)
+                property real slideY: visible ? 0 : (root ? root.s(10) : 0)
                 
                 Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                transform: Translate { y: slideY }
+                transform: Translate { y: tab2Pane.slideY }
                 Behavior on opacity { NumberAnimation { duration: 250 } }
 
                 ColumnLayout {
@@ -1299,13 +1302,14 @@ Item {
             // TAB 3: MATUGEN ENGINE
             // ------------------------------------------
             Item {
+                id: tab3Pane
                 anchors.fill: parent
                 visible: root.currentTab === 3
                 opacity: visible ? 1.0 : 0.0
-                property real slideY: visible ? 0 : root.s(10)
+                property real slideY: visible ? 0 : (root ? root.s(10) : 0)
                 
                 Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                transform: Translate { y: slideY }
+                transform: Translate { y: tab3Pane.slideY }
                 Behavior on opacity { NumberAnimation { duration: 250 } }
 
                 ColumnLayout {
@@ -1528,13 +1532,14 @@ Item {
             // TAB 4: ABOUT
             // ------------------------------------------
             Item {
+                id: tab4Pane
                 anchors.fill: parent
                 visible: root.currentTab === 4
                 opacity: visible ? 1.0 : 0.0
-                property real slideY: visible ? 0 : root.s(10)
+                property real slideY: visible ? 0 : (root ? root.s(10) : 0)
                 
                 Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                transform: Translate { y: slideY }
+                transform: Translate { y: tab4Pane.slideY }
                 Behavior on opacity { NumberAnimation { duration: 250 } }
 
                 RowLayout {

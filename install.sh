@@ -253,7 +253,6 @@ CORE_PACKAGES_ARCH=(
 
     # New packages from imperative-dots
     "quickshell-git"
-    "matugen-bin"
     "swayosd-git"
     "cava"
     "zbar"
@@ -413,7 +412,7 @@ backup_config() {
     log "Creating backup of existing configurations..."
     mkdir -p "$BACKUP_DIR"
 
-    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "matugen" "swayosd" "nvim")
+    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "swayosd" "nvim")
 
     for config in "${configs[@]}"; do
         if [ -d "$CONFIG_DIR/$config" ]; then
@@ -524,13 +523,6 @@ install_dotfiles() {
         log "Installed cava config"
     fi
 
-    # Copy Matugen config
-    if [ -d "$SCRIPT_DIR/config/matugen" ]; then
-        mkdir -p "$CONFIG_DIR/matugen"
-        cp -r "$SCRIPT_DIR/config/matugen/"* "$CONFIG_DIR/matugen/"
-        log "Installed matugen config"
-    fi
-
     # Copy Hypridle config (goes to ~/.config/hypr/)
     if [ -f "$SCRIPT_DIR/config/hypridle/hypridle.conf" ]; then
         cp "$SCRIPT_DIR/config/hypridle/hypridle.conf" "$CONFIG_DIR/hypr/"
@@ -596,31 +588,6 @@ install_kitty_config() {
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ INSTALL MATUGEN CONFIG                                                            │
 # └───────────────────────────────────────────────────────────────────────────────────┘
-
-install_matugen_config() {
-    log "Installing Matugen color generation configuration..."
-
-    # Copy matugen config and templates (already done in install_dotfiles)
-    # Generate initial colors if wallpapers exist
-    local first_wallpaper=""
-
-    if [ -d "$CONFIG_DIR/hypr/wallpapers" ]; then
-        first_wallpaper=$(find "$CONFIG_DIR/hypr/wallpapers" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) | head -n 1)
-    fi
-
-    if [ -n "$first_wallpaper" ] && command -v matugen &>/dev/null; then
-        log "Generating initial Matugen colors from $first_wallpaper..."
-        bash "$CONFIG_DIR/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$first_wallpaper" || warn "Matugen color generation failed (non-fatal)"
-    else
-        if [ -z "$first_wallpaper" ]; then
-            warn "No wallpapers found for Matugen color generation. Run matugen manually after setting a wallpaper."
-        elif ! command -v matugen &>/dev/null; then
-            warn "matugen binary not found. Skipping color generation."
-        fi
-    fi
-
-    log "Matugen configuration installed!"
-}
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ INSTALL HACK NERD FONT                                                            │
@@ -960,9 +927,6 @@ main() {
         install_kitty_config
     fi
 
-    # Install Matugen config and generate colors
-    install_matugen_config
-
     # Install Hack Nerd Font
     install_hack_nerd_font
 
@@ -1056,7 +1020,6 @@ case "$1" in
         backup_config
         install_dotfiles
         install_kitty_config
-        install_matugen_config
         install_hack_nerd_font
         install_nvim_config
         create_directories

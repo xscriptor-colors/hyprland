@@ -43,7 +43,7 @@ hl.on("hyprland.start", function()
     -- Focus daemon
     hl.exec_cmd("python3 ~/.config/hypr/scripts/quickshell/focustime/focus_daemon.py &")
 
-    -- System init (wallpaper + matugen on first boot)
+    -- System init (wallpaper on first boot)
     hl.exec_cmd("~/.config/hypr/scripts/init.sh")
 
     -- Show the getting-started guide on first session

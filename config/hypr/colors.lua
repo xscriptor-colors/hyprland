@@ -6,8 +6,9 @@
 -- ║ can consume it. Colors are stored as stripped hex; use X.hex(name) or     ║
 -- ║ X.rgba(name, alpha) to build Hyprland color strings.                      ║
 -- ║                                                                           ║
--- ║ Window borders are dynamic: they come from Matugen (matugen-colors.lua)   ║
--- ║ when present, falling back to the fixed X palette otherwise.              ║
+-- ║ Window borders are palette-driven: the active palette slug and any manual ║
+-- ║ border overrides are read from settings.json "dock"; the accent (color1)  ║
+-- ║ and muted (color8) colors come from dock/palettes/<slug>.json.            ║
 -- ╚═══════════════════════════════════════════════════════════════════════════╝
 
 local X = {
@@ -48,14 +49,48 @@ function X.hex(name)
 end
 
 -- Ready-to-use border colors
--- Dynamic: from Matugen when matugen-colors.lua exists, else the X palette.
-local ok, matugenColors = pcall(require, "matugen-colors")
-if ok and type(matugenColors) == "table" then
-    X.active_border   = matugenColors.active_border
-    X.inactive_border = matugenColors.inactive_border
+-- Palette-driven: reads settings.json "dock" (palette slug + optional manual
+-- border overrides) and the matching dock/palettes/<slug>.json for the accent
+-- (color1) and muted (color8) colors. Matugen is NOT involved.
+local function jsonString(path, key)
+    local f = io.open(path, "r")
+    if not f then return nil end
+    local c = f:read("*a")
+    f:close()
+    return c:match('"' .. key .. '"%s*:%s*"([^"]+)"')
+end
+
+local function jsonBool(path, key)
+    local f = io.open(path, "r")
+    if not f then return nil end
+    local c = f:read("*a")
+    f:close()
+    return c:match('"' .. key .. '"%s*:%s*(%w+)')
+end
+
+local home = os.getenv("HOME") or ""
+local settingsPath = home .. "/.config/hypr/settings.json"
+
+local borderActiveHex   = jsonString(settingsPath, "borderActive")
+local borderInactiveHex = jsonString(settingsPath, "borderInactive")
+local followPalette     = jsonBool(settingsPath, "borderFollowPalette")
+
+if followPalette == "false" and borderActiveHex and borderActiveHex ~= "" and borderActiveHex:sub(1,1) == "#" then
+    X.active_border = "rgba(" .. borderActiveHex:sub(2) .. "ee)"
 else
-    X.active_border   = "rgba(" .. X.color1 .. "ee)" -- accent (red)
-    X.inactive_border = "rgba(" .. X.color8 .. "aa)" -- bright black
+    local slug = jsonString(settingsPath, "palette") or "x"
+    local palPath = home .. "/.config/hypr/scripts/quickshell/dock/palettes/" .. slug .. ".json"
+    local c1 = jsonString(palPath, "color1")
+    X.active_border = c1 and c1:sub(1,1) == "#" and ("rgba(" .. c1:sub(2) .. "ee)") or ("rgba(" .. X.color1 .. "ee)")
+end
+
+if followPalette == "false" and borderInactiveHex and borderInactiveHex ~= "" and borderInactiveHex:sub(1,1) == "#" then
+    X.inactive_border = "rgba(" .. borderInactiveHex:sub(2) .. "aa)"
+else
+    local slug = jsonString(settingsPath, "palette") or "x"
+    local palPath = home .. "/.config/hypr/scripts/quickshell/dock/palettes/" .. slug .. ".json"
+    local c8 = jsonString(palPath, "color8")
+    X.inactive_border = c8 and c8:sub(1,1) == "#" and ("rgba(" .. c8:sub(2) .. "aa)") or ("rgba(" .. X.color8 .. "aa)")
 end
 
 return X

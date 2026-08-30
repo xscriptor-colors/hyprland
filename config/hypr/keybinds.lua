@@ -32,7 +32,6 @@ hl.bind(mod .. "period", hl.dsp.exec_cmd("rofi -show emoji -theme ~/.config/rofi
 hl.bind(mod .. "Q", hl.dsp.window.kill())
 hl.bind(mod .. "M", run("bash " .. scripts .. "/qs_manager.sh", "toggle music"))
 hl.bind(mod .. "C", run(scripts .. "/qs_manager.sh", "toggle clipboard"))
-hl.bind(mod .. "P", run(scripts .. "/qs_manager.sh", "toggle movies"))
 hl.bind(mod .. "D", run("bash " .. scripts .. "/qs_manager.sh", "toggle applauncher"))
 hl.bind(mod .. "B", run("bash " .. scripts .. "/qs_manager.sh", "toggle battery"))
 hl.bind(mod .. "W", run("bash " .. scripts .. "/qs_manager.sh", "toggle wallpaper"))

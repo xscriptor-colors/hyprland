@@ -42,7 +42,7 @@ hyprland.lua
 
 Colors are **fixed** to the X palette (see `references.md`), no longer generated per-wallpaper by Matugen. `colors.lua` exports the palette and the border colors used by `settings.lua`.
 
-Matugen still generates colors for the other apps (Kitty, Neovim, Cava, SwayOSD, GTK, Qt, QuickShell `qs_colors.json`, SDDM).
+Matugen is no longer used: all widgets and window borders follow the 12 fixed palettes in `dock/palettes/` (see themes.md).
 
 ## Auto Monitor Detection
 

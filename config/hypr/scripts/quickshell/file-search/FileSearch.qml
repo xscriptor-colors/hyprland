@@ -5,11 +5,12 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     readonly property color base: _theme.base
     readonly property color crust: _theme.crust
@@ -18,6 +19,7 @@ Item {
     readonly property color overlay0: _theme.overlay0 || "#6c7086"
     readonly property color surface0: _theme.surface0
     readonly property color surface1: _theme.surface1
+    readonly property color surface2: _theme.surface2
     readonly property color mauve: _theme.mauve || "#cba6f7"
     readonly property color blue: _theme.blue || "#89b4fa"
     readonly property color green: _theme.green || "#a6e3a1"

@@ -6,7 +6,8 @@ import Qt.labs.folderlistmodel
 import QtMultimedia
 import Quickshell
 import Quickshell.Io
-import "../" 
+import "../"
+import "../dock"
 
 Item {
     id: window
@@ -23,7 +24,7 @@ Item {
         return scaler.s(val); 
     }
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     property string widgetArg: ""
     property string targetWallName: ""
@@ -147,14 +148,10 @@ Item {
         
         window.targetWallName = safeFileName;
         let cleanName = window.getCleanName(safeFileName);
-        let reloadScript = Qt.resolvedUrl("matugen_reload.sh").toString();
-        
-        if (reloadScript.startsWith("file://")) {
-            reloadScript = decodeURIComponent(reloadScript.substring(7));
-        }
-
         const escapeBash = (str) => String(str).replace(/(["\\$`])/g, '\\$1');
-        const randomTransition = window.transitions[Math.floor(Math.random() * window.transitions.length)];
+        const randomTransition = window.transition === "random"
+            ? window.transitions[Math.floor(Math.random() * window.transitions.length)]
+            : window.transition;
         const escOutputs = escapeBash(outputs);
         
         const logFile = paths.logDir + "/awww_debug.log";
@@ -171,7 +168,6 @@ Item {
                     export PATH="$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
                     export DEST_FILE="${escapeBash(destFile)}"
                     export FINAL_THUMB="${escapeBash(finalThumb)}"
-                    export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
                     export TARGET_MONITORS="${escOutputs}"
                     
                     if [ ! -f "$DEST_FILE" ]; then
@@ -197,7 +193,7 @@ Item {
                     fi
                     
                     notify-send "Wallpaper" "Applied: $(basename "$DEST_FILE")" -i preferences-desktop-wallpaper -t 2000
-( bash "$HOME/.config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
+
                     `;
                 Quickshell.execDetached(["bash", "-c", applyScript]);
             } else {
@@ -210,7 +206,6 @@ Item {
                     export DEST_FILE="${escapeBash(destFile)}"
                     export FINAL_THUMB="${escapeBash(finalThumb)}"
                     export TEMP_THUMB="${escapeBash(tempThumb)}"
-                    export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
                     export MAP_FILE="${escapeBash(mapFile)}"
                     export TARGET_MONITORS="${escOutputs}"
                     
@@ -245,7 +240,7 @@ Item {
                             awww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         fi
                         
-                        ( bash "$HOME/.config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$FINAL_THUMB" 2>/dev/null || true; bash "$RELOAD_SCRIPT" || true ) &
+                        
                     fi
                 `;
                 Quickshell.execDetached(["bash", "-c", downloadScript]);
@@ -258,7 +253,6 @@ Item {
         
         const escOriginal = escapeBash(originalFile);
         const escThumb = escapeBash(thumbFile);
-        const escReload = escapeBash(reloadScript);
 
         let wallpaperCmd = "";
         
@@ -294,12 +288,6 @@ Item {
             pkill mpvpaper || true
             
             ${wallpaperCmd}
-            if command -v matugen >/dev/null 2>&1; then
-                mkdir -p /tmp/quickshell/logs
-                bash "$HOME/.config/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "${escOriginal}" >>/tmp/quickshell/logs/matugen.log 2>&1
-                echo "matugen exit code: $?" >> /tmp/quickshell/logs/matugen.log
-            fi
-            bash "${escReload}" 2>/dev/null || true
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
     }
@@ -557,14 +545,14 @@ Item {
     readonly property string homeDir: "file://" + Quickshell.env("HOME")
     readonly property string thumbDir: "file://" + paths.getCacheDir("wallpaper_picker") + "/thumbs"
     readonly property string searchDir: "file://" + paths.getCacheDir("wallpaper_picker") + "/search_thumbs"
-    readonly property string srcDir: {
-        const dir = Quickshell.env("WALLPAPER_DIR")
-        return (dir && dir !== "") 
-        ? dir 
-        : Quickshell.env("HOME") + "/.config/hypr/wallpapers"
-    }
+    readonly property string srcDir: Config.wallpaperDir
 
-    readonly property var transitions: ["simple", "fade", "left", "right", "top", "bottom", "wipe", "grow", "center", "outer", "random", "wave"]
+        readonly property var transitions: ["simple", "fade", "left", "right", "top", "bottom", "wipe", "grow", "center", "outer", "random", "wave"]
+    // User-selected transition (cycles via the header button; "random" picks one).
+    property string transition: "random"
+    // Thumbnail corners: rounded vs square.
+    property bool roundedThumbs: true
+    property int thumbRadius: roundedThumbs ? window.s(12) : 0
 
     readonly property real itemWidth: window.s(400)
     readonly property real itemHeight: window.s(420)
@@ -1168,7 +1156,7 @@ Item {
             scale: matchesFilter ? 1.0 : 0.5
 
             height: matchesFilter ? targetHeight : 0
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
             anchors.verticalCenterOffset: window.s(15)
 
             z: isVisuallyEnlarged ? 10 : 1
@@ -1208,10 +1196,11 @@ Item {
                     asynchronous: true
                 }
 
-                Item {
+                Rectangle {
                     anchors.fill: parent
                     anchors.margins: window.borderWidth
-                    Rectangle { anchors.fill: parent; color: _theme.base }
+                    color: _theme.base
+                    radius: window.thumbRadius
                     clip: true
 
                     Image {
@@ -1518,6 +1507,70 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            // ── Quick controls: transition, corners, palette preview ───────────
+            Row {
+                spacing: window.s(6)
+                anchors.verticalCenter: parent.verticalCenter
+
+                // Transition selector — click to cycle through awww transitions.
+                Rectangle {
+                    id: transBtn
+                    width: transLabel.implicitWidth + window.s(30)
+                    height: window.s(36)
+                    radius: window.s(13)
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: transMouse.containsMouse ? _theme.surface1 : _theme.surface0
+                    border.color: _theme.surface1; border.width: 1
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: window.s(6)
+                        Text { text: "󰜯"; font.family: "Hack Nerd Font"; font.pixelSize: window.s(13); color: _theme.text; anchors.verticalCenter: parent.verticalCenter }
+                        Text { id: transLabel; text: window.transition; font.family: "Hack Nerd Font"; font.pixelSize: window.s(11); color: _theme.text; anchors.verticalCenter: parent.verticalCenter }
+                    }
+                    MouseArea {
+                        id: transMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            let i = window.transitions.indexOf(window.transition);
+                            window.transition = window.transitions[(i + 1) % window.transitions.length];
+                        }
+                    }
+                }
+
+                // Thumbnail corners: rounded / square toggle.
+                Rectangle {
+                    width: window.s(36); height: window.s(36); radius: window.s(13)
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: cornersMouse.containsMouse ? _theme.surface1 : _theme.surface0
+                    border.color: _theme.surface1; border.width: 1
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    Text {
+                        anchors.centerIn: parent
+                        text: window.roundedThumbs ? "◍" : "▣"
+                        font.family: "Hack Nerd Font"; font.pixelSize: window.s(15)
+                        color: _theme.text
+                    }
+                    MouseArea {
+                        id: cornersMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                        onClicked: window.roundedThumbs = !window.roundedThumbs
+                    }
+                }
+
+                // Active palette preview (base + accent swatches).
+                Rectangle {
+                    width: window.s(58); height: window.s(36); radius: window.s(13)
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: _theme.surface0
+                    border.color: _theme.surface1; border.width: 1
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: window.s(5)
+                        Rectangle { width: window.s(13); height: window.s(13); radius: window.s(4); color: _theme.base; border.color: _theme.surface1; border.width: 1 }
+                        Rectangle { width: window.s(13); height: window.s(13); radius: window.s(4); color: _theme.accent }
                     }
                 }
             }

@@ -7,6 +7,7 @@ import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
@@ -37,7 +38,7 @@ Item {
     // -------------------------------------------------------------------------
     // COLORS (Dynamic Matugen Palette + Added Blob Colors)
     // -------------------------------------------------------------------------
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     
     readonly property color base: _theme.base
     readonly property color mantle: _theme.mantle || _theme.base
@@ -463,7 +464,7 @@ except Exception as e:
                             transformOrigin: Item.Center
                             
                             RotationAnimation on rotation {
-                                from: 0; to: 360; duration: 2500; loops: Animation.Infinite; running: parent.visible
+                                from: 0; to: 360; duration: 2500; loops: Animation.Infinite; running: parent ? parent.visible : false
                             }
                         }
                     }
