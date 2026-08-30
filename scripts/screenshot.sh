@@ -229,8 +229,18 @@ if [ "$FULL_MODE" = true ] || [ -n "$GEOMETRY" ]; then
         [ -n "$MIC_DEVICE" ] && [ "$MIC_DEVICE" != "null" ] && MIC_DEV="$MIC_DEVICE" || MIC_DEV=$(pactl get-default-source 2>/dev/null)
         MIC_DEV="${MIC_DEV:-default}"
 
-        # Reverted back to the portal method for reliable security clearance
-        GSR_ARGS=(-w "portal" -c "mp4" -f "60" -ac "aac")
+        # Capture backend: -w portal hangs without producing a file on this
+        # setup; use direct capture instead (screen for full, region for area).
+        # The overlay passes grim-style geometry "X,Y WxH"; gsr needs "WxH+X+Y".
+        if [ "$FULL_MODE" = true ]; then
+            GSR_ARGS=(-w "screen" -c "mp4" -f "60" -ac "aac")
+        else
+            GSR_REGION="$GEOMETRY"
+            if [[ "$GSR_REGION" =~ ^([0-9]+),([0-9]+)[[:space:]]+([0-9]+)x([0-9]+)$ ]]; then
+                GSR_REGION="${BASH_REMATCH[3]}x${BASH_REMATCH[4]}+${BASH_REMATCH[1]}+${BASH_REMATCH[2]}"
+            fi
+            GSR_ARGS=(-w "region" -region "$GSR_REGION" -c "mp4" -f "60" -ac "aac")
+        fi
 
         AUDIO_MIX=""
 
