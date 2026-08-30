@@ -43,7 +43,7 @@ hl.bind(mod .. "SHIFT + S", run("bash " .. scripts .. "/qs_manager.sh", "toggle 
 hl.bind(mod .. "SHIFT + E", run("bash " .. scripts .. "/qs_manager.sh", "toggle settings topbar"))
 hl.bind(mod .. "SHIFT + T", run("bash " .. scripts .. "/qs_manager.sh", "toggle focustime"))
 hl.bind(mod .. "U", run("bash " .. scripts .. "/qs_manager.sh", "toggle updater"))
-hl.bind(mod .. "X", run("bash " .. scripts .. "/qs_manager.sh", "toggle stewart"))
+
 hl.bind(mod .. "Y", run("bash " .. scripts .. "/qs_manager.sh", "toggle quicknotes"))
 hl.bind(mod .. "I", run("bash " .. scripts .. "/qs_manager.sh", "toggle system-monitor"))
 hl.bind(mod .. "O", run("bash " .. scripts .. "/qs_manager.sh", "toggle rss-reader"))
