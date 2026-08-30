@@ -21,14 +21,14 @@ ModulePill {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: bar.volIcon
-            font.family: "Hack Nerd Font"
+            font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: mod.contentColor
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: bar.volPercent
-            font.family: "Hack Nerd Font"
+            font.family: bar.fontFamily
             font.pixelSize: bar.s(13)
             font.weight: Font.Black
             color: mod.contentColor
@@ -38,7 +38,7 @@ ModulePill {
     Text {
         visible: mod.compact
         text: bar.volIcon
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor
     }

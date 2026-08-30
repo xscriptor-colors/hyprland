@@ -19,14 +19,14 @@ ModulePill {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: bar.showEthernet ? "󰈀" : bar.wifiIcon
-            font.family: "Hack Nerd Font"
+            font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: mod.contentColor
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: bar.showEthernet ? bar.ethStatus : (bar.isWifiOn ? (bar.wifiSsid !== "" ? bar.wifiSsid : "On") : "Off")
-            font.family: "Hack Nerd Font"
+            font.family: bar.fontFamily
             font.pixelSize: bar.s(13)
             font.weight: Font.Black
             width: Math.min(implicitWidth, bar.s(100)); elide: Text.ElideRight
@@ -37,7 +37,7 @@ ModulePill {
     Text {
         visible: mod.compact
         text: bar.showEthernet ? "󰈀" : bar.wifiIcon
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor
     }

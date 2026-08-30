@@ -139,7 +139,7 @@ ModulePill {
                     // app-icon layout is too wide for the narrow pill.
                     visible: mod.compact || wsPill.appIconList.length === 0
                     text: wsPill.wsName
-                    font.family: "Hack Nerd Font"
+                    font.family: bar.fontFamily
                     font.pixelSize: mod.compact ? bar.s(13) : bar.s(18)
                     font.weight: wsPill.stateLabel === "active" ? Font.Black : (wsPill.stateLabel === "occupied" ? Font.Bold : Font.Medium)
                     color: index === bar.wsModel.activeIndex ? colors.crust : (wsPill.isHovered ? colors.text : (wsPill.stateLabel === "occupied" ? colors.text : colors.overlay0))
@@ -154,14 +154,14 @@ ModulePill {
                         model: wsPill.appIconList
                         delegate: Text {
                             text: modelData
-                            font.family: "Hack Nerd Font"
+                            font.family: bar.fontFamily
                             font.pixelSize: bar.s(12)
                             color: wsPill.wsIndex === bar.wsModel.activeIndex ? colors.crust : (wsPill.isHovered ? colors.text : colors.text)
                         }
                     }
                     Text {
                         text: wsPill.hasManyIcons ? "+" + (wsPill.appClassList.length - 2) : ""
-                        font.family: "Hack Nerd Font"
+                        font.family: bar.fontFamily
                         font.pixelSize: bar.s(10)
                         font.weight: Font.Black
                         color: index === bar.wsModel.activeIndex ? colors.crust : colors.overlay0

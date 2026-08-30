@@ -6,6 +6,7 @@ import QtCore
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
@@ -165,7 +166,7 @@ Item {
         } catch(e) {}
     }
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     readonly property color base: _theme.base
     readonly property color mantle: _theme.mantle

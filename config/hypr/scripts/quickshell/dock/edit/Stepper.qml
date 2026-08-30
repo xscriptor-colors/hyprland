@@ -12,7 +12,7 @@ Row {
 
     Rectangle {
         width: bar ? bar.s(26) : 26; height: width; radius: width / 2
-        color: bar.colors.surface2
+        color: bar.colors.surface1
         Text { anchors.centerIn: parent; text: "−"; font.family: "Hack Nerd Font"; font.pixelSize: bar ? bar.s(16) : 16; color: bar.colors.text }
         MouseArea { anchors.fill: parent; onClicked: stepper.dec() }
     }
@@ -28,7 +28,7 @@ Row {
     }
     Rectangle {
         width: bar ? bar.s(26) : 26; height: width; radius: width / 2
-        color: bar.colors.surface2
+        color: bar.colors.surface1
         Text { anchors.centerIn: parent; text: "+"; font.family: "Hack Nerd Font"; font.pixelSize: bar ? bar.s(16) : 16; color: bar.colors.text }
         MouseArea { anchors.fill: parent; onClicked: stepper.inc() }
     }

@@ -18,7 +18,7 @@ ModulePill {
 
     Text {
         text: bar.dateStr
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(11)
         font.weight: Font.Bold
         color: mod.contentColor

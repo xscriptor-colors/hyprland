@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import QtQuick.Window
 import "../"
+import "../dock"
 
 Item {
     id: window
@@ -78,7 +79,7 @@ Item {
     // -------------------------------------------------------------------------
     // COLORS (Dynamic Matugen Palette)
     // -------------------------------------------------------------------------
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     readonly property color base: _theme.base
     readonly property color mantle: _theme.mantle
     readonly property color crust: _theme.crust
@@ -510,36 +511,6 @@ Item {
             border.color: window.surface0
             border.width: 1
             clip: true
-
-            // Big Parallax Weather Icon (Tied to Weather Transition)
-            Text {
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: window.centerOffset
-                text: {
-                    if (!window.weatherData) return "";
-                    if (window.weatherView === 0 && window.weatherData.current_icon) return window.weatherData.current_icon;
-                    if (window.weatherData.forecast && window.weatherData.forecast[window.weatherView]) return window.weatherData.forecast[window.weatherView].icon;
-                    return "";
-                }
-                font.family: "Hack Nerd Font"
-                font.pixelSize: Math.round(800 * window.sf)
-                color: window.activeWeatherHex
-                opacity: (0.03 + (0.01 * Math.sin(window.globalOrbitAngle * 4))) * window.introAmbient * window.weatherContentOpacity
-                z: 0
-                Behavior on color { ColorAnimation { duration: 1500 } }
-                
-                property real drift: 0
-                SequentialAnimation on drift {
-                    loops: Animation.Infinite
-                    NumberAnimation { to: Math.round(-20 * window.sf); duration: 6000; easing.type: Easing.InOutSine }
-                    NumberAnimation { to: 0; duration: 6000; easing.type: Easing.InOutSine }
-                }
-                
-                transform: [
-                    Translate { y: parent.drift },
-                    Translate { x: window.weatherContentOffset * 2 } // Exaggerated shift for background depth
-                ]
-            }
 
             // =======================================================
             // CENTRAL HERO: THE BREATHING TIME HUB & 3D HOURLY ORBIT

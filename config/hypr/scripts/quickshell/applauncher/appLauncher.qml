@@ -6,6 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
@@ -24,7 +25,7 @@ Item {
     // -------------------------------------------------------------------------
     // COLORS (Expanded Dynamic Matugen Palette)
     // -------------------------------------------------------------------------
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     
     readonly property color base: _theme.base
     readonly property color mantle: _theme.mantle

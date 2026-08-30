@@ -10,7 +10,7 @@ Rectangle {
     width: bar ? bar.s(66) : 66
     height: bar ? bar.s(30) : 30
     radius: height / 2
-    color: bar.colors.surface2
+    color: bar.colors.surface1
 
     property var roles: ["surface1", "surface0", "text", "red", "blue", "green", "yellow", "mauve", "teal"]
 
