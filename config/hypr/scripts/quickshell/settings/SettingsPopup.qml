@@ -166,7 +166,7 @@ Item {
                 let isEd = dynamicStartupModel.get(root.highlightedBox).isEditing;
                 dynamicStartupModel.setProperty(root.highlightedBox, "isEditing", !isEd);
             }
-
+        }
     }
 
     onHighlightedBoxChanged: {
@@ -207,6 +207,7 @@ Item {
 
     property int currentTab: 0
 
+    // App scale is persisted by the General tab's Save button, matching how
     // every other setting on that tab behaves.
     function appScaleStep(dir) {
         let next = Math.max(0.75, Math.min(2.0, Config.appScale + dir * 0.25));
@@ -475,6 +476,8 @@ Item {
     readonly property color surface1: _theme.surface1
     readonly property color surface2: _theme.surface2
     readonly property color overlay0: _theme.overlay0
+    readonly property color overlay1: _theme.overlay1
+    readonly property color overlay2: _theme.overlay2
     readonly property color mauve: _theme.mauve
     readonly property color pink: _theme.pink
     readonly property color blue: _theme.blue
