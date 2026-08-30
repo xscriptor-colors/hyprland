@@ -23,6 +23,7 @@
 - Kitty comment lines invisible: `color8` was too close to the background in several palettes (and `paris` had `color7` = background) — `color8` is now a mid-tone `mix(background, foreground, 0.5/0.65)` with sufficient contrast in all 12 palettes; `paris` `color7` fixed to the foreground.
 - Shell comments (`# ...`) invisible when typed in zsh: `zsh-syntax-highlighting` defaults to `fg=black` (the background) — `~/.zshrc` now sets `ZSH_HIGHLIGHT_STYLES[comment]='fg=bright-black,bold'` so comments use the palette's `color8` (visible in every theme).
 - Notifications popup: removed decorative background bubbles; kept small/minimal on the side; removed the redundant `swaync` daemon (double popup + broken app icon).
+- Screen recorder: `gpu-screen-recorder -w portal` hung without saving; switched to direct capture (`-w screen` full, `-w region` area) and converted the overlay's grim-style geometry (`X,Y WxH`) to gsr's (`WxH+X+Y`) so area recordings save correctly.
 - Various pre-existing QML bugs: widget property injection (`Main.qml`), QuickNotes autosave, FileSearch `surface2`, Guide/Clipboard/appLauncher/Calendar transform scoping, NetworkPopup scoping, Updater null guard, Zone reload noise.
 
 ## [2026-08-23]
