@@ -30,9 +30,6 @@ Accessible via keybinds (SUPER + letter):
 | Settings | `settings/SettingsPopup.qml` | SUPER + SHIFT + S | Left edge |
 | Display Scale | `scale/ScalePicker.qml` | SUPER + Z | Center |
 | Focus Time | `focustime/FocusTimePopup.qml` | SUPER + SHIFT + T | Center |
-| Stewart | `stewart/stewart.qml` | SUPER + X | Center |
-| Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
-| Stewart | `stewart/stewart.qml` | SUPER + X | Center |
 | Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
 | System Monitor | `system-monitor/SystemMonitor.qml` | SUPER + I | Center |
 | Quick Notes | `quicknotes/QuickNotes.qml` | SUPER + Y | Center |
