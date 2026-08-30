@@ -909,7 +909,7 @@ Item {
                             Text { 
                                 anchors.centerIn: parent; text: ""; font.family: "Hack Nerd Font"; font.pixelSize: Math.round(18 * window.sf)
                                 color: parent.containsMouse ? window.textAccent : window.overlay1
-                                transform: Translate { x: parent.containsMouse ? Math.round(-5 * window.sf) : wPrevMa.pulseOffset }
+                                transform: Translate { x: parent && parent.containsMouse ? Math.round(-5 * window.sf) : wPrevMa.pulseOffset }
                                 Behavior on transform { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
                             }
                         }
@@ -940,7 +940,7 @@ Item {
                             Text { 
                                 anchors.centerIn: parent; text: ""; font.family: "Hack Nerd Font"; font.pixelSize: Math.round(18 * window.sf)
                                 color: parent.containsMouse ? window.textAccent : window.overlay1
-                                transform: Translate { x: parent.containsMouse ? Math.round(5 * window.sf) : wNextMa.pulseOffset }
+                                transform: Translate { x: parent && parent.containsMouse ? Math.round(5 * window.sf) : wNextMa.pulseOffset }
                                 Behavior on transform { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
                             }
                         }

@@ -9,13 +9,14 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import "../"
+import "dock"
 
 ShellRoot {
     id: root
 
     Caching { id: paths }
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     readonly property color base: _theme.base
     readonly property color crust: _theme.crust
     readonly property color mantle: _theme.mantle

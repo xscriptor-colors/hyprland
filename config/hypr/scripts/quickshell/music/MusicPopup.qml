@@ -7,6 +7,7 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: root
@@ -24,7 +25,7 @@ Item {
     }
 
     // Theme Colors
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     // Theme Colors
     readonly property color base: _theme.base
@@ -703,7 +704,7 @@ Item {
 
                             Text {
                                 text: root.musicData.artist ? "BY " + root.musicData.artist : ""
-                                color: root.subtext0 // Better matugen match
+                                color: root.subtext0 
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: root.s(14)
                                 font.bold: true
@@ -729,7 +730,7 @@ Item {
                                 }
                                 Text {
                                     text: "VIA " + (root.musicData.source || "Offline")
-                                    color: root.overlay2 // Better matugen match
+                                    color: root.overlay2 
                                     font.family: "Hack Nerd Font"
                                     font.pixelSize: root.s(12)
                                     font.bold: true
@@ -1445,7 +1446,7 @@ Item {
         property bool isActivePreset: root.eqData && root.eqData.preset === name
         property bool isHovered: hoverMa.containsMouse
 
-        color: isActivePreset ? root.mauve : (isHovered ? root.surface1 : "#BF1E1E2E")
+        color: isActivePreset ? root.mauve : (isHovered ? root.surface1 : Qt.rgba(root.base.r, root.base.g, root.base.b, 0.75))
         scale: isHovered && !isActivePreset ? 1.05 : 1.0
 
         Behavior on color { ColorAnimation { duration: 200 } }

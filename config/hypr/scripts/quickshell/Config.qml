@@ -107,7 +107,10 @@ Item {
     property real appScale: 1.0
     property int workspaceCount: 8
     property int initialWorkspaceCount: 8
-    property string wallpaperDir: Quickshell.env("WALLPAPER_DIR") || (homeDir + "/Pictures/Wallpapers")
+    property string wallpaperDir: {
+        const saved = getSetting("wallpaperDir", "");
+        return saved !== "" ? saved : (Quickshell.env("WALLPAPER_DIR") || homeDir + "/.config/hypr/wallpapers");
+    }
     property string language: ""
     property string kbOptions: "grp:alt_shift_toggle"
 

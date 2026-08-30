@@ -5,11 +5,12 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     readonly property color base: _theme.base
     readonly property color crust: _theme.crust
@@ -41,6 +42,7 @@ Item {
 
     Process {
         id: saveProcess
+        stdinEnabled: true
         stdout: StdioCollector {
             onStreamFinished: {
                 window.isDirty = false
@@ -52,7 +54,7 @@ Item {
         id: saveTimer; interval: 800
         onTriggered: {
             saveProcess.command = ["bash", "-c", "mkdir -p " + Quickshell.env("HOME") + "/.cache/quickshell && cat > " + window.notesFile]
-            saveProcess.input = noteText.text
+            saveProcess.write(noteText.text)
             saveProcess.running = true
         }
     }

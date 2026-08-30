@@ -21,6 +21,16 @@ Item {
     // --- which palette is active -------------------------------------------------
     property string paletteName: "x"
 
+    // Latest parsed "dock" section of settings.json (border overrides, etc.)
+    property var dockSettings: ({})
+    // Latest explicit per-palette role overrides (borderActive/borderInactive…)
+    property var _roles: ({})
+
+    // Emitted whenever the active palette finished applying (per instance).
+    signal paletteApplied()
+    // Emitted whenever settings.json was re-read (per instance).
+    signal settingsUpdated()
+
     readonly property string palettesDir: Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/dock/palettes"
 
     // --- core palette (base-16) --------------------------------------------------
@@ -91,6 +101,41 @@ Item {
         return "#" + pad(r) + pad(g) + pad(bl);
     }
 
+    // Convert a QML color (or pass-through hex string) into "#rrggbb".
+    function hexOf(c) {
+        if (typeof c === "string") return c;
+        try {
+            let pad = (v) => ("0" + Math.max(0, Math.min(255, Math.round(v * 255))).toString(16)).slice(-2);
+            return "#" + pad(c.r) + pad(c.g) + pad(c.b);
+        } catch (e) { return "#000000"; }
+    }
+
+    // Effective window-border color for a given border ("active"|"inactive"):
+    // manual override when "follow palette" is off, per-palette role override,
+    // else derived from the palette (active = accent, inactive = muted).
+    function borderHex(which) {
+        const d = root.dockSettings || {};
+        const valid = (s) => typeof s === "string" && /^#[0-9a-fA-F]{6}$/.test(s);
+        if (d.borderFollowPalette === false) {
+            const saved = which === "active" ? d.borderActive : d.borderInactive;
+            if (valid(saved)) return saved.toLowerCase();
+        }
+        const r = root._roles || {};
+        if (which === "active") return valid(r.borderActive) ? r.borderActive.toLowerCase() : root.hexOf(root.accent);
+        return valid(r.borderInactive) ? r.borderInactive.toLowerCase() : root.hexOf(root.color8);
+    }
+
+    // Push the effective border colors to Hyprland LIVE (no window restart)
+    // using `hyprctl eval` with the Lua config API. Only touches the border
+    // option; nothing else is modified.
+    function syncWindowBorders() {
+        const a = root.borderHex("active").slice(1);
+        const i = root.borderHex("inactive").slice(1);
+        const lua = 'hl.config({ general = { col = { active_border = "rgba(' + a + 'ee)", inactive_border = "rgba(' + i + 'aa)" } } })';
+        const cmd = "hyprctl eval '" + lua + "' 2>/dev/null";
+        Quickshell.execDetached(["bash", "-c", cmd]);
+    }
+
     function applyPalette(c) {
         if (!c || !c.base16) return;
         let b = c.base16;
@@ -150,6 +195,8 @@ Item {
                 try { root[key] = r[key]; } catch (e) {}
             }
         }
+        root._roles = (c.roles && typeof c.roles === "object") ? c.roles : {};
+        root.paletteApplied();
     }
 
     function forceRefresh() {
@@ -172,9 +219,11 @@ Item {
                 try {
                     if (this.text && this.text.trim().length > 0 && this.text.trim() !== "{}") {
                         let parsed = JSON.parse(this.text);
+                        root.dockSettings = (parsed.dock && typeof parsed.dock === "object") ? parsed.dock : {};
                         let want = (parsed.dock && parsed.dock.palette)
                                  ? String(parsed.dock.palette).toLowerCase() : "x";
                         if (root.paletteName !== want) root.paletteName = want;
+                        root.settingsUpdated();
                     }
                 } catch (e) {}
                 root.readSettings();

@@ -1720,25 +1720,25 @@ Item {
                                     color: "transparent"
                                     border.width: 1
                                     border.color: floatCard.isFailed ? window.red : window.surface2
-                                    visible: !isHighlighted && !locksList
+                                    visible: !parent.isHighlighted && !parent.locksList
                                     Behavior on border.color { ColorAnimation { duration: 300 } }
                                 }
 
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: window.s(18)
-                                    opacity: locksList || isHighlighted ? 1.0 : 0.0
+                                    opacity: parent.locksList || parent.isHighlighted ? 1.0 : 0.0
                                     color: "transparent"
-                                    border.width: isHighlighted && !locksList ? 1 : window.s(2)
+                                    border.width: parent.isHighlighted && !parent.locksList ? 1 : window.s(2)
                                     border.color: floatCard.isFailed ? window.red : "transparent"
                                     Behavior on opacity { NumberAnimation { duration: 250 } }
                                     
                                     Rectangle {
                                         anchors.fill: parent
-                                        anchors.margins: isHighlighted && !locksList ? 1 : window.s(2)
+                                        anchors.margins: parent.isHighlighted && !parent.locksList ? 1 : window.s(2)
                                         radius: window.s(16)
                                         color: window.base
-                                        opacity: locksList ? 0.9 : 1.0
+                                        opacity: parent.locksList ? 0.9 : 1.0
                                     }
                                     
                                     gradient: Gradient {

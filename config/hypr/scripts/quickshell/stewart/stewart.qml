@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Effects
 import "../"
+import "../dock"
 
 Item {
     id: root
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     
     // -------------------------------------------------------------------------
     // COLORS (Dynamic Matugen Palette)

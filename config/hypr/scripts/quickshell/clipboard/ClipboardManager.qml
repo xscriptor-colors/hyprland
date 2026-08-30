@@ -6,6 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
@@ -22,7 +23,7 @@ Item {
         return scaler.s(val); 
     }
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     
     readonly property color base: _theme.base
     readonly property color crust: _theme.crust
@@ -625,6 +626,7 @@ Item {
                         clip: true
 
                         Text {
+                            id: textItem
                             anchors.fill: parent
                             text: model.content
                             font.family: "Hack Nerd Font"
@@ -637,7 +639,7 @@ Item {
                             maximumLineCount: 4 
                             
                             property real textShift: index === clipList.currentIndex ? window.s(4) : 0
-                            transform: Translate { x: textShift }
+                            transform: Translate { x: textItem.textShift }
                             Behavior on textShift { NumberAnimation { duration: 500; easing.type: Easing.OutExpo } }
                             Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
                         }

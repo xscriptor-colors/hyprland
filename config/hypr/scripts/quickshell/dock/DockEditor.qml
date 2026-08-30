@@ -37,6 +37,7 @@ Item {
     property var dock: DockLayout.defaultDock()
     property var palettes: ([])
     property bool _dirty: false
+    property bool borderTargetActive: true
 
     Timer { id: saveTimer; interval: 220; onTriggered: flushSave() }
     function markDirty() { _dirty = true; saveTimer.restart(); }
@@ -52,6 +53,10 @@ Item {
         reload();
         paletteReader.running = true;
         scaleReader.running = true;
+        // Push window-border colors to Hyprland live whenever the palette
+        // re-applies or settings.json changes (only this instance pushes).
+        themeColors.paletteApplied.connect(function() { themeColors.syncWindowBorders(); });
+        themeColors.settingsUpdated.connect(function() { themeColors.syncWindowBorders(); });
     }
 
     Process {
@@ -322,6 +327,100 @@ Item {
                                         onInc: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.min(8, root.dock.borderWidth+1) })) }
                                     ColorCycle { bar: root; role: root.dock.borderColor; onCycled: (role) => root.applyDock(Object.assign({}, root.dock, { borderColor: role })) }
                                 }
+                            }
+                        }
+                    }
+
+                    // ── CARD: WINDOW BORDERS ──────────────────────────────────
+                    Rectangle {
+                        width: parent.width
+                        radius: s(18)
+                        color: colors.surface0
+                        border.width: s(1); border.color: colors.surface1
+                        height: winBordCol.implicitHeight + s(28)
+                        Column {
+                            id: winBordCol
+                            anchors.fill: parent
+                            anchors.margins: s(14)
+                            spacing: s(9)
+                            SectionTitle { bar: root; text: "Window borders" }
+                            Item {
+                                width: parent.width
+                                height: s(28)
+                                EditLabel { bar: root; text: "Follow palette"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                ToggleSwitch { bar: root; checked: root.dock.borderFollowPalette !== false; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter;
+                                    onToggled: root.applyDock(Object.assign({}, root.dock, { borderFollowPalette: root.dock.borderFollowPalette !== false ? false : true })) }
+                            }
+                            Item {
+                                width: parent.width
+                                height: s(28)
+                                visible: root.dock.borderFollowPalette === false
+                                EditLabel { bar: root; text: "Target"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                Row {
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: s(8)
+                                    EditPill { bar: root; text: "Active"; active: root.borderTargetActive; onActivated: root.borderTargetActive = true }
+                                    EditPill { bar: root; text: "Inactive"; active: !root.borderTargetActive; onActivated: root.borderTargetActive = false }
+                                }
+                            }
+                            Item {
+                                width: parent.width
+                                height: s(28)
+                                visible: root.dock.borderFollowPalette === false
+                                EditLabel { bar: root; text: root.borderTargetActive ? "Active color" : "Inactive color"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                Rectangle {
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: s(92); height: s(26); radius: s(8)
+                                    color: root.borderTargetActive ? themeColors.borderHex("active") : themeColors.borderHex("inactive")
+                                    border.width: 1; border.color: colors.surface2
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: root.borderTargetActive ? themeColors.borderHex("active") : themeColors.borderHex("inactive")
+                                        font.family: "Hack Nerd Font"; font.pixelSize: s(9); font.weight: Font.Bold
+                                        color: colors.text
+                                    }
+                                }
+                            }
+                            Flow {
+                                width: parent.width
+                                visible: root.dock.borderFollowPalette === false
+                                spacing: s(6)
+                                Repeater {
+                                    model: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+                                    delegate: Rectangle {
+                                        required property int modelData
+                                        width: s(26); height: s(26); radius: s(7)
+                                        color: themeColors["color" + modelData]
+                                        border.width: 1; border.color: colors.surface2
+                                        Rectangle {
+                                            anchors.fill: parent; anchors.margins: s(2); radius: s(5)
+                                            visible: (root.borderTargetActive
+                                                ? themeColors.borderHex("active") === themeColors.hexOf(themeColors["color" + modelData])
+                                                : themeColors.borderHex("inactive") === themeColors.hexOf(themeColors["color" + modelData]))
+                                            border.width: 2; border.color: colors.text
+                                        }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                let hex = themeColors.hexOf(themeColors["color" + modelData]);
+                                                root.applyDock(Object.assign({}, root.dock, root.borderTargetActive
+                                                    ? { borderActive: hex }
+                                                    : { borderInactive: hex }));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Text {
+                                width: parent.width
+                                visible: root.dock.borderFollowPalette !== false
+                                text: "Borders follow the active palette accent. Turn this off to pick custom colors (applies live, no window restart)."
+                                font.family: "Hack Nerd Font"; font.pixelSize: s(10)
+                                color: colors.overlay1
+                                wrapMode: Text.WordWrap
                             }
                         }
                     }

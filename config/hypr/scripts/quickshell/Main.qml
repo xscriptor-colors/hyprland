@@ -117,12 +117,31 @@ PanelWindow {
         if (widgetCache[name]) return;
         let t = getLayout(name);
         if (!t || !t.comp) return;
-        let obj = t.comp.createObject(preloaderContainer, {
-            "notifModel": masterWindow.notifModel,
-            "liveNotifs": masterWindow.liveNotifs,
-            "visible": false
-        });
-        if (obj) widgetCache[name] = obj;
+        // t.comp is a URL STRING from WindowRegistry — it has no createObject.
+        // Create a real Component first (the old code called createObject on the
+        // string, which always threw and silently killed the whole preload).
+        let comp = Qt.createComponent(t.comp);
+        if (!comp) return;
+        let make = () => {
+            if (comp.status !== Component.Ready) return false;
+            // Only force the widget invisible at preload; notifModel/liveNotifs
+            // and layout props are injected when the widget is actually shown
+            // (some widgets don't declare them, so passing them here warns).
+            let obj = comp.createObject(preloaderContainer, { "visible": false });
+            if (obj) widgetCache[name] = obj;
+            comp.destroy();
+            return true;
+        };
+        if (comp.status === Component.Ready) {
+            make();
+        } else if (comp.status === Component.Loading) {
+            comp.statusChanged.connect(() => {
+                if (comp.status === Component.Ready) make();
+                else comp.destroy();
+            });
+        } else {
+            comp.destroy();
+        }
     }
 
     Component.onCompleted: {
@@ -471,14 +490,6 @@ PanelWindow {
         masterWindow.targetW = t.w;
         masterWindow.targetH = t.h;
 
-        let props = {};
-        props["notifModel"]   = masterWindow.notifModel;
-        props["liveNotifs"]   = masterWindow.liveNotifs;
-        props["layoutWidth"]  = t.w;
-        props["layoutHeight"] = t.h;
-        if (newWidget === "wallpaper") props["widgetArg"] = arg;
-        if (newWidget === "settings") props["activeMode"] = arg;
-
         let cached = widgetCache[newWidget];
         if (cached) {
             if (cached.notifModel   !== undefined) cached.notifModel   = masterWindow.notifModel;
@@ -496,14 +507,21 @@ PanelWindow {
             }
         } else {
             if (immediate) {
-                widgetStack.replace(t.comp, props, StackView.Immediate);
+                widgetStack.replace(t.comp, {}, StackView.Immediate);
             } else {
-                widgetStack.replace(t.comp, props);
+                widgetStack.replace(t.comp, {});
             }
         }
 
         let currentItem = widgetStack.currentItem;
         if (currentItem) {
+            // Assign optional cross-widget props only when the target defines them.
+            if (currentItem.notifModel   !== undefined) currentItem.notifModel   = masterWindow.notifModel;
+            if (currentItem.liveNotifs   !== undefined) currentItem.liveNotifs   = masterWindow.liveNotifs;
+            if (currentItem.layoutWidth  !== undefined) currentItem.layoutWidth  = t.w;
+            if (currentItem.layoutHeight !== undefined) currentItem.layoutHeight = t.h;
+            if (newWidget === "wallpaper" && currentItem.widgetArg !== undefined) currentItem.widgetArg = arg;
+            if (arg !== "" && currentItem.activeMode !== undefined) currentItem.activeMode = arg;
             if (currentItem.targetMasterWidth !== undefined) {
                 let dynW = currentItem.targetMasterWidth;
                 masterWindow.animW = dynW;

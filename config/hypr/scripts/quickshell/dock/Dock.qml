@@ -89,7 +89,7 @@ Variants {
                 id: dockColors
             }
             // Exposed as a property so modules/zones can use `colors.<role>`
-            // exactly like they did with the old MatugenColors component.
+            // exactly like they did with the legacy MatugenColors component.
             readonly property var colors: dockColors
 
             // ================================================================
@@ -146,6 +146,11 @@ Variants {
             Component.onCompleted: {
                 syncDockConfig();
                 dockWindow._lastOrientation = dockWindow.orientation;
+                // Keep Hyprland window-border colors in sync with the palette /
+                // border overrides at all times (the dock bar is always alive,
+                // so this fires whether or not the DockEditor is open).
+                dockColors.paletteApplied.connect(function() { dockColors.syncWindowBorders(); });
+                dockColors.settingsUpdated.connect(function() { dockColors.syncWindowBorders(); });
             }
 
             function syncDockConfig() {
