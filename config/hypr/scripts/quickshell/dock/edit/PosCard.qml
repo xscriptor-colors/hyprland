@@ -12,7 +12,7 @@ Rectangle {
 
     height: bar ? bar.s(64) : 64
     radius: bar ? bar.s(14) : 14
-    color: (dockRef && dockRef.position === pos) ? bar.colors.accent : bar.colors.surface2
+    color: (dockRef && dockRef.position === pos) ? bar.colors.accent : bar.colors.surface1
     opacity: (dockRef && dockRef.position === pos) ? 1 : 0.55
     Behavior on color { ColorAnimation { duration: 150 } }
 

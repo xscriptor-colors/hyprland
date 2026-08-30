@@ -19,7 +19,7 @@ ModulePill {
 
     Text {
         text: ""
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor
 

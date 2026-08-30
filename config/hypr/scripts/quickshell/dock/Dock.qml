@@ -120,9 +120,33 @@ Variants {
             property bool barBg: false
             property real borderWidth: 0
             property string borderColor: "surface1"
+            // Configurable font for all module text/icons (dock.font).
+            property string fontFamily: "Hack Nerd Font"
+            // Tracks the last applied orientation so switching vertical ↔
+            // horizontal can trigger a clean reload (same as SUPER+R) — the
+            // module layout glitches when crossing axes without it.
+            property string _lastOrientation: ""
 
-            onDockConfigChanged: syncDockConfig()
-            Component.onCompleted: syncDockConfig()
+            onDockConfigChanged: {
+                let cfg = dockConfig || DockLayout.defaultDock();
+                let newOrient = (cfg.position === "top" || cfg.position === "bottom") ? "horizontal" : "vertical";
+                // Only reload on an ACTUAL axis change (vertical ↔ horizontal),
+                // and never during boot (before configReady).
+                let needsReload = dockWindow.configReady && dockWindow._lastOrientation !== "" && newOrient !== dockWindow._lastOrientation;
+                syncDockConfig();
+                if (needsReload) {
+                    // Same as SUPER+R: trigger the IPC reload (calling
+                    // Quickshell.reload() inline while handling a config event is
+                    // silently dropped).
+                    Quickshell.execDetached(["bash", "-c",
+                        "qs -p " + Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/Shell.qml ipc call topbar forceReload 2>/dev/null"]);
+                }
+                dockWindow._lastOrientation = newOrient;
+            }
+            Component.onCompleted: {
+                syncDockConfig();
+                dockWindow._lastOrientation = dockWindow.orientation;
+            }
 
             function syncDockConfig() {
                 if (!dockConfig) return;
@@ -137,6 +161,7 @@ Variants {
                 dockWindow.barBg = dockConfig.barBg;
                 dockWindow.borderWidth = dockConfig.borderWidth;
                 dockWindow.borderColor = dockConfig.borderColor;
+                dockWindow.fontFamily = dockConfig.font || "Hack Nerd Font";
                 dockWindow.zones = dockConfig.zones;
                 applyPosition();
             }

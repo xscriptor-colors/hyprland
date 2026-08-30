@@ -17,7 +17,7 @@ ModulePill {
 
     Text {
         text: "󰅖"
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(22)
         color: mod.contentColor
         Behavior on color { ColorAnimation { duration: 200 } }

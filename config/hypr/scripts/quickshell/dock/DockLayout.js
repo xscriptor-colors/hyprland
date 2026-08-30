@@ -113,6 +113,7 @@ function defaultDock() {
         barBg: false,
         borderWidth: 0,
         borderColor: "surface1",
+        font: "Hack Nerd Font",
         zones: zones
     };
 }
@@ -136,6 +137,7 @@ function normalizeDock(raw) {
         barBg: raw.barBg !== undefined ? (raw.barBg === true) : def.barBg,
         borderWidth: (typeof raw.borderWidth === "number") ? raw.borderWidth : def.borderWidth,
         borderColor: (typeof raw.borderColor === "string" && raw.borderColor !== "") ? raw.borderColor : def.borderColor,
+        font: (typeof raw.font === "string" && raw.font.trim() !== "") ? raw.font : def.font,
         zones: []
     };
 

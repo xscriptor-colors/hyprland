@@ -81,10 +81,10 @@ Item {
     Rectangle {
         anchors.fill: parent
         anchors.margins: s(10)
-        radius: s(24)
-        color: Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.94)
+        radius: s(26)
+        color: Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.97)
         border.width: s(1)
-        border.color: colors.surface1
+        border.color: colors.surface0
         clip: true
 
         Column {
@@ -126,8 +126,8 @@ Item {
                     Rectangle {
                         width: parent.width
                         radius: s(18)
-                        color: colors.surface1
-                        border.width: s(1); border.color: colors.surface2
+                        color: colors.surface0
+                        border.width: s(1); border.color: colors.surface1
                         height: posCol.implicitHeight + s(28)
                         Column {
                             id: posCol
@@ -154,8 +154,8 @@ Item {
                     Rectangle {
                         width: parent.width
                         radius: s(18)
-                        color: colors.surface1
-                        border.width: s(1); border.color: colors.surface2
+                        color: colors.surface0
+                        border.width: s(1); border.color: colors.surface1
                         height: palCol.implicitHeight + s(28)
                         Column {
                             id: palCol
@@ -233,8 +233,8 @@ Item {
                     Rectangle {
                         width: parent.width
                         radius: s(18)
-                        color: colors.surface1
-                        border.width: s(1); border.color: colors.surface2
+                        color: colors.surface0
+                        border.width: s(1); border.color: colors.surface1
                         height: aspCol.implicitHeight + s(28)
                         Column {
                             id: aspCol
@@ -289,6 +289,28 @@ Item {
                             }
                             Item {
                                 width: parent.width
+                                height: s(32)
+                                EditLabel { bar: root; text: "Fuente"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                TextField {
+                                    id: fontField
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: s(240)
+                                    height: s(30)
+                                    text: root.dock.font || "Hack Nerd Font"
+                                    font.family: text
+                                    font.pixelSize: s(12)
+                                    color: colors.text
+                                    selectByMouse: true
+                                    background: Rectangle { color: colors.surface1; radius: s(8); border.color: colors.surface2 }
+                                    onEditingFinished: {
+                                        let v = text.trim();
+                                        root.applyDock(Object.assign({}, root.dock, { font: v !== "" ? v : "Hack Nerd Font" }));
+                                    }
+                                }
+                            }
+                            Item {
+                                width: parent.width
                                 height: s(28)
                                 EditLabel { bar: root; text: "Borde (global)"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 Row {
@@ -308,8 +330,8 @@ Item {
                     Rectangle {
                         width: parent.width
                         radius: s(18)
-                        color: colors.surface1
-                        border.width: s(1); border.color: colors.surface2
+                        color: colors.surface0
+                        border.width: s(1); border.color: colors.surface1
                         height: zonasCol.implicitHeight + s(28)
                         Column {
                             id: zonasCard

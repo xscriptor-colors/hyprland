@@ -15,7 +15,7 @@ ModulePill {
     Text {
         visible: mod.horizontal
         text: bar.timeStr
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(16)
         font.weight: Font.Black
         color: mod.contentColor
@@ -26,7 +26,7 @@ ModulePill {
         visible: mod.compact
         width: Math.max(bar.s(28), bar.pillWidth - bar.s(8))
         text: bar.timeStr.length >= 5 ? bar.timeStr.substring(0, 5) : bar.timeStr
-        font.family: "Hack Nerd Font"
+        font.family: bar.fontFamily
         font.pixelSize: bar.s(14)
         font.weight: Font.Black
         horizontalAlignment: Text.AlignHCenter

@@ -55,7 +55,7 @@ ModulePill {
 
                     Text {
                         text: bar.displayTitle
-                        font.family: "Hack Nerd Font"
+                        font.family: bar.fontFamily
                         font.weight: Font.Black
                         font.pixelSize: bar.s(13)
                         color: colors.text
@@ -64,7 +64,7 @@ ModulePill {
                     }
                     Text {
                         text: bar.displayTime
-                        font.family: "Hack Nerd Font"
+                        font.family: bar.fontFamily
                         font.weight: Font.Black
                         font.pixelSize: bar.s(13)
                         color: colors.subtext0
@@ -83,7 +83,7 @@ ModulePill {
                 width: bar.s(24); height: bar.s(24)
                 anchors.verticalCenter: parent.verticalCenter
                 Text {
-                    anchors.centerIn: parent; text: "󰒮"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(26)
+                    anchors.centerIn: parent; text: "󰒮"; font.family: bar.fontFamily; font.pixelSize: bar.s(26)
                     color: prevMouse.containsMouse ? colors.text : colors.overlay2
                     Behavior on color { ColorAnimation { duration: 150 } }
                     scale: prevMouse.containsMouse ? 1.1 : 1.0
@@ -95,7 +95,7 @@ ModulePill {
                 width: bar.s(28); height: bar.s(28)
                 anchors.verticalCenter: parent.verticalCenter
                 Text {
-                    anchors.centerIn: parent; text: bar.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(30)
+                    anchors.centerIn: parent; text: bar.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: bar.fontFamily; font.pixelSize: bar.s(30)
                     color: playMouse.containsMouse ? colors.green : colors.text
                     Behavior on color { ColorAnimation { duration: 150 } }
                     scale: playMouse.containsMouse ? 1.15 : 1.0
@@ -107,7 +107,7 @@ ModulePill {
                 width: bar.s(24); height: bar.s(24)
                 anchors.verticalCenter: parent.verticalCenter
                 Text {
-                    anchors.centerIn: parent; text: "󰒭"; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(26)
+                    anchors.centerIn: parent; text: "󰒭"; font.family: bar.fontFamily; font.pixelSize: bar.s(26)
                     color: nextMouse.containsMouse ? colors.text : colors.overlay2
                     Behavior on color { ColorAnimation { duration: 150 } }
                     scale: nextMouse.containsMouse ? 1.1 : 1.0
@@ -138,7 +138,7 @@ ModulePill {
             anchors.centerIn: parent
             visible: !bar.displayArtUrl || bar.displayArtUrl === ""
             text: bar.musicData.status === "Playing" ? "󰝚" : "󰝛"
-            font.family: "Hack Nerd Font"
+            font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: colors.mauve
         }
