@@ -5,7 +5,7 @@
 ### Added
 - **Palette system** — 12 fixed palettes in `dock/palettes/*.json` + `dock/Colors.qml` (replaces `MatugenColors`). Every widget, border, SDDM, kitty and nvim now follows the active palette.
 - **Window borders UI** — Dock Editor "Window borders" card (follow-palette toggle + manual active/inactive colors), applied live via `hyprctl eval` without restarting windows.
-- **`scripts/theme-sync.sh`** — kitty themes regenerate from `dock/palettes` (single source of truth) and follow `settings.json → dock.palette`; nvim keeps its own upstream config.
+- **`scripts/theme-sync.sh`** — kitty + starship + VS Code themes regenerate from `dock/palettes` (single source of truth) and follow `settings.json → dock.palette` (VS Code updates `workbench.colorTheme` + `workbench.iconTheme` live, both `code` and `code-insiders`); nvim keeps its own upstream config.
 - **`scripts/sddm-colors.sh`** — SDDM login theme colors derived from the palette, plus a dynamic background that follows the current wallpaper.
 
 ### Changed
