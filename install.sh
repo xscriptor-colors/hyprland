@@ -465,10 +465,6 @@ install_dotfiles() {
     rm -f "$CONFIG_DIR/hypr/scripts/settings_watcher.sh" \
           "$CONFIG_DIR/hypr/scripts/detect-monitors.sh"
 
-    # Copy themes
-    mkdir -p "$CONFIG_DIR/hypr/themes"
-    cp -r "$SCRIPT_DIR/themes/"* "$CONFIG_DIR/hypr/themes/"
-
     # Copy scripts
     mkdir -p "$CONFIG_DIR/hypr/scripts"
     if [ -d "$SCRIPT_DIR/scripts" ]; then
@@ -712,26 +708,28 @@ install_nvim_config() {
 install_sddm_theme() {
     log "Installing SDDM theme..."
 
-    if [ -d "$SCRIPT_DIR/config/sddm/themes/matugen-minimal" ]; then
-        sudo mkdir -p /usr/share/sddm/themes/matugen-minimal
-        sudo cp -r "$SCRIPT_DIR/config/sddm/themes/matugen-minimal/"* /usr/share/sddm/themes/matugen-minimal/
+    if [ -d "$SCRIPT_DIR/config/sddm/themes/x" ]; then
+        sudo mkdir -p /usr/share/sddm/themes/x
+        sudo cp -r "$SCRIPT_DIR/config/sddm/themes/x/"* /usr/share/sddm/themes/x/
 
-        # Create Colors.qml with Matugen-generated colors if available, else fallback
+        # Generate Colors.qml from the active palette (no Matugen involved)
+        if [ -f "$SCRIPT_DIR/scripts/sddm-colors.sh" ]; then
+            bash "$SCRIPT_DIR/scripts/sddm-colors.sh" || warn "SDDM color generation failed (non-fatal)"
+        fi
         if [ -f "$HOME/.config/hypr/sddm-colors.qml" ]; then
-            sudo cp "$HOME/.config/hypr/sddm-colors.qml" /usr/share/sddm/themes/matugen-minimal/Colors.qml
-            log "SDDM Colors.qml generated from Matugen"
+            sudo cp "$HOME/.config/hypr/sddm-colors.qml" /usr/share/sddm/themes/x/Colors.qml
         else
-            cat <<EOF | sudo tee /usr/share/sddm/themes/matugen-minimal/Colors.qml > /dev/null
+            cat <<EOF | sudo tee /usr/share/sddm/themes/x/Colors.qml > /dev/null
 pragma Singleton
 import QtQuick
 QtObject {
-    readonly property color base: "#1e1e2e"
-    readonly property color surface0: "#313244"
-    readonly property color text: "#cdd6f4"
-    readonly property color subtext0: "#a6adc8"
-    readonly property color mauve: "#cba6f7"
-    readonly property color blue: "#89b4fa"
-    readonly property color red: "#f38ba8"
+    readonly property color base: "#1a1a1a"
+    readonly property color surface0: "#2b2b2b"
+    readonly property color text: "#ffffff"
+    readonly property color subtext0: "#cccccc"
+    readonly property color mauve: "#ff9aa2"
+    readonly property color blue: "#8be9fd"
+    readonly property color red: "#ff5555"
 }
 EOF
             log "SDDM Colors.qml created with default palette"
@@ -739,9 +737,9 @@ EOF
 
         # Configure SDDM to use the theme
         sudo mkdir -p /etc/sddm.conf.d
-        cat <<EOF | sudo tee /etc/sddm.conf.d/10-matugen-theme.conf > /dev/null
+        cat <<EOF | sudo tee /etc/sddm.conf.d/10-x-theme.conf > /dev/null
 [Theme]
-Current=matugen-minimal
+Current=x
 EOF
 
         # Disable user-specific theme override if present (SilentSDDM, etc.)
@@ -756,7 +754,7 @@ EOF
 
         log "SDDM theme installed and configured!"
     else
-        warn "SDDM theme directory not found at config/sddm/themes/matugen-minimal"
+        warn "SDDM theme directory not found at config/sddm/themes/x"
     fi
 }
 

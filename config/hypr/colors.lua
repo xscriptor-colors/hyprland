@@ -1,6 +1,6 @@
 -- ╔═══════════════════════════════════════════════════════════════════════════╗
 -- ║ THEME: X (FIXED PALETTE)                                                   ║
--- ║ Color scheme from references.md                                            ║
+-- ║ Color scheme from dock/palettes (12 fixed palettes)                                            ║
 -- ║                                                                           ║
 -- ║ This module exports the X palette as a Lua table so other config files    ║
 -- ║ can consume it. Colors are stored as stripped hex; use X.hex(name) or     ║

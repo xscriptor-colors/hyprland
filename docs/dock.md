@@ -22,7 +22,7 @@ quickshell/
     ModulePill.qml        # the shared island pill (all visual plumbing)
     Colors.qml            # Matugen-free palette loader + semantic role derivation
     DockLayout.js         # pure-JS engine: zone-as-data model, module catalog, migration
-    palettes/*.json       # 13 palettes (base-16 from references.md + optional role overrides)
+    palettes/*.json       # 12 palettes (base-16 + optional role overrides)
   topbar/modules/*.qml    # the 16 modules (being migrated to ModulePill)
   topbar/TopbarLayout.js  # OLD catalog — still used by the legacy TopBar during migration
 ```
