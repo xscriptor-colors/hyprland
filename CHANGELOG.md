@@ -21,6 +21,7 @@
 - Settings popup sidebar not drawing after topbar dead-code cleanup (brace imbalance) + missing `overlay1`/`overlay2` roles.
 - Wallpaper picker applying from the wrong directory (`srcDir` now from `settings.json`).
 - Kitty comment lines invisible: `color8` was too close to the background in several palettes (and `paris` had `color7` = background) — `color8` is now a mid-tone `mix(background, foreground, 0.5/0.65)` with sufficient contrast in all 12 palettes; `paris` `color7` fixed to the foreground.
+- Shell comments (`# ...`) invisible when typed in zsh: `zsh-syntax-highlighting` defaults to `fg=black` (the background) — `~/.zshrc` now sets `ZSH_HIGHLIGHT_STYLES[comment]='fg=bright-black,bold'` so comments use the palette's `color8` (visible in every theme).
 - Notifications popup: removed decorative background bubbles; kept small/minimal on the side; removed the redundant `swaync` daemon (double popup + broken app icon).
 - Various pre-existing QML bugs: widget property injection (`Main.qml`), QuickNotes autosave, FileSearch `surface2`, Guide/Clipboard/appLauncher/Calendar transform scoping, NetworkPopup scoping, Updater null guard, Zone reload noise.
 
