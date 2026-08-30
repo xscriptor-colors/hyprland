@@ -251,7 +251,7 @@ CORE_PACKAGES_ARCH=(
     "gvfs"
     "gvfs-mtp"
 
-    # New packages from imperative-dots
+    # New packages from xshell
     "quickshell-git"
     "swayosd-git"
     "cava"
@@ -833,6 +833,16 @@ check_requirements() {
 # │ MAIN INSTALLATION                                                                 │
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
+
+# Writes the local xshell version state read by the guide/updater/notifier.
+write_xshell_version() {
+    mkdir -p "$HOME/.local/state"
+    cat > "$HOME/.local/state/xshell-version" <<EOF
+LOCAL_VERSION="$INSTALL_VERSION"
+EOF
+    log "Wrote xshell version ($INSTALL_VERSION)"
+}
+
 main() {
     print_banner
 
@@ -902,6 +912,7 @@ main() {
 
     # Install dotfiles
     install_dotfiles
+    write_xshell_version
 
     # Download wallpaper pack
     download_wallpapers
@@ -1005,6 +1016,7 @@ case "$1" in
     --dotfiles-only)
         backup_config
         install_dotfiles
+        write_xshell_version
         install_kitty_config
         install_hack_nerd_font
         install_nvim_config

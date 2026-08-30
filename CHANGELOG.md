@@ -24,6 +24,7 @@
 - Shell comments (`# ...`) invisible when typed in zsh: `zsh-syntax-highlighting` defaults to `fg=black` (the background) — `~/.zshrc` now sets `ZSH_HIGHLIGHT_STYLES[comment]='fg=bright-black,bold'` so comments use the palette's `color8` (visible in every theme).
 - Notifications popup: removed decorative background bubbles; kept small/minimal on the side; removed the redundant `swaync` daemon (double popup + broken app icon).
 - Screen recorder: `gpu-screen-recorder -w portal` hung without saving; switched to direct capture (`-w screen` full, `-w region` area) and converted the overlay's grim-style geometry (`X,Y WxH`) to gsr's (`WxH+X+Y`) so area recordings save correctly.
+- Guide info panel: removed the obsolete "Matugen" tab (now "Palettes") and the "Modules" tab/button, fixed the author block typo (`xscripto` → `xscriptor`), branding `Imperative` → `xshell`, version state renamed `imperative-dots-version` → `xshell-version` (written by the installer), repo links fixed to `main` branch and correct targets (NixOS→xlnux, Wallpapers→xww), and slightly more compact window (1160×720) keeping all color roles.
 - Various pre-existing QML bugs: widget property injection (`Main.qml`), QuickNotes autosave, FileSearch `surface2`, Guide/Clipboard/appLauncher/Calendar transform scoping, NetworkPopup scoping, Updater null guard, Zone reload noise.
 
 ## [2026-08-23]
