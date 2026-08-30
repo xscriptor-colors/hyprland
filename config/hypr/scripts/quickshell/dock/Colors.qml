@@ -6,7 +6,7 @@ import Quickshell.Io
 // Colors — Matugen-free palette system.
 //
 // Loads a named palette from dock/palettes/<slug>.json (base-16 from
-// references.md + optional explicit "roles" overrides) and derives the
+// dock/palettes/*.json + optional explicit "roles" overrides) and derives the
 // semantic roles the UI uses (base, surface0/1/2, text, subtext, overlay,
 // and the accent set). Every module reads from `colors.<role>` so swapping
 // the active palette never touches module code.
@@ -134,6 +134,10 @@ Item {
         const lua = 'hl.config({ general = { col = { active_border = "rgba(' + a + 'ee)", inactive_border = "rgba(' + i + 'aa)" } } })';
         const cmd = "hyprctl eval '" + lua + "' 2>/dev/null";
         Quickshell.execDetached(["bash", "-c", cmd]);
+        // Keep the SDDM login theme in sync with the active palette (local file
+        // always regenerates; the sudo copy to /usr/share silently no-ops when
+        // passwordless sudo is unavailable).
+        Quickshell.execDetached(["bash", "-c", "bash ~/.config/hypr/scripts/sddm-colors.sh >/dev/null 2>&1"]);
     }
 
     function applyPalette(c) {

@@ -79,8 +79,8 @@ Item {
     }
 
     onParentChanged: applyAnchors()
-    onIsHorizontalChanged: Qt.callLater(() => applyAnchors())
-    onZoneDataChanged: { zoneRoot.ready = false; Qt.callLater(() => applyAnchors()); }
+    onIsHorizontalChanged: Qt.callLater(() => { try { applyAnchors(); } catch (e) {} })
+    onZoneDataChanged: { zoneRoot.ready = false; Qt.callLater(() => { try { applyAnchors(); } catch (e) {} }); }
     Component.onCompleted: applyAnchors()
 
     // --- unified pill behind the whole zone ---------------------------------
