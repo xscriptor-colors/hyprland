@@ -7,7 +7,6 @@ import Quickshell
 import Quickshell.Io
 import "../"
 import "../dock"
-import "../topbar/TopbarLayout.js" as TopbarLayout
 
 Item {
     id: root
@@ -131,7 +130,6 @@ Item {
         if (tab === 1) return 3;
         if (tab === 2) return dynamicKeybindsModel.count - 1;
         if (tab === 4) return dynamicStartupModel.count - 1;
-        if (tab === 5) return root.topbarModules.length - 1;
         return -1;
     }
 
@@ -168,10 +166,7 @@ Item {
                 let isEd = dynamicStartupModel.get(root.highlightedBox).isEditing;
                 dynamicStartupModel.setProperty(root.highlightedBox, "isEditing", !isEd);
             }
-        } else if (root.currentTab === 5) {
-            let tbMod = root.topbarModuleAt(root.highlightedBox);
-            if (tbMod) root.topbarApply(TopbarLayout.toggleEnabled(root.topbarLayoutView, tbMod.id));
-        }
+
     }
 
     onHighlightedBoxChanged: {
@@ -212,163 +207,11 @@ Item {
 
     property int currentTab: 0
 
-    // Topbar layout editing. Edits land in a draft so a burst of keystrokes
-    // collapses into one settings.json write instead of one per keypress.
-    property var topbarDraft: null
-    readonly property var topbarLayoutView: topbarDraft ? topbarDraft : Config.topbarLayout
-    readonly property var topbarModules: TopbarLayout.flatten(topbarLayoutView)
-
-    function topbarModuleAt(idx) {
-        return (idx >= 0 && idx < root.topbarModules.length) ? root.topbarModules[idx] : null;
-    }
-
-    // Roundness writes go through the same debounce idea as the layout: the bar
-    // repaints from settings.json, so a burst of presses must not spam jq.
-    function roundnessStep(dir) {
-        let next = Math.max(0.0, Math.min(1.0, Config.topbarRoundness + dir * 0.1));
-        Config.topbarRoundness = Math.round(next * 100) / 100;
-        roundnessSaveTimer.restart();
-    }
-
-    Timer {
-        id: roundnessSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarRoundness(Config.topbarRoundness)
-    }
-
-    // Border width follows the same debounce pattern as roundness.
-    Timer {
-        id: borderWidthSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarBorderWidth(Config.topbarBorderWidth)
-    }
-
-    property var topbarBorderColorOptions: [
-        "mauve", "blue", "sapphire", "peach", "green", "red",
-        "pink", "yellow", "teal", "maroon", "text", "subtext0",
-        "surface1", "surface2"
-    ]
-
-    function borderColorIndex() {
-        let idx = root.topbarBorderColorOptions.indexOf(Config.topbarBorderColor);
-        return idx >= 0 ? idx : 0;
-    }
-
-    Timer {
-        id: borderColorSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarBorderColor(Config.topbarBorderColor)
-    }
-
-    // Border mode: unified or per-zone.
-    // When switching to per-zone the unified values are copied into every zone
-    // so the transition is seamless instead of dropping to zero-width borders.
-    function borderModeToggle() {
-        if (Config.topbarBorderMode === "unified") {
-            Config.topbarBorderMode = "per-zone";
-            Config.topbarBorderWidthLeft = Config.topbarBorderWidth;
-            Config.topbarBorderColorLeft = Config.topbarBorderColor;
-            Config.topbarBorderWidthCenter = Config.topbarBorderWidth;
-            Config.topbarBorderColorCenter = Config.topbarBorderColor;
-            Config.topbarBorderWidthRight = Config.topbarBorderWidth;
-            Config.topbarBorderColorRight = Config.topbarBorderColor;
-            // Persist all per-zone values in a single write so the bar picks
-            // them up immediately instead of defaulting to zero-width borders.
-            perZoneBorderSaveTimer.restart();
-        } else {
-            Config.topbarBorderMode = "unified";
-        }
-        borderModeSaveTimer.restart();
-    }
-    Timer {
-        id: borderModeSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarBorderMode(Config.topbarBorderMode)
-    }
-
-    // Per-zone border helpers. Accept optional zone parameter so the same
-    // functions work for both unified and per-zone controls.
-    function borderWidthStep(dir, zone) {
-        let prop = zone ? ("topbarBorderWidth" + zone.charAt(0).toUpperCase() + zone.slice(1)) : "topbarBorderWidth";
-        let next = Math.max(0, Math.min(4, Config[prop] + dir));
-        Config[prop] = next;
-        (zone ? perZoneBorderSaveTimer : borderWidthSaveTimer).restart();
-    }
-    function borderColorCycle(dir, zone) {
-        let opts = root.topbarBorderColorOptions;
-        let prop = zone ? ("topbarBorderColor" + zone.charAt(0).toUpperCase() + zone.slice(1)) : "topbarBorderColor";
-        let idx = opts.indexOf(Config[prop]);
-        if (idx < 0) idx = 0;
-        idx = (idx + dir + opts.length) % opts.length;
-        Config[prop] = opts[idx];
-        (zone ? perZoneBorderSaveTimer : borderColorSaveTimer).restart();
-    }
-    // Saves all per-zone border values in a single jq call to avoid race
-    // conditions when multiple keys are written at once.
-    Timer {
-        id: perZoneBorderSaveTimer
-        interval: 250
-        onTriggered: Config.updateJsonBulk({
-            "topbarBorderWidthLeft": Config.topbarBorderWidthLeft,
-            "topbarBorderWidthCenter": Config.topbarBorderWidthCenter,
-            "topbarBorderWidthRight": Config.topbarBorderWidthRight,
-            "topbarBorderColorLeft": Config.topbarBorderColorLeft,
-            "topbarBorderColorCenter": Config.topbarBorderColorCenter,
-            "topbarBorderColorRight": Config.topbarBorderColorRight
-        })
-    }
-
-    Timer {
-        id: pillBgSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarPillBg(Config.topbarPillBg)
-    }
-
-    Timer {
-        id: solidFillSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarPillSolid(Config.topbarPillSolid)
-    }
-
-    // App scale is persisted by the General tab's Save button, matching how
     // every other setting on that tab behaves.
     function appScaleStep(dir) {
         let next = Math.max(0.75, Math.min(2.0, Config.appScale + dir * 0.25));
         Config.appScale = Math.round(next * 100) / 100;
     }
-
-    function topbarApply(newLayout) {
-        root.topbarDraft = newLayout;
-        topbarSaveTimer.restart();
-    }
-
-    // Moves the highlighted module and keeps the highlight on it, so repeated
-    // presses keep acting on the same module instead of the same slot.
-    function topbarMove(delta) {
-        let mod = root.topbarModuleAt(root.highlightedBox);
-        if (!mod) return;
-        let next = TopbarLayout.move(root.topbarLayoutView, mod.id, delta);
-        root.topbarApply(next);
-        let flat = TopbarLayout.flatten(next);
-        for (let i = 0; i < flat.length; i++) {
-            if (flat[i].id === mod.id) { root.highlightedBox = i; break; }
-        }
-    }
-
-    Timer {
-        id: topbarSaveTimer
-        interval: 250
-        onTriggered: root.topbarFlush()
-    }
-
-    function topbarFlush() {
-        if (root.topbarDraft) Config.saveTopbarLayout(root.topbarDraft);
-        root.topbarDraft = null;
-    }
-
-    // Closing the panel inside the debounce window would otherwise drop the
-    // last edit on the floor.
-    Component.onDestruction: root.topbarFlush()
 
     // Opened straight onto a tab via `qs_manager.sh toggle settings <mode>`.
     property string activeMode: ""
@@ -521,30 +364,6 @@ Item {
                 event.accepted = true;
                 return;
             }
-        }
-
-        if (root.currentTab === 5 && (event.modifiers & Qt.ShiftModifier)
-            && (event.key === Qt.Key_Up || event.key === Qt.Key_Down)) {
-            root.topbarMove(event.key === Qt.Key_Down ? 1 : -1);
-            event.accepted = true;
-            return;
-        }
-
-        // Island shape is a tab-wide control, so it answers to Left/Right
-        // whatever module happens to be highlighted.
-        if (root.currentTab === 5 && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
-            root.roundnessStep(event.key === Qt.Key_Right ? 1 : -1);
-            event.accepted = true;
-            return;
-        }
-
-        // Border width with Alt+Left / Alt+Right in the topbar tab (unified mode only).
-        if (root.currentTab === 5 && Config.topbarBorderMode === "unified"
-            && (event.modifiers & Qt.AltModifier)
-            && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
-            root.borderWidthStep(event.key === Qt.Key_Right ? 1 : -1);
-            event.accepted = true;
-            return;
         }
 
         if (event.key === Qt.Key_Down) {
