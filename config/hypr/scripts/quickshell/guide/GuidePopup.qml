@@ -76,29 +76,13 @@ Item {
         event.accepted = true;
     }
     Keys.onLeftPressed: {
-        if (currentTab === 2) { 
-            if (selectedModuleIndex > 0) {
-                selectedModuleIndex--;
-                modulesList.positionViewAtIndex(selectedModuleIndex, ListView.Contain);
-            }
-            event.accepted = true;
-        }
+        event.accepted = true;
     }
     Keys.onRightPressed: {
-        if (currentTab === 2) { 
-            if (selectedModuleIndex < modulesDataModel.count - 1) {
-                selectedModuleIndex++;
-                modulesList.positionViewAtIndex(selectedModuleIndex, ListView.Contain);
-            }
-            event.accepted = true;
-        }
+        event.accepted = true;
     }
     Keys.onReturnPressed: {
-        if (currentTab === 2) { 
-            let target = modulesDataModel.get(selectedModuleIndex).target;
-            Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "toggle", target]);
-            event.accepted = true;
-        }
+        event.accepted = true;
     }
     Keys.onEnterPressed: { Keys.onReturnPressed(event); }
 
@@ -157,7 +141,7 @@ Item {
 
     Process {
         id: versionReader
-        command: ["bash", "-c", "source ~/.local/state/hyprland-version 2>/dev/null && echo $LOCAL_VERSION || echo 'Unknown'"]
+        command: ["bash", "-c", "source ~/.local/state/xshell-version 2>/dev/null && echo $LOCAL_VERSION || echo 'Unknown'"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -169,7 +153,7 @@ Item {
 
     Process {
         id: updateChecker
-        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor-colors/hyprland/modernizex/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
+        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -224,25 +208,13 @@ Item {
     // STATE MANAGEMENT & DATA
     // -------------------------------------------------------------------------
     property int currentTab: 1
-    property int selectedModuleIndex: 0
-    property var tabNames: ["Settings", "System", "Modules", "Matugen", "About"]
-    property var tabIcons: ["", "", "󰣆", "󰏘", ""]
+    property var tabNames: ["Settings", "System", "Palettes", "About"]
+    property var tabIcons: ["", "", "󰏘", ""]
 
     property real introBase: 0.0
     property real introSidebar: 0.0
     property real introContent: 0.0
 
-    ListModel {
-        id: modulesDataModel
-        ListElement { title: "Calendar & Weather"; target: "calendar"; icon: ""; desc: "Dual-sync calendar with live \nOpenWeatherMap integration."; preview: "previews/preview_calendar.png" }
-        ListElement { title: "Media & Lyrics"; target: "music"; icon: "󰎆"; desc: "PlayerCtl integration, Cava \nvisualizer, and live lyrics."; preview: "previews/preview_music.png" }
-        ListElement { title: "Battery & Power"; target: "battery"; icon: "󰁹"; desc: "Uptime tracking, power profiles, \nand battery health metrics."; preview: "previews/preview_battery.png" }
-        ListElement { title: "Network Hub"; target: "network"; icon: "󰤨"; desc: "Wi-Fi and Bluetooth connection \nmanagement via nmcli/bluez."; preview: "previews/preview_network.png" }
-        ListElement { title: "FocusTime"; target: "focustime"; icon: "󰄉"; desc: "Built-in Pomodoro timer daemon \nwith session tracking."; preview: "previews/preview_focustime.png" }
-        ListElement { title: "Volume Mixer"; target: "volume"; icon: "󰕾"; desc: "Pipewire integration for I/O \nvolume and stream routing."; preview: "previews/preview_volume.png" }
-        ListElement { title: "Wallpaper Picker"; target: "wallpaper"; icon: ""; desc: "Live awww backend rendering \nwith Matugen color generation."; preview: "previews/preview_wallpaper.png" }
-        ListElement { title: "Monitors"; target: "monitors"; icon: "󰍹"; desc: "Quick display management."; preview: "previews/preview_monitors.png" }
-    }
 
     Component.onCompleted: { 
         startupSequence.start(); 
@@ -433,7 +405,7 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                             spacing: root.s(2)
                             Text { 
-                                text: "Imperative"
+                                text: "xshell"
                                 font.family: "Hack Nerd Font"
                                 font.weight: Font.Black
                                 font.pixelSize: root.s(15)
@@ -623,7 +595,7 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor-colors/hyprland/modernizex/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor-colors/hyprland/modernizex/install.sh)\"'; fi";
+                            let cmd = "if command -v kitty >/dev/null 2>&1; then kitty --hold bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/install.sh)\"'; else ${TERM:-xterm} -hold -e bash -c 'eval \"$(curl -fsSL https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/install.sh)\"'; fi";
                             Quickshell.execDetached(["bash", "-c", cmd]);
                         }
                     }
@@ -944,7 +916,7 @@ Item {
                                 Layout.alignment: Qt.AlignVCenter
                                 spacing: root.s(1)
                                 Repeater {
-                                    model: [ { l: "x", c: root.red }, { l: "s", c: root.peach }, { l: "c", c: root.yellow }, { l: "r", c: root.green }, { l: "i", c: root.sapphire }, { l: "p", c: root.blue }, { l: "t", c: root.mauve }, { l: "o", c: root.pink } ]
+                                    model: [ { l: "x", c: root.red }, { l: "s", c: root.peach }, { l: "c", c: root.yellow }, { l: "r", c: root.green }, { l: "i", c: root.sapphire }, { l: "p", c: root.blue }, { l: "t", c: root.mauve }, { l: "o", c: root.pink }, { l: "r", c: root.red } ]
                                     Text { 
                                         text: modelData.l
                                         font.family: "Hack Nerd Font"
@@ -981,11 +953,11 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/xscriptor-colors/hyprland/tree/modernizex"]) 
+                            onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/xscriptor-colors/hyprland/tree/main"]) 
                         }
                     }
 
-                    // MODULES AND QUICK LINKS ROW
+                    // QUICK LINKS ROW
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: root.s(15)
@@ -993,7 +965,6 @@ Item {
                         Repeater {
                             model: [ 
                                 { name: "Settings", icon: "", color: "mauve", targetTab: 0, isToggle: true }, 
-                                { name: "Modules", icon: "󰣆", color: "blue", targetTab: 2, isToggle: false } 
                             ]
                             
                             Rectangle {
@@ -1102,208 +1073,12 @@ Item {
                 }
             }
 
-            // ------------------------------------------
-            // TAB 2: MODULES
-            // ------------------------------------------
-            Item {
-                id: tab2Pane
-                anchors.fill: parent
-                visible: root.currentTab === 2
-                opacity: visible ? 1.0 : 0.0
-                property real slideY: visible ? 0 : (root ? root.s(10) : 0)
-                
-                Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                transform: Translate { y: tab2Pane.slideY }
-                Behavior on opacity { NumberAnimation { duration: 250 } }
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.topMargin: root.s(15)
-                    anchors.leftMargin: root.s(20)
-                    anchors.rightMargin: root.s(20)
-                    anchors.bottomMargin: root.s(20)
-                    spacing: root.s(20)
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: root.s(4)
-                            Text { text: "Interactive Modules"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(28); color: root.text }
-                            Text { text: "Use arrow keys or select below to preview. Double-click or press Enter to toggle."; font.family: "Hack Nerd Font"; font.pixelSize: root.s(13); color: root.subtext0 }
-                        }
-                        
-                        Item { Layout.fillWidth: true } 
-                        
-                        Rectangle {
-                            Layout.preferredWidth: root.s(110)
-                            Layout.preferredHeight: root.s(44)
-                            radius: root.s(29)
-                            color: launchMa.containsMouse ? Qt.alpha(root.ambientBlue, 0.9) : Qt.alpha(root.ambientBlue, 0.7)
-                            border.color: root.ambientBlue
-                            border.width: 1
-                            scale: launchMa.pressed ? 0.95 : (launchMa.containsMouse ? 1.05 : 1.0)
-                            
-                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            
-                            RowLayout { 
-                                anchors.centerIn: parent
-                                spacing: root.s(8)
-                                Text { text: "󰐊"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(20); color: root.base } 
-                                Text { text: "PLAY"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(14); color: root.base } 
-                            }
-                            
-                            MouseArea { 
-                                id: launchMa
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "toggle", modulesDataModel.get(root.selectedModuleIndex).target]) 
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        id: previewContainer
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: root.s(16)
-                        color: root.surface0
-                        border.color: root.surface2
-                        border.width: 1
-                        clip: true
-                        
-                        property string targetSource: modulesDataModel.get(root.selectedModuleIndex).preview ? Qt.resolvedUrl(modulesDataModel.get(root.selectedModuleIndex).preview) : ""
-                        
-                        onTargetSourceChanged: { 
-                            baseImage.source = overlayImage.source; 
-                            overlayImage.opacity = 0.0; 
-                            overlayImage.source = targetSource; 
-                            fadeAnim.restart(); 
-                        }
-                        
-                        Image { 
-                            id: baseImage
-                            anchors.fill: parent
-                            anchors.margins: 0
-                            fillMode: Image.PreserveAspectCrop
-                            verticalAlignment: Image.AlignTop
-                            horizontalAlignment: Image.AlignHCenter
-                            smooth: true
-                            mipmap: true
-                            asynchronous: true 
-                        }
-                        
-                        Image { 
-                            id: overlayImage
-                            anchors.fill: parent
-                            anchors.margins: 0
-                            fillMode: Image.PreserveAspectCrop
-                            verticalAlignment: Image.AlignTop
-                            horizontalAlignment: Image.AlignHCenter
-                            smooth: true
-                            mipmap: true
-                            asynchronous: true
-                            NumberAnimation on opacity { 
-                                id: fadeAnim
-                                to: 1.0
-                                duration: 350
-                                easing.type: Easing.InOutQuad 
-                            } 
-                        }
-                    }
-
-                    ListView {
-                        id: modulesList
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: root.s(90)
-                        orientation: ListView.Horizontal
-                        spacing: root.s(15)
-                        clip: true
-                        model: modulesDataModel
-                        currentIndex: root.selectedModuleIndex
-                        highlightMoveDuration: 250
-                        
-                        delegate: Rectangle {
-                            width: root.s(220)
-                            height: root.s(90)
-                            radius: root.s(16)
-                            property bool isSelected: index === root.selectedModuleIndex
-                            color: isSelected ? root.surface1 : (modMa.containsMouse ? Qt.alpha(root.surface1, 0.5) : Qt.alpha(root.surface0, 0.4))
-                            border.color: isSelected ? root.ambientBlue : (modMa.containsMouse ? root.surface2 : root.surface1)
-                            border.width: isSelected ? 2 : 1
-                            scale: isSelected ? 1.0 : (modMa.pressed ? 0.96 : (modMa.containsMouse ? 1.02 : 1.0))
-                            
-                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                            Behavior on color { ColorAnimation { duration: 200 } }
-                            Behavior on border.color { ColorAnimation { duration: 200 } }
-                            
-                            ColumnLayout {
-                                anchors.fill: parent
-                                anchors.margins: root.s(12)
-                                spacing: root.s(5)
-                                RowLayout { 
-                                    spacing: root.s(10)
-                                    Rectangle { 
-                                        Layout.alignment: Qt.AlignVCenter
-                                        width: root.s(28)
-                                        height: root.s(28)
-                                        radius: root.s(14)
-                                        color: Qt.alpha(root.base, 0.5)
-                                        Text { anchors.centerIn: parent; text: model.icon; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14); color: isSelected ? root.ambientBlue : root.text } 
-                                    } 
-                                    Text { 
-                                        text: model.title
-                                        font.family: "Hack Nerd Font"
-                                        font.weight: Font.Bold
-                                        font.pixelSize: root.s(12)
-                                        color: root.text
-                                        Layout.fillWidth: true
-                                        Layout.alignment: Qt.AlignVCenter
-                                        elide: Text.ElideRight 
-                                    } 
-                                }
-                                Text { 
-                                    text: model.desc
-                                    font.family: "Hack Nerd Font"
-                                    font.pixelSize: root.s(10)
-                                    color: root.subtext0
-                                    Layout.alignment: Qt.AlignLeft
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    wrapMode: Text.WordWrap
-                                    elide: Text.ElideRight 
-                                }
-                            }
-                            
-                            MouseArea { 
-                                id: modMa
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: { 
-                                    root.selectedModuleIndex = index; 
-                                    modulesList.positionViewAtIndex(index, ListView.Contain); 
-                                }
-                                onDoubleClicked: { 
-                                    root.selectedModuleIndex = index; 
-                                    Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "toggle", model.target]) 
-                                } 
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ------------------------------------------
-            // TAB 3: MATUGEN ENGINE
+            // TAB 3: PALETTES
             // ------------------------------------------
             Item {
                 id: tab3Pane
                 anchors.fill: parent
-                visible: root.currentTab === 3
+                visible: root.currentTab === 2
                 opacity: visible ? 1.0 : 0.0
                 property real slideY: visible ? 0 : (root ? root.s(10) : 0)
                 
@@ -1319,7 +1094,7 @@ Item {
                     anchors.bottomMargin: root.s(20)
                     spacing: root.s(20)
 
-                    Text { text: "Theming Engine"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(28); color: root.text; Layout.alignment: Qt.AlignVCenter }
+                    Text { text: "Palette System"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(28); color: root.text; Layout.alignment: Qt.AlignVCenter }
                     
                     Rectangle {
                         Layout.fillWidth: true
@@ -1347,7 +1122,7 @@ Item {
                                     color: root.surface1
                                     Text { anchors.centerIn: parent; text: ""; font.family: "Hack Nerd Font"; font.pixelSize: root.s(28); color: root.text } 
                                 } 
-                                Text { text: "Wallpaper"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignHCenter } 
+                                Text { text: "Config"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignHCenter } 
                             }
                             
                             Item { 
@@ -1367,13 +1142,13 @@ Item {
                                             y: parent.height / 2 - root.s(3)
                                             SequentialAnimation on x { 
                                                 loops: Animation.Infinite
-                                                running: root.currentTab === 3
+                                                running: root.currentTab === 2
                                                 PauseAnimation { duration: index * 400 }
                                                 NumberAnimation { from: 0; to: parent.width; duration: 1200; easing.type: Easing.InOutSine } 
                                             } 
                                             SequentialAnimation on opacity { 
                                                 loops: Animation.Infinite
-                                                running: root.currentTab === 3
+                                                running: root.currentTab === 2
                                                 PauseAnimation { duration: index * 400 }
                                                 NumberAnimation { from: 0; to: 1; duration: 300 }
                                                 PauseAnimation { duration: 600 }
@@ -1394,7 +1169,7 @@ Item {
                                 
                                 SequentialAnimation on border.width { 
                                     loops: Animation.Infinite
-                                    running: root.currentTab === 3
+                                    running: root.currentTab === 2
                                     NumberAnimation { from: root.s(1); to: root.s(4); duration: 1000; easing.type: Easing.InOutSine }
                                     NumberAnimation { from: root.s(4); to: root.s(1); duration: 1000; easing.type: Easing.InOutSine } 
                                 }
@@ -1402,7 +1177,7 @@ Item {
                                 ColumnLayout { 
                                     anchors.centerIn: parent
                                     spacing: root.s(8)
-                                    Text { text: "Matugen Core"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(15); color: root.ambientPurple; Layout.alignment: Qt.AlignHCenter } 
+                                    Text { text: "xscriptor palettes"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(15); color: root.ambientPurple; Layout.alignment: Qt.AlignHCenter } 
                                     RowLayout { 
                                         spacing: root.s(4)
                                         Layout.alignment: Qt.AlignHCenter
@@ -1416,7 +1191,7 @@ Item {
                                                 color: modelData
                                                 SequentialAnimation on scale { 
                                                     loops: Animation.Infinite
-                                                    running: root.currentTab === 3
+                                                    running: root.currentTab === 2
                                                     PauseAnimation { duration: index * 150 }
                                                     NumberAnimation { to: 1.3; duration: 300; easing.type: Easing.OutQuart }
                                                     NumberAnimation { to: 1.0; duration: 400; easing.type: Easing.OutQuart }
@@ -1445,13 +1220,13 @@ Item {
                                             y: parent.height / 2 - root.s(3)
                                             SequentialAnimation on x { 
                                                 loops: Animation.Infinite
-                                                running: root.currentTab === 3
+                                                running: root.currentTab === 2
                                                 PauseAnimation { duration: index * 400 }
                                                 NumberAnimation { from: 0; to: parent.width; duration: 1200; easing.type: Easing.InOutSine } 
                                             } 
                                             SequentialAnimation on opacity { 
                                                 loops: Animation.Infinite
-                                                running: root.currentTab === 3
+                                                running: root.currentTab === 2
                                                 PauseAnimation { duration: index * 400 }
                                                 NumberAnimation { from: 0; to: 1; duration: 300 }
                                                 PauseAnimation { duration: 600 }
@@ -1479,7 +1254,7 @@ Item {
                         }
                     }
 
-                    Text { text: "When you change wallpapers, Matugen extracts the dominant colors and injects them directly into these configuration files in real-time:"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(13); color: root.subtext0; Layout.fillWidth: true; wrapMode: Text.WordWrap; Layout.alignment: Qt.AlignVCenter }
+                    Text { text: "xscriptor-colors ships 12 fixed palettes (dock/palettes). Choosing one in the bar regenerates every target below in real time — bar, borders, kitty, starship, VS Code, SDDM and Neovim all stay in sync:"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(13); color: root.subtext0; Layout.fillWidth: true; wrapMode: Text.WordWrap; Layout.alignment: Qt.AlignVCenter }
 
                     GridLayout {
                         Layout.fillWidth: true
@@ -1490,12 +1265,12 @@ Item {
                         
                         Repeater {
                             model: [ 
-                                { f: "kitty-colors.conf", i: "󰄛", c: "yellow" }, 
-                                { f: "nvim-colors.lua", i: "", c: "green" }, 
-                                { f: "rofi.rasi", i: "", c: "blue" }, 
-                                { f: "cava-colors.ini", i: "󰎆", c: "mauve" }, 
-                                { f: "sddm-colors.qml", i: "󰍃", c: "peach" }, 
-                                { f: "swaync/osd.css", i: "󰂚", c: "pink" } 
+                                { f: "kitty themes", i: "󰄛", c: "yellow" }, 
+                                { f: "nvim palettes", i: "", c: "green" }, 
+                                { f: "starship prompt", i: "", c: "mauve" }, 
+                                { f: "vscode color + icons", i: "󰨞", c: "blue" }, 
+                                { f: "sddm login", i: "󰍃", c: "peach" }, 
+                                { f: "borders + bar", i: "", c: "pink" } 
                             ]
                             
                             Rectangle {
@@ -1533,7 +1308,7 @@ Item {
             Item {
                 id: tab4Pane
                 anchors.fill: parent
-                visible: root.currentTab === 4
+                visible: root.currentTab === 3
                 opacity: visible ? 1.0 : 0.0
                 property real slideY: visible ? 0 : (root ? root.s(10) : 0)
                 
@@ -1547,9 +1322,9 @@ Item {
 
                     Repeater {
                         model: [
-                            { name: "NixOS Config", icon: "", color: "blue", url: "https://github.com/xscriptor-colors/hyprland" },
+                            { name: "X Config", icon: "X", color: "blue", url: "https://github.com/xlnux" },
                             { name: "Hyprland Config", icon: "󰣇", color: "mauve", url: "https://github.com/xscriptor-colors/hyprland" },
-                            { name: "Wallpapers", icon: "", color: "peach", url: "https://github.com/xscriptor/xwall" }
+                            { name: "Wallpapers", icon: "", color: "peach", url: "https://github.com/xscriptor-colors/xww" }
                         ]
 
                         Rectangle {

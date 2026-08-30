@@ -44,7 +44,7 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         "focustime": { w: s(900, scale), h: s(700, scale), rx: Math.floor((mw/2)-(s(900, scale)/2)), ry: Math.floor((mh/2)-(s(700, scale)/2)), comp: "focustime/FocusTimePopup.qml" },
 
         // --- Extralarge / Custom Centered ---
-        "guide":     { w: s(1200, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1200, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "guide/GuidePopup.qml" },
+        "guide":     { w: s(1160, scale), h: s(720, scale), rx: Math.floor((mw/2)-(s(1160, scale)/2)), ry: Math.floor((mh/2)-(s(720, scale)/2)), comp: "guide/GuidePopup.qml" },
         "calendar":  { w: s(1450, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1450, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "calendar/CalendarPopup.qml" },
         "updater": { w: s(950, scale), h: s(850, scale), rx: Math.floor((mw/2)-(s(950, scale)/2)), ry: Math.floor((mh/2)-(s(850, scale)/2)), comp: "updater/UpdaterPopup.qml" },
         "system-monitor": { w: s(580, scale), h: s(480, scale), rx: Math.floor((mw/2)-(s(580, scale)/2)), ry: Math.floor((mh/2)-(s(480, scale)/2)), comp: "system-monitor/SystemMonitor.qml" },
