@@ -583,6 +583,14 @@ install_kitty_config() {
         warn "kitty installer not found in cloned repo."
     fi
     rm -rf "$TMP_DIR"
+
+    # Regenerate the kitty themes from the dock palettes (single source of
+    # truth): the terminal repo ships its own theme values, so we overwrite
+    # them right away to keep kitty consistent with the bar/borders/SDDM.
+    if [ -f "$SCRIPT_DIR/scripts/theme-sync.sh" ]; then
+        bash "$SCRIPT_DIR/scripts/theme-sync.sh" || warn "Kitty theme sync failed (non-fatal)"
+        log "Kitty themes synced from the active palette"
+    fi
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
