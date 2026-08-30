@@ -104,7 +104,7 @@ Item {
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     Text { text: "Dock Editor"; font.family: "Hack Nerd Font"; font.pixelSize: s(17); font.weight: Font.Black; color: colors.text }
-                    Text { text: "Personaliza la barra · SUPER+SHIFT+D · ESC cerrar"; font.family: "Hack Nerd Font"; font.pixelSize: s(10); color: colors.overlay1 }
+                    Text { text: "Customize the bar · SUPER+SHIFT+D · ESC to close"; font.family: "Hack Nerd Font"; font.pixelSize: s(10); color: colors.overlay1 }
                 }
             }
             Rectangle { width: parent.width; height: 1; color: colors.surface1; opacity: 0.5 }
@@ -134,18 +134,18 @@ Item {
                             anchors.fill: parent
                             anchors.margins: s(14)
                             spacing: s(10)
-                            SectionTitle { bar: root; text: "Posición" }
+                            SectionTitle { bar: root; text: "Position" }
                             Row {
                                 width: parent.width
                                 spacing: s(8)
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "top";    label: "Arriba";    glyph: "↑" }
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "bottom"; label: "Abajo";     glyph: "↓" }
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "top";    label: "Top";    glyph: "↑" }
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "bottom"; label: "Bottom";     glyph: "↓" }
                             }
                             Row {
                                 width: parent.width
                                 spacing: s(8)
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "left";   label: "Izquierda"; glyph: "←" }
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "right";  label: "Derecha";   glyph: "→" }
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "left";   label: "Left"; glyph: "←" }
+                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "right";  label: "Right";   glyph: "→" }
                             }
                         }
                     }
@@ -162,7 +162,7 @@ Item {
                             anchors.fill: parent
                             anchors.margins: s(14)
                             spacing: s(10)
-                            SectionTitle { bar: root; text: "Paleta" }
+                            SectionTitle { bar: root; text: "Palette" }
                             Flickable {
                                 width: parent.width
                                 height: s(100)
@@ -241,11 +241,11 @@ Item {
                             anchors.fill: parent
                             anchors.margins: s(14)
                             spacing: s(9)
-                            SectionTitle { bar: root; text: "Aspecto" }
+                            SectionTitle { bar: root; text: "Appearance" }
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Redondez"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Roundness"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 Stepper { bar: root; label: Math.round(root.dock.roundness*100)+"%"
                                     anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                     onDec: root.applyDock(Object.assign({}, root.dock, { roundness: Math.max(0, +(root.dock.roundness-0.1).toFixed(1)) }))
@@ -254,7 +254,7 @@ Item {
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Grosor"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Thickness"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 Stepper { bar: root; label: Math.round(root.dock.thickness)+"px"
                                     anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                     onDec: root.applyDock(Object.assign({}, root.dock, { thickness: Math.max(32, root.dock.thickness-4) }))
@@ -263,7 +263,7 @@ Item {
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Margen del borde"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Edge margin"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 Stepper { bar: root; label: Math.round(root.dock.edgeGap)+"px"
                                     anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
                                     onDec: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.max(0, root.dock.edgeGap-2) }))
@@ -272,25 +272,25 @@ Item {
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Relleno de islas"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Island fill"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 ToggleSwitch { bar: root; checked: root.dock.pillBg; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { pillBg: !root.dock.pillBg })) }
                             }
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Relleno sólido"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Solid fill"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 ToggleSwitch { bar: root; checked: root.dock.pillSolid; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { pillSolid: !root.dock.pillSolid })) }
                             }
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Barra unificada"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Unified bar"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 ToggleSwitch { bar: root; checked: root.dock.barBg; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { barBg: !root.dock.barBg })) }
                             }
                             Item {
                                 width: parent.width
                                 height: s(32)
-                                EditLabel { bar: root; text: "Fuente"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Font"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 TextField {
                                     id: fontField
                                     anchors.right: parent.right
@@ -312,7 +312,7 @@ Item {
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                EditLabel { bar: root; text: "Borde (global)"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                EditLabel { bar: root; text: "Border (global)"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 Row {
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
@@ -341,12 +341,12 @@ Item {
                             Item {
                                 width: parent.width
                                 height: s(28)
-                                SectionTitle { bar: root; text: "Zonas"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                SectionTitle { bar: root; text: "Zones"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
                                 Row {
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
                                     spacing: s(8)
-                                    EditPill { bar: root; modelData: "add"; text: "+ Añadir"; accentFill: true; onActivated: root.applyDock(DockLayout.addZone(root.dock, "start")) }
+                                    EditPill { bar: root; modelData: "add"; text: "+ Add"; accentFill: true; onActivated: root.applyDock(DockLayout.addZone(root.dock, "start")) }
                                     EditPill { bar: root; modelData: "reset"; text: "Default"; onActivated: root.applyDock(DockLayout.defaultDock()) }
                                 }
                             }
