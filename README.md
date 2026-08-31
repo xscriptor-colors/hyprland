@@ -114,8 +114,7 @@ chmod +x install.sh
   config/cava/                Audio visualizer
   config/hypridle/            Idle management (dim, lock, suspend)
   config/sddm/                SDDM login theme (x, palette-synced)
-  scripts/                    Shell scripts and daemons (theme-sync.sh, sddm-colors.sh)
-  assets/previews/            Screenshots</code></pre>
+  scripts/                    Shell scripts and daemons (theme-sync.sh, sddm-colors.sh)</code></pre>
 
 <hr>
 
