@@ -31,7 +31,7 @@
   <a href="#x">X</a>
 </p>
 
-<img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-1.gif" width="900" alt="Demo">
+<img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-5.gif" width="900" alt="Demo">
 
 <details>
   <summary>More...</summary>
@@ -49,7 +49,7 @@
     <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-4.gif" width="880" alt="demo">
   </p>
    <p align="center">
-    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-5.gif" width="880" alt="demo">
+    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-1.gif" width="880" alt="demo">
   </p>
    <p align="center">
     <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-6.gif" width="880" alt="demo">
