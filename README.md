@@ -37,8 +37,10 @@
   <summary>More...</summary>
   <br>
   <p align="center">
-    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-2.gif" width="440" alt="demo">
-    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-4.gif" width="440" alt="demo">
+    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-2.gif" width="880" alt="demo">
+  </p>
+  <p align="center">
+    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-4.gif" width="880" alt="demo">
   </p>
   <p align="center">
     <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-3.gif" width="880" alt="demo">
@@ -146,7 +148,7 @@ chmod +x install.sh
 
 <div id="x" align="center">
 <h2>X</h2>
-<p><em>Based on xshell -- adapted, extended, and customized</em></p>
+<p><em>Xshell Based on Imperative -- adapted, extended, and customized</em></p>
 <a href="https://xscriptor.io">Dev</a>
  & 
 <a href="https://github.com/xscriptor">Github</a>
