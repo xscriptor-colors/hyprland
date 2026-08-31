@@ -33,8 +33,6 @@
 
 <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-1.gif" width="900" alt="Demo">
 
-<a href="https://xscriptor-colors.github.io/web/hyprland/">
-
 <details>
   <summary>More...</summary>
   <br>
@@ -44,7 +42,7 @@
       <td><img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-4.gif" width="400" alt="demo"></td>
     </tr>
     <tr>
-      <td><img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-3.gif" width="900" alt="demo"></td>
+      <td colspan="2"><img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-3.gif" width="880" alt="demo"></td>
     </tr>
   </table>
 </details>
