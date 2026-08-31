@@ -6,7 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "../"
-import "../topbar/TopbarLayout.js" as TopbarLayout
+import "../dock"
 
 Item {
     id: root
@@ -130,7 +130,6 @@ Item {
         if (tab === 1) return 3;
         if (tab === 2) return dynamicKeybindsModel.count - 1;
         if (tab === 4) return dynamicStartupModel.count - 1;
-        if (tab === 5) return root.topbarModules.length - 1;
         return -1;
     }
 
@@ -167,9 +166,6 @@ Item {
                 let isEd = dynamicStartupModel.get(root.highlightedBox).isEditing;
                 dynamicStartupModel.setProperty(root.highlightedBox, "isEditing", !isEd);
             }
-        } else if (root.currentTab === 5) {
-            let tbMod = root.topbarModuleAt(root.highlightedBox);
-            if (tbMod) root.topbarApply(TopbarLayout.toggleEnabled(root.topbarLayoutView, tbMod.id));
         }
     }
 
@@ -211,163 +207,12 @@ Item {
 
     property int currentTab: 0
 
-    // Topbar layout editing. Edits land in a draft so a burst of keystrokes
-    // collapses into one settings.json write instead of one per keypress.
-    property var topbarDraft: null
-    readonly property var topbarLayoutView: topbarDraft ? topbarDraft : Config.topbarLayout
-    readonly property var topbarModules: TopbarLayout.flatten(topbarLayoutView)
-
-    function topbarModuleAt(idx) {
-        return (idx >= 0 && idx < root.topbarModules.length) ? root.topbarModules[idx] : null;
-    }
-
-    // Roundness writes go through the same debounce idea as the layout: the bar
-    // repaints from settings.json, so a burst of presses must not spam jq.
-    function roundnessStep(dir) {
-        let next = Math.max(0.0, Math.min(1.0, Config.topbarRoundness + dir * 0.1));
-        Config.topbarRoundness = Math.round(next * 100) / 100;
-        roundnessSaveTimer.restart();
-    }
-
-    Timer {
-        id: roundnessSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarRoundness(Config.topbarRoundness)
-    }
-
-    // Border width follows the same debounce pattern as roundness.
-    Timer {
-        id: borderWidthSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarBorderWidth(Config.topbarBorderWidth)
-    }
-
-    property var topbarBorderColorOptions: [
-        "mauve", "blue", "sapphire", "peach", "green", "red",
-        "pink", "yellow", "teal", "maroon", "text", "subtext0",
-        "surface1", "surface2"
-    ]
-
-    function borderColorIndex() {
-        let idx = root.topbarBorderColorOptions.indexOf(Config.topbarBorderColor);
-        return idx >= 0 ? idx : 0;
-    }
-
-    Timer {
-        id: borderColorSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarBorderColor(Config.topbarBorderColor)
-    }
-
-    // Border mode: unified or per-zone.
-    // When switching to per-zone the unified values are copied into every zone
-    // so the transition is seamless instead of dropping to zero-width borders.
-    function borderModeToggle() {
-        if (Config.topbarBorderMode === "unified") {
-            Config.topbarBorderMode = "per-zone";
-            Config.topbarBorderWidthLeft = Config.topbarBorderWidth;
-            Config.topbarBorderColorLeft = Config.topbarBorderColor;
-            Config.topbarBorderWidthCenter = Config.topbarBorderWidth;
-            Config.topbarBorderColorCenter = Config.topbarBorderColor;
-            Config.topbarBorderWidthRight = Config.topbarBorderWidth;
-            Config.topbarBorderColorRight = Config.topbarBorderColor;
-            // Persist all per-zone values in a single write so the bar picks
-            // them up immediately instead of defaulting to zero-width borders.
-            perZoneBorderSaveTimer.restart();
-        } else {
-            Config.topbarBorderMode = "unified";
-        }
-        borderModeSaveTimer.restart();
-    }
-    Timer {
-        id: borderModeSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarBorderMode(Config.topbarBorderMode)
-    }
-
-    // Per-zone border helpers. Accept optional zone parameter so the same
-    // functions work for both unified and per-zone controls.
-    function borderWidthStep(dir, zone) {
-        let prop = zone ? ("topbarBorderWidth" + zone.charAt(0).toUpperCase() + zone.slice(1)) : "topbarBorderWidth";
-        let next = Math.max(0, Math.min(4, Config[prop] + dir));
-        Config[prop] = next;
-        (zone ? perZoneBorderSaveTimer : borderWidthSaveTimer).restart();
-    }
-    function borderColorCycle(dir, zone) {
-        let opts = root.topbarBorderColorOptions;
-        let prop = zone ? ("topbarBorderColor" + zone.charAt(0).toUpperCase() + zone.slice(1)) : "topbarBorderColor";
-        let idx = opts.indexOf(Config[prop]);
-        if (idx < 0) idx = 0;
-        idx = (idx + dir + opts.length) % opts.length;
-        Config[prop] = opts[idx];
-        (zone ? perZoneBorderSaveTimer : borderColorSaveTimer).restart();
-    }
-    // Saves all per-zone border values in a single jq call to avoid race
-    // conditions when multiple keys are written at once.
-    Timer {
-        id: perZoneBorderSaveTimer
-        interval: 250
-        onTriggered: Config.updateJsonBulk({
-            "topbarBorderWidthLeft": Config.topbarBorderWidthLeft,
-            "topbarBorderWidthCenter": Config.topbarBorderWidthCenter,
-            "topbarBorderWidthRight": Config.topbarBorderWidthRight,
-            "topbarBorderColorLeft": Config.topbarBorderColorLeft,
-            "topbarBorderColorCenter": Config.topbarBorderColorCenter,
-            "topbarBorderColorRight": Config.topbarBorderColorRight
-        })
-    }
-
-    Timer {
-        id: pillBgSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarPillBg(Config.topbarPillBg)
-    }
-
-    Timer {
-        id: solidFillSaveTimer
-        interval: 250
-        onTriggered: Config.saveTopbarPillSolid(Config.topbarPillSolid)
-    }
-
     // App scale is persisted by the General tab's Save button, matching how
     // every other setting on that tab behaves.
     function appScaleStep(dir) {
         let next = Math.max(0.75, Math.min(2.0, Config.appScale + dir * 0.25));
         Config.appScale = Math.round(next * 100) / 100;
     }
-
-    function topbarApply(newLayout) {
-        root.topbarDraft = newLayout;
-        topbarSaveTimer.restart();
-    }
-
-    // Moves the highlighted module and keeps the highlight on it, so repeated
-    // presses keep acting on the same module instead of the same slot.
-    function topbarMove(delta) {
-        let mod = root.topbarModuleAt(root.highlightedBox);
-        if (!mod) return;
-        let next = TopbarLayout.move(root.topbarLayoutView, mod.id, delta);
-        root.topbarApply(next);
-        let flat = TopbarLayout.flatten(next);
-        for (let i = 0; i < flat.length; i++) {
-            if (flat[i].id === mod.id) { root.highlightedBox = i; break; }
-        }
-    }
-
-    Timer {
-        id: topbarSaveTimer
-        interval: 250
-        onTriggered: root.topbarFlush()
-    }
-
-    function topbarFlush() {
-        if (root.topbarDraft) Config.saveTopbarLayout(root.topbarDraft);
-        root.topbarDraft = null;
-    }
-
-    // Closing the panel inside the debounce window would otherwise drop the
-    // last edit on the floor.
-    Component.onDestruction: root.topbarFlush()
 
     // Opened straight onto a tab via `qs_manager.sh toggle settings <mode>`.
     property string activeMode: ""
@@ -389,7 +234,7 @@ Item {
         onTriggered: root.currentTab = 5
     }
 
-    property var tabNames: ["General", "Weather", "Keybinds", "Monitors", "Startup", "Topbar"]
+    property var tabNames: ["General", "Weather", "Keyboard", "Monitors", "Startup", "Dock"]
     property var tabIcons: ["󰒓", "󰖐", "󰌌", "󰍹", "󰐥", ""]
     property var tabColors: ["teal", "blue", "peach", "green", "mauve", "sapphire"]
 
@@ -522,30 +367,6 @@ Item {
             }
         }
 
-        if (root.currentTab === 5 && (event.modifiers & Qt.ShiftModifier)
-            && (event.key === Qt.Key_Up || event.key === Qt.Key_Down)) {
-            root.topbarMove(event.key === Qt.Key_Down ? 1 : -1);
-            event.accepted = true;
-            return;
-        }
-
-        // Island shape is a tab-wide control, so it answers to Left/Right
-        // whatever module happens to be highlighted.
-        if (root.currentTab === 5 && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
-            root.roundnessStep(event.key === Qt.Key_Right ? 1 : -1);
-            event.accepted = true;
-            return;
-        }
-
-        // Border width with Alt+Left / Alt+Right in the topbar tab (unified mode only).
-        if (root.currentTab === 5 && Config.topbarBorderMode === "unified"
-            && (event.modifiers & Qt.AltModifier)
-            && (event.key === Qt.Key_Left || event.key === Qt.Key_Right)) {
-            root.borderWidthStep(event.key === Qt.Key_Right ? 1 : -1);
-            event.accepted = true;
-            return;
-        }
-
         if (event.key === Qt.Key_Down) {
             let maxIdx = root.maxHighlightForTab(root.currentTab);
             if (maxIdx < 0) { event.accepted = true; return; }
@@ -643,7 +464,7 @@ Item {
         }
     }
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     readonly property color base: _theme.base
     readonly property color mantle: _theme.mantle
@@ -655,6 +476,8 @@ Item {
     readonly property color surface1: _theme.surface1
     readonly property color surface2: _theme.surface2
     readonly property color overlay0: _theme.overlay0
+    readonly property color overlay1: _theme.overlay1
+    readonly property color overlay2: _theme.overlay2
     readonly property color mauve: _theme.mauve
     readonly property color pink: _theme.pink
     readonly property color blue: _theme.blue
@@ -3164,8 +2987,98 @@ Item {
             Rectangle { anchors.left: parent.left; width: 1; height: parent.height; color: sidebarPanel.border.color }
         }
 
+        // ── Sidebar navigation ────────────────────────────────────────────────
+        // Modern settings-app left rail: a vertical list of sections. Clicking a
+        // section switches `root.currentTab` (the same index the old top tab bar
+        // used, so all section logic/loaders keep working unchanged).
+        Column {
+            id: settingsSidebar
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: root.s(16)
+            anchors.topMargin: root.s(90)
+            width: root.s(160)
+            spacing: root.s(4)
+
+            // One nav item per section: [icon, label, tabIndex]
+            function navItem(icon, label, idx) {
+                // (helper not used; items are declared explicitly below for clarity)
+            }
+
+            Repeater {
+                model: [
+                    { icon: "󰒓", label: "General",    tab: 0 },
+                    { icon: "󰖐", label: "Weather",      tab: 1 },
+                    { icon: "󰌌", label: "Keyboard",    tab: 2 },
+                    { icon: "󰍹", label: "Monitors",  tab: 3 },
+                    { icon: "󰐥", label: "Startup",   tab: 4 },
+                    { icon: "󰫧", label: "Dock",      tab: 5 }
+                ]
+                delegate: Rectangle {
+                    required property var modelData
+                    property bool isActive: root.currentTab === modelData.tab
+                    width: parent.width
+                    height: root.s(40)
+                    radius: root.s(10)
+                    color: isActive ? root.mauve : (navMa.containsMouse ? root.surface1 : "transparent")
+                    opacity: isActive ? 1 : 0.85
+                    Behavior on color { ColorAnimation { duration: 150 } }
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: root.s(12)
+                        spacing: root.s(10)
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.icon
+                            font.family: "Hack Nerd Font"
+                            font.pixelSize: root.s(15)
+                            color: isActive ? root.base : root.subtext0
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.label
+                            font.family: "Hack Nerd Font"
+                            font.weight: isActive ? Font.Black : Font.Medium
+                            font.pixelSize: root.s(12)
+                            color: isActive ? root.base : root.text
+                        }
+                    }
+                    MouseArea {
+                        id: navMa
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.currentTab = modelData.tab
+                    }
+                }
+            }
+
+            Item { width: 1; height: root.s(24) }
+
+            // Quick hint under the nav.
+            Rectangle {
+                width: parent.width
+                height: root.s(2)
+                color: root.surface1
+                opacity: 0.6
+            }
+            Text {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                text: "Usa las flechas ↑↓ para navegar · ESC cierra"
+                font.family: "Hack Nerd Font"
+                font.pixelSize: root.s(9)
+                color: root.overlay1
+            }
+        }
+
         Item {
-            anchors.fill: parent
+            anchors.left: settingsSidebar.right
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
             opacity: introContent
             scale: 0.96 + (0.04 * introContent)
             transform: Translate { y: root.s(40) * (1.0 - introContent) }
@@ -3392,13 +3305,15 @@ Item {
                 }
 
                 // ── Tab bar ───────────────────────────────────────────────────
+                // HIDDEN: replaced by the left sidebar (settingsSidebar).
+                // Kept in the tree (visible: false) so all the tab-switching and
+                // keyboard logic that references it keeps working.
                 Item {
                     id: tabBarContainer
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.s(38)
-                    visible: !root.isSearchMode
-                    opacity: root.isSearchMode ? 0.0 : 1.0
-                    Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+                    visible: false
+                    enabled: false
                     clip: true
 
                     Rectangle {
@@ -3887,929 +3802,83 @@ Item {
             }
         }
     }
-
     Component {
         id: topbarTabComponent
+        // ── BARRA (dock) ─────────────────────────────────────────────────────
+        // The bar is edited by the dedicated DockEditor (SUPER+SHIFT+D). This
+        // section is a clean gateway that opens it, instead of the old inline
+        // topbar editor (which was replaced by the position-agnostic dock).
         Item {
             id: topbarTabRoot
 
-            function scrollTo(y) {
-                let maxY = Math.max(0, topbarFlickable.contentHeight - topbarFlickable.height);
-                topbarFlickable.contentY = Math.max(0, Math.min(y - root.s(40), maxY > 0 ? maxY : y));
-            }
-            function scrollToBox(approxItemY) {
-                let viewH = topbarFlickable.height;
-                let itemTop = approxItemY;
-                let itemBottom = approxItemY + root.s(64);
-                let curY = topbarFlickable.contentY;
-                let maxY = Math.max(0, topbarFlickable.contentHeight - viewH);
-                if (itemTop < curY + root.s(10)) {
-                    topbarFlickable.contentY = Math.max(0, itemTop - root.s(20));
-                } else if (itemBottom > curY + viewH - root.s(10)) {
-                    topbarFlickable.contentY = Math.min(maxY, itemBottom - viewH + root.s(20));
-                }
-            }
+            function scrollTo(y) {}
+            function scrollToBox(approxItemY) {}
 
             Flickable {
-                id: topbarFlickable
                 anchors.fill: parent
                 contentWidth: width
-                contentHeight: topbarColLayout.implicitHeight + root.s(40)
+                contentHeight: barCard.implicitHeight + root.s(40)
                 clip: true
                 boundsBehavior: Flickable.DragAndOvershootBounds
 
-                ColumnLayout {
-                    id: topbarColLayout
-                    width: topbarFlickable.width
-                    spacing: root.s(10)
+                Rectangle {
+                    id: barCard
+                    width: parent.width - root.s(20)
+                    radius: root.s(18)
+                    color: root.surface0
+                    border.color: root.surface1
+                    border.width: 1
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: hintText.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(18)
-                        color: Qt.alpha(root.sapphire, 0.12)
-                        border.color: Qt.alpha(root.sapphire, 0.35)
-                        border.width: 1
+                    Column {
+                        anchors.fill: parent
+                        anchors.margins: root.s(18)
+                        spacing: root.s(12)
+
+                        Row {
+                            spacing: root.s(10)
+                            Rectangle {
+                                width: root.s(40); height: root.s(40); radius: root.s(12)
+                                color: root.mauve
+                                Text { anchors.centerIn: parent; text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(20); color: root.base }
+                            }
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                Text { text: "Customize the bar"; font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(15); color: root.text }
+                                Text { text: "Position, palette, size, zones and modules"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(11); color: root.subtext0 }
+                            }
+                        }
+
+                        Rectangle { width: parent.width; height: 1; color: root.surface1; opacity: 0.6 }
 
                         Text {
-                            id: hintText
-                            anchors.centerIn: parent
-                            width: parent.width - root.s(28)
-                            text: "Enter toggles  ·  Shift+Up / Shift+Down reorders  ·  Left / Right shapes the islands  ·  Alt+Left / Alt+Right border width"
-                            font.family: "Inter"; font.pixelSize: root.s(10)
-                            color: root.sapphire
-                            wrapMode: Text.WordWrap
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-                    }
-
-                    Rectangle {
-                        id: roundnessCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: roundRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: roundRow
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: root.s(13)
-                            spacing: root.s(11)
-
-                            // Preview swatch: mirrors the shape the bar will use.
-                            Rectangle {
-                                Layout.preferredWidth: root.s(30)
-                                Layout.preferredHeight: root.s(20)
-                                Layout.alignment: Qt.AlignVCenter
-                                radius: Math.round(root.s(20) * 0.5 * Config.topbarRoundness)
-                                color: root.sapphire
-                                Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
-                                spacing: root.s(2)
-                                Text {
-                                    text: "Island shape"
-                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
-                                    color: root.text
-                                    Layout.fillWidth: true
-                                }
-                                Text {
-                                    text: Config.topbarRoundness >= 0.999 ? "fully rounded"
-                                        : (Config.topbarRoundness <= 0.001 ? "square" : "rounded corners")
-                                    font.family: "Inter"; font.pixelSize: root.s(10)
-                                    color: Qt.alpha(root.subtext0, 0.7)
-                                    Layout.fillWidth: true
-                                }
-                            }
-
-                            RowLayout {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(8)
-                                Rectangle {
-                                    width: root.s(26); height: root.s(26); radius: root.s(13)
-                                    color: rMinusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                    Text {
-                                        anchors.centerIn: parent; text: "-"
-                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
-                                        color: root.sapphire
-                                    }
-                                    MouseArea { id: rMinusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.roundnessStep(-1) }
-                                }
-                                Text {
-                                    text: Math.round(Config.topbarRoundness * 100) + "%"
-                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(13)
-                                    color: root.sapphire
-                                    Layout.minimumWidth: root.s(42); horizontalAlignment: Text.AlignHCenter
-                                }
-                                Rectangle {
-                                    width: root.s(26); height: root.s(26); radius: root.s(13)
-                                    color: rPlusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                    Text {
-                                        anchors.centerIn: parent; text: "+"
-                                        font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15)
-                                        color: root.sapphire
-                                    }
-                                    MouseArea { id: rPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.roundnessStep(1) }
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Pill background toggle ────────────────────────────────
-                    Rectangle {
-                        id: pillBgCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: pillBgRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: pillBgRow
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: root.s(13)
-                            spacing: root.s(11)
-
-                            Item {
-                                Layout.preferredWidth: root.s(22)
-                                Layout.alignment: Qt.AlignVCenter
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: Config.topbarPillBg ? "󰈙" : "󰉁"
-                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
-                                    color: root.sapphire
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
-                                spacing: root.s(2)
-                                Text {
-                                    text: "Pill background"
-                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
-                                    color: root.text; Layout.fillWidth: true
-                                }
-                                Text {
-                                    text: Config.topbarPillBg ? "filled" : "transparent"
-                                    font.family: "Inter"; font.pixelSize: root.s(10)
-                                    color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true
-                                }
-                            }
-
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
-                                scale: pillBgMa.containsMouse ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                color: Config.topbarPillBg ? root.sapphire : Qt.alpha(root.surface2, 1.0)
-                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(18)
-                                    color: Config.topbarPillBg ? root.base : root.surface0
-                                    y: root.s(3); x: Config.topbarPillBg ? root.s(21) : root.s(3)
-                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                }
-                                MouseArea {
-                                    id: pillBgMa; anchors.fill: parent; hoverEnabled: true
-                                    onClicked: { Config.topbarPillBg = !Config.topbarPillBg; pillBgSaveTimer.restart() }
-                                    cursorShape: Qt.PointingHandCursor
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Solid fill toggle ────────────────────────────────────
-                    Rectangle {
-                        id: solidFillCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: solidFillRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: solidFillRow
-                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                            anchors.margins: root.s(13); spacing: root.s(11)
-                            Item {
-                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
-                                Text { anchors.centerIn: parent; text: Config.topbarPillSolid ? "󰈙" : "󰉁"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
-                                Text { text: "Solid fill"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
-                                Text { text: Config.topbarPillSolid ? "opaque background" : "translucent background"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
-                            }
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
-                                scale: sfMa.containsMouse ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                color: Config.topbarPillSolid ? root.sapphire : Qt.alpha(root.surface2, 1.0)
-                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(18)
-                                    color: Config.topbarPillSolid ? root.base : root.surface0
-                                    y: root.s(3); x: Config.topbarPillSolid ? root.s(21) : root.s(3)
-                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                }
-                                MouseArea {
-                                    id: sfMa; anchors.fill: parent; hoverEnabled: true
-                                    onClicked: { Config.topbarPillSolid = !Config.topbarPillSolid; solidFillSaveTimer.restart() }
-                                    cursorShape: Qt.PointingHandCursor
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Unify zone toggles ───────────────────────────────────
-                    Rectangle {
-                        id: unifyLeftCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: unifyLeftRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: unifyLeftRow
-                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                            anchors.margins: root.s(13); spacing: root.s(11)
-                            Item {
-                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
-                                Text { anchors.centerIn: parent; text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
-                                Text { text: "Unify left zone"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
-                                Text { text: Config.topbarUnifyLeft ? "one continuous island" : "separate pills"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
-                            }
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
-                                scale: ulMa.containsMouse ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                color: Config.topbarUnifyLeft ? root.sapphire : Qt.alpha(root.surface2, 1.0)
-                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(18)
-                                    color: Config.topbarUnifyLeft ? root.base : root.surface0
-                                    y: root.s(3); x: Config.topbarUnifyLeft ? root.s(21) : root.s(3)
-                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                }
-                                MouseArea {
-                                    id: ulMa; anchors.fill: parent; hoverEnabled: true
-                                    onClicked: { Config.topbarUnifyLeft = !Config.topbarUnifyLeft; unifySaveTimer.restart() }
-                                    cursorShape: Qt.PointingHandCursor
-                                }
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        id: unifyCenterCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: unifyCenterRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: unifyCenterRow
-                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                            anchors.margins: root.s(13); spacing: root.s(11)
-                            Item {
-                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
-                                Text { anchors.centerIn: parent; text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
-                                Text { text: "Unify center zone"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
-                                Text { text: Config.topbarUnifyCenter ? "one continuous island" : "separate pills"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
-                            }
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
-                                scale: ucMa.containsMouse ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                color: Config.topbarUnifyCenter ? root.sapphire : Qt.alpha(root.surface2, 1.0)
-                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(18)
-                                    color: Config.topbarUnifyCenter ? root.base : root.surface0
-                                    y: root.s(3); x: Config.topbarUnifyCenter ? root.s(21) : root.s(3)
-                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                }
-                                MouseArea {
-                                    id: ucMa; anchors.fill: parent; hoverEnabled: true
-                                    onClicked: { Config.topbarUnifyCenter = !Config.topbarUnifyCenter; unifySaveTimer.restart() }
-                                    cursorShape: Qt.PointingHandCursor
-                                }
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        id: unifyRightCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: unifyRightRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: unifyRightRow
-                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                            anchors.margins: root.s(13); spacing: root.s(11)
-                            Item {
-                                Layout.preferredWidth: root.s(22); Layout.alignment: Qt.AlignVCenter
-                                Text { anchors.centerIn: parent; text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(18); color: root.sapphire }
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
-                                Text { text: "Unify right zone"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
-                                Text { text: Config.topbarUnifyRight ? "one continuous island" : "separate pills"; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
-                            }
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
-                                scale: urMa.containsMouse ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                color: Config.topbarUnifyRight ? root.sapphire : Qt.alpha(root.surface2, 1.0)
-                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(18)
-                                    color: Config.topbarUnifyRight ? root.base : root.surface0
-                                    y: root.s(3); x: Config.topbarUnifyRight ? root.s(21) : root.s(3)
-                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                }
-                                MouseArea {
-                                    id: urMa; anchors.fill: parent; hoverEnabled: true
-                                    onClicked: { Config.topbarUnifyRight = !Config.topbarUnifyRight; unifySaveTimer.restart() }
-                                    cursorShape: Qt.PointingHandCursor
-                                }
-                            }
-                        }
-                    }
-
-                    Timer {
-                        id: unifySaveTimer
-                        interval: 250
-                        onTriggered: {
-                            Config.saveTopbarUnifyLeft(Config.topbarUnifyLeft);
-                            Config.saveTopbarUnifyCenter(Config.topbarUnifyCenter);
-                            Config.saveTopbarUnifyRight(Config.topbarUnifyRight);
-                        }
-                    }
-
-                    // ── Border mode toggle ───────────────────────────────────
-                    Rectangle {
-                        id: borderModeCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: borderModeRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-
-                        RowLayout {
-                            id: borderModeRow
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: root.s(13)
-                            spacing: root.s(11)
-
-                            Item {
-                                Layout.preferredWidth: root.s(22)
-                                Layout.alignment: Qt.AlignVCenter
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: Config.topbarBorderMode === "unified" ? "󰊤" : "󰏘"
-                                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(18)
-                                    color: root.sapphire
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
-                                spacing: root.s(2)
-                                Text {
-                                    text: "Border mode"
-                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
-                                    color: root.text; Layout.fillWidth: true
-                                }
-                                Text {
-                                    text: Config.topbarBorderMode === "unified" ? "same for every zone" : "different per zone"
-                                    font.family: "Inter"; font.pixelSize: root.s(10)
-                                    color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true
-                                }
-                            }
-
-                            Rectangle {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredWidth: root.s(40); Layout.preferredHeight: root.s(22); radius: root.s(22)
-                                scale: bmToggleMa.containsMouse ? 1.05 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                color: Config.topbarBorderMode === "unified" ? root.sapphire : Qt.alpha(root.surface2, 1.0)
-                                Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                Rectangle {
-                                    width: root.s(16); height: root.s(16); radius: root.s(18)
-                                    color: Config.topbarBorderMode === "unified" ? root.base : root.surface0
-                                    y: root.s(3); x: Config.topbarBorderMode === "unified" ? root.s(21) : root.s(3)
-                                    Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                }
-                                MouseArea { id: bmToggleMa; anchors.fill: parent; hoverEnabled: true; onClicked: root.borderModeToggle(); cursorShape: Qt.PointingHandCursor }
-                            }
-                        }
-                    }
-
-                    // ── Unified border width + color (visible in unified mode) ──
-                    Rectangle {
-                        id: borderWidthCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: borderWidthRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-                        visible: Config.topbarBorderMode === "unified"
-                        opacity: visible ? 1.0 : 0.0
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
-
-                        RowLayout {
-                            id: borderWidthRow
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.margins: root.s(13)
-                            spacing: root.s(11)
-
-                            Rectangle {
-                                Layout.preferredWidth: root.s(30)
-                                Layout.preferredHeight: root.s(20)
-                                Layout.alignment: Qt.AlignVCenter
-                                radius: Math.round(root.s(20) * 0.5 * Config.topbarRoundness)
-                                color: "transparent"
-                                border.width: Math.min(Config.topbarBorderWidth, 4)
-                                border.color: root[Config.topbarBorderColor] || root.surface1
-                                Behavior on border.width { NumberAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                                Behavior on border.color { ColorAnimation { duration: 200 } }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
-                                Text {
-                                    text: "Border width"
-                                    font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
-                                    color: root.text; Layout.fillWidth: true
-                                }
-                                Text {
-                                    text: Config.topbarBorderWidth === 0 ? "no border" : (Config.topbarBorderWidth + "px")
-                                    font.family: "Inter"; font.pixelSize: root.s(10)
-                                    color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true
-                                }
-                            }
-
-                            RowLayout {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(8)
-                                Rectangle {
-                                    width: root.s(26); height: root.s(26); radius: root.s(13)
-                                    color: bwMinusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                    Text { anchors.centerIn: parent; text: "-"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15); color: root.sapphire }
-                                    MouseArea { id: bwMinusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(-1) }
-                                }
-                                Text {
-                                    text: Config.topbarBorderWidth + "px"
-                                    font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(13)
-                                    color: root.sapphire; Layout.minimumWidth: root.s(36); horizontalAlignment: Text.AlignHCenter
-                                }
-                                Rectangle {
-                                    width: root.s(26); height: root.s(26); radius: root.s(13)
-                                    color: bwPlusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                    Text { anchors.centerIn: parent; text: "+"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(15); color: root.sapphire }
-                                    MouseArea { id: bwPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(1) }
-                                }
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        id: borderColorCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: borderColorRow.implicitHeight + root.s(22)
-                        Layout.bottomMargin: root.s(2)
-                        radius: root.s(24)
-                        color: root.surface0
-                        border.color: root.surface1
-                        border.width: 1
-                        visible: Config.topbarBorderMode === "unified"
-                        opacity: visible ? 1.0 : 0.0
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
-
-                        RowLayout {
-                            id: borderColorRow
-                            anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                            anchors.margins: root.s(13); spacing: root.s(11)
-
-                            Rectangle {
-                                Layout.preferredWidth: root.s(30); Layout.preferredHeight: root.s(20); Layout.alignment: Qt.AlignVCenter
-                                radius: Math.round(root.s(20) * 0.5 * Config.topbarRoundness)
-                                color: root[Config.topbarBorderColor] || root.surface1
-                                Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: root.s(2)
-                                Text { text: "Border color"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13); color: root.text; Layout.fillWidth: true }
-                                Text { text: Config.topbarBorderColor; font.family: "Inter"; font.pixelSize: root.s(10); color: Qt.alpha(root.subtext0, 0.7); Layout.fillWidth: true }
-                            }
-
-                            RowLayout {
-                                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight; spacing: root.s(8)
-                                Rectangle {
-                                    width: root.s(26); height: root.s(26); radius: root.s(13)
-                                    color: bcMinusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                    Text { anchors.centerIn: parent; text: "◀"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12); color: root.sapphire }
-                                    MouseArea { id: bcMinusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(-1) }
-                                }
-                                Rectangle {
-                                    width: root.s(30); height: root.s(30); radius: root.s(15)
-                                    color: root[Config.topbarBorderColor] || root.surface1; border.width: 1; border.color: root.surface2
-                                    Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                                }
-                                Rectangle {
-                                    width: root.s(26); height: root.s(26); radius: root.s(13)
-                                    color: bcPlusMa.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                    Text { anchors.centerIn: parent; text: "▶"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12); color: root.sapphire }
-                                    MouseArea { id: bcPlusMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(1) }
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Per-zone border controls ────────────────────────────
-                    Item {
-                        id: perZoneSection
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: perZoneCol.implicitHeight
-                        visible: Config.topbarBorderMode === "per-zone"
-                        opacity: visible ? 1.0 : 0.0
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
-
-                        ColumnLayout {
-                            id: perZoneCol
                             width: parent.width
-                            spacing: root.s(6)
-
-                            // Left zone
-                            Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: leftZoneRow.implicitHeight + root.s(14)
-                                radius: root.s(20)
-                                color: root.surface0; border.color: root.surface1; border.width: 1
-                                RowLayout {
-                                    id: leftZoneRow
-                                    anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                                    anchors.margins: root.s(10); spacing: root.s(8)
-                                    Text { text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14); color: root.sapphire; Layout.alignment: Qt.AlignVCenter }
-                                    Text { text: "Left"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignVCenter; Layout.minimumWidth: root.s(40) }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: lwMinus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "-"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.sapphire }
-                                        MouseArea { id: lwMinus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(-1, "left") }
-                                    }
-                                    Text {
-                                        text: Config.topbarBorderWidthLeft + "px"
-                                        font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(11)
-                                        color: root.sapphire; Layout.minimumWidth: root.s(28); horizontalAlignment: Text.AlignHCenter
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: lwPlus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "+"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.sapphire }
-                                        MouseArea { id: lwPlus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(1, "left") }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: lcMinus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "◀"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.sapphire }
-                                        MouseArea { id: lcMinus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(-1, "left") }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: root[Config.topbarBorderColorLeft] || root.surface1; border.width: 1; border.color: root.surface2
-                                        Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: lcPlus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "▶"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.sapphire }
-                                        MouseArea { id: lcPlus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(1, "left") }
-                                    }
-                                }
-                            }
-
-                            // Center zone
-                            Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: centerZoneRow.implicitHeight + root.s(14)
-                                radius: root.s(20)
-                                color: root.surface0; border.color: root.surface1; border.width: 1
-                                RowLayout {
-                                    id: centerZoneRow
-                                    anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                                    anchors.margins: root.s(10); spacing: root.s(8)
-                                    Text { text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14); color: root.sapphire; Layout.alignment: Qt.AlignVCenter }
-                                    Text { text: "Center"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignVCenter; Layout.minimumWidth: root.s(40) }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: cwMinus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "-"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.sapphire }
-                                        MouseArea { id: cwMinus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(-1, "center") }
-                                    }
-                                    Text {
-                                        text: Config.topbarBorderWidthCenter + "px"
-                                        font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(11)
-                                        color: root.sapphire; Layout.minimumWidth: root.s(28); horizontalAlignment: Text.AlignHCenter
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: cwPlus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "+"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.sapphire }
-                                        MouseArea { id: cwPlus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(1, "center") }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: ccMinus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "◀"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.sapphire }
-                                        MouseArea { id: ccMinus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(-1, "center") }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: root[Config.topbarBorderColorCenter] || root.surface1; border.width: 1; border.color: root.surface2
-                                        Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: ccPlus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "▶"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.sapphire }
-                                        MouseArea { id: ccPlus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(1, "center") }
-                                    }
-                                }
-                            }
-
-                            // Right zone
-                            Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: rightZoneRow.implicitHeight + root.s(14)
-                                radius: root.s(20)
-                                color: root.surface0; border.color: root.surface1; border.width: 1
-                                RowLayout {
-                                    id: rightZoneRow
-                                    anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right
-                                    anchors.margins: root.s(10); spacing: root.s(8)
-                                    Text { text: "󰇄"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(14); color: root.sapphire; Layout.alignment: Qt.AlignVCenter }
-                                    Text { text: "Right"; font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(12); color: root.text; Layout.alignment: Qt.AlignVCenter; Layout.minimumWidth: root.s(40) }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: rwMinus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "-"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.sapphire }
-                                        MouseArea { id: rwMinus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(-1, "right") }
-                                    }
-                                    Text {
-                                        text: Config.topbarBorderWidthRight + "px"
-                                        font.family: "Hack Nerd Font"; font.weight: Font.Black; font.pixelSize: root.s(11)
-                                        color: root.sapphire; Layout.minimumWidth: root.s(28); horizontalAlignment: Text.AlignHCenter
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: rwPlus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "+"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(13); color: root.sapphire }
-                                        MouseArea { id: rwPlus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderWidthStep(1, "right") }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: rcMinus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "◀"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.sapphire }
-                                        MouseArea { id: rcMinus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(-1, "right") }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: root[Config.topbarBorderColorRight] || root.surface1; border.width: 1; border.color: root.surface2
-                                        Behavior on color { ColorAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                                    }
-                                    Rectangle {
-                                        Layout.preferredWidth: root.s(22); Layout.preferredHeight: root.s(22); radius: root.s(11)
-                                        color: rcPlus.containsMouse ? Qt.alpha(root.sapphire, 0.2) : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text { anchors.centerIn: parent; text: "▶"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(10); color: root.sapphire }
-                                        MouseArea { id: rcPlus; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.borderColorCycle(1, "right") }
-                                    }
-                                }
-                            }
+                            wrapMode: Text.WordWrap
+                            text: "El dock se personaliza desde su propio editor (SUPER+SHIFT+D). Desde aquí puedes abrirlo, y todos los cambios se guardan en vivo y se sincronizan con las paletas de colores elegidas en la barra."
+                            font.family: "Hack Nerd Font"
+                            font.pixelSize: root.s(12)
+                            lineHeight: 1.3
+                            color: root.subtext0
                         }
-                    }
 
-                    Repeater {
-                        model: root.topbarModules
-
+                        // Open the DockEditor widget (same IPC the bar module uses).
                         Rectangle {
-                            id: modCard
-                            required property var modelData
-                            required property int index
-
-                            property bool isActive: root.highlightedBox === index
-                            property bool isOn: modelData.enabled
-
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: modRow.implicitHeight + root.s(22)
-                            radius: root.s(24)
-                            color: isActive ? root.sapphire : root.surface0
-                            border.color: isActive ? root.sapphire : root.surface1
-                            border.width: 1
-                            Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-
-                            opacity: isOn ? 1.0 : 0.55
-                            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutExpo } }
-
-                            MouseArea { anchors.fill: parent; onClicked: root.highlightedBox = modCard.index; z: -1 }
-
-                            RowLayout {
-                                id: modRow
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.margins: root.s(13)
-                                spacing: root.s(11)
-
-                                Item {
-                                    Layout.preferredWidth: root.s(22)
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: modCard.modelData.icon
-                                        font.family: "Hack Nerd Font"
-                                        font.pixelSize: root.s(17)
-                                        color: modCard.isActive ? root.base : root.sapphire
-                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                    }
-                                }
-
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: root.s(2)
-                                    Text {
-                                        text: modCard.modelData.label
-                                        font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: root.s(13)
-                                        color: modCard.isActive ? root.base : root.text
-                                        Layout.fillWidth: true
-                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                    }
-                                    Text {
-                                        text: modCard.isOn ? modCard.modelData.zone : modCard.modelData.zone + "  ·  hidden"
-                                        font.family: "Inter"; font.pixelSize: root.s(10)
-                                        color: modCard.isActive ? Qt.alpha(root.base, 0.75) : Qt.alpha(root.subtext0, 0.7)
-                                        Layout.fillWidth: true
-                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                    }
-                                }
-
-                                // Reorder controls. Enabled at a zone edge too, where they
-                                // hand the module over to the neighbouring zone.
-                                Row {
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: root.s(3)
-
-                                    Rectangle {
-                                        width: root.s(26); height: root.s(26); radius: root.s(13)
-                                        color: upMa.containsMouse
-                                            ? (modCard.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.sapphire, 0.2))
-                                            : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "󰅃"
-                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
-                                            color: modCard.isActive ? root.base : root.subtext0
-                                        }
-                                        MouseArea {
-                                            id: upMa
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                root.highlightedBox = modCard.index;
-                                                root.topbarMove(-1);
-                                            }
-                                        }
-                                    }
-
-                                    Rectangle {
-                                        width: root.s(26); height: root.s(26); radius: root.s(13)
-                                        color: downMa.containsMouse
-                                            ? (modCard.isActive ? Qt.alpha(root.base, 0.25) : Qt.alpha(root.sapphire, 0.2))
-                                            : "transparent"
-                                        Behavior on color { ColorAnimation { duration: 150 } }
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "󰅀"
-                                            font.family: "Hack Nerd Font"; font.pixelSize: root.s(15)
-                                            color: modCard.isActive ? root.base : root.subtext0
-                                        }
-                                        MouseArea {
-                                            id: downMa
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                root.highlightedBox = modCard.index;
-                                                root.topbarMove(1);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Rectangle {
-                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                    Layout.preferredWidth: root.s(40)
-                                    Layout.preferredHeight: root.s(22)
-                                    radius: root.s(22)
-                                    scale: modToggleMa.containsMouse ? 1.05 : 1.0
-                                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                    color: modCard.isOn
-                                        ? (modCard.isActive ? root.base : root.sapphire)
-                                        : Qt.alpha(root.surface2, modCard.isActive ? 0.4 : 1.0)
-                                    Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                    Rectangle {
-                                        width: root.s(16); height: root.s(16); radius: root.s(18)
-                                        color: modCard.isOn
-                                            ? (modCard.isActive ? root.sapphire : root.base)
-                                            : (modCard.isActive ? root.sapphire : root.surface0)
-                                        y: root.s(3); x: modCard.isOn ? root.s(21) : root.s(3)
-                                        Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
-                                        Behavior on color { ColorAnimation { duration: 220; easing.type: Easing.OutExpo } }
-                                    }
-                                    MouseArea {
-                                        id: modToggleMa
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            root.highlightedBox = modCard.index;
-                                            root.topbarApply(TopbarLayout.toggleEnabled(root.topbarLayoutView, modCard.modelData.id));
-                                        }
-                                    }
-                                }
+                            width: root.s(180)
+                            height: root.s(38)
+                            radius: root.s(18)
+                            color: openBarMa.containsMouse ? root.mauve : root.surface1
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: root.s(8)
+                                Text { text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(15); color: openBarMa.containsMouse ? root.base : root.mauve }
+                                Text { text: "Open Dock Editor"; font.family: "Hack Nerd Font"; font.weight: Font.Bold; font.pixelSize: root.s(12); color: openBarMa.containsMouse ? root.base : root.text }
+                            }
+                            MouseArea {
+                                id: openBarMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Quickshell.execDetached(["bash", "-c", "qs -p ~/.config/hypr/scripts/quickshell/Shell.qml ipc call main handleCommand open dock-editor ''"])
                             }
                         }
                     }
@@ -4818,8 +3887,9 @@ Item {
         }
     }
 
+
     Component {
-        id: startupTabComponent
+id: startupTabComponent
         Item {
             id: startupTabRoot
 

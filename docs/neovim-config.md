@@ -1,11 +1,11 @@
 # Neovim Configuration
 
-A full Neovim setup is included in `config/nvim/`. It uses a custom Lua-based plugin manager via `lazy.nvim`.
+Neovim is installed from the **remote repository** [`xscriptor-colors/nvim`](https://github.com/xscriptor-colors/nvim) (it is not bundled in this repo). The installer clones it to `~/.config/nvim`; `git pull` inside that directory updates it.
 
-## Structure
+## Structure (upstream repo)
 
 ```
-config/nvim/
+nvim/
   init.lua                  -- Entry point
   lua/
     config/
@@ -14,24 +14,20 @@ config/nvim/
       lazy.lua              -- Lazy.nvim bootstrap
       locale.lua            -- Locale settings
       options.lua           -- Neovim options
-      theme.lua             -- Theme bootstrapper
-    plugins/
-      completion.lua        -- Autocompletion (nvim-cmp, snippets)
-      editor.lua            -- Editor enhancement plugins
-      git.lua               -- Git integration (gitsigns, fugitive)
-      lsp.lua               -- LSP configuration (mason, mason-lspconfig)
-      tools.lua             -- Utility plugins
-      treesitter.lua        -- Treesitter parsers and config
-      ui.lua                -- UI enhancements (bufferline, lualine, etc.)
+      theme.lua             -- Theme bootstrapper (upstream)
+    plugins/                -- Plugin configs (completion, editor, git, lsp, tools, treesitter, ui)
     themes/
-      init.lua              -- Theme engine
-  colors/
-    colors.lua              -- Color scheme overrides
-  docs/
-    cheatsheet.md           -- Keybinding reference
-    troubleshooting.md      -- Common issues
+      palettes.lua          -- The 12 palettes (same as dock/palettes/*.json)
+      init.lua              -- Theme engine (applies highlight groups)
+  colors/<slug>.lua         -- One-liners: require("themes").apply("<slug>")
 ```
 
 ## Theme System
 
-The custom theme engine in `lua/themes/` loads `matugen_colors.lua` (generated from wallpaper via Matugen) as the color source. The engine sets highlight groups for syntax, UI elements, and plugin integrations.
+The theme engine in `lua/themes/` applies highlight groups from `palettes.lua`. The plugin/keymap/option config comes from the user's own repo (cloned to `~/.config/nvim`), but **`theme-sync.sh` regenerates** `lua/themes/palettes.lua` and `lua/config/theme.lua` from `dock/palettes` so Neovim follows the same palette as the bar, kitty, starship and VS Code.
+
+## Post-install
+
+1. Open `nvim` → Lazy installs plugins (`:Lazy`).
+2. `:Mason` to install LSP servers.
+3. Refer to the nvim README / cheatsheet for usage.

@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import "../"
+import "../dock"
 import "../WindowRegistry.js" as Registry
 
 PanelWindow {
@@ -84,15 +85,7 @@ PanelWindow {
         visible: opacity > 0.01
         Behavior on opacity { NumberAnimation { duration: 300 } }
 
-        MatugenColors { id: _theme }
-
-        property var blobPalette1: [_theme.mauve, _theme.blue, _theme.peach, _theme.green, _theme.pink]
-        property var blobPalette2: [_theme.sapphire, _theme.teal, _theme.maroon, _theme.yellow, _theme.red]
-
-        property real globalOrbitAngle: 0
-        NumberAnimation on globalOrbitAngle {
-            from: 0; to: Math.PI * 2; duration: 25000; loops: Animation.Infinite; running: true
-        }
+        Colors { id: _theme }
 
         ListView {
             id: popupList
@@ -189,25 +182,6 @@ PanelWindow {
                     border.color: _theme.surface1
                     border.width: 1
                     clip: true
-
-                    property color blob1Color: contentWrapper.blobPalette1[index % 5]
-                    property color blob2Color: contentWrapper.blobPalette2[index % 5]
-
-                    Rectangle {
-                        width: parent.width * 0.7; height: width; radius: width / 2
-                        x: (parent.width / 2 - width / 2) + Math.cos(contentWrapper.globalOrbitAngle * 2 + index) * 60
-                        y: (parent.height / 2 - height / 2) + Math.sin(contentWrapper.globalOrbitAngle * 2 + index) * 30
-                        color: popupCard.blob1Color
-                        opacity: 0.12
-                    }
-
-                    Rectangle {
-                        width: parent.width * 0.5; height: width; radius: width / 2
-                        x: (parent.width / 2 - width / 2) + Math.sin(contentWrapper.globalOrbitAngle * 1.5 - index) * -50
-                        y: (parent.height / 2 - height / 2) + Math.cos(contentWrapper.globalOrbitAngle * 1.5 - index) * -40
-                        color: popupCard.blob2Color
-                        opacity: 0.10
-                    }
 
                     Timer {
                         interval: delegateRoot.effectiveTimeout > 0 ? delegateRoot.effectiveTimeout : 5000

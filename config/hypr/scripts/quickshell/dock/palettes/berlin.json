@@ -1,0 +1,26 @@
+{
+  "name": "Berlin",
+  "slug": "berlin",
+  "author": "xscriptor",
+  "base16": {
+    "color0": "#000000",
+    "color1": "#999999",
+    "color2": "#bbbbbb",
+    "color3": "#dddddd",
+    "color4": "#888888",
+    "color5": "#aaaaaa",
+    "color6": "#cccccc",
+    "color7": "#ffffff",
+    "color8": "#666666",
+    "color9": "#999999",
+    "color10": "#bbbbbb",
+    "color11": "#dddddd",
+    "color12": "#888888",
+    "color13": "#aaaaaa",
+    "color14": "#cccccc",
+    "color15": "#ffffff"
+  },
+  "background": "#000000",
+  "foreground": "#cccccc",
+  "roles": {}
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Helsinki",
+  "slug": "helsinki",
+  "author": "xscriptor",
+  "base16": {
+    "color0": "#f8fafe",
+    "color1": "#1faa9e",
+    "color2": "#733d9a",
+    "color3": "#2e70ad",
+    "color4": "#b55a0f",
+    "color5": "#3e9d21",
+    "color6": "#bd4c3d",
+    "color7": "#544d40",
+    "color8": "#a6a49f",
+    "color9": "#1faa9e",
+    "color10": "#733d9a",
+    "color11": "#2e70ad",
+    "color12": "#b55a0f",
+    "color13": "#3e9d21",
+    "color14": "#bd4c3d",
+    "color15": "#544d40"
+  },
+  "background": "#f8fafe",
+  "foreground": "#544d40",
+  "roles": {}
+}

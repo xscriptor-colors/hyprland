@@ -1,74 +1,33 @@
 import QtQuick
 import Quickshell
+import "../../dock"
 
-Item {
+// Recording indicator — red accent island + blinking icon while recording.
+ModulePill {
     id: mod
-    required property var bar
-    required property var colors
-    required property bool zoneReady
-    required property int slotIndex
-    required property real effectiveBorderWidth
-    required property string effectiveBorderColor
-    required property bool unified
 
-    implicitWidth: pill.width
-    implicitHeight: bar.barHeight
-    visible: pill.width > 0 || pill.opacity > 0
+    padH: bar.s(6)
+    accentRole: "red"
+    accentActive: bar.isRecording
+    pulse: true
+    showState: bar.isRecording
 
-    Rectangle {
-        id: pill
-        anchors.verticalCenter: parent.verticalCenter
-        property bool isHovered: recMouse.containsMouse
+    onClicked: {
+        bar.isRecording = false;
+        Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/screenshot.sh"]);
+    }
 
-        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, bar.topbarPillSolid ? 1.0 : 0.95) : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, bar.topbarPillSolid ? 1.0 : 0.75)) : "transparent")
-        radius: unified ? 0 : bar.pillRadius(bar.barHeight)
-        border.width: unified ? 0 : effectiveBorderWidth
-        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
+    Text {
+        text: ""
+        font.family: bar.fontFamily
+        font.pixelSize: bar.s(20)
+        color: mod.contentColor
 
-        property real targetWidth: bar.isRecording ? bar.barHeight : 0
-        width: targetWidth
-        height: bar.barHeight
-
-        opacity: bar.isRecording ? 1.0 : 0.0
-        clip: true
-
-        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-        Behavior on opacity { NumberAnimation { duration: 300 } }
-
-        scale: isHovered ? 1.05 : 1.0
-        Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-        Behavior on color { ColorAnimation { duration: 200 } }
-
-        Text {
-            id: recIcon
-            anchors.centerIn: parent
-            text: ""
-            font.family: "Hack Nerd Font"
-            font.pixelSize: bar.s(20)
-            color: colors.red
-
-            SequentialAnimation on opacity {
-                running: bar.isRecording && !pill.isHovered
-                loops: Animation.Infinite
-                NumberAnimation { to: 0.3; duration: 600; easing.type: Easing.InOutSine }
-                NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutSine }
-            }
-            SequentialAnimation on scale {
-                running: bar.isRecording && !pill.isHovered
-                loops: Animation.Infinite
-                NumberAnimation { to: 1.15; duration: 600; easing.type: Easing.InOutSine }
-                NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutSine }
-            }
-        }
-
-        MouseArea {
-            id: recMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: {
-                bar.isRecording = false;
-                Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/screenshot.sh"]);
-            }
+        SequentialAnimation on opacity {
+            running: bar.isRecording && !mod.hovered
+            loops: Animation.Infinite
+            NumberAnimation { to: 0.35; duration: 600; easing.type: Easing.InOutSine }
+            NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutSine }
         }
     }
 }

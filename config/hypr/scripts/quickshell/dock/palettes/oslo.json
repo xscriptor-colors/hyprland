@@ -1,0 +1,26 @@
+{
+  "name": "Oslo",
+  "slug": "oslo",
+  "author": "xscriptor",
+  "base16": {
+    "color0": "#3f4451",
+    "color1": "#e05561",
+    "color2": "#8cc265",
+    "color3": "#d18f52",
+    "color4": "#4aa5f0",
+    "color5": "#c162de",
+    "color6": "#42b3c2",
+    "color7": "#e6e6e6",
+    "color8": "#858c98",
+    "color9": "#e05561",
+    "color10": "#8cc265",
+    "color11": "#d18f52",
+    "color12": "#4aa5f0",
+    "color13": "#c162de",
+    "color14": "#42b3c2",
+    "color15": "#e6e6e6"
+  },
+  "background": "#3f4451",
+  "foreground": "#abb2bf",
+  "roles": {}
+}

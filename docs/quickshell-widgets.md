@@ -10,7 +10,7 @@ Three panel windows run simultaneously:
 - **Main.qml** -- Full-screen overlay that handles widget popup positioning, animations, and IPC dispatch
 - **Floating.qml** -- Full-screen overlay for the persistent sidebar and exclusive UI surfaces
 
-All windows share a `Caching` QML singleton for path management, `MatugenColors` for dynamic theming, and `Scaler` for resolution-independent sizing.
+All windows share a `Caching` QML singleton for path management, the palette system (`Colors.qml`) for theming, and `Scaler` for resolution-independent sizing.
 
 ## Widget Popups
 
@@ -30,10 +30,6 @@ Accessible via keybinds (SUPER + letter):
 | Settings | `settings/SettingsPopup.qml` | SUPER + SHIFT + S | Left edge |
 | Display Scale | `scale/ScalePicker.qml` | SUPER + Z | Center |
 | Focus Time | `focustime/FocusTimePopup.qml` | SUPER + SHIFT + T | Center |
-| Movie Widget | `movies/MovieWidget.qml` | SUPER + P | Bottom center |
-| Stewart | `stewart/stewart.qml` | SUPER + X | Center |
-| Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
-| Stewart | `stewart/stewart.qml` | SUPER + X | Center |
 | Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |
 | System Monitor | `system-monitor/SystemMonitor.qml` | SUPER + I | Center |
 | Quick Notes | `quicknotes/QuickNotes.qml` | SUPER + Y | Center |

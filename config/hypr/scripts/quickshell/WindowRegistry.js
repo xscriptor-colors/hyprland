@@ -39,13 +39,12 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         // --- Central Standard Tools ---
         "applauncher": { w: s(800, scale), h: s(700, scale), rx: Math.floor((mw/2)-(s(800, scale)/2)), ry: Math.floor((mh/2)-(s(700, scale)/2)), comp: "applauncher/appLauncher.qml" },
         "clipboard": { w: s(800, scale), h: s(700, scale), rx: Math.floor((mw/2)-(s(800, scale)/2)), ry: Math.floor((mh/2)-(s(700, scale)/2)), comp: "clipboard/ClipboardManager.qml" },
-        "stewart":   { w: s(800, scale), h: s(650, scale), rx: Math.floor((mw/2)-(s(800, scale)/2)), ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "stewart/stewart.qml" },
 
         // --- Central Large Tools ---
         "focustime": { w: s(900, scale), h: s(700, scale), rx: Math.floor((mw/2)-(s(900, scale)/2)), ry: Math.floor((mh/2)-(s(700, scale)/2)), comp: "focustime/FocusTimePopup.qml" },
 
         // --- Extralarge / Custom Centered ---
-        "guide":     { w: s(1200, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1200, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "guide/GuidePopup.qml" },
+        "guide":     { w: s(1160, scale), h: s(720, scale), rx: Math.floor((mw/2)-(s(1160, scale)/2)), ry: Math.floor((mh/2)-(s(720, scale)/2)), comp: "guide/GuidePopup.qml" },
         "calendar":  { w: s(1450, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1450, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "calendar/CalendarPopup.qml" },
         "updater": { w: s(950, scale), h: s(850, scale), rx: Math.floor((mw/2)-(s(950, scale)/2)), ry: Math.floor((mh/2)-(s(850, scale)/2)), comp: "updater/UpdaterPopup.qml" },
         "system-monitor": { w: s(580, scale), h: s(480, scale), rx: Math.floor((mw/2)-(s(580, scale)/2)), ry: Math.floor((mh/2)-(s(480, scale)/2)), comp: "system-monitor/SystemMonitor.qml" },
@@ -54,21 +53,14 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         "file-search": { w: s(600, scale), h: s(500, scale), rx: Math.floor((mw/2)-(s(600, scale)/2)), ry: Math.floor((mh/2)-(s(500, scale)/2)), comp: "file-search/FileSearch.qml" },
         "scale": { w: s(520, scale), h: s(560, scale), rx: Math.floor((mw/2)-(s(520, scale)/2)), ry: Math.floor((mh/2)-(s(560, scale)/2)), comp: "scale/ScalePicker.qml" },
         "window-controls": { w: s(480, scale), h: s(800, scale), rx: Math.floor((mw/2)-(s(480, scale)/2)), ry: Math.floor((mh/2)-(s(800, scale)/2)), comp: "window-controls/WindowControls.qml" },
+        "dock-editor": { w: s(920, scale), h: s(740, scale), rx: Math.floor((mw/2)-(s(920, scale)/2)), ry: Math.floor((mh/2)-(s(740, scale)/2)), comp: "dock/DockEditor.qml" },
         "wallpaper": { w: mw, h: s(650, scale), rx: 0, ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "wallpaper/WallpaperPicker.qml" },
         
         // --- Top Left Edge ---
         "music":     { w: s(700, scale), h: s(650, scale), rx: s(5, scale), ry: s(60, scale), comp: "music/MusicPopup.qml" },
 
-        "movies": {
-            w: s(1370, scale),
-            h: s(850, scale),
-            rx: Math.floor((mw / 2) - (s(1370, scale) / 2)),
-            ry: mh - s(850, scale),
-            comp: "movies/MovieWidget.qml"
-        },
-        
         // --- Screen Spanning Panels ---
-        "settings":  { w: s(450, scale), h: mh - s(0, scale), rx: s(0, scale), ry: s(0, scale), comp: "settings/SettingsPopup.qml" },
+        "settings":  { w: s(780, scale), h: mh - s(0, scale), rx: s(0, scale), ry: s(0, scale), comp: "settings/SettingsPopup.qml" },
         
         // --- Utility ---
         "hidden":    { w: 1, h: 1, rx: -5000 - mx, ry: -5000 - my, comp: "" } 

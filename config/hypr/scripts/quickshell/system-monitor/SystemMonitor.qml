@@ -4,11 +4,12 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
 
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
 
     readonly property color base: _theme.base
     readonly property color crust: _theme.crust

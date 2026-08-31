@@ -8,7 +8,7 @@ Since Hyprland 0.55 the configuration is written in **Lua** (`hyprland.lua`). Ea
 |------|---------|
 | `hyprland.lua` | Main entry point. Requires every module: env, colors, variables, settings, monitors, keybinds, animations, windowrules, workspaces, autostart. Also loads runtime override modules from `config/`. |
 | `env.lua` | Environment variables via `hl.env()`: NVIDIA GBM backend, Wayland session type, Qt/GTK/SDL backends, Electron Wayland flags, cursor theme, wallpaper/script dirs, XDG dirs, optional app scaling. |
-| `colors.lua` | Fixed X palette (from `references.md`) exported as a Lua table. Provides `active_border` / `inactive_border` and helpers to build `rgb()`/`rgba()` strings. |
+| `colors.lua` | Fixed palette (from `dock/palettes/`) exported as a Lua table. Provides `active_border` / `inactive_border` and helpers to build `rgb()`/`rgba()` strings. |
 | `variables.lua` | Core variables: `mainMod = "SUPER"`, `terminal = "kitty"`, `fileMgr`, `browser`, `menu`, `shellDir`. |
 | `settings.lua` | `hl.config()` for general, decoration (rounding/opacity/shadow/blur), input (+ touchpad), cursor, dwindle, master, misc, xwayland and ecosystem. Includes the touchpad gesture. |
 | `monitors.lua` | Monitor setup. Defaults to the wildcard entry `mode = "highrr"` which auto-detects every monitor at its highest refresh rate (replaces the old `detect-monitors.sh`). |
@@ -40,9 +40,9 @@ hyprland.lua
 
 ## Colors
 
-Colors are **fixed** to the X palette (see `references.md`), no longer generated per-wallpaper by Matugen. `colors.lua` exports the palette and the border colors used by `settings.lua`.
+Colors are **fixed** to the 12 palettes in `dock/palettes/`, no longer generated per-wallpaper by Matugen. `colors.lua` exports the palette and the border colors used by `settings.lua`.
 
-Matugen still generates colors for the other apps (Kitty, Neovim, Cava, SwayOSD, GTK, Qt, QuickShell `qs_colors.json`, SDDM).
+Matugen is no longer used: all widgets and window borders follow the 12 fixed palettes in `dock/palettes/` (see themes.md).
 
 ## Auto Monitor Detection
 

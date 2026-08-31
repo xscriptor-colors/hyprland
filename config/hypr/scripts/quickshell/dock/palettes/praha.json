@@ -1,0 +1,26 @@
+{
+  "name": "Praha",
+  "slug": "praha",
+  "author": "xscriptor",
+  "base16": {
+    "color0": "#1a1a1a",
+    "color1": "#ff5555",
+    "color2": "#b8e6a0",
+    "color3": "#ffe4a3",
+    "color4": "#bd93f9",
+    "color5": "#ff9aa2",
+    "color6": "#8be9fd",
+    "color7": "#ffffff",
+    "color8": "#8c8c8c",
+    "color9": "#ff5555",
+    "color10": "#b8e6a0",
+    "color11": "#ffe4a3",
+    "color12": "#bd93f9",
+    "color13": "#ff9aa2",
+    "color14": "#8be9fd",
+    "color15": "#ffffff"
+  },
+  "background": "#1a1a1a",
+  "foreground": "#ffffff",
+  "roles": {}
+}

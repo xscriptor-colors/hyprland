@@ -1,5 +1,32 @@
 # Changelog
 
+## [2026-08-30]
+
+### Added
+- **Palette system** — 12 fixed palettes in `dock/palettes/*.json` + `dock/Colors.qml` (replaces `MatugenColors`). Every widget, border, SDDM, kitty and nvim now follows the active palette.
+- **Window borders UI** — Dock Editor "Window borders" card (follow-palette toggle + manual active/inactive colors), applied live via `hyprctl eval` without restarting windows.
+- **`scripts/theme-sync.sh`** — kitty + starship + VS Code themes regenerate from `dock/palettes` (single source of truth) and follow `settings.json → dock.palette` (VS Code updates `workbench.colorTheme` + `workbench.iconTheme` live, both `code` and `code-insiders`); nvim regenerates its palette data from `dock/palettes` (config/plugins stay from the user's repo).
+- **`scripts/sddm-colors.sh`** — SDDM login theme colors derived from the palette, plus a dynamic background that follows the current wallpaper.
+
+### Changed
+- **Matugen removed** entirely: `MatugenColors.qml`, `qs_colors.json`, `matugen-apply.sh`, `matugen_reload.sh`, `matugen-colors.lua`, `config/matugen`, `install.sh`/`init.sh` matugen blocks.
+- **All widgets migrated** to the palette (Blocks 1–3): bar modules, volume, network, battery, applauncher, calendar, settings, music, clipboard, system-monitor, quicknotes, rss-reader, file-search, scale, updater, guide, focustime, window-controls, Floating, Lock, ScreenshotOverlay, notifications.
+- **Window borders** now derive from the active palette in `colors.lua` (reads `settings.json` + palette JSON).
+- **SDDM theme** renamed `matugen-minimal` → `x`, palette-driven colors, adaptive dark/light overlay, background points at the live wallpaper cache.
+- **kitty + nvim** installed from remote repos (`xscriptor-colors/terminal`, `xscriptor-colors/nvim`); bundled copies removed.
+- **Removed widgets** `movies` (SUPER+P) and `stewart` (SUPER+X).
+- **Removed legacy** `TopBar.qml`, `themes/*.conf`, `references.md`.
+
+### Fixed
+- Settings popup sidebar not drawing after topbar dead-code cleanup (brace imbalance) + missing `overlay1`/`overlay2` roles.
+- Wallpaper picker applying from the wrong directory (`srcDir` now from `settings.json`).
+- Kitty comment lines invisible: `color8` was too close to the background in several palettes (and `paris` had `color7` = background) — `color8` is now a mid-tone `mix(background, foreground, 0.5/0.65)` with sufficient contrast in all 12 palettes; `paris` `color7` fixed to the foreground.
+- Shell comments (`# ...`) invisible when typed in zsh: `zsh-syntax-highlighting` defaults to `fg=black` (the background) — `~/.zshrc` now sets `ZSH_HIGHLIGHT_STYLES[comment]='fg=bright-black,bold'` so comments use the palette's `color8` (visible in every theme).
+- Notifications popup: removed decorative background bubbles; kept small/minimal on the side; removed the redundant `swaync` daemon (double popup + broken app icon).
+- Screen recorder: `gpu-screen-recorder -w portal` hung without saving; switched to direct capture (`-w screen` full, `-w region` area) and converted the overlay's grim-style geometry (`X,Y WxH`) to gsr's (`WxH+X+Y`) so area recordings save correctly.
+- Guide info panel: removed the obsolete "Matugen" tab (now "Palettes") and the "Modules" tab/button, fixed the author block typo (`xscripto` → `xscriptor`), branding `Imperative` → `xshell`, version state renamed `imperative-dots-version` → `xshell-version` (written by the installer), repo links fixed to `main` branch and correct targets (NixOS→xlnux, Wallpapers→xww), and slightly more compact window (1160×720) keeping all color roles.
+- Various pre-existing QML bugs: widget property injection (`Main.qml`), QuickNotes autosave, FileSearch `surface2`, Guide/Clipboard/appLauncher/Calendar transform scoping, NetworkPopup scoping, Updater null guard, Zone reload noise.
+
 ## [2026-08-23]
 
 - Migrate all customizations to xscriptor-colors

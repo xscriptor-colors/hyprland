@@ -6,6 +6,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import "../"
+import "../dock"
 
 Item {
     id: window
@@ -24,7 +25,7 @@ Item {
     // -------------------------------------------------------------------------
     // COLORS (Expanded Dynamic Matugen Palette)
     // -------------------------------------------------------------------------
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     
     readonly property color base: _theme.base
     readonly property color mantle: _theme.mantle
@@ -521,13 +522,14 @@ Item {
                                 text: model.name
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: window.s(14)
+                                id: launchItem
                                 font.weight: index === appList.currentIndex ? Font.Bold : Font.Medium
                                 color: index === appList.currentIndex ? window.crust : window.text
                                 elide: Text.ElideRight
                                 verticalAlignment: Text.AlignVCenter
                                 
                                 property real textShift: index === appList.currentIndex ? window.s(6) : 0
-                                transform: Translate { x: textShift }
+                                transform: Translate { x: launchItem.textShift }
                                 
                                 Behavior on textShift { 
                                     NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 

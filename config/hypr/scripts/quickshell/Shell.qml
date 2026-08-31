@@ -1,6 +1,7 @@
 //@ pragma UseQApplication
 import QtQuick
 import Quickshell
+import "dock"
 
 ShellRoot {
     Connections {
@@ -10,7 +11,6 @@ ShellRoot {
     }
 
     Main {}
-    TopBar {}
+    Dock {}
     Floating {}
 }
-

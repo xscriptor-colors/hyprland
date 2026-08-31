@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import "dock"
 
 PanelWindow {
     id: root
@@ -25,7 +26,7 @@ PanelWindow {
     Scaler { id: scaler; currentWidth: width }
     function s(val) { return scaler.s(val); }
     
-    MatugenColors { id: _theme }
+    Colors { id: _theme }
     property color dimColor: Qt.alpha(_theme.crust, 0.50)
     property color selectionTint: Qt.alpha(_theme.mauve, 0.05)
     property color handleColor: _theme.text

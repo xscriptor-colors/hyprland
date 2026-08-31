@@ -32,7 +32,6 @@ hl.bind(mod .. "period", hl.dsp.exec_cmd("rofi -show emoji -theme ~/.config/rofi
 hl.bind(mod .. "Q", hl.dsp.window.kill())
 hl.bind(mod .. "M", run("bash " .. scripts .. "/qs_manager.sh", "toggle music"))
 hl.bind(mod .. "C", run(scripts .. "/qs_manager.sh", "toggle clipboard"))
-hl.bind(mod .. "P", run(scripts .. "/qs_manager.sh", "toggle movies"))
 hl.bind(mod .. "D", run("bash " .. scripts .. "/qs_manager.sh", "toggle applauncher"))
 hl.bind(mod .. "B", run("bash " .. scripts .. "/qs_manager.sh", "toggle battery"))
 hl.bind(mod .. "W", run("bash " .. scripts .. "/qs_manager.sh", "toggle wallpaper"))
@@ -44,12 +43,13 @@ hl.bind(mod .. "SHIFT + S", run("bash " .. scripts .. "/qs_manager.sh", "toggle 
 hl.bind(mod .. "SHIFT + E", run("bash " .. scripts .. "/qs_manager.sh", "toggle settings topbar"))
 hl.bind(mod .. "SHIFT + T", run("bash " .. scripts .. "/qs_manager.sh", "toggle focustime"))
 hl.bind(mod .. "U", run("bash " .. scripts .. "/qs_manager.sh", "toggle updater"))
-hl.bind(mod .. "X", run("bash " .. scripts .. "/qs_manager.sh", "toggle stewart"))
+
 hl.bind(mod .. "Y", run("bash " .. scripts .. "/qs_manager.sh", "toggle quicknotes"))
 hl.bind(mod .. "I", run("bash " .. scripts .. "/qs_manager.sh", "toggle system-monitor"))
 hl.bind(mod .. "O", run("bash " .. scripts .. "/qs_manager.sh", "toggle rss-reader"))
 hl.bind(mod .. "apostrophe", run("bash " .. scripts .. "/qs_manager.sh", "toggle file-search"))
 hl.bind(mod .. "SHIFT + B", run("bash " .. scripts .. "/qs_manager.sh", "toggle window-controls"))
+hl.bind(mod .. "SHIFT + D", run("bash " .. scripts .. "/qs_manager.sh", "toggle dock-editor"))
 hl.bind(mod .. "R", run(scripts .. "/reload.sh"))
 
 -- ┌───────────────────────────────────────────────────────────────────────────┐

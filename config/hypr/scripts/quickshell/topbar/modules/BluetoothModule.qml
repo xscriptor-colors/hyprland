@@ -1,71 +1,45 @@
 import QtQuick
 import Quickshell
+import "../../dock"
 
-Item {
+// Bluetooth — orange accent island when on. Hidden on desktops (no BT hardware).
+// Compact (vertical): icon only.
+ModulePill {
     id: mod
-    required property var bar
-    required property var colors
-    required property bool zoneReady
-    required property int slotIndex
-    required property real effectiveBorderWidth
-    required property string effectiveBorderColor
-    required property bool unified
 
-    implicitWidth: pill.width
-    implicitHeight: bar.barHeight
-    visible: pill.targetWidth > 0
+    accentRole: "color4"
+    accentActive: bar.isBtOn
+    showState: !bar.isDesktop
 
-    property bool initAnimTrigger: false
-    Timer { running: mod.zoneReady && !mod.initAnimTrigger; interval: mod.slotIndex * 50; onTriggered: mod.initAnimTrigger = true }
+    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"])
 
-    Rectangle {
-        id: pill
-        anchors.verticalCenter: parent.verticalCenter
-        property bool isHovered: btMouse.containsMouse
-        radius: unified ? 0 : bar.pillRadius(bar.pillHeight); height: bar.pillHeight
-        clip: true
-        color: unified ? "transparent" : (bar.topbarPillBg ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, bar.topbarPillSolid ? 1.0 : 0.6) : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, bar.topbarPillSolid ? 1.0 : 0.4)) : "transparent")
-        border.width: unified ? 0 : effectiveBorderWidth
-        border.color: unified ? "transparent" : (colors[effectiveBorderColor] || colors.surface1)
+    Row {
+        visible: mod.horizontal
+        spacing: bar.s(10)
 
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            opacity: bar.isBtOn ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 300 } }
-            color: colors.color4
-        }
-
-        property real targetWidth: bar.isDesktop ? 0 : btLayoutRow.implicitWidth + bar.s(24)
-        width: targetWidth
-        visible: targetWidth > 0
-        Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
-
-        scale: isHovered ? 1.05 : 1.0
-        Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
-        Behavior on color { ColorAnimation { duration: 200 } }
-
-        opacity: mod.initAnimTrigger ? 1 : 0
-        transform: Translate { y: mod.initAnimTrigger ? 0 : bar.s(15); Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutBack } } }
-        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
-
-        Row {
-            id: btLayoutRow
+        Text {
             anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: bar.s(12)
-            spacing: bar.s(10)
-            Text { anchors.verticalCenter: parent.verticalCenter; text: bar.btIcon; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(16); color: bar.isBtOn ? colors.base : colors.subtext0 }
-            Text {
-                id: btText
-                anchors.verticalCenter: parent.verticalCenter
-                text: bar.btDevice
-                visible: text !== "";
-                font.family: "Hack Nerd Font"; font.pixelSize: bar.s(13); font.weight: Font.Black;
-                color: bar.isBtOn ? colors.base : colors.text;
-                width: Math.min(implicitWidth, bar.s(100)); elide: Text.ElideRight
-            }
+            text: bar.btIcon
+            font.family: bar.fontFamily
+            font.pixelSize: bar.s(16)
+            color: mod.contentColor
         }
-        MouseArea { id: btMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"]) }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: bar.btDevice
+            font.family: bar.fontFamily
+            font.pixelSize: bar.s(13)
+            font.weight: Font.Black
+            width: Math.min(implicitWidth, bar.s(100)); elide: Text.ElideRight
+            color: mod.contentColor
+        }
+    }
+
+    Text {
+        visible: mod.compact
+        text: bar.btIcon
+        font.family: bar.fontFamily
+        font.pixelSize: bar.s(20)
+        color: mod.contentColor
     }
 }

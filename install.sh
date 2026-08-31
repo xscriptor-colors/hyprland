@@ -251,9 +251,8 @@ CORE_PACKAGES_ARCH=(
     "gvfs"
     "gvfs-mtp"
 
-    # New packages from imperative-dots
+    # New packages from xshell
     "quickshell-git"
-    "matugen-bin"
     "swayosd-git"
     "cava"
     "zbar"
@@ -413,7 +412,7 @@ backup_config() {
     log "Creating backup of existing configurations..."
     mkdir -p "$BACKUP_DIR"
 
-    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "matugen" "swayosd" "nvim")
+    local configs=("hypr" "rofi" "kitty" "dunst" "cava" "swayosd" "nvim")
 
     for config in "${configs[@]}"; do
         if [ -d "$CONFIG_DIR/$config" ]; then
@@ -459,13 +458,12 @@ install_dotfiles() {
           "$CONFIG_DIR/hypr/theme.conf" "$CONFIG_DIR/hypr/windowrules.conf" \
           "$CONFIG_DIR/hypr/workspaces.conf"
     rm -f "$CONFIG_DIR/hypr/config/gaps.conf" "$CONFIG_DIR/hypr/config/settings.conf" \
-          "$CONFIG_DIR/hypr/config/variables.conf" "$CONFIG_DIR/hypr/config/window-effects.conf"
+          "$CONFIG_DIR/hypr/config/variables.conf" "$CONFIG_DIR/hypr/config/window-effects.conf" \
+          "$CONFIG_DIR/hypr/config/autostart.conf" "$CONFIG_DIR/hypr/config/env.conf" \
+          "$CONFIG_DIR/hypr/config/keybindings.conf" "$CONFIG_DIR/hypr/config/monitors.conf" \
+          "$CONFIG_DIR/hypr/config/rules.conf"
     rm -f "$CONFIG_DIR/hypr/scripts/settings_watcher.sh" \
           "$CONFIG_DIR/hypr/scripts/detect-monitors.sh"
-
-    # Copy themes
-    mkdir -p "$CONFIG_DIR/hypr/themes"
-    cp -r "$SCRIPT_DIR/themes/"* "$CONFIG_DIR/hypr/themes/"
 
     # Copy scripts
     mkdir -p "$CONFIG_DIR/hypr/scripts"
@@ -521,13 +519,6 @@ install_dotfiles() {
         log "Installed cava config"
     fi
 
-    # Copy Matugen config
-    if [ -d "$SCRIPT_DIR/config/matugen" ]; then
-        mkdir -p "$CONFIG_DIR/matugen"
-        cp -r "$SCRIPT_DIR/config/matugen/"* "$CONFIG_DIR/matugen/"
-        log "Installed matugen config"
-    fi
-
     # Copy Hypridle config (goes to ~/.config/hypr/)
     if [ -f "$SCRIPT_DIR/config/hypridle/hypridle.conf" ]; then
         cp "$SCRIPT_DIR/config/hypridle/hypridle.conf" "$CONFIG_DIR/hypr/"
@@ -567,57 +558,44 @@ install_dotfiles() {
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
 install_kitty_config() {
-    log "Installing Kitty configuration..."
+    log "Installing Kitty configuration from xscriptor-colors/terminal..."
 
-    # Copy Kitty config from local
-    mkdir -p "$CONFIG_DIR/kitty/themes"
-
-    if [ -f "$SCRIPT_DIR/config/kitty/kitty.conf" ]; then
-        cp "$SCRIPT_DIR/config/kitty/kitty.conf" "$CONFIG_DIR/kitty/"
-        log "Installed kitty.conf"
+    if ! command -v git >/dev/null 2>&1; then
+        warn "git not found. Cannot clone xscriptor-colors/terminal."
+        warn "Install git and run: wget -qO- https://raw.githubusercontent.com/xscriptor-colors/terminal/main/emulators/kitty/install.sh | bash"
+        return
     fi
 
-    if [ -d "$SCRIPT_DIR/config/kitty/themes" ]; then
-        cp -r "$SCRIPT_DIR/config/kitty/themes/"* "$CONFIG_DIR/kitty/themes/"
-        log "Installed Kitty themes"
+    local TMP_DIR
+    TMP_DIR="$(mktemp -d)"
+    if ! git clone --depth 1 https://github.com/xscriptor-colors/terminal.git "$TMP_DIR/terminal" >/dev/null 2>&1; then
+        warn "Failed to clone xscriptor-colors/terminal."
+        rm -rf "$TMP_DIR"
+        return
     fi
 
-    # Set default theme
-    if [ -f "$CONFIG_DIR/kitty/themes/x.conf" ]; then
-        cp "$CONFIG_DIR/kitty/themes/x.conf" "$CONFIG_DIR/kitty/current-theme.conf"
+    local KITTY_INSTALLER="$TMP_DIR/terminal/emulators/kitty/install.sh"
+    if [ -f "$KITTY_INSTALLER" ]; then
+        log "Running kitty installer (packages, font, themes, aliases)..."
+        bash "$KITTY_INSTALLER" || warn "Kitty installer finished with warnings (non-fatal)"
+        log "Kitty configuration installed from xscriptor-colors/terminal!"
+    else
+        warn "kitty installer not found in cloned repo."
     fi
+    rm -rf "$TMP_DIR"
 
-    log "Kitty configuration installed!"
+    # Regenerate the kitty themes from the dock palettes (single source of
+    # truth): the terminal repo ships its own theme values, so we overwrite
+    # them right away to keep kitty consistent with the bar/borders/SDDM.
+    if [ -f "$SCRIPT_DIR/scripts/theme-sync.sh" ]; then
+        bash "$SCRIPT_DIR/scripts/theme-sync.sh" || warn "Kitty theme sync failed (non-fatal)"
+        log "Kitty themes synced from the active palette"
+    fi
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ INSTALL MATUGEN CONFIG                                                            │
 # └───────────────────────────────────────────────────────────────────────────────────┘
-
-install_matugen_config() {
-    log "Installing Matugen color generation configuration..."
-
-    # Copy matugen config and templates (already done in install_dotfiles)
-    # Generate initial colors if wallpapers exist
-    local first_wallpaper=""
-
-    if [ -d "$CONFIG_DIR/hypr/wallpapers" ]; then
-        first_wallpaper=$(find "$CONFIG_DIR/hypr/wallpapers" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) | head -n 1)
-    fi
-
-    if [ -n "$first_wallpaper" ] && command -v matugen &>/dev/null; then
-        log "Generating initial Matugen colors from $first_wallpaper..."
-        bash "$CONFIG_DIR/hypr/scripts/quickshell/wallpaper/matugen-apply.sh" "$first_wallpaper" || warn "Matugen color generation failed (non-fatal)"
-    else
-        if [ -z "$first_wallpaper" ]; then
-            warn "No wallpapers found for Matugen color generation. Run matugen manually after setting a wallpaper."
-        elif ! command -v matugen &>/dev/null; then
-            warn "matugen binary not found. Skipping color generation."
-        fi
-    fi
-
-    log "Matugen configuration installed!"
-}
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ INSTALL HACK NERD FONT                                                            │
@@ -674,53 +652,30 @@ install_hack_nerd_font() {
 install_nvim_config() {
     local NVIM_DEST="$CONFIG_DIR/nvim"
 
-    echo ""
-    prompt "Which Neovim config do you want to install?"
-    echo -e "  ${CYAN}1)${NC} Bundled (config/nvim in this repo)"
-    echo -e "  ${CYAN}2)${NC} X Nvim (https://github.com/xscriptor-colors/nvim)"
-    echo -e "  ${CYAN}3)${NC} Skip"
-    read -r nvim_choice
+    log "Installing Neovim configuration from xscriptor-colors/nvim..."
 
-    case "$nvim_choice" in
-        2)
-            log "Installing Neovim configuration from xscriptor-colors/nvim..."
-            if command -v git &>/dev/null; then
-                if [ -d "$NVIM_DEST" ]; then
-                    warn "Existing nvim config found at $NVIM_DEST"
-                    prompt "Replace it? [Y/n] "
-                    read -r replace_response
-                    if [[ "$replace_response" =~ ^[Nn]$ ]]; then
-                        log "Skipping nvim installation."
-                        return
-                    fi
-                    rm -rf "$NVIM_DEST"
-                fi
-                git clone https://github.com/xscriptor-colors/nvim.git "$NVIM_DEST" || {
-                    error "Failed to clone xscriptor-colors/nvim."
-                    return
-                }
-                log "Neovim configuration installed from xscriptor-colors/nvim!"
-            else
-                warn "git not found. Cannot clone external repo."
-                warn "Install git and run: git clone https://github.com/xscriptor-colors/nvim.git ~/.config/nvim"
-            fi
-            ;;
-        3)
-            log "Skipping Neovim configuration installation."
+    if ! command -v git >/dev/null 2>&1; then
+        warn "git not found. Cannot clone nvim repo."
+        warn "Install git and run: git clone https://github.com/xscriptor-colors/nvim.git ~/.config/nvim"
+        return
+    fi
+
+    if [ -d "$NVIM_DEST" ]; then
+        warn "Existing nvim config found at $NVIM_DEST"
+        prompt "Replace it? [Y/n] "
+        read -r replace_response
+        if [[ "$replace_response" =~ ^[Nn]$ ]]; then
+            log "Skipping nvim installation."
             return
-            ;;
-        *)
-            # Default: bundled
-            if [ -d "$SCRIPT_DIR/config/nvim" ]; then
-                log "Installing bundled Neovim configuration..."
-                cp -r "$SCRIPT_DIR/config/nvim" "$NVIM_DEST"
-                log "Neovim configuration installed!"
-            else
-                warn "Bundled nvim config not found at config/nvim"
-                return
-            fi
-            ;;
-    esac
+        fi
+        rm -rf "$NVIM_DEST"
+    fi
+
+    git clone --depth 1 https://github.com/xscriptor-colors/nvim.git "$NVIM_DEST" || {
+        error "Failed to clone xscriptor-colors/nvim."
+        return
+    }
+    log "Neovim configuration installed from xscriptor-colors/nvim!"
 
     echo ""
     echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════════╗${NC}"
@@ -732,7 +687,6 @@ install_nvim_config() {
     echo -e "${CYAN}3.${NC} Run Mason to install LSP servers:  ${WHITE}:Mason${NC}"
     echo ""
     echo -e "${BLUE}Refer to the nvim README for more details.${NC}"
-    echo ""
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -742,26 +696,28 @@ install_nvim_config() {
 install_sddm_theme() {
     log "Installing SDDM theme..."
 
-    if [ -d "$SCRIPT_DIR/config/sddm/themes/matugen-minimal" ]; then
-        sudo mkdir -p /usr/share/sddm/themes/matugen-minimal
-        sudo cp -r "$SCRIPT_DIR/config/sddm/themes/matugen-minimal/"* /usr/share/sddm/themes/matugen-minimal/
+    if [ -d "$SCRIPT_DIR/config/sddm/themes/x" ]; then
+        sudo mkdir -p /usr/share/sddm/themes/x
+        sudo cp -r "$SCRIPT_DIR/config/sddm/themes/x/"* /usr/share/sddm/themes/x/
 
-        # Create Colors.qml with Matugen-generated colors if available, else fallback
+        # Generate Colors.qml from the active palette (no Matugen involved)
+        if [ -f "$SCRIPT_DIR/scripts/sddm-colors.sh" ]; then
+            bash "$SCRIPT_DIR/scripts/sddm-colors.sh" || warn "SDDM color generation failed (non-fatal)"
+        fi
         if [ -f "$HOME/.config/hypr/sddm-colors.qml" ]; then
-            sudo cp "$HOME/.config/hypr/sddm-colors.qml" /usr/share/sddm/themes/matugen-minimal/Colors.qml
-            log "SDDM Colors.qml generated from Matugen"
+            sudo cp "$HOME/.config/hypr/sddm-colors.qml" /usr/share/sddm/themes/x/Colors.qml
         else
-            cat <<EOF | sudo tee /usr/share/sddm/themes/matugen-minimal/Colors.qml > /dev/null
+            cat <<EOF | sudo tee /usr/share/sddm/themes/x/Colors.qml > /dev/null
 pragma Singleton
 import QtQuick
 QtObject {
-    readonly property color base: "#1e1e2e"
-    readonly property color surface0: "#313244"
-    readonly property color text: "#cdd6f4"
-    readonly property color subtext0: "#a6adc8"
-    readonly property color mauve: "#cba6f7"
-    readonly property color blue: "#89b4fa"
-    readonly property color red: "#f38ba8"
+    readonly property color base: "#1a1a1a"
+    readonly property color surface0: "#2b2b2b"
+    readonly property color text: "#ffffff"
+    readonly property color subtext0: "#cccccc"
+    readonly property color mauve: "#ff9aa2"
+    readonly property color blue: "#8be9fd"
+    readonly property color red: "#ff5555"
 }
 EOF
             log "SDDM Colors.qml created with default palette"
@@ -769,9 +725,9 @@ EOF
 
         # Configure SDDM to use the theme
         sudo mkdir -p /etc/sddm.conf.d
-        cat <<EOF | sudo tee /etc/sddm.conf.d/10-matugen-theme.conf > /dev/null
+        cat <<EOF | sudo tee /etc/sddm.conf.d/10-x-theme.conf > /dev/null
 [Theme]
-Current=matugen-minimal
+Current=x
 EOF
 
         # Disable user-specific theme override if present (SilentSDDM, etc.)
@@ -786,7 +742,7 @@ EOF
 
         log "SDDM theme installed and configured!"
     else
-        warn "SDDM theme directory not found at config/sddm/themes/matugen-minimal"
+        warn "SDDM theme directory not found at config/sddm/themes/x"
     fi
 }
 
@@ -877,6 +833,16 @@ check_requirements() {
 # │ MAIN INSTALLATION                                                                 │
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
+
+# Writes the local xshell version state read by the guide/updater/notifier.
+write_xshell_version() {
+    mkdir -p "$HOME/.local/state"
+    cat > "$HOME/.local/state/xshell-version" <<EOF
+LOCAL_VERSION="$INSTALL_VERSION"
+EOF
+    log "Wrote xshell version ($INSTALL_VERSION)"
+}
+
 main() {
     print_banner
 
@@ -946,6 +912,7 @@ main() {
 
     # Install dotfiles
     install_dotfiles
+    write_xshell_version
 
     # Download wallpaper pack
     download_wallpapers
@@ -956,9 +923,6 @@ main() {
     if [[ ! "$kitty_response" =~ ^[Nn]$ ]]; then
         install_kitty_config
     fi
-
-    # Install Matugen config and generate colors
-    install_matugen_config
 
     # Install Hack Nerd Font
     install_hack_nerd_font
@@ -1052,8 +1016,8 @@ case "$1" in
     --dotfiles-only)
         backup_config
         install_dotfiles
+        write_xshell_version
         install_kitty_config
-        install_matugen_config
         install_hack_nerd_font
         install_nvim_config
         create_directories

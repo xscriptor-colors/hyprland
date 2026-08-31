@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "dock"
 
 Variants {
     model: Quickshell.screens
@@ -185,7 +186,7 @@ Variants {
                 return isNaN(res) ? val : res; 
             }
 
-            MatugenColors { id: mocha }
+            Colors { id: mocha }
 
             // =========================================================
             // --- DYNAMIC LAYOUT LOGIC

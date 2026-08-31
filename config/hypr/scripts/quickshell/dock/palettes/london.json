@@ -1,0 +1,26 @@
+{
+  "name": "London",
+  "slug": "london",
+  "author": "xscriptor",
+  "base16": {
+    "color0": "#ffffff",
+    "color1": "#333333",
+    "color2": "#444444",
+    "color3": "#555555",
+    "color4": "#666666",
+    "color5": "#777777",
+    "color6": "#888888",
+    "color7": "#333333",
+    "color8": "#999999",
+    "color9": "#333333",
+    "color10": "#444444",
+    "color11": "#555555",
+    "color12": "#666666",
+    "color13": "#777777",
+    "color14": "#888888",
+    "color15": "#333333"
+  },
+  "background": "#ffffff",
+  "foreground": "#333333",
+  "roles": {}
+}
