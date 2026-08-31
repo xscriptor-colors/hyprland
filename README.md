@@ -147,12 +147,12 @@ chmod +x install.sh
 
 <h2 align="center" id="related-repos">Related Repos</h2>
 <ul>
-  <li><a href="https://github.com/xscriptor-colors/terminal">Terminal </a></li>
-  <li><a href="https://github.com/xscriptor-colors/nvim">Nvim </a></li>
+  <li><a href="https://github.com/xscriptor-colors/terminal">Terminal </a> - Kitty synchronized dotfiles</li>
+  <li><a href="https://github.com/xscriptor-colors/nvim">Nvim </a> - synchronized dotfiles</li>
   <li><a href="https://github.com/xscriptor-colors/jetbrains">Jetbrains </a></li>
-  <li><a href="https://github.com/xscriptor-colors/vscode">VSCode </a></li>
+  <li><a href="https://github.com/xscriptor-colors/vscode">VSCode </a> - synchronized dotfiles</li>
   <li><a href="https://github.com/xscriptor-colors/obsidian">Obsidian </a></li>
-  <li><a href="https://github.com/xscriptor/xfetch">XFetch </a></li>
+  <li><a href="https://github.com/xfetch-cli/">XFetch </a> - terminal tool shown in the previews</li>
 </ul>
 
 <div id="x" align="center">
