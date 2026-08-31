@@ -36,15 +36,13 @@
 <details>
   <summary>More...</summary>
   <br>
-  <table>
-    <tr>
-      <td><img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-2.gif" width="400" alt="demo"></td>
-      <td><img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-4.gif" width="400" alt="demo"></td>
-    </tr>
-    <tr>
-      <td colspan="2"><img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-3.gif" width="880" alt="demo"></td>
-    </tr>
-  </table>
+  <p align="center">
+    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-2.gif" width="440" alt="demo">
+    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-4.gif" width="440" alt="demo">
+  </p>
+  <p align="center">
+    <img src="https://xscriptor-colors.github.io/web/images/gifs/hyprland/hyprland-demo-3.gif" width="880" alt="demo">
+  </p>
 </details>
 
 ---
