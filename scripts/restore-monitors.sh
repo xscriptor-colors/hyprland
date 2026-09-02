@@ -21,6 +21,19 @@
 # same values is a visual no-op.
 
 STATE="$HOME/.config/hypr/display-config"
+STATE_BAK="$STATE.bak"
+
+# The reconciler keeps a backup so a missing/accidentally-deleted layout can
+# still be recovered at boot (only a deliberate "Reset to auto" removes both).
+resolve_state() {
+    if [ -s "$STATE" ] && grep -qv '^#' "$STATE"; then
+        echo "$STATE"
+    elif [ -s "$STATE_BAK" ] && grep -qv '^#' "$STATE_BAK"; then
+        echo "$STATE_BAK"
+    else
+        echo ""
+    fi
+}
 
 # Apply a single saved rule. `desc:` is accepted by hl.monitor and uniquely
 # identifies the physical screen even when its connector was renamed.
@@ -34,7 +47,7 @@ apply_rule() {
 # currently connected AND drifted from the saved geometry/refresh. Monitors not
 # connected yet are ignored here; the next poll catches them when they appear.
 drifted() {
-    python3 - "$STATE" <<'PY'
+    python3 - "$1" <<'PY'
 import json, os, sys
 try:
     live = json.loads(os.popen("hyprctl monitors -j 2>/dev/null").read())
@@ -77,14 +90,20 @@ PY
 # each other (avoids DRM "Device or resource busy" storms).
 sleep 3
 while true; do
+    SRCFILE="$(resolve_state)"
+    if [ -z "$SRCFILE" ]; then
+        sleep 5
+        continue
+    fi
     changed=0
     while IFS='|' read -r desc x y scale mode; do
         [ -z "$desc" ] && continue
         apply_rule "$desc" "$x" "$y" "$scale" "$mode"
         changed=1
         sleep 0.8
-    done < <(drifted)
+    done < <(drifted "$SRCFILE")
     if [ "$changed" = "1" ]; then
+        cp "$SRCFILE" "$STATE_BAK" 2>/dev/null
         sleep 4
     else
         sleep 2

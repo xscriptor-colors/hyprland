@@ -36,9 +36,10 @@ hl.on("hyprland.start", function()
     -- Monitor layout restorer/reconciler: applies display-config at session
     -- start and re-applies any drift (~2s poll) so late-enumerating dock
     -- monitors, re-docks and stray reloads converge back to the saved layout.
-    -- pkill + start chained in ONE exec_cmd: two separate exec_cmds race and
-    -- the pkill can land after the daemon starts, killing it at boot.
-    hl.exec_cmd("pkill -f \"restore-monitors.sh\" 2>/dev/null || true; ~/.config/hypr/scripts/restore-monitors.sh")
+    -- Started DIRECTLY (no pkill): any pkill for "restore-monitors.sh" also
+    -- matches the autostart wrapper's own command line and killed the daemon
+    -- at boot. Duplicate daemons are harmless (idempotent apply).
+    hl.exec_cmd("~/.config/hypr/scripts/restore-monitors.sh")
 
     -- Wallpaper daemon
     hl.exec_cmd("awww-daemon")

@@ -464,7 +464,7 @@ Item {
     // never saved a layout, or to start over: with the file gone, restore-
     // monitors.sh has nothing to reconcile and Hyprland's "auto" rule applies.
     function resetMonitorsToAuto() {
-        config.sh(`rm -f "$HOME/.config/hypr/display-config" && hyprctl reload ; hyprctl eval 'hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "auto" })'`);
+        config.sh(`rm -f "$HOME/.config/hypr/display-config" "$HOME/.config/hypr/display-config.bak" && hyprctl reload ; hyprctl eval 'hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "auto" })'`);
         Quickshell.execDetached(["notify-send", "Display Layout", "Saved layout deleted - monitors now auto-arrange"]);
     }
 

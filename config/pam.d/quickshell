@@ -1,0 +1,11 @@
+#%PAM-1.0
+#
+# PAM service for the QuickShell lock screen (Lock.qml -> PamContext).
+# Without this file, PAM falls back to /etc/pam.d/other (pam_deny) and no
+# password is ever accepted, locking the session until reboot.
+# Installed by install.sh (backup at quickshell.backup if one existed).
+
+auth       include    system-auth
+account    include    system-auth
+password   include    system-auth
+session    include    system-auth

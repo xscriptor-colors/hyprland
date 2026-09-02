@@ -64,6 +64,14 @@ sudo rm -f /etc/sddm.conf.d/10-matugen-theme.conf
 sudo rm -f /etc/sddm.conf.d/z-disable-virtualkbd.conf
 sudo rm -rf /usr/share/sddm/themes/matugen-minimal
 
+# Restore previous PAM service for the quickshell lock screen, if backed up
+if [ -f /etc/pam.d/quickshell.backup ]; then
+    sudo mv /etc/pam.d/quickshell.backup /etc/pam.d/quickshell
+    echo "Restored: /etc/pam.d/quickshell"
+else
+    sudo rm -f /etc/pam.d/quickshell
+fi
+
 # Remove wallpaper cache
 rm -rf "$HOME/.cache/wallpaper-thumbs"
 
