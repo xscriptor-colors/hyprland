@@ -33,6 +33,12 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("pkill -f \"quickshell.*TopBar.qml\" 2>/dev/null || true")
     hl.exec_cmd("pkill -f \"quickshell.*Floating.qml\" 2>/dev/null || true")
 
+    -- Monitor layout restore: applies display-config at start and re-applies
+    -- it on hotplug, so dock monitors that enumerate late don't pile up at
+    -- "auto" positions after a reboot or re-dock.
+    hl.exec_cmd("pkill -f \"restore-monitors.sh\" 2>/dev/null || true")
+    hl.exec_cmd("~/.config/hypr/scripts/restore-monitors.sh")
+
     -- Wallpaper daemon
     hl.exec_cmd("awww-daemon")
 

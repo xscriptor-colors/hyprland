@@ -404,7 +404,7 @@ Item {
             let lua = `hl.monitor({ output = \"${m.name}\", mode = \"${m.resW}x${m.resH}@${m.rate}\", position = \"0x0\", scale = ${m.sysScale}${m.transform !== 0 ? `, transform = ${m.transform}` : ""} })`;
             let jsonArr = [{ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: 0, y: 0, scale: m.sysScale, transform: m.transform }];
             config.setSetting("monitors", jsonArr);
-            config.sh(`hyprctl eval '${lua.replace(/'/g, "'\\''")}' ; pkill awww-daemon 2>/dev/null || true; awww-daemon &`);
+            config.sh(`hyprctl eval '${lua.replace(/'/g, "'\\''")}' ; pkill awww-daemon 2>/dev/null || true; awww-daemon & ; ~/.config/hypr/scripts/persist-display-config.sh > ~/.config/hypr/display-config 2>/dev/null`);
             Quickshell.execDetached(["notify-send", "Display Update", "Applied: " + m.resW + "x" + m.resH + " @ " + m.rate + "Hz"]);
         } else {
             let rects = [];
@@ -454,9 +454,18 @@ Item {
                 jsonArr.push({ name: r.name, resW: r.resW, resH: r.resH, rate: parseInt(r.rate), x: r.x, y: r.y, scale: r.sysScale, transform: r.transform });
             }
             config.setSetting("monitors", jsonArr);
-            config.sh(evalCmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon &");
+            config.sh(evalCmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon & ; ~/.config/hypr/scripts/persist-display-config.sh > ~/.config/hypr/display-config 2>/dev/null");
             Quickshell.execDetached(["notify-send", "Display Update", "Applied layout for: " + summaryString.trim()]);
         }
+    }
+
+    // Removes the persisted layout (~/.config/hypr/display-config) and sends all
+    // monitors back to the wildcard auto-arrangement. Useful for machines that
+    // never saved a layout, or to start over: with the file gone, restore-
+    // monitors.sh has nothing to reconcile and Hyprland's "auto" rule applies.
+    function resetMonitorsToAuto() {
+        config.sh(`rm -f "$HOME/.config/hypr/display-config" && hyprctl reload ; hyprctl eval 'hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "auto" })'`);
+        Quickshell.execDetached(["notify-send", "Display Layout", "Saved layout deleted - monitors now auto-arrange"]);
     }
 
     property alias monDelayedLayoutUpdate: _monDelayedLayoutUpdate
