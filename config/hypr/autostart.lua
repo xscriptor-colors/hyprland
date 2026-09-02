@@ -33,11 +33,12 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("pkill -f \"quickshell.*TopBar.qml\" 2>/dev/null || true")
     hl.exec_cmd("pkill -f \"quickshell.*Floating.qml\" 2>/dev/null || true")
 
-    -- Monitor layout restore: applies display-config at start and re-applies
-    -- it on hotplug, so dock monitors that enumerate late don't pile up at
-    -- "auto" positions after a reboot or re-dock.
-    hl.exec_cmd("pkill -f \"restore-monitors.sh\" 2>/dev/null || true")
-    hl.exec_cmd("~/.config/hypr/scripts/restore-monitors.sh")
+    -- Monitor layout restorer/reconciler: applies display-config at session
+    -- start and re-applies any drift (~2s poll) so late-enumerating dock
+    -- monitors, re-docks and stray reloads converge back to the saved layout.
+    -- pkill + start chained in ONE exec_cmd: two separate exec_cmds race and
+    -- the pkill can land after the daemon starts, killing it at boot.
+    hl.exec_cmd("pkill -f \"restore-monitors.sh\" 2>/dev/null || true; ~/.config/hypr/scripts/restore-monitors.sh")
 
     -- Wallpaper daemon
     hl.exec_cmd("awww-daemon")
@@ -75,8 +76,11 @@ hl.on("hyprland.start", function()
     -- Bluetooth
     hl.exec_cmd("blueman-applet")
 
-    -- Idle management
-    hl.exec_cmd("hypridle")
+    -- Idle management: honors the saved idle-mode (awake = hypridle stays
+    -- stopped so the machine never auto-locks/suspends; normal = timers on).
+    -- Toggle anytime with the Idle & sleep widget (SUPER+P) or
+    -- ~/.config/hypr/scripts/idle-mode.sh.
+    hl.exec_cmd("~/.config/hypr/scripts/idle-mode.sh boot")
 
     -- Volume listener
     hl.exec_cmd("~/.config/hypr/scripts/volume_listener.sh")

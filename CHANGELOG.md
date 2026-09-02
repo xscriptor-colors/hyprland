@@ -4,6 +4,8 @@
 
 ### Added
 - **`scripts/restore-monitors.sh`** — authoritative layout restorer/reconciler (started from `autostart.lua`): applies the saved layout at session start and re-checks every ~2s, re-applying any monitor that drifts (late-enumerating dock outputs, unplug/re-plug, stray `hyprctl reload`s). Because every tool that changes monitors re-persists the layout, it converges instead of fighting.
+- **`scripts/idle-mode.sh`** — idle control (awake/normal/boot/status): "awake" stops `hypridle` so nothing ever auto-dims/locks/suspends; the choice persists in `idle-settings.json` and `autostart.lua` honors it on every login.
+- **Idle & sleep popup** — new QuickShell widget (`quickshell/idle/IdlePopup.qml`, SUPER+P): switch between Keep awake / Auto, plus Lock now and Suspend buttons. Manual lock stays SUPER+L, manual suspend SUPER+CTRL+L.
 - **`scripts/persist-display-config.sh`** — single source of truth for `~/.config/hypr/display-config`; used by `monitor-manager.sh`, `scale-menu.sh` and QuickShell `Config.qml`.
 - **Settings popup Monitors tab** — "Apply & save permanently" and "Reset to auto" buttons (the latter deletes the saved layout and returns to wildcard auto-arrangement).
 
