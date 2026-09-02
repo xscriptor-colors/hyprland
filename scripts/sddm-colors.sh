@@ -73,10 +73,17 @@ open(out_path, "w").write("\n".join(lines) + "\n")
 print("SDDM colors from palette '%s': base=%s mauve=%s blue=%s isDark=%s" % (palette, base, out["mauve"], out["blue"], is_dark))
 PYEOF
 
-# Sync into the installed theme dir if present (silent; sudo may not be available).
+# Sync into the installed theme dir if present. The dir is root-owned, so this
+# needs sudo. Only attempt it from an INTERACTIVE terminal: silent sudo calls
+# from reloads/theme-changes/dock fail PAM without a passwordless rule and trip
+# pam_faillock, eventually locking sudo out until `faillock --reset`.
 THEME="/usr/share/sddm/themes/x"
-if [ -d "$THEME" ]; then
-    cp "$OUT" "$THEME/Colors.qml" 2>/dev/null || sudo cp "$OUT" "$THEME/Colors.qml" 2>/dev/null || true
+if [ -d "$THEME" ] && [ -t 0 ]; then
+    if [ -w "$THEME" ]; then
+        cp "$OUT" "$THEME/Colors.qml" 2>/dev/null || true
+    else
+        sudo cp "$OUT" "$THEME/Colors.qml" 2>/dev/null || true
+    fi
 fi
 
 # Point the login background at the live wallpaper cache (dynamic: it updates
@@ -84,7 +91,10 @@ fi
 # wallpaper.jpg when the cache doesn't exist yet.
 CACHE_WALL="$HOME/.cache/quickshell/wallpaper_picker/current_wallpaper.png"
 THEME_CONF="$THEME/theme.conf"
-if [ -f "$CACHE_WALL" ] && [ -f "$THEME_CONF" ]; then
-    sed -i "s|^background=.*|background=$CACHE_WALL|" "$THEME_CONF" 2>/dev/null \
-        || sudo sed -i "s|^background=.*|background=$CACHE_WALL|" "$THEME_CONF" 2>/dev/null || true
+if [ -f "$CACHE_WALL" ] && [ -f "$THEME_CONF" ] && [ -t 0 ]; then
+    if [ -w "$THEME_CONF" ]; then
+        sed -i "s|^background=.*|background=$CACHE_WALL|" "$THEME_CONF" 2>/dev/null || true
+    else
+        sudo sed -i "s|^background=.*|background=$CACHE_WALL|" "$THEME_CONF" 2>/dev/null || true
+    fi
 fi
