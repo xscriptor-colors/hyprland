@@ -221,6 +221,7 @@ hl.bind(mod .. "mouse:273", hl.dsp.window.resize(), { mouse = true })
 -- └───────────────────────────────────────────────────────────────────────────┘
 
 hl.bind(mod .. "Z", run("bash " .. scripts .. "/qs_manager.sh", "toggle scale"))
+hl.bind(mod .. "P", run("bash " .. scripts .. "/qs_manager.sh", "toggle idle"))
 hl.bind(mod .. "SHIFT + Z", run(scripts .. "/scale-menu.sh", "up"))
 hl.bind(mod .. "CTRL + Z", run(scripts .. "/scale-menu.sh", "down"))
 

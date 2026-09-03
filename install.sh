@@ -843,6 +843,30 @@ EOF
     log "Wrote xshell version ($INSTALL_VERSION)"
 }
 
+# ┌───────────────────────────────────────────────────────────────────────────────────┐
+# │ PAM: quickshell lock screen authentication                                       │
+# └───────────────────────────────────────────────────────────────────────────────────┘
+configure_pam_lock() {
+    # The lock screen (Lock.qml -> PamContext) authenticates through the
+    # "quickshell" PAM service. Missing, PAM falls back to /etc/pam.d/other
+    # (pam_deny) and no password is accepted -> locked out until reboot.
+    log "Configuring PAM for the quickshell lock screen..."
+    if [ -f /etc/pam.d/quickshell ] && grep -q "system-auth" /etc/pam.d/quickshell 2>/dev/null; then
+        log "PAM service 'quickshell' already configured. Skipping."
+        return
+    fi
+    if [ -f /etc/pam.d/quickshell ]; then
+        sudo cp /etc/pam.d/quickshell /etc/pam.d/quickshell.backup
+    fi
+    if [ -f "$SCRIPT_DIR/config/pam.d/quickshell" ]; then
+        sudo tee /etc/pam.d/quickshell < "$SCRIPT_DIR/config/pam.d/quickshell" > /dev/null
+    else
+        warn "config/pam.d/quickshell not found in the repo. Skipping PAM setup."
+        return
+    fi
+    log "PAM service 'quickshell' written (system-auth based)."
+}
+
 main() {
     print_banner
 
@@ -951,6 +975,9 @@ main() {
     systemctl --user enable easyeffects.service 2>/dev/null || true
     sudo systemctl --global enable pipewire wireplumber pipewire-pulse 2>/dev/null || true
     systemctl --user start pipewire wireplumber pipewire-pulse 2>/dev/null || true
+
+    # Lock screen auth (PAM service for quickshell)
+    configure_pam_lock
 
     check_requirements
 

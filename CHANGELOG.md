@@ -1,5 +1,26 @@
 # Changelog
 
+## [2026-09-02]
+
+### Added
+- **`scripts/restore-monitors.sh`** — authoritative layout restorer/reconciler (started from `autostart.lua`): applies the saved layout at session start and re-checks every ~2s, re-applying any monitor that drifts (late-enumerating dock outputs, unplug/re-plug, stray `hyprctl reload`s). Because every tool that changes monitors re-persists the layout, it converges instead of fighting.
+- **`scripts/idle-mode.sh`** — idle control (awake/normal/boot/status): "awake" stops `hypridle` so nothing ever auto-dims/locks/suspends; the choice persists in `idle-settings.json` and `autostart.lua` honors it on every login.
+- **Idle & sleep popup** — new QuickShell widget (`quickshell/idle/IdlePopup.qml`, SUPER+P): switch between Keep awake / Auto, plus Lock now and Suspend buttons. Manual lock stays SUPER+L, manual suspend SUPER+CTRL+L.
+- **PAM service for the lock screen** — `config/pam.d/quickshell` (system-auth based) installed by `install.sh` and restored/removed by `uninstall.sh`. Without it, `PamContext` falls back to `pam_deny` and the session can never be unlocked (had to reboot every time the screen locked).
+- **`scripts/persist-display-config.sh`** — single source of truth for `~/.config/hypr/display-config`; used by `monitor-manager.sh`, `scale-menu.sh` and QuickShell `Config.qml`.
+- **Settings popup Monitors tab** — "Apply & save permanently" and "Reset to auto" buttons (the latter deletes the saved layout and returns to wildcard auto-arrangement).
+
+### Changed
+- **Saved monitor layouts are keyed by EDID description** (`desc|x|y|scale|mode`), not connector name: a physical screen keeps its position/scale/refresh even when the kernel renames its output (`DP-5` → `DP-3`), and one user's layout can never affect someone else's hardware (inert on non-matching screens).
+- **Exact Hyprland modes are persisted and restored** (e.g. `1920x1080@144.11Hz`): `preferred` / `preferred@<int>` silently fell back to the EDID 60Hz mode.
+- **`monitors.lua`** now only keeps the wildcard `highrr` entry — file reads during Lua config parse proved unreliable (rules silently never fired), so layout restoration moved entirely to `restore-monitors.sh`.
+- **`workspaces.lua`** — workspaces 1-4 pinned to the author's physical screens by EDID description (laptop = 1, leftwards 2-4), each as that monitor's default so every screen boots to its own number.
+
+### Fixed
+- Multi-monitor setups resetting to "auto" (or only some monitors coming up) after reboot / config reload.
+- Saved layouts keyed by connector name being dropped when dock outputs were renamed between boots.
+- Refresh rate silently dropping to 60Hz when re-applying a layout or using the monitor-manager's rate menu.
+
 ## [2026-08-30]
 
 ### Added

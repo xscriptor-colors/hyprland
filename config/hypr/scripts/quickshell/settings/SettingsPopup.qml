@@ -4708,6 +4708,59 @@ id: startupTabComponent
                     }
                 }
 
+                // ── Layout actions (persist beyond this session) ───────────
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignRight
+                    spacing: root.s(8)
+
+                    // Apply the arrangement above AND save it permanently to
+                    // ~/.config/hypr/display-config (restore-monitors.sh will
+                    // restore this exact layout after reboots/re-docks).
+                    Rectangle {
+                        Layout.preferredHeight: root.s(28)
+                        Layout.preferredWidth: monSaveRow.implicitWidth + root.s(16)
+                        radius: root.s(22)
+                        color: monSaveMa.containsMouse ? root.green : root.surface1
+                        border.color: monSaveMa.containsMouse ? root.green : root.surface2
+                        border.width: 1
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        RowLayout {
+                            id: monSaveRow; anchors.centerIn: parent; spacing: root.s(5)
+                            Text { text: "󰸞"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: monSaveMa.containsMouse ? root.base : root.green; Behavior on color { ColorAnimation { duration: 150 } } }
+                            Text { text: "Apply & save permanently"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); color: monSaveMa.containsMouse ? root.base : root.green; Behavior on color { ColorAnimation { duration: 150 } } }
+                        }
+                        MouseArea {
+                            id: monSaveMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                if (Config.monitorsModel.count === 0) return;
+                                Config.applyMonitors();
+                            }
+                        }
+                    }
+
+                    // Forget the saved layout: from now on monitors are laid out
+                    // automatically (handy on machines that never saved one).
+                    Rectangle {
+                        Layout.preferredHeight: root.s(28)
+                        Layout.preferredWidth: monResetRow.implicitWidth + root.s(16)
+                        radius: root.s(22)
+                        color: monResetMa.containsMouse ? root.red : root.surface1
+                        border.color: monResetMa.containsMouse ? root.red : root.surface2
+                        border.width: 1
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        RowLayout {
+                            id: monResetRow; anchors.centerIn: parent; spacing: root.s(5)
+                            Text { text: "󰆴"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: monResetMa.containsMouse ? root.base : root.red; Behavior on color { ColorAnimation { duration: 150 } } }
+                            Text { text: "Reset to auto"; font.family: "Hack Nerd Font"; font.pixelSize: root.s(10); color: monResetMa.containsMouse ? root.base : root.red; Behavior on color { ColorAnimation { duration: 150 } } }
+                        }
+                        MouseArea {
+                            id: monResetMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: Config.resetMonitorsToAuto();
+                        }
+                    }
+                }
+
                 Item { Layout.preferredHeight: root.s(16) }
             }
         }

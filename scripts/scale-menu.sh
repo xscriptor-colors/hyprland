@@ -94,9 +94,35 @@ jq --argjson s "$scale" '.monitors = [ .monitors[] | .scale = $s ]' "$SETTINGS" 
 # Apply to every connected monitor through the Lua API, then persist the layout
 # to display-config so monitors.lua restores it on the next session instead of
 # falling back to the "auto" DPI scale (which resets to 125%/150% on login).
+# The exact mode string is preserved: plain "preferred" would silently drop
+# every screen to its EDID-preferred 60Hz.
 if command -v hyprctl >/dev/null 2>&1; then
-    hyprctl -j monitors 2>/dev/null | jq -r --argjson s "$scale" '.[] | "hyprctl eval '\''hl.monitor({ output = \"\(.name)\", mode = \"preferred\", position = \"\(.x)x\(.y)\", scale = \($s) })'\''"' | bash
-    hyprctl -j monitors 2>/dev/null | jq -r '.[] | "\(.name)|\(.x)|\(.y)|\(.scale)"' > "$(dirname "$SETTINGS")/display-config"
+    hyprctl -j monitors 2>/dev/null | python3 -c "
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+
+def best_mode(m):
+    target = m.get('refreshRate', 60)
+    best = None
+    for s in m.get('availableModes') or []:
+        try:
+            r = float(s.split('@')[1].replace('Hz', ''))
+        except Exception:
+            continue
+        if best is None or abs(r - target) < abs(best[0] - target):
+            best = (r, s)
+    return best[1] if best else 'highrr'
+
+for m in data:
+    mode = best_mode(m)
+    stmt = 'hl.monitor({ output = \"%s\", mode = \"%s\", position = \"%dx%d\", scale = %s })' % (
+        m['name'], mode, m['x'], m['y'], sys.argv[1])
+    print('hyprctl eval %r' % stmt)
+" "$scale" | bash
+    bash "$(dirname "${BASH_SOURCE[0]}")/persist-display-config.sh" > "$(dirname "$SETTINGS")/display-config" 2>/dev/null || true
 fi
 
 if command -v notify-send >/dev/null 2>&1; then
