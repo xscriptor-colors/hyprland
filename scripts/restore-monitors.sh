@@ -103,9 +103,11 @@ while true; do
         sleep 0.8
     done < <(drifted "$SRCFILE")
     if [ "$changed" = "1" ]; then
-        cp "$SRCFILE" "$STATE_BAK" 2>/dev/null
         sleep 4
     else
         sleep 2
     fi
+    # Keep the backup current every cycle (not only after a drift apply), so a
+    # deleted layout can always be recovered on the next boot.
+    cp "$SRCFILE" "$STATE_BAK" 2>/dev/null
 done
