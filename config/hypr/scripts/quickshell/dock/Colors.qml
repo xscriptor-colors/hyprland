@@ -13,6 +13,20 @@ import Quickshell.Io
 //
 // The active palette is controlled by settings.json: "dock": { "palette": "x" }
 // (case-insensitive, falls back to "x").
+//
+// The active palette FILE is watched too (Phase T: the DockEditor live base16
+// editor rewrites dock/palettes/<slug>.json atomically), so palette edits made
+// in the editor re-apply to every running Colors instance in real time through
+// the same paletteApplied -> syncWindowBorders() chain the palette switcher
+// uses. The watcher targets the palettes DIRECTORY (atomic tmp+mv writes
+// replace the file and would kill a watch on the file inode) and every re-read
+// goes through a content-compare choke point, so events on unrelated palette
+// files (or identical rewrites) never cause redundant repaints.
+//
+// settings.json is watched the same way (directory watch on ~/.config/hypr,
+// atomic-write safe) with its own content choke point: the shell writes the
+// file via tmp+mv, which kills file-inode watches, and events on unrelated
+// files of the config directory must not re-fire settingsUpdated().
 // ============================================================================
 
 Item {
@@ -25,6 +39,15 @@ Item {
     property var dockSettings: ({})
     // Latest explicit per-palette role overrides (borderActive/borderInactive…)
     property var _roles: ({})
+    // Content guard for the palette file watcher: text of the last applied
+    // palette file, keyed by palette name (so switching between two palettes
+    // with byte-identical files still re-applies).
+    property string lastPaletteKey: ""
+    // Content guard for the settings.json reader: text of the last successfully
+    // parsed settings file. Directory watchers wake on ANY event under
+    // ~/.config/hypr, so identical content must not re-fire settingsUpdated()
+    // nor re-read the palette (Theme.qml uses the same choke-point pattern).
+    property string lastSettingsJson: ""
 
     // Emitted whenever the active palette finished applying (per instance).
     signal paletteApplied()
@@ -32,6 +55,7 @@ Item {
     signal settingsUpdated()
 
     readonly property string palettesDir: Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/dock/palettes"
+    readonly property string settingsFilePath: Quickshell.env("HOME") + "/.config/hypr/settings.json"
 
     // --- core palette (base-16) --------------------------------------------------
     property color color0: "#363537"
@@ -80,6 +104,10 @@ Item {
     property color yellow: color3
     property color maroon: color9
     property color teal: color6
+    // Optional per-palette override for the WORKSPACE active fill (roles
+    // "workspaceActive" in a palette file). Transparent = unset → modules fall
+    // back to colors.mauve, so themes without the key are untouched.
+    property color workspaceActive: "transparent"
 
     // --- helpers ------------------------------------------------------------------
     // Normalize a "#rrggbb" / "#rrggbbaa" string into {r,g,b} 0..255.
@@ -215,6 +243,21 @@ Item {
         paletteReader.running = true;
     }
 
+    // Single choke point for palette file content. The key embeds the palette
+    // name, so switching between two palettes re-applies even if the files
+    // happen to be byte-identical; identical rewrites of the same palette
+    // (e.g. a DockEditor commit that did not actually change the value) are
+    // ignored so directory-watcher wakeups stay cheap and never loop.
+    function applyPaletteText(txt) {
+        txt = txt ? txt.trim() : "";
+        let key = root.paletteName + "|" + txt;
+        if (txt === "" || key === root.lastPaletteKey) return;
+        try {
+            root.applyPalette(JSON.parse(txt));
+            root.lastPaletteKey = key;
+        } catch (e) {}
+    }
+
     // --- settings.json reader (pick the active palette name) ----------------------
     Process {
         id: settingsReader
@@ -222,33 +265,37 @@ Item {
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
+                let txt = this.text ? this.text.trim() : "";
+                if (txt === "" || txt === "{}") return;
+                // Choke point: the directory watcher wakes on unrelated config
+                // file events too — identical content must stay silent.
+                if (txt === root.lastSettingsJson) return;
                 try {
-                    if (this.text && this.text.trim().length > 0 && this.text.trim() !== "{}") {
-                        let parsed = JSON.parse(this.text);
-                        root.dockSettings = (parsed.dock && typeof parsed.dock === "object") ? parsed.dock : {};
-                        let want = (parsed.dock && parsed.dock.palette)
-                                 ? String(parsed.dock.palette).toLowerCase() : "x";
-                        if (root.paletteName !== want) root.paletteName = want;
-                        root.settingsUpdated();
-                    }
-                } catch (e) {}
+                    let parsed = JSON.parse(txt);
+                    root.lastSettingsJson = txt;
+                    root.dockSettings = (parsed.dock && typeof parsed.dock === "object") ? parsed.dock : {};
+                    let want = (parsed.dock && parsed.dock.palette)
+                             ? String(parsed.dock.palette).toLowerCase() : "x";
+                    if (root.paletteName !== want) root.paletteName = want;
+                    root.settingsUpdated();
+                } catch (e) {
+                    return;
+                }
+                // Apply the (possibly switched) active palette file.
                 root.readSettings();
             }
         }
     }
 
-    Process {
+    // FileView watch (no shell processes, reload-safe): settings.json is
+    // replaced atomically (tmp + mv) and FileView follows the file across
+    // renames, unlike an inotify watch on the inode. Any change re-runs the
+    // reader; the content choke point above keeps identical rewrites silent.
+    FileView {
         id: settingsWatcher
-        command: ["bash", "-c", "while [ ! -f ~/.config/hypr/settings.json ]; do sleep 1; done; inotifywait -qq -e modify,close_write ~/.config/hypr/settings.json"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                settingsReader.running = false;
-                settingsReader.running = true;
-                settingsWatcher.running = false;
-                settingsWatcher.running = true;
-            }
-        }
+        path: root.settingsFilePath
+        watchChanges: true
+        onFileChanged: root.forceRefresh()
     }
 
     // --- palette file reader --------------------------------------------------------
@@ -257,16 +304,28 @@ Item {
         command: ["bash", "-c", "cat '" + root.palettesDir + "/" + root.paletteName + ".json' 2>/dev/null || cat '" + root.palettesDir + "/x.json'"]
         running: false
         stdout: StdioCollector {
-            onStreamFinished: {
-                let txt = this.text ? this.text.trim() : "";
-                if (txt !== "") {
-                    try { root.applyPalette(JSON.parse(txt)); } catch (e) {}
-                }
-            }
+            onStreamFinished: root.applyPaletteText(this.text)
         }
     }
 
-    onPaletteNameChanged: root.readSettings()
+    // --- live watcher on the active palette file (Phase-T DockEditor edits) ---------
+    // FileView on the ACTIVE palette file: the editor rewrites it atomically
+    // (tmp + mv) and FileView follows the path across renames — no shell
+    // processes, reload-safe. applyPaletteText() stays silent when the content
+    // did not actually change, so the DockEditor <-> Colors refresh loop is
+    // impossible. The watch retargets automatically when paletteName changes
+    // (FileView.path binding) and re-reads through the paletteReader process.
+    FileView {
+        id: paletteWatcher
+        path: root.palettesDir + "/" + root.paletteName + ".json"
+        watchChanges: true
+        onFileChanged: root.readSettings()
+    }
+
+    onPaletteNameChanged: {
+        root.readSettings();
+        root.paletteWatcher.reload();
+    }
 
     Component.onCompleted: root.readSettings()
 }

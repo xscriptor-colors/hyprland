@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import "dock"
+import "widgets"
 
 ShellRoot {
     Connections {
@@ -13,4 +14,5 @@ ShellRoot {
     Main {}
     Dock {}
     Floating {}
+    Widgets {}
 }

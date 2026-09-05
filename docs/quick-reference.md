@@ -59,13 +59,20 @@
 
 ## Workspaces
 
-| Shortcut | Action |
-|----------|--------|
-| SUPER + 1-9,0 | Go to workspace 1-10 |
-| SUPER + SHIFT + 1-9,0 | Move window to workspace |
-| SUPER + Page Up/Down | Previous / Next workspace |
-| SUPER + Mouse Scroll | Change workspace |
-| SUPER + Tab | Previous workspace (current monitor) |
+On a multi-screen rig matching the roster in `scripts/ws-desktops-lib.sh`
+(>= 2 known screens connected) the numbered keys become **unified desktops**:
+every screen jumps together, keeping its own windows per desktop. Anywhere
+else (single screen, or monitors not in the roster) the classic per-monitor
+behavior below is used unchanged. Force the classic behavior on any rig with
+`"unifiedDesktops": false` in `settings.json`.
+
+| Shortcut | Action (classic) | Action (unified desktops) |
+|----------|------------------|---------------------------|
+| SUPER + 1-9,0 | Go to workspace 1-10 | All screens to desktop 1-8 |
+| SUPER + SHIFT + 1-9,0 | Move window to workspace | Move window to that desktop (same screen) |
+| SUPER + Page Up/Down | Previous / Next workspace | Previous / Next desktop (all screens) |
+| SUPER + Mouse Scroll | Change workspace | Previous / Next desktop (all screens) |
+| SUPER + Tab | Previous workspace (current monitor) | Previous workspace (current monitor) |
 | SUPER + A | Toggle files scratchpad |
 | SUPER + SHIFT + A | Move window to files scratchpad |
 

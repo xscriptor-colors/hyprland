@@ -141,7 +141,7 @@ try:
     data = json.loads(res.read().decode())
 
     valid_videos = []
-    for item in data.get('videos', []):
+    for item in (data.get('releases') or data.get('videos') or []):
         target_v = parse_v(item['version'])
         # Only grab videos for versions newer than what the user currently has installed
         if target_v > local_v:

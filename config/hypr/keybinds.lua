@@ -50,6 +50,8 @@ hl.bind(mod .. "O", run("bash " .. scripts .. "/qs_manager.sh", "toggle rss-read
 hl.bind(mod .. "apostrophe", run("bash " .. scripts .. "/qs_manager.sh", "toggle file-search"))
 hl.bind(mod .. "SHIFT + B", run("bash " .. scripts .. "/qs_manager.sh", "toggle window-controls"))
 hl.bind(mod .. "SHIFT + D", run("bash " .. scripts .. "/qs_manager.sh", "toggle dock-editor"))
+-- Desktop-widget redactor (full-screen editor; SUPER+W remains the wallpaper picker)
+hl.bind(mod .. "SHIFT + W", run("bash " .. scripts .. "/qs_manager.sh", "toggle widgets-redactor"))
 hl.bind(mod .. "R", run(scripts .. "/reload.sh"))
 
 -- ┌───────────────────────────────────────────────────────────────────────────┐
@@ -172,9 +174,11 @@ for i = 1, 10 do
     hl.bind(mod .. "SHIFT + " .. key, run(scripts .. "/qs_manager.sh", tostring(i) .. " move"))
 end
 
--- Navigate workspaces with Page Up/Down
-hl.bind(mod .. "Page_Up", hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mod .. "Page_Down", hl.dsp.focus({ workspace = "e+1" }))
+-- Navigate desktops/workspaces with Page Up/Down.
+-- With >=2 roster screens connected this moves ALL screens (unified desktops);
+-- anywhere else it keeps the classic per-monitor workspace cycling.
+hl.bind(mod .. "Page_Up", run(scripts .. "/qs_manager.sh", "prev"))
+hl.bind(mod .. "Page_Down", run(scripts .. "/qs_manager.sh", "next"))
 
 -- Previous workspace (XMonad-style, stays on current monitor)
 hl.bind(mod .. "Tab", hl.dsp.focus({ workspace = "previous", on_current_monitor = true }))
@@ -183,9 +187,9 @@ hl.bind(mod .. "Tab", hl.dsp.focus({ workspace = "previous", on_current_monitor 
 hl.bind(mod .. "A", hl.dsp.workspace.toggle_special("files"))
 hl.bind(mod .. "SHIFT + A", hl.dsp.window.move({ workspace = "special:files" }))
 
--- Scroll through workspaces
-hl.bind(mod .. "mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. "mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+-- Scroll through desktops/workspaces (same unified/classic behavior as above)
+hl.bind(mod .. "mouse_down", run(scripts .. "/qs_manager.sh", "next"))
+hl.bind(mod .. "mouse_up", run(scripts .. "/qs_manager.sh", "prev"))
 
 -- ┌───────────────────────────────────────────────────────────────────────────┐
 -- │ MULTI-MONITOR                                                             │

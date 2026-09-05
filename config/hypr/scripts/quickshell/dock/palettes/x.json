@@ -1,10 +1,15 @@
 {
-  "name": "X",
-  "slug": "x",
   "author": "xscriptor",
+  "background": "#050505",
   "base16": {
     "color0": "#0a0a0a",
     "color1": "#fc618d",
+    "color10": "#7bd88f",
+    "color11": "#fce566",
+    "color12": "#fd9353",
+    "color13": "#948ae3",
+    "color14": "#5ad4e6",
+    "color15": "#f7f1ff",
     "color2": "#7bd88f",
     "color3": "#fce566",
     "color4": "#fd9353",
@@ -12,15 +17,12 @@
     "color6": "#5ad4e6",
     "color7": "#f7f1ff",
     "color8": "#7e7b82",
-    "color9": "#fc618d",
-    "color10": "#7bd88f",
-    "color11": "#fce566",
-    "color12": "#fd9353",
-    "color13": "#948ae3",
-    "color14": "#5ad4e6",
-    "color15": "#f7f1ff"
+    "color9": "#fc618d"
   },
-  "background": "#050505",
   "foreground": "#f7f1ff",
-  "roles": {}
+  "name": "X",
+  "roles": {
+    "workspaceActive": "#eab308"
+  },
+  "slug": "x"
 }

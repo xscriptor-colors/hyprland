@@ -1,5 +1,32 @@
 # Changelog
 
+## [2026-09-05]
+
+### Added
+- **Second, switchable bar engine** (`barEngine: "dock" | "serp"` in `settings.json`): a classic left/center/right bar with modular/solid/fill styles, width %, thickness, opacity, autohide with edge tab, groups of modules, distinct pills, corner roundness and time-format options. Both engines share the same module catalog, data plumbing and palette; switching is hot (no full reload) and each engine keeps its own configuration.
+- **Engine editor cards** — the Dock Editor now has an Engine switch (Dock ⇄ classic) and, per engine, its own cards: zones keep position/palette/appearance/window borders/zones; the classic engine gets position, style & size (distinct pills, roundness, thickness, opacity, width, autohide + delay), module sections with drag & drop between Left/Center/Right/Available (incl. groups and ungroup), mirror-from-dock layout, plus a shared palette picker.
+- **Desktop widgets** — floating, palette-themable widgets (clock analog/digital/minimal, weather, music, audio visualizer, image) on the desktop, each monitor with its own persisted layout (`~/.local/state/quickshell/widgets/<monitor>/layout.json`), edited by a full-screen widget editor (`SUPER+SHIFT+W`): add, move, resize, rotate, opacity, variant, delete, duplicate, snapping and an image gallery.
+- **Live palette editor** — edit the active palette's base-16 colors + background/foreground from the Dock Editor; applies live to the bar, desktop widgets, window borders and synced terminal themes, with a session snapshot & Reset.
+- **New dock islands** — `weather` (current conditions, opens the calendar) and `focus` (focused window title); both arrive disabled by default and never alter existing layouts.
+- **Live island drag & drop** on the bar: grab an island to reorder it between zones; commit is atomic, Esc/outside cancels; `dock.dragModules` toggle.
+- **Per-zone container backgrounds** ("capsule in a capsule"): a themed translucent or solid rounded panel behind a zone's islands (roles + Solid toggle per zone), with per-island centering so mixed-height islands stay aligned.
+- **Empty-workspace markers** in the workspaces pill: numbers / dots / letters / a custom Unicode character (e.g. Japanese glyphs) for empty workspaces; occupied ones keep app icons.
+- **Per-palette workspace accent**: palettes can set a `workspaceActive` role for the active-workspace fill (theme `x`: gold; `berlin`/`london`: gray; `madrid`/`helsinki`: dark gold; others fall back to the default accent).
+- **Bar opacity**, configurable clock formats, thickness/roundness knobs for the classic engine.
+
+### Changed
+- Settings hot-reload is now process-free and reliable: file watchers were replaced by native file watching (`FileView`) and polling timers, so every editor change applies live and reloads no longer leak watcher processes (previously ~980 orphan processes after repeated reloads exhausted system limits).
+- Bar position/orientation changes remount the content in-process instead of reloading the whole shell.
+- The updater manifest key was renamed `videos` → `releases` (the reader keeps a fallback for older manifests).
+
+### Fixed
+- Qt6 validation-type naming in the palette editor broke opening the Dock Editor — corrected.
+- The classic bar rendered at zero size (root not following its container) — fixed; its widget redactor no longer duplicates lifecycle handlers.
+- The workspace-marker setting was read from the wrong settings path and never applied — fixed.
+- Empty/corrupt desktop-widget layouts are backed up and reset instead of blocking startup.
+- Bluetooth scan sessions from the network popup no longer leak resident processes when the popup is toggled repeatedly.
+- Mixed-height islands in a zone are now vertically aligned instead of top-aligned.
+
 ## [2026-09-02]
 
 ### Added
