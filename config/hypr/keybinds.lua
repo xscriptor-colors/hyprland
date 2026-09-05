@@ -50,6 +50,8 @@ hl.bind(mod .. "O", run("bash " .. scripts .. "/qs_manager.sh", "toggle rss-read
 hl.bind(mod .. "apostrophe", run("bash " .. scripts .. "/qs_manager.sh", "toggle file-search"))
 hl.bind(mod .. "SHIFT + B", run("bash " .. scripts .. "/qs_manager.sh", "toggle window-controls"))
 hl.bind(mod .. "SHIFT + D", run("bash " .. scripts .. "/qs_manager.sh", "toggle dock-editor"))
+-- Desktop-widget redactor (full-screen editor; SUPER+W remains the wallpaper picker)
+hl.bind(mod .. "SHIFT + W", run("bash " .. scripts .. "/qs_manager.sh", "toggle widgets-redactor"))
 hl.bind(mod .. "R", run(scripts .. "/reload.sh"))
 
 -- ┌───────────────────────────────────────────────────────────────────────────┐

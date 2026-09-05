@@ -51,8 +51,15 @@ Item {
     // text roles
     property string idleRole: "text"
     property string hoverRole: ""
+    // Flat-mode icon tinting (bar.accentTintMode, serp solid/fill styles):
+    // keep the module's state color as the CONTENT color even when the island
+    // fill is disabled — colored icon on the strip, no double fill.
+    readonly property bool accentTint: bar && bar.accentTintMode === true
     readonly property color contentColor: {
         if (accentVisible) return colors.base;
+        if (root.accentTint && accentRole !== "") {
+            return root.hasAccentColor ? root.accentColor : (colors[accentRole] || colors.text);
+        }
         if (hovered) return colors[hoverRole !== "" ? hoverRole : idleRole] || colors.text;
         return colors[idleRole] || colors.text;
     }
@@ -69,6 +76,10 @@ Item {
 
     readonly property bool accentVisible: accentRole !== "" && accentActive && bar.topbarPillBg
     readonly property bool hovered: pillMouse.containsMouse
+    // While the dock is reordering islands live (bar.dragBusy), suppress every
+    // pill transition so model rewrites never cascade into flicker/entrance
+    // replays. The wrapper slot handles the "lifted" look of the dragged pill.
+    readonly property bool dragSuppress: bar && bar.dragBusy === true
 
     signal clicked()
     signal rightClicked()
@@ -78,9 +89,12 @@ Item {
     // --- entrance cascade ------------------------------------------------------
     property bool initAnimTrigger: false
     Timer {
-        running: root.zoneReady && !root.initAnimTrigger
+        running: root.zoneReady && !root.initAnimTrigger && !root.dragSuppress
         interval: root.slotIndex * 50
         onTriggered: root.initAnimTrigger = true
+    }
+    onDragSuppressChanged: {
+        if (root.dragSuppress) root.initAnimTrigger = true;
     }
 
     implicitWidth: pill.width
@@ -132,11 +146,11 @@ Item {
             ? (root.fullHeight ? bar.barHeight : bar.pillHeight)
             : (root.showState ? Math.max(contentHost.height + root.padV * 2, bar.s(34)) : 0)
 
-        Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-        Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-        Behavior on opacity { NumberAnimation { duration: 300 } }
+        Behavior on width { enabled: !root.dragSuppress; NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
+        Behavior on height { enabled: !root.dragSuppress; NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
+        Behavior on opacity { enabled: !root.dragSuppress; NumberAnimation { duration: 300 } }
 
-        scale: isHovered ? 1.05 : 1.0
+        scale: (!root.dragSuppress && isHovered) ? 1.05 : 1.0
         Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
 
         // entrance

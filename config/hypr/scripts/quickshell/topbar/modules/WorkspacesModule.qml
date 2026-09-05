@@ -3,9 +3,13 @@ import Quickshell
 import "../../dock"
 
 // Workspaces — the centerpiece. A horizontal row of workspace pills (top/bottom
-// docks) or a vertical stack (left/right docks), with a sliding mauve highlight
-// that follows the active workspace in both axes. Each pill shows the workspace
+// docks) or a vertical stack (left/right docks), with a sliding highlight that
+// follows the active workspace in both axes. Each pill shows the workspace
 // number, or app icons when occupied.
+//
+// The active fill normally follows colors.mauve, but palettes may override it
+// per-theme through the "workspaceActive" role (see dock/Colors.qml): theme "x"
+// uses a golden fill, every other theme keeps mauve.
 ModulePill {
     id: mod
 
@@ -14,6 +18,12 @@ ModulePill {
     bgHoverRole: "crust"
     padH: bar.s(10)
     padV: bar.s(4)
+
+    // Active-workspace fill color: per-palette "workspaceActive" when the
+    // palette sets it (alpha > 0), otherwise the standard mauve.
+    readonly property color wsActiveFill: (colors.workspaceActive !== undefined && colors.workspaceActive.a > 0)
+        ? colors.workspaceActive : colors.mauve
+    readonly property color wsActiveText: colors.crust
 
     // NOTE: children of a ModulePill land in its contentHost via the default
     // property — do NOT use `content: Item {...}` (the alias-to-data assignment
@@ -27,7 +37,7 @@ ModulePill {
         Rectangle {
             id: activeHighlight
             radius: bar.pillRadius(mod.compact ? bar.pillWidth : bar.s(32))
-            color: colors.mauve
+            color: mod.wsActiveFill
             z: 0
 
             property int curIdx: bar.wsModel.activeIndex
@@ -142,7 +152,7 @@ ModulePill {
                     font.family: bar.fontFamily
                     font.pixelSize: mod.compact ? bar.s(13) : bar.s(18)
                     font.weight: wsPill.stateLabel === "active" ? Font.Black : (wsPill.stateLabel === "occupied" ? Font.Bold : Font.Medium)
-                    color: index === bar.wsModel.activeIndex ? colors.crust : (wsPill.isHovered ? colors.text : (wsPill.stateLabel === "occupied" ? colors.text : colors.overlay0))
+                    color: index === bar.wsModel.activeIndex ? mod.wsActiveText : (wsPill.isHovered ? colors.text : (wsPill.stateLabel === "occupied" ? colors.text : colors.overlay0))
                     Behavior on color { ColorAnimation { duration: 250 } }
                 }
 
@@ -156,7 +166,7 @@ ModulePill {
                             text: modelData
                             font.family: bar.fontFamily
                             font.pixelSize: bar.s(12)
-                            color: wsPill.wsIndex === bar.wsModel.activeIndex ? colors.crust : (wsPill.isHovered ? colors.text : colors.text)
+                            color: wsPill.wsIndex === bar.wsModel.activeIndex ? mod.wsActiveText : (wsPill.isHovered ? colors.text : colors.text)
                         }
                     }
                     Text {
@@ -164,7 +174,7 @@ ModulePill {
                         font.family: bar.fontFamily
                         font.pixelSize: bar.s(10)
                         font.weight: Font.Black
-                        color: index === bar.wsModel.activeIndex ? colors.crust : colors.overlay0
+                        color: index === bar.wsModel.activeIndex ? mod.wsActiveText : colors.overlay0
                         visible: wsPill.hasManyIcons
                     }
                 }

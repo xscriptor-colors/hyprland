@@ -100,6 +100,26 @@ vertical island and every module is expected to show **reduced** content:
 | sysmon | icon + cpu + ram | two tiny stacked values |
 | volume | icon + percent | icon |
 | battery | icon + percent | icon |
+| weather | weather glyph + temperature | glyph over temperature |
+| focus | app icon + window title | app icon |
+
+`weather` and `focus` are **new islands shipped disabled by default** — enable
+them in the Dock Editor → Zones (their entries exist in `dock.zones` with
+`enabled: false` and are re-added disabled after updates, so existing bars
+never change on their own).
+
+Modules can be moved between zones/alignments from the Dock Editor by
+**dragging the zone card chips** (Dock Editor → Zones, ghost + insertion
+indicator; enabled chips only, drop index counts enabled chips — see
+`docs/dock.md` §6).
+
+- **weather**: shows `bar.weatherIcon` + `bar.weatherTemp` (data polled every
+  150 s by the dock from `calendar/weather.sh`). The island fill follows the
+  weather code color (`bar.weatherHex`); click opens the calendar popup.
+- **focus**: shows the title of the currently focused window
+  (`bar.focusTitle`, polled every second via `hyprctl activewindow -j`),
+  with an app glyph derived from the window class (`bar.focusIcon`). The
+  island collapses on an empty desktop; click opens the app launcher.
 
 Modules branch with `visible: mod.horizontal` / `visible: mod.compact` inside the
 content.

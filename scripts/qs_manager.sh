@@ -178,6 +178,19 @@ handle_wallpaper_prep() {
 }
 
 handle_network_prep() {
+    # Kill any PREVIOUS BT scan session first (dedupe): toggling the network
+    # popup (SUPER+N) starts a new scan but the old one only dies on an
+    # explicit `close network` — every toggle used to leak a resident
+    # `bluetoothctl | sleep infinity` process until the next close.
+    if [ -f "$BT_PID_FILE" ]; then
+        OLD_PID=$(cat "$BT_PID_FILE" 2>/dev/null)
+        if [ -n "$OLD_PID" ]; then
+            kill "$OLD_PID" 2>/dev/null
+            pkill -P "$OLD_PID" 2>/dev/null
+            rm -f "$BT_PID_FILE"
+        fi
+    fi
+    (bluetoothctl scan off > /dev/null 2>&1) &
     echo "" > "$BT_SCAN_LOG"
     { echo "scan on"; sleep infinity; } | stdbuf -oL bluetoothctl > "$BT_SCAN_LOG" 2>&1 &
     echo $! > "$BT_PID_FILE"

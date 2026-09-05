@@ -11,6 +11,12 @@ import "DockLayout.js" as DockLayout
 // It also draws the optional "unified" pill behind the whole zone and forwards
 // per-zone border styling to the modules via the shared module contract
 // (bar, colors, zoneReady, slotIndex, effectiveBorderWidth/Color, unified).
+//
+// Drag & drop (Phase D2): every module slot carries a drag MouseArea. Once the
+// pointer moves past the threshold the dock takes over (bar.startDrag) and,
+// while bar.dragBusy, this zone exposes hit-test helpers (dockPointToInsert /
+// containsDockPoint) so the dock can reorder modules live under the cursor.
+// Zone entrance animations are suppressed while a drag is in progress.
 // ============================================================================
 
 Item {
@@ -23,6 +29,11 @@ Item {
 
     readonly property bool isHorizontal: bar.orientation === "horizontal"
     readonly property bool unified: zoneData.unify === true
+
+    // Zone marker used by the dock's drag manager to find zone delegates.
+    property bool isDockZone: true
+    // Id of the module currently being dragged (set by the dock).
+    property string dragId: ""
 
     // Main-axis alignment: start | center | end
     anchors.left: undefined
@@ -80,7 +91,16 @@ Item {
 
     onParentChanged: applyAnchors()
     onIsHorizontalChanged: Qt.callLater(() => { try { applyAnchors(); } catch (e) {} })
-    onZoneDataChanged: { zoneRoot.ready = false; Qt.callLater(() => { try { applyAnchors(); } catch (e) {} }); }
+    onZoneDataChanged: {
+        // During a live drag the model is rewritten constantly; replaying the
+        // entrance cascade on every hop would flicker the whole bar.
+        if (bar && bar.dragBusy) {
+            Qt.callLater(() => { try { applyAnchors(); } catch (e) {} });
+            return;
+        }
+        zoneRoot.ready = false;
+        Qt.callLater(() => { try { applyAnchors(); } catch (e) {} });
+    }
     Component.onCompleted: applyAnchors()
 
     // --- unified pill behind the whole zone ---------------------------------
@@ -97,30 +117,139 @@ Item {
     }
 
     // --- module flow (shared delegate) ---------------------------------------
+    // One wrapper per ENABLED module: it hosts the module Loader plus the drag
+    // MouseArea. The wrapper is the flow child (Row/Column measure it), so the
+    // drag overlay never interferes with the module's own click handling.
     Component {
         id: moduleDelegate
-        Loader {
+        Item {
+            id: slotWrap
             required property string modelData
             required property int index
-            width: item ? item.implicitWidth : 0
-            height: item ? item.implicitHeight : 0
+            width: slotLoader.width
+            height: slotLoader.height
 
-            Component.onCompleted: {
-                let mod = DockLayout.getModule(modelData);
-                if (!mod) return;
-                // Module components live in the quickshell root (one level up
-                // from dock/), so resolve relative to this file.
-                setSource(Qt.resolvedUrl("../" + mod.component), {
-                    "bar": zoneRoot.bar,
-                    "colors": zoneRoot.colors,
-                    "zoneReady": Qt.binding(() => zoneRoot.ready),
-                    "slotIndex": index,
-                    "effectiveBorderWidth": Qt.binding(() => zoneRoot.unified ? 0 : (zoneRoot.zoneData.borderWidth || 0)),
-                    "effectiveBorderColor": Qt.binding(() => zoneRoot.unified ? "surface1" : (zoneRoot.zoneData.borderColor || "surface1")),
-                    "unified": Qt.binding(() => zoneRoot.unified)
-                });
+            // Marker used by the zone hit-test to enumerate module slots.
+            property bool isDockSlot: true
+            readonly property string slotModuleId: modelData
+
+            // Lift the island that is being dragged (visual only — layout
+            // position follows the live model reorder done by the dock).
+            scale: (bar.dragBusy && modelData === bar.dragId) ? 1.08 : 1.0
+            opacity: (bar.dragBusy && modelData === bar.dragId) ? 0.9 : 1.0
+            Behavior on scale { enabled: !bar.dragBusy; NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+            Behavior on opacity { NumberAnimation { duration: 150 } }
+            z: (bar.dragBusy && modelData === bar.dragId) ? 50 : 0
+
+            Loader {
+                id: slotLoader
+                width: item ? item.implicitWidth : 0
+                height: item ? item.implicitHeight : 0
+
+                Component.onCompleted: {
+                    let mod = DockLayout.getModule(slotWrap.modelData);
+                    if (!mod) return;
+                    // Module components live in the quickshell root (one level up
+                    // from dock/), so resolve relative to this file.
+                    setSource(Qt.resolvedUrl("../" + mod.component), {
+                        "bar": zoneRoot.bar,
+                        "colors": zoneRoot.colors,
+                        "zoneReady": Qt.binding(() => zoneRoot.ready),
+                        "slotIndex": slotWrap.index,
+                        "effectiveBorderWidth": Qt.binding(() => zoneRoot.unified ? 0 : (zoneRoot.zoneData.borderWidth || 0)),
+                        "effectiveBorderColor": Qt.binding(() => zoneRoot.unified ? "surface1" : (zoneRoot.zoneData.borderColor || "surface1")),
+                        "unified": Qt.binding(() => zoneRoot.unified)
+                    });
+                }
+            }
+
+            // --- drag start handler ---------------------------------------------
+            // Small movements stay clicks (ModulePill handles them); only after
+            // the threshold does this area hand the gesture to the dock.
+            MouseArea {
+                id: slotDragArea
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                enabled: bar.dragModulesEnabled
+
+                property point pressPos: Qt.point(0, 0)
+                property bool dragStarted: false
+                property bool canDrag: bar.dragModulesEnabled
+
+                onPressed: mouse => {
+                    pressPos = Qt.point(mouse.x, mouse.y);
+                    dragStarted = false;
+                }
+                onPositionChanged: mouse => {
+                    if (!canDrag || !pressed) return;
+                    if (!dragStarted) {
+                        let dx = mouse.x - pressPos.x;
+                        let dy = mouse.y - pressPos.y;
+                        let dist = zoneRoot.isHorizontal ? Math.abs(dx) : Math.abs(dy);
+                        if (dist > bar.s(12)) {
+                            dragStarted = true;
+                            zoneRoot.bar.startDrag(slotWrap.modelData);
+                            if (!zoneRoot.bar.dragBusy) { dragStarted = false; return; }
+                        }
+                    }
+                    if (dragStarted && zoneRoot.bar.dragBusy) {
+                        // Everything below the threshold is a click; past it the
+                        // dock's drag manager owns the gesture and we just feed
+                        // it pointer positions (MouseArea keeps the grab while
+                        // the button is held, even outside this item).
+                        let p = slotWrap.mapToItem(zoneRoot.bar, mouse.x, mouse.y);
+                        zoneRoot.bar.updateDragAt(p.x, p.y);
+                    }
+                }
+                onReleased: mouse => {
+                    if (dragStarted && zoneRoot.bar.dragBusy) {
+                        let p = slotWrap.mapToItem(zoneRoot.bar, mouse.x, mouse.y);
+                        zoneRoot.bar.endDragAt(p.x, p.y);
+                    }
+                    dragStarted = false;
+                }
+                onCanceled: {
+                    if (dragStarted && zoneRoot.bar.dragBusy) zoneRoot.bar.cancelDrag();
+                    dragStarted = false;
+                }
             }
         }
+    }
+
+    // --- drag hit-test helpers (called by the dock's drag manager) ------------
+    // Map a point in dock-window coordinates to an insertion slot.
+    // Returns null when the point is outside this zone; otherwise
+    // { zoneId, index } where `index` counts ENABLED modules ignoring the
+    // module currently being dragged (bar.dragId).
+    function dockPointToInsert(px, py) {
+        let q = zoneRoot.mapFromItem(zoneRoot.bar, px, py);
+        if (q.x < 0 || q.y < 0 || q.x > zoneRoot.width || q.y > zoneRoot.height) return null;
+        let flow = zoneRoot.isHorizontal ? flowH : flowV;
+        if (!flow || !flow.visible || !zoneRoot.ready) return null;
+
+        let qMain = zoneRoot.isHorizontal ? q.x : q.y;
+        let flowStart = zoneRoot.isHorizontal ? flow.x : flow.y;
+        let dragged = zoneRoot.bar && zoneRoot.bar.dragBusy ? zoneRoot.bar.dragId : "";
+
+        let kids = flow.children;
+        let countBefore = 0;
+        for (let i = 0; i < kids.length; i++) {
+            let c = kids[i];
+            if (!c || !c.isDockSlot) continue;
+            let id = c.slotModuleId !== undefined ? c.slotModuleId : "";
+            if (!id || id === dragged) continue;
+            let start = flowStart + (zoneRoot.isHorizontal ? c.x : c.y);
+            let size = zoneRoot.isHorizontal ? c.width : c.height;
+            let center = start + size / 2;
+            if (qMain > center) countBefore++;
+        }
+        return { zoneId: zoneData.id, index: countBefore };
+    }
+
+    // Is a dock-window point inside this zone's bounds?
+    function containsDockPoint(px, py) {
+        let q = zoneRoot.mapFromItem(zoneRoot.bar, px, py);
+        return q.x >= 0 && q.y >= 0 && q.x <= zoneRoot.width && q.y <= zoneRoot.height;
     }
 
     // Row (horizontal dock) OR Column (vertical dock) of modules.
@@ -135,7 +264,7 @@ Item {
         height: Math.min(parent.height, implicitHeight)
         spacing: zoneRoot.unified ? 0 : bar.s(8)
         Repeater {
-            id: flowHRepeater
+            id: flowRepeaterH
             model: DockLayout.zoneModel(zoneRoot.zoneData)
             delegate: moduleDelegate
         }
@@ -149,6 +278,7 @@ Item {
         width: Math.min(parent.width, implicitWidth)
         spacing: zoneRoot.unified ? 0 : bar.s(8)
         Repeater {
+            id: flowRepeaterV
             model: DockLayout.zoneModel(zoneRoot.zoneData)
             delegate: moduleDelegate
         }

@@ -63,6 +63,10 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         // --- Screen Spanning Panels ---
         "settings":  { w: s(780, scale), h: mh - s(0, scale), rx: s(0, scale), ry: s(0, scale), comp: "settings/SettingsPopup.qml" },
         
+        // Full-screen desktop-widget editor: covers the whole monitor (rx/ry 0)
+        // so redactor-local coordinates equal the widget layout coordinates.
+        "widgets-redactor": { w: mw, h: mh, rx: 0, ry: 0, comp: "widgets/WidgetRedactor.qml" },
+        
         // --- Utility ---
         "hidden":    { w: 1, h: 1, rx: -5000 - mx, ry: -5000 - my, comp: "" } 
     };

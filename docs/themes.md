@@ -23,6 +23,16 @@ Window borders are palette-driven, with optional manual override:
 - When `false`, the manual `dock.borderActive` / `dock.borderInactive` hex values are used.
 - Load-time defaults are derived in `config/hypr/colors.lua` from the active palette JSON (no Matugen involved).
 
+## Editing the active palette (live)
+
+The Dock Editor can recolor the **active** palette in real time — no Matugen, no new palette format:
+
+1. Open the Dock Editor (`SUPER + SHIFT + D`) → *Palette* card → **Edit colors**.
+2. The inline editor lists the 18 editable slots of the active palette file: base16 `color0`..`color15` plus the top-level `background` and `foreground` rows. Each row has a swatch, the slot name and a validated `#rrggbb` hex field (invalid input gets a red border and is discarded on blur).
+3. Committing a hex (Enter or click elsewhere) normalizes it to lowercase and rewrites `dock/palettes/<slug>.json` atomically — debounced ~250 ms, `jq` over a `mktemp` temp file then `mv`, preserving `name`/`author`/`slug`/`roles` and any unknown keys. `settings.json` is never touched: the palette file is the source of truth.
+4. Propagation is instant: `dock/Colors.qml` and the widgets `Theme.qml` singleton watch the palettes directory, re-read the active file and re-apply it, so dock islands, Dock Editor chrome and every desktop-widget face recolor live. The border push (`syncWindowBorders`) also re-syncs Hyprland window borders via `hyprctl eval`, regenerates kitty themes + the starship palette (`theme-sync.sh`) and rewrites the SDDM login theme (`sddm-colors.sh`).
+5. **Session snapshot**: the first edit of a palette copies its pristine file to `~/.local/state/quickshell/palette_backup/<slug>.json` (a snapshot from an earlier session is never overwritten). The card's **Reset** button (enabled while a snapshot exists) restores that snapshot atomically and deletes it; editing after a Reset starts a fresh snapshot. Only the active palette file is ever written — the other palettes stay untouched, and the file format is unchanged, so deleting `palette_backup/` and re-deploying `dock/palettes/` reverts everything.
+
 ## Colors.qml roles
 
 `Colors` exposes the same role API the widgets have always used: `base`, `mantle`, `crust`, `text`, `subtext0/1`, `surface0/1/2`, `overlay0/1/2`, the accent set (`blue`, `sapphire`, `peach`, `green`, `red`, `mauve`, `pink`, `yellow`, `maroon`, `teal`), plus `color0..color15`, `background`, `foreground`, `accent`, `accent2`.
