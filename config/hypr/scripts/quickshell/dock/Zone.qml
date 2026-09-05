@@ -195,10 +195,18 @@ Item {
             // --- drag start handler ---------------------------------------------
             // Small movements stay clicks (ModulePill handles them); only after
             // the threshold does this area hand the gesture to the dock.
+            //
+            // Click pass-through: this area sits ABOVE the module content, so
+            // without propagation it would swallow every island click. We
+            // propagate composed events so presses/releases reach the
+            // ModulePill MouseArea underneath; when a real drag happened, the
+            // dock sets bar.consumeNextModuleClick so the pill's own click
+            // (fired from the propagated release) is discarded once.
             MouseArea {
                 id: slotDragArea
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
+                propagateComposedEvents: true
                 enabled: bar.dragModulesEnabled
 
                 property point pressPos: Qt.point(0, 0)
@@ -232,6 +240,9 @@ Item {
                 }
                 onReleased: mouse => {
                     if (dragStarted && zoneRoot.bar.dragBusy) {
+                        // The propagated release is about to reach the pill's
+                        // MouseArea and fire its clicked(): consume it once.
+                        zoneRoot.bar.consumeNextModuleClick = true;
                         let p = slotWrap.mapToItem(zoneRoot.bar, mouse.x, mouse.y);
                         zoneRoot.bar.endDragAt(p.x, p.y);
                     }

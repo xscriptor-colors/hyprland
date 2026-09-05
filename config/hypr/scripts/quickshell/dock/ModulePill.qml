@@ -241,8 +241,14 @@ Item {
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked: mouse => {
-                if (mouse.button === Qt.RightButton) root.rightClicked()
-                else root.clicked()
+                if (mouse.button === Qt.RightButton) { root.rightClicked(); return; }
+                // After a real island drag the propagated release fires this
+                // click too — swallow exactly one of them (see Zone slotDragArea).
+                if (bar && bar.consumeNextModuleClick === true) {
+                    bar.consumeNextModuleClick = false;
+                    return;
+                }
+                root.clicked()
             }
             onWheel: wheel => {
                 if (wheel.angleDelta.y > 0) root.wheelUp()

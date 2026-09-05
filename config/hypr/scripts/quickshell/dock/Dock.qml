@@ -177,6 +177,9 @@ Variants {
             // LIVE ISLAND DRAG & DROP STATE (Phase D2)
             // ================================================================
             property bool dragBusy: false
+            // Set right before a dragged island is released so the propagated
+            // release cannot fire the pill's own click (see Zone slotDragArea).
+            property bool consumeNextModuleClick: false
             property string dragId: ""
             property var dragStartDock: ({})
             property var dragWorkingDock: ({})
