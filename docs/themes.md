@@ -33,6 +33,28 @@ The Dock Editor can recolor the **active** palette in real time — no Matugen, 
 4. Propagation is instant: `dock/Colors.qml` and the widgets `Theme.qml` singleton watch the palettes directory, re-read the active file and re-apply it, so dock islands, Dock Editor chrome and every desktop-widget face recolor live. The border push (`syncWindowBorders`) also re-syncs Hyprland window borders via `hyprctl eval`, regenerates kitty themes + the starship palette (`theme-sync.sh`) and rewrites the SDDM login theme (`sddm-colors.sh`).
 5. **Session snapshot**: the first edit of a palette copies its pristine file to `~/.local/state/quickshell/palette_backup/<slug>.json` (a snapshot from an earlier session is never overwritten). The card's **Reset** button (enabled while a snapshot exists) restores that snapshot atomically and deletes it; editing after a Reset starts a fresh snapshot. Only the active palette file is ever written — the other palettes stay untouched, and the file format is unchanged, so deleting `palette_backup/` and re-deploying `dock/palettes/` reverts everything.
 
+## Per-palette role: workspaceActive
+
+Palette files can override semantic roles through `roles` (applied on top of
+the base16 derivation, see `dock/Colors.qml`). The `workspaceActive` role
+colors the ACTIVE workspace fill in the Workspaces module (both engines) and
+falls back to `mauve` when absent.
+
+Current built-in assignments:
+
+| Palette | `roles.workspaceActive` | Look |
+| --- | --- | --- |
+| x | `#eab308` | gold (signature of theme x) |
+| berlin | `#666666` | gray (theme color8) |
+| london | `#999999` | gray (theme color8) |
+| madrid | `#8a6408` | dark gold (theme color3) |
+| helsinki | `#8f6f14` | dark gold |
+| all others | — | mauve (default) |
+
+To tune a theme: edit the role in `dock/palettes/<slug>.json` (live via the
+Dock Editor → Palette → Edit colors or directly; it hot-reloads through the
+palette FileView watchers).
+
 ## Colors.qml roles
 
 `Colors` exposes the same role API the widgets have always used: `base`, `mantle`, `crust`, `text`, `subtext0/1`, `surface0/1/2`, `overlay0/1/2`, the accent set (`blue`, `sapphire`, `peach`, `green`, `red`, `mauve`, `pink`, `yellow`, `maroon`, `teal`), plus `color0..color15`, `background`, `foreground`, `accent`, `accent2`.

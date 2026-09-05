@@ -145,6 +145,32 @@ share the exact same logic. Key functions:
 
 ---
 
+## 4b. Zone containers & empty-workspace markers (Phase E3)
+
+Every zone can render an optional **container background** behind its islands
+("capsule inside a capsule") without unifying them:
+
+- `dock.zones[i].zoneBg` — a `colors.*` role name (e.g. `surface0`, `mauve`,
+  `crust`). `""` (default) = off. Rendered as a translucent rounded panel that
+  hugs the zone's islands with a ~`s(2)` rim per side (neumorphic cushion);
+  the islands keep their own fills on top.
+- `dock.zones[i].zoneBgSolid` — `true` makes the container opaque (default
+  `false` = translucent at 0.35 alpha).
+- Not drawn while the zone is `unify` (unify already provides the background).
+- Editor: Dock Editor → Zones → per-zone **Container bg** toggle + color cycle
+  + **Solid** toggle. Pure helpers: `DockLayout.setZoneBg(dock, zoneId, role)`,
+  `DockLayout.setZoneBgSolid(dock, zoneId, solid)`.
+
+Empty-workspace markers (global, both engines via `WorkspacesModule`):
+
+- `dock.workspacesMarker` — `"number"` (default) | `"dot"` | `"letter"`
+  (A, B, C…) | `"custom"`.
+- `dock.workspacesMarkerText` — the character shown when marker is `"custom"`
+  (up to 4 chars — any Unicode glyph, e.g. a Japanese character).
+- Only EMPTY workspaces use the marker; occupied/active workspaces with apps
+  keep showing app icons. Editor: Dock Editor → Workspaces (visible in both
+  engines) → Numbers / Dots / Letters / Custom + Character field.
+
 ## 5. Adding / removing / customizing modules
 
 See **`docs/dock-modules.md`** for the module contract, the `ModulePill` API and the

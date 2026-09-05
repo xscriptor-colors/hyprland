@@ -126,6 +126,23 @@ content.
 
 ---
 
+### Workspaces module — empty markers
+
+Empty workspaces (no windows) render a configurable marker instead of the
+workspace number:
+
+- `dock.workspacesMarker`: `number` (default) / `dot` / `letter` (A, B, C… by
+  index) / `custom`.
+- `dock.workspacesMarkerText`: the glyph for `custom` — any Unicode character,
+  e.g. a Japanese one (up to 4 chars).
+- Occupied workspaces always show their app icons; markers only appear on empty
+  pills (including an empty ACTIVE workspace, drawn over the sliding
+  highlight). Marker color follows the pill state (active/hover/empty).
+
+The active-workspace highlight color can be themed per palette through the
+`workspaceActive` role (see `docs/themes.md`) — e.g. theme `x` uses gold, while
+`berlin`/`london` use a theme gray and `madrid`/`helsinki` a dark gold.
+
 ## 4. Adding a new module
 
 1. Create `quickshell/topbar/modules/MyModule.qml` (root = `ModulePill`).
