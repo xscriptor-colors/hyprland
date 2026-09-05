@@ -119,6 +119,12 @@ function defaultZone(id, align, modules) {
         id: id,
         align: align,
         unify: false,
+        // Optional container behind the whole zone ("" = off). A color-role
+        // name (surface0, mauve, ...); islands keep their own pills on top,
+        // so this reads as "capsule inside a capsule". zoneBgSolid makes the
+        // container opaque (translucent by default).
+        zoneBg: "",
+        zoneBgSolid: false,
         borderWidth: 0,
         borderColor: "surface1",
         modules: cloneModules(modules || [])
@@ -167,6 +173,12 @@ function defaultDock() {
         borderActive: "",
         borderInactive: "",
         font: "Hack Nerd Font",
+        // How EMPTY workspaces render in the Workspaces module:
+        // "number" (default), "dot", "letter" or "custom" (the character set in
+        // workspacesMarkerText, e.g. a Japanese glyph). Occupied workspaces
+        // always show app icons (see WorkspacesModule.qml).
+        workspacesMarker: "number",
+        workspacesMarkerText: "", // single custom character for marker "custom"
         zones: zones
     };
 }
@@ -198,6 +210,8 @@ function normalizeDock(raw) {
         borderWidth: (typeof raw.borderWidth === "number") ? raw.borderWidth : def.borderWidth,
         borderColor: (typeof raw.borderColor === "string" && raw.borderColor !== "") ? raw.borderColor : def.borderColor,
         borderFollowPalette: raw.borderFollowPalette !== undefined ? (raw.borderFollowPalette === true) : def.borderFollowPalette,
+        workspacesMarker: ["number", "dot", "letter", "custom"].indexOf(raw.workspacesMarker) !== -1 ? raw.workspacesMarker : def.workspacesMarker,
+        workspacesMarkerText: (typeof raw.workspacesMarkerText === "string") ? raw.workspacesMarkerText.slice(0, 4) : def.workspacesMarkerText,
         borderActive: (typeof raw.borderActive === "string") ? raw.borderActive : def.borderActive,
         borderInactive: (typeof raw.borderInactive === "string") ? raw.borderInactive : def.borderInactive,
         font: (typeof raw.font === "string" && raw.font.trim() !== "") ? raw.font : def.font,
@@ -217,6 +231,8 @@ function normalizeDock(raw) {
         ));
         let zi = out.zones.length - 1;
         out.zones[zi].unify = z.unify === true;
+        out.zones[zi].zoneBg = (typeof z.zoneBg === "string") ? z.zoneBg : "";
+        out.zones[zi].zoneBgSolid = z.zoneBgSolid === true;
         out.zones[zi].borderWidth = (typeof z.borderWidth === "number") ? z.borderWidth : out.borderWidth;
         out.zones[zi].borderColor = (typeof z.borderColor === "string" && z.borderColor !== "") ? z.borderColor : out.borderColor;
         // drop unknown / duplicate module ids
@@ -595,6 +611,24 @@ function setZoneUnify(dock, zoneId, value) {
     let zi = zoneIndex(out, zoneId);
     if (zi === -1) return out;
     out.zones[zi].unify = value === true;
+    return out;
+}
+
+// Set (or clear with "") the container background role of a zone. Pure.
+function setZoneBg(dock, zoneId, role) {
+    let out = cloneDock(dock);
+    let zi = zoneIndex(out, zoneId);
+    if (zi === -1) return out;
+    out.zones[zi].zoneBg = String(role || "");
+    return out;
+}
+
+// Opaque vs translucent container fill (pure).
+function setZoneBgSolid(dock, zoneId, solid) {
+    let out = cloneDock(dock);
+    let zi = zoneIndex(out, zoneId);
+    if (zi === -1) return out;
+    out.zones[zi].zoneBgSolid = solid === true;
     return out;
 }
 

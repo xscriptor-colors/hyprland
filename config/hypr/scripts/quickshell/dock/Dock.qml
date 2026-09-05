@@ -487,6 +487,8 @@ Variants {
                 dockWindow.barOpacity = (typeof dockConfig.barOpacity === "number") ? dockConfig.barOpacity : 0.85;
                 dockWindow.dragModulesEnabled = dockConfig.dragModules !== false;
                 dockWindow.accentTintMode = false;
+                dockWindow.workspacesMarker = (typeof dockConfig.workspacesMarker === "string") ? dockConfig.workspacesMarker : "number";
+                dockWindow.workspacesMarkerText = (typeof dockConfig.workspacesMarkerText === "string") ? dockConfig.workspacesMarkerText : "";
                 dockWindow.borderWidth = dockConfig.borderWidth;
                 dockWindow.borderColor = dockConfig.borderColor;
                 dockWindow.fontFamily = dockConfig.font || "Hack Nerd Font";
@@ -761,6 +763,10 @@ Variants {
             property bool forceUpdateShow: false
             property bool isUpdateVisible: updateAvailable || forceUpdateShow
             property int workspaceCount: 8
+            // Empty-workspace marker for the Workspaces module
+            // (number|dot|letter|custom) + optional custom character.
+            property string workspacesMarker: "number"
+            property string workspacesMarkerText: "" 
 
             property bool isDesktop: false
             property string ethStatus: "Ethernet"

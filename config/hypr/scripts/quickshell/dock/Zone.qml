@@ -103,6 +103,30 @@ Item {
     }
     Component.onCompleted: applyAnchors()
 
+    // --- optional container behind the whole zone ("capsule in a capsule") ----
+    // zoneData.zoneBg = a colors.* role name ("" = off). Draws a translucent
+    // rounded panel that hugs the zone's islands WITHOUT unifying them (each
+    // ModulePill keeps its own fill on top). Not drawn when the zone is
+    // unified (unify already provides the single background).
+    Rectangle {
+        id: zoneContainer
+        visible: zoneData.zoneBg !== "" && !zoneRoot.unified && zoneRoot.ready
+        anchors.centerIn: parent
+        // ~s(2) rim per side so the container reads as a soft neumorphic
+        // cushion peeking out from behind the islands.
+        width: parent.width + bar.s(4)
+        height: parent.height + bar.s(4)
+        radius: bar.pillRadius(bar.pillHeight + bar.s(4))
+        opacity: 0
+        color: {
+            let c = colors[zoneData.zoneBg] || colors.surface0;
+            return Qt.rgba(c.r, c.g, c.b, zoneData.zoneBgSolid === true ? 1.0 : 0.35);
+        }
+        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        Behavior on color { ColorAnimation { duration: 200 } }
+        onVisibleChanged: if (zoneContainer.visible) zoneContainer.opacity = 1
+    }
+
     // --- unified pill behind the whole zone ---------------------------------
     Rectangle {
         id: unifyPill
@@ -126,8 +150,12 @@ Item {
             id: slotWrap
             required property string modelData
             required property int index
-            width: slotLoader.width
-            height: slotLoader.height
+            // Occupies the full band on the CROSS axis so every island is
+            // centered vertically (horizontal docks) / horizontally (vertical
+            // docks) regardless of its own height — mixed-height islands stay
+            // aligned. The module content is centered inside below.
+            width: zoneRoot.isHorizontal ? slotLoader.width : zoneRoot.width
+            height: zoneRoot.isHorizontal ? zoneRoot.height : slotLoader.height
 
             // Marker used by the zone hit-test to enumerate module slots.
             property bool isDockSlot: true
@@ -143,6 +171,7 @@ Item {
 
             Loader {
                 id: slotLoader
+                anchors.centerIn: slotWrap
                 width: item ? item.implicitWidth : 0
                 height: item ? item.implicitHeight : 0
 

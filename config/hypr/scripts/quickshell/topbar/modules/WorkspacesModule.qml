@@ -24,6 +24,10 @@ ModulePill {
     readonly property color wsActiveFill: (colors.workspaceActive !== undefined && colors.workspaceActive.a > 0)
         ? colors.workspaceActive : colors.mauve
     readonly property color wsActiveText: colors.crust
+    // How EMPTY workspaces render: "number" | "dot" | "letter" (dock config).
+    readonly property string marker: bar.workspacesMarker || "number"
+    // Custom character for marker === "custom" (user glyph, e.g. Japanese).
+    readonly property string markerChar: (bar.workspacesMarkerText || "").trim() || "•"
 
     // NOTE: children of a ModulePill land in its contentHost via the default
     // property — do NOT use `content: Item {...}` (the alias-to-data assignment
@@ -125,7 +129,8 @@ ModulePill {
 
             width: mod.compact
                 ? bar.pillWidth - bar.s(8)
-                : (appIconList.length > 0 ? bar.s(24) + appIconList.length * bar.s(16) + (hasManyIcons ? bar.s(18) : 0) : bar.s(36))
+                : (appIconList.length > 0 ? bar.s(24) + appIconList.length * bar.s(16) + (hasManyIcons ? bar.s(18) : 0)
+                    : (mod.marker === "dot" ? bar.s(20) : (mod.marker === "letter" || mod.marker === "custom" ? bar.s(28) : bar.s(36))))
             height: mod.compact ? bar.s(30) : bar.s(36)
             radius: bar.pillRadius(mod.compact ? bar.pillWidth : bar.s(36))
 
@@ -143,17 +148,41 @@ ModulePill {
             Item {
                 anchors.fill: parent
 
-                Text {
+                Item {
                     anchors.centerIn: parent
-                    // In compact (vertical) docks always show the number; the
-                    // app-icon layout is too wide for the narrow pill.
+                    // Empty workspace marker (configurable: number/dot/letter).
+                    // Occupied workspaces keep the app-icon row below; the
+                    // number text only appears when there is nothing else.
                     visible: mod.compact || wsPill.appIconList.length === 0
-                    text: wsPill.wsName
-                    font.family: bar.fontFamily
-                    font.pixelSize: mod.compact ? bar.s(13) : bar.s(18)
-                    font.weight: wsPill.stateLabel === "active" ? Font.Black : (wsPill.stateLabel === "occupied" ? Font.Bold : Font.Medium)
-                    color: index === bar.wsModel.activeIndex ? mod.wsActiveText : (wsPill.isHovered ? colors.text : (wsPill.stateLabel === "occupied" ? colors.text : colors.overlay0))
-                    Behavior on color { ColorAnimation { duration: 250 } }
+
+                    readonly property color markerColor: index === bar.wsModel.activeIndex ? mod.wsActiveText
+                        : (wsPill.isHovered ? colors.text : (wsPill.stateLabel === "occupied" ? colors.text : colors.overlay0))
+
+                    // number / letter / custom-character marker
+                    Text {
+                        anchors.centerIn: parent
+                        visible: mod.marker !== "dot"
+                        text: mod.marker === "letter" ? String.fromCharCode(65 + wsPill.wsIndex)
+                            : mod.marker === "custom" ? mod.markerChar
+                            : wsPill.wsName
+                        font.family: bar.fontFamily
+                        font.pixelSize: mod.compact ? bar.s(13) : bar.s(18)
+                        font.weight: wsPill.stateLabel === "active" ? Font.Black : (wsPill.stateLabel === "occupied" ? Font.Bold : Font.Medium)
+                        color: parent.markerColor
+                        Behavior on color { ColorAnimation { duration: 250 } }
+                    }
+                    // dot marker for empty workspaces
+                    Rectangle {
+                        anchors.centerIn: parent
+                        visible: mod.marker === "dot"
+                        width: mod.compact ? bar.s(6) : bar.s(9)
+                        height: width
+                        radius: width / 2
+                        color: parent.markerColor
+                        Behavior on color { ColorAnimation { duration: 250 } }
+                        scale: wsPill.isHovered ? 1.35 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                    }
                 }
 
                 Row {

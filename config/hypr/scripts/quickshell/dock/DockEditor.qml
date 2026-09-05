@@ -1162,6 +1162,73 @@ Item {
                             }
                         }
                     }
+
+                    // ── CARD: WORKSPACES ──────────────────────────────────────
+                    Rectangle {
+                        width: parent.width
+                        radius: s(18)
+                        color: colors.surface0
+                        border.width: s(1); border.color: colors.surface1
+                        height: wsCol.implicitHeight + s(28)
+                        Column {
+                            id: wsCol
+                            anchors.fill: parent
+                            anchors.margins: s(14)
+                            spacing: s(9)
+                            SectionTitle { bar: root; text: "Workspaces" }
+                            Item {
+                                width: parent.width
+                                height: s(28)
+                                EditLabel { bar: root; text: "Empty workspace"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                Row {
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: s(6)
+                                    EditPill { bar: root; text: "Numbers"; active: root.dock.workspacesMarker === "number"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "number" })) }
+                                    EditPill { bar: root; text: "Dots"; active: root.dock.workspacesMarker === "dot"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "dot" })) }
+                                    EditPill { bar: root; text: "Letters"; active: root.dock.workspacesMarker === "letter"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "letter" })) }
+                                    EditPill { bar: root; text: "Custom"; active: root.dock.workspacesMarker === "custom"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "custom" })) }
+                                }
+                            }
+                            Item {
+                                width: parent.width
+                                height: s(28)
+                                visible: root.dock.workspacesMarker === "custom"
+                                EditLabel { bar: root; text: "Character"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
+                                TextField {
+                                    id: wsMarkerCharField
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: s(110)
+                                    height: s(28)
+                                    text: root.dock.workspacesMarkerText || ""
+                                    font.family: root.dock.font || "Hack Nerd Font"
+                                    font.pixelSize: s(13)
+                                    color: colors.text
+                                    selectByMouse: true
+                                    maximumLength: 4
+                                    background: Rectangle { color: colors.surface1; radius: s(8); border.color: colors.surface2 }
+                                    onEditingFinished: {
+                                        let v = text.trim().slice(0, 4);
+                                        if (v !== root.dock.workspacesMarkerText) {
+                                            root.applyDock(Object.assign({}, root.dock, { workspacesMarkerText: v }));
+                                        }
+                                    }
+                                }
+                            }
+                            Item {
+                                width: parent.width
+                                height: s(26)
+                                Text {
+                                    anchors.fill: parent
+                                    text: "Only for empty workspaces — occupied ones keep showing their app icons. Tip: the Container bg option in each zone adds a themed background behind its islands without unifying them."
+                                    font.family: "Hack Nerd Font"; font.pixelSize: s(10)
+                                    color: colors.overlay1
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+                    }
                     // ════ SERP ENGINE CARDS (Phase D4-E2) ════
                     // Visible only while root.engine === "serp": the classic
                     // bar's position, style & size, module lists and quick

@@ -173,6 +173,36 @@ Rectangle {
             }
         }
 
+        // optional translucent container behind the whole zone
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: bar.s(8)
+
+            EditLabel { bar: zoneCard.bar; text: "Container bg" }
+            Item { Layout.fillWidth: true; height: 1 }
+            ToggleSwitch {
+                bar: zoneCard.bar
+                checked: zoneData.zoneBg !== ""
+                onToggled: {
+                    if (zoneData.zoneBg === "") patch(d => DockLayout.setZoneBg(d, zoneData.id, "surface0"));
+                    else patch(d => DockLayout.setZoneBg(d, zoneData.id, ""));
+                }
+            }
+            ColorCycle {
+                bar: zoneCard.bar
+                role: zoneData.zoneBg || "surface0"
+                visible: zoneData.zoneBg !== ""
+                onCycled: (role) => patch(d => DockLayout.setZoneBg(d, zoneData.id, role))
+            }
+            EditLabel { bar: zoneCard.bar; text: "Solid"; visible: zoneData.zoneBg !== "" }
+            ToggleSwitch {
+                bar: zoneCard.bar
+                visible: zoneData.zoneBg !== ""
+                checked: zoneData.zoneBgSolid === true
+                onToggled: patch(d => DockLayout.setZoneBgSolid(d, zoneData.id, zoneData.zoneBgSolid !== true))
+            }
+        }
+
         // zone border
         RowLayout {
             Layout.fillWidth: true

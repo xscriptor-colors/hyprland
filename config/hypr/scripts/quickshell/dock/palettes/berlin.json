@@ -22,5 +22,7 @@
   },
   "background": "#000000",
   "foreground": "#cccccc",
-  "roles": {}
+  "roles": {
+    "workspaceActive": "#666666"
+  }
 }
