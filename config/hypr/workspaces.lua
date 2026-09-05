@@ -3,25 +3,34 @@
 -- ╚═══════════════════════════════════════════════════════════════════════════╝
 
 -- ┌───────────────────────────────────────────────────────────────────────────┐
--- │ MULTI-MONITOR WORKSPACE BINDING                                          │
+-- │ MULTI-MONITOR: UNIFIED DESKTOPS & BOOT DEFAULTS                          │
 -- │                                                                           │
--- │ Workspaces 1-4 are pinned to the physical screens below, following the   │
--- │ author's layout from the laptop outwards (laptop = 1, then leftwards     │
--- │ 2, 3, 4). Rules match by EDID description (model + serial), so on other  │
--- │ hardware they are INERT: unmatched monitors keep free-floating           │
--- │ workspaces and nothing is imposed on different rigs.                     │
+-- │ The author's rig is 4 physical screens (laptop + 3 Xiaomi). The rules    │
+-- │ below are only the BOOT DEFAULTS of "desktop 1": each monitor starts on  │
+-- │ its own pinned workspace (laptop = 1, then leftwards 2, 3, 4).           │
+-- │                                                                           │
+-- │ Optional UNIFIED DESKTOPS mode (scripts/ws-desktops-lib.sh is the engine)│
+-- │ turns SUPER + 1..9 into full-desktop jumps: with >= 2 roster screens     │
+-- │ connected, EVERY screen switches at once (workspace = (d-1)*4 + rank).   │
+-- │ With fewer screens — or on other people's hardware (different EDIDs) —   │
+-- │ the classic per-monitor behavior is kept untouched. Disable the mode     │
+-- │ explicitly with "unifiedDesktops": false in settings.json.               │
+-- │                                                                           │
+-- │ KEEP THE MON_* DESCRIPTIONS IN SYNC with ROSTER_DESCS in                 │
+-- │ scripts/ws-desktops-lib.sh (same rank order!).                           │
 -- │                                                                           │
 -- │ Identify your own monitors with: hyprctl monitors all                    │
 -- │ (the "description" field is the key, e.g. "Xiaomi ... 5275600003570").   │
--- │ Workspaces 5-10 stay unbound (float wherever focused).                   │
 -- └───────────────────────────────────────────────────────────────────────────┘
 
 -- --- LAPTOP (rightmost) + externals leftwards ---
+-- NOTE: same order/descriptions as ROSTER_DESCS in scripts/ws-desktops-lib.sh
 local MON_LAPTOP = "desc:BOE NE160WUM-NXA"
 local MON_LEFT2  = "desc:Xiaomi Corporation P27FBB-RGGL 5275600003084"  -- DP-6
 local MON_LEFT3  = "desc:Xiaomi Corporation P27FBB-RGGL 5275600003570"  -- HDMI-A-3
 local MON_LEFT4  = "desc:Xiaomi Corporation P27FBB-RGGL 5275600072695"  -- DP-5
 
+-- Desktop-1 boot defaults: each monitor shows its own pinned workspace on login.
 hl.workspace_rule({ workspace = "1", monitor = MON_LAPTOP, default = true })
 hl.workspace_rule({ workspace = "2", monitor = MON_LEFT2, default = true })
 hl.workspace_rule({ workspace = "3", monitor = MON_LEFT3, default = true })

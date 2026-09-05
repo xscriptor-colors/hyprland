@@ -89,3 +89,23 @@ In the QuickShell settings **Monitors** tab there are two explicit buttons:
 - **Reset to auto** -- deletes the saved layout and returns to the wildcard
   auto arrangement (useful before arranging a new machine's own layout).
 
+### Unified desktops (optional, auto-gated)
+
+When at least **two** of the physical screens listed in the roster
+(`ROSTER_DESCS` in `scripts/ws-desktops-lib.sh`, same order as `MON_*` in
+`workspaces.lua`) are connected, the number keys switch **desktops across all
+screens at once** (Windows/macOS style): desktop N maps every screen to
+workspace `(N-1) * <roster size> + rank` (laptop = rank 1, then leftwards).
+Each screen keeps its own windows per desktop.
+
+- Screens are matched by EDID description, so the mode is **inert for people
+  on different hardware**: fewer than two roster screens -> the classic
+  per-monitor workspace behavior is kept byte-for-byte.
+- Force the classic behavior anywhere with `"unifiedDesktops": false` in
+  `settings.json` (default: enabled, but only effective on matching rigs).
+- Implementation: `ws-desktops-lib.sh` (roster + dispatch helpers),
+  `qs_manager.sh` (numeric/`next`/`prev` routing) and `workspaces.sh`
+  (dock pills relabel to desktops 1..N and aggregate their windows/icons).
+- ⚠️ If you change your monitor layout, keep `ROSTER_DESCS` and the `MON_*`
+  constants (same order!) in sync.
+

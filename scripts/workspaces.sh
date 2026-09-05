@@ -4,11 +4,15 @@
 # CACHING & MIGRATION
 # -----------------------------------------------------------------------------
 source "$(dirname "${BASH_SOURCE[0]}")/caching.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/ws-desktops-lib.sh"
 qs_ensure_cache "workspaces"
+
+# Roster for the optional unified-desktops pill view (rank order).
+ROSTER_JSON="$(printf '%s\n' "${ROSTER_DESCS[@]}" | jq -Rn '[inputs]' 2>/dev/null || echo '[]')"
 
 # ============================================================================
 # 1. ZOMBIE PREVENTION
-# Kills any older instances of this script. When Quickshell reloads, 
+# Kills any older instances of this script. When Quickshell reloads,
 # it can leave the old listener pipelines running in the background infinitely.
 # ============================================================================
 for pid in $(pgrep -f "workspaces.sh"); do
@@ -44,7 +48,11 @@ if ! [[ "$SEQ_END" =~ ^[0-9]+$ ]]; then
     SEQ_END=8
 fi
 
-print_workspaces() {
+# ============================================================================
+# CLASSIC VIEW (default; every monitor-free / single-screen / non-roster rig)
+# One pill per workspace id 1..SEQ_END, states taken from all monitors.
+# ============================================================================
+print_workspaces_classic() {
     # Get raw data with a timeout fallback
     spaces=$(timeout 2 hyprctl workspaces -j 2>/dev/null)
     active=$(timeout 2 hyprctl activeworkspace -j 2>/dev/null | jq '.id')
@@ -61,7 +69,7 @@ print_workspaces() {
             {id: $i, state: $state, tooltip: $win}
         )
     ' > "$QS_RUN_WORKSPACES/workspaces.tmp"
-    
+
     # Add app classes per workspace using Python (simpler than complex jq)
     python3 -c "
 import json, subprocess, sys
@@ -90,8 +98,107 @@ for entry in data:
 with open('$QS_RUN_WORKSPACES/workspaces.json', 'w') as f:
     json.dump(data, f)
 " 2>/dev/null || mv "$QS_RUN_WORKSPACES/workspaces.tmp" "$QS_RUN_WORKSPACES/workspaces.json"
-    
+
     rm -f "$QS_RUN_WORKSPACES/workspaces.tmp"
+}
+
+# ============================================================================
+# UNIFIED DESKTOPS VIEW (optional; only while >= 2 roster screens are docked
+# and settings.json does not force "unifiedDesktops": false)
+# One pill per DESKTOP 1..SEQ_END. A desktop is "occupied" when any connected
+# roster screen holds a window on that desktop; app icons are aggregated from
+# all the screens' windows of that desktop.
+# ============================================================================
+print_workspaces_unified() {
+    WS_ROSTER="$ROSTER_JSON" python3 - "$SEQ_END" > "$QS_RUN_WORKSPACES/workspaces.tmp" <<'PY'
+import json, os, subprocess, sys
+
+D = int(sys.argv[1]) if len(sys.argv) > 1 else 8
+try:
+    roster = json.loads(os.environ.get("WS_ROSTER", "[]"))
+except Exception:
+    roster = []
+W = len(roster)
+
+def hs(*args):
+    try:
+        out = subprocess.run(["hyprctl", *args], capture_output=True, text=True, timeout=3)
+        return json.loads(out.stdout) if out.stdout else []
+    except Exception:
+        return []
+
+mons = hs("monitors", "-j")
+clients = hs("clients", "-j")
+ws_list = hs("workspaces", "-j")
+
+by_desc = {m.get("description"): m.get("name") for m in mons}
+focused_name = next((m.get("name") for m in mons if m.get("focused")), "")
+ranks = []
+for i, desc in enumerate(roster, start=1):
+    name = by_desc.get(desc)
+    if name:
+        ranks.append((i, name))
+
+# Which desktop is the focused screen showing?
+focused_ws = None
+for m in mons:
+    if m.get("name") == focused_name:
+        focused_ws = m.get("activeWorkspace", {}).get("id")
+        break
+active_desktop = 1
+if isinstance(focused_ws, int) and focused_ws > 0 and W > 0:
+    if D * W >= focused_ws >= 1:
+        active_desktop = min(D, (focused_ws - 1) // W + 1)
+
+ws_by_id = {}
+for w in ws_list:
+    ws_by_id[w.get("id")] = w.get("lastwindowtitle", "")
+
+cls_by_ws = {}
+for c in clients:
+    ws = c.get("workspace", {}).get("id")
+    cls = c.get("class", "")
+    if ws and cls:
+        cls_by_ws.setdefault(ws, []).append(cls)
+
+out = []
+for d in range(1, D + 1):
+    titles, classes, has_win = [], [], False
+    for rank, _name in ranks:
+        wid = (d - 1) * W + rank
+        if wid in ws_by_id:
+            has_win = True
+        if ws_by_id.get(wid):
+            titles.append(ws_by_id[wid])
+        classes.extend(cls_by_ws.get(wid, []))
+    if d == active_desktop:
+        state = "active"
+    elif has_win:
+        state = "occupied"
+    else:
+        state = "empty"
+    uniq_cls = []
+    for c in classes:
+        if c not in uniq_cls:
+            uniq_cls.append(c)
+    out.append({
+        "id": d,
+        "state": state,
+        "tooltip": " | ".join(dict.fromkeys(titles)) or ("Empty" if not has_win else ""),
+        "classes": ",".join(uniq_cls),
+    })
+
+print(json.dumps(out))
+PY
+    mv -f "$QS_RUN_WORKSPACES/workspaces.tmp" "$QS_RUN_WORKSPACES/workspaces.json"
+}
+
+print_workspaces() {
+    if [[ "$(ws_desktops_unified)" == "yes" ]]; then
+        print_workspaces_unified
+    else
+        print_workspaces_classic
+    fi
 }
 
 # Print initial state
@@ -105,7 +212,7 @@ while true; do
     socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
         case "$line" in
             workspace*|focusedmon*|activewindow*|createwindow*|closewindow*|movewindow*|destroyworkspace*)
-                
+
                 # -> THE FIX <-
                 # Hyprland emits HUNDREDS of events a second when you move/resize windows.
                 # This reads and discards all subsequent events arriving within a 50ms window.

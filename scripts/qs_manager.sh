@@ -7,9 +7,12 @@ SCRIPTS_DIR="$HOME/.config/hypr/scripts/quickshell"
 SHELL_QML_PATH="$SCRIPTS_DIR/Shell.qml"
 QS=""; command -v quickshell >/dev/null 2>&1 && QS=quickshell || command -v qs >/dev/null 2>&1 && QS=qs
 
+# Shared helpers for the optional "unified desktops" mode (tiny, no caching).
+source "$(dirname "${BASH_SOURCE[0]}")/ws-desktops-lib.sh"
+
 # -----------------------------------------------------------------------------
-# FAST PATH: WORKSPACE SWITCHING
-# Must be first — before any sourcing, caching, or pgrep.
+# FAST PATH: WORKSPACE / DESKTOP SWITCHING
+# Must be first — before any other sourcing, caching, or pgrep.
 # -----------------------------------------------------------------------------
 ACTION="$1"
 TARGET="$2"
@@ -19,10 +22,38 @@ if [[ "$ACTION" =~ ^[0-9]+$ ]]; then
     # Send IPC command directly to Main.qml via Quickshell's native IPC handler
     $QS -p "$SHELL_QML_PATH" ipc call main handleCommand "close" "" "" >/dev/null 2>&1
 
+    if [[ "$(ws_desktops_unified)" == "yes" ]]; then
+        # Unified desktops: >=2 roster screens connected -> desktop `ACTION`
+        # jumps on EVERY screen. Falls through to classic below otherwise.
+        if [[ "$TARGET" == "move" ]]; then
+            ws_desktop_move_window "$ACTION"
+        else
+            ws_desktop_goto "$ACTION"
+        fi
+        exit 0
+    fi
+
     if [[ "$TARGET" == "move" ]]; then
         hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = $ACTION }))" >/dev/null 2>&1
     else
         hyprctl eval "hl.dispatch(hl.dsp.focus({ workspace = $ACTION }))" >/dev/null 2>&1
+    fi
+    exit 0
+fi
+
+if [[ "$ACTION" == "next" || "$ACTION" == "prev" ]]; then
+    # Close popups first, like numeric switches do.
+    $QS -p "$SHELL_QML_PATH" ipc call main handleCommand "close" "" "" >/dev/null 2>&1
+
+    if [[ "$(ws_desktops_unified)" == "yes" ]]; then
+        ws_desktop_rel "$ACTION"
+        exit 0
+    fi
+
+    if [[ "$ACTION" == "next" ]]; then
+        hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = "e+1" }))' >/dev/null 2>&1
+    else
+        hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = "e-1" }))' >/dev/null 2>&1
     fi
     exit 0
 fi

@@ -15,6 +15,7 @@
   "topbarBorderColorRight": "surface1",
   "appScale": 1.0,
   "workspaceCount": 8,
+  "unifiedDesktops": true,
   "wallpaperDir": "~/.config/hypr/wallpapers",
   "language": "",
   "kbOptions": "grp:alt_shift_toggle",
