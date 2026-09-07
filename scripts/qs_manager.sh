@@ -160,9 +160,19 @@ handle_wallpaper_prep() {
                 thumb="$THUMB_DIR/000_$filename"
                 [ -f "$THUMB_DIR/$filename" ] && rm -f "$THUMB_DIR/$filename"
                 if [ ! -f "$thumb" ]; then
-                    ffmpeg -y -ss 00:00:05 -i "$img" -vframes 1 \
+                    thumb_offset="00:00:05"
+                    if command -v ffprobe >/dev/null 2>&1; then
+                        v_dur=$(ffprobe -v error -show_entries format=duration \
+                            -of default=nw=1:nk=1 -- "$img" 2>/dev/null)
+                        if [ -n "$v_dur" ]; then
+                            seek_pt=$(awk -v d="$v_dur" 'BEGIN { s = (d < 6.5) ? d / 2 : 5; if (s < 0) s = 0; printf "%.0f", s }')
+                            thumb_offset=$(printf "%02d:%02d:%02d" \
+                                $((seek_pt / 3600)) $(((seek_pt % 3600) / 60)) $((seek_pt % 60)))
+                        fi
+                    fi
+                    ffmpeg -y -ss "$thumb_offset" -i "$img" -vframes 1 \
                         -threads 1 -f image2 -q:v 2 "$thumb" >/dev/null 2>&1
-                    echo "000_$filename" >> "$MANIFEST"
+                    [ -f "$thumb" ] && echo "000_$filename" >> "$MANIFEST"
                 fi
             else
                 thumb="$THUMB_DIR/$filename"
