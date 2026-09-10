@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import "../DockLayout.js" as DockLayout
 
-// Per-zone editor card for the DockEditor. Height grows with content so the
+// Per-zone editor card for the BarEditor. Height grows with content so the
 // module chips never overlap the rows below. Width is managed by the parent
 // layout (Layout.fillWidth) so it never fights the container.
 //
 // ── Editor module drag & drop (Phase D3) ────────────────────────────────────
-// The DockEditor (this card's `bar`) coordinates ONE editor-wide drag session:
+// The BarEditor (this card's `bar`) coordinates ONE editor-wide drag session:
 //   * ENABLED chips are draggable with the left button past a ~bar.s(10)
 //     visual threshold; short presses stay clicks, so the chip toggle and the
 //     ◀ ▶ buttons (which sit above this area) keep working untouched.
@@ -21,7 +21,7 @@ import "../DockLayout.js" as DockLayout
 //     click, then they can be dragged like any other chip.
 //   * A card with zero chips is still a valid drop target (index 0).
 //   * Dropping outside every card cancels the gesture.
-// Contract with the DockEditor:
+// Contract with the BarEditor:
 //   * bar.startDnd(zoneId, moduleId) / bar.updateDnd(px,py) /
 //     bar.endDnd(px,py) / bar.cancelDnd() plus bar.dndBusy + bar.dndModuleId.
 //   * The editor enumerates the cards through the Zones card's column children
@@ -40,8 +40,8 @@ Rectangle {
     readonly property string cardZoneId: zoneData.id
 
     height: contentCol.implicitHeight + bar.s(20)
-    radius: bar.s(16)
-    color: bar.colors.surface0
+    radius: bar.s(21)
+    color: Qt.alpha(bar.colors.surface0, 0.4)
     border.width: bar.s(1); border.color: bar.colors.surface1
 
     // ---- DnD target state (owned by the editor while a chip drags) ----
@@ -166,10 +166,28 @@ Rectangle {
             EditLabel { bar: zoneCard.bar; text: "Unify" }
             ToggleSwitch { bar: zoneCard.bar; checked: zoneData.unify === true; onToggled: patch(d => DockLayout.setZoneUnify(d, zoneData.id, !zoneData.unify)) }
             Rectangle {
-                width: bar.s(28); height: bar.s(28); radius: bar.s(8)
-                color: bar.colors.red
-                Text { anchors.centerIn: parent; text: ""; font.family: "Hack Nerd Font"; font.pixelSize: bar.s(14); color: bar.colors.base }
-                MouseArea { anchors.fill: parent; onClicked: patch(d => DockLayout.removeZone(d, zoneData.id)) }
+                id: delBtn
+                width: bar.s(28); height: bar.s(28); radius: bar.s(14)
+                color: delMa.containsMouse ? Qt.alpha(bar.colors.red, 0.1) : "transparent"
+                border.width: 1
+                border.color: delMa.containsMouse ? bar.colors.red : bar.colors.surface1
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on border.color { ColorAnimation { duration: 150 } }
+                Text {
+                    anchors.centerIn: parent
+                    text: ""
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: bar.s(14)
+                    color: delMa.containsMouse ? bar.colors.red : bar.colors.subtext0
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+                MouseArea {
+                    id: delMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: patch(d => DockLayout.removeZone(d, zoneData.id))
+                }
             }
         }
 
@@ -223,7 +241,7 @@ Rectangle {
             }
         }
 
-        Rectangle { Layout.fillWidth: true; height: bar.s(1); color: bar.colors.surface1; opacity: 0.4 }
+        Rectangle { Layout.fillWidth: true; height: bar.s(1); color: Qt.alpha(bar.colors.surface1, 0.5) }
 
         // module chips (wrap; card grows). One chip per zoneData.modules entry
         // (disabled entries are dimmed). See the DnD contract in the header.
@@ -264,7 +282,7 @@ Rectangle {
                     }
                     // Chip click (toggle) + editor drag & drop (Phase D3).
                     // Short presses toggle; movements past ~s(10) px start a
-                    // drag session owned by the DockEditor (bar.startDnd…).
+                    // drag session owned by the BarEditor (bar.startDnd…).
                     MouseArea {
                         id: chipDrag
                         anchors.fill: parent
@@ -345,11 +363,11 @@ Rectangle {
         id: dropHighlight
         anchors.fill: parent
         anchors.margins: bar.s(1)
-        radius: bar.s(15)
+        radius: bar.s(20)
         visible: zoneCard.dndActive
         color: "transparent"
         border.width: bar.s(2)
-        border.color: bar.colors.accent
+        border.color: bar.colors.mauve
         opacity: 0.9
         enabled: false
         Behavior on opacity { NumberAnimation { duration: 90 } }
@@ -361,7 +379,7 @@ Rectangle {
         visible: false
         width: bar.s(3)
         radius: bar.s(1.5)
-        color: bar.colors.accent
+        color: bar.colors.mauve
         enabled: false
         Behavior on x { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
         Behavior on y { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }

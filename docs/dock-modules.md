@@ -104,12 +104,12 @@ vertical island and every module is expected to show **reduced** content:
 | focus | app icon + window title | app icon |
 
 `weather` and `focus` are **new islands shipped disabled by default** — enable
-them in the Dock Editor → Zones (their entries exist in `dock.zones` with
+them in the Settings panel → Zones (their entries exist in `dock.zones` with
 `enabled: false` and are re-added disabled after updates, so existing bars
 never change on their own).
 
-Modules can be moved between zones/alignments from the Dock Editor by
-**dragging the zone card chips** (Dock Editor → Zones, ghost + insertion
+Modules can be moved between zones/alignments from the Settings panel by
+**dragging the zone card chips** (Settings panel → Zones, ghost + insertion
 indicator; enabled chips only, drop index counts enabled chips — see
 `docs/dock.md` §6).
 

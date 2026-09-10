@@ -1,5 +1,26 @@
 # Changelog
 
+## [2026-09-10]
+
+### Added
+- **Unified Settings panel** (`bar-editor`, `SUPER+SHIFT+D`): sidebar rail with grouped pages, animated highlight, global search (`/`), `activeMode` deep-linking and lazy-loaded pages. Replaces the legacy settings sidebar and the inline dock editor; `SUPER+X` opens it on the About page.
+- **Configurable app launcher** (`launcher` settings key): position (center/top/bottom/left/right) with real screen anchoring and directional intro, width, visible apps, row height, content alignment (left/center/right), icon visibility, margin (negative allowed), border width/color/radius and bar-overlap avoidance.
+- **New Settings pages**: Hyprland window effects (same knobs as `SUPER+SHIFT+B`), Animations (enabled + speed), Input (sensitivity/accel/touchpad), Idle (auto/awake), GPU (Optimus modes), Notifications (Do Not Disturb) and an embedded About/Guide page.
+- **Monthly dotfiles updater**: `scripts/dotfiles-update.sh` + systemd user timer; one `git fetch` per month against `origin/main`, `--ff-only` auto-pull only on a clean main, notification + green bar indicator when updates are available, and a remote-version fallback when there is no clone.
+- **Version manifest** (`updates.json`) with `version`, `date` and `changelog`; the updater popup (`SUPER+U`) compares it with the installed version and shows the changelog (cached, at most one network check per month).
+- **Starship integration** in the installer (package + xscriptor themes) and a fixed active `~/.config/starship.toml` that follows the palette live.
+
+### Changed
+- **Versioning standardized to xshell v1.0.0**: `install.sh` (`INSTALL_VERSION`), `updates.json` and the About panel now report 1.0.0.
+- Settings tabs extracted from `SettingsPopup.qml` into shared `settings/tabs/*.qml`; the legacy sidebar was removed and its entry points (`SUPER+SHIFT+S`, bar settings button, guide) now open the unified panel.
+- Starship themes are regenerated from a canonical template (fixes the self-destructive generator that emptied all themes); custom `STARSHIP_CONFIG` values are preserved.
+
+### Fixed
+- Editor pages no longer leave color bindings dead (black text) when `bar` was injected after construction (lazy Loader gate + qualified references).
+- The bar no longer shifts when opening the settings panel (removed the old edge-offset animation).
+- Monitors poller, startup/keybind models and the launcher palette editor now populate correctly inside the panel.
+
+
 ## [2026-09-05]
 
 ### Added

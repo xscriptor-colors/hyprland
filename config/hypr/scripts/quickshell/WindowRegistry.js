@@ -54,14 +54,13 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         "file-search": { w: s(600, scale), h: s(500, scale), rx: Math.floor((mw/2)-(s(600, scale)/2)), ry: Math.floor((mh/2)-(s(500, scale)/2)), comp: "file-search/FileSearch.qml" },
         "scale": { w: s(520, scale), h: s(560, scale), rx: Math.floor((mw/2)-(s(520, scale)/2)), ry: Math.floor((mh/2)-(s(560, scale)/2)), comp: "scale/ScalePicker.qml" },
         "window-controls": { w: s(480, scale), h: s(800, scale), rx: Math.floor((mw/2)-(s(480, scale)/2)), ry: Math.floor((mh/2)-(s(800, scale)/2)), comp: "window-controls/WindowControls.qml" },
-        "dock-editor": { w: s(920, scale), h: s(740, scale), rx: Math.floor((mw/2)-(s(920, scale)/2)), ry: Math.floor((mh/2)-(s(740, scale)/2)), comp: "dock/DockEditor.qml" },
+        "bar-editor": { w: s(1120, scale), h: s(760, scale), rx: Math.floor((mw/2)-(s(1120, scale)/2)), ry: Math.floor((mh/2)-(s(760, scale)/2)), comp: "dock/BarEditor.qml" },
         "wallpaper": { w: mw, h: s(650, scale), rx: 0, ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "wallpaper/WallpaperPicker.qml" },
         
         // --- Top Left Edge ---
         "music":     { w: s(700, scale), h: s(650, scale), rx: s(5, scale), ry: s(60, scale), comp: "music/MusicPopup.qml" },
 
         // --- Screen Spanning Panels ---
-        "settings":  { w: s(780, scale), h: mh - s(0, scale), rx: s(0, scale), ry: s(0, scale), comp: "settings/SettingsPopup.qml" },
         
         // Full-screen desktop-widget editor: covers the whole monitor (rx/ry 0)
         // so redactor-local coordinates equal the widget layout coordinates.

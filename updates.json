@@ -1,8 +1,12 @@
 {
-  "releases": [
-    {
-      "version": "2.0.0",
-      "url": "https://github.com/xscriptor/media/releases/download/v1.7.6/update.mp4"
-    }
+  "version": "1.0.0",
+  "date": "2026-09-10",
+  "changelog": [
+    "Unified Settings panel (bar-editor): sidebar rail, global search and activeMode",
+    "Configurable app launcher: position, size, visible apps, row height, alignment, borders and icons",
+    "New pages: Hyprland window effects, Animations, Input, Idle, GPU and Notifications",
+    "Monthly dotfiles updater (systemd user timer) with bar update indicator",
+    "Guide (About) embedded as a panel page; legacy settings popup removed",
+    "Versioning standardized to xshell v1.0.0 (installer, update manifest and About panel aligned)"
   ]
 }

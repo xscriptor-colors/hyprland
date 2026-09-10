@@ -118,29 +118,29 @@
 
 ## Installer Robustness <!-- phase:installer-robustness -->
 
-- [ ] Add full Fedora package list (currently missing many packages vs Arch and X) (#83)
+- [x] Add full Fedora package list (currently missing many packages vs Arch and X) (#83)
 - [ ] Add openSUSE support to `install.sh` (#84)
 - [ ] Complete distribution detection for Debian-based (build from source flow) (#85)
 - [x] Sync `uninstall.sh` with all installed components (missing rofi, wlogout, hyprlock, hypridle) (#86)
-- [ ] Create `update.sh` to pull latest dotfiles without full reinstall (#87)
-- [ ] Remove root fix scripts from project root (`fix_hypr.py`, `force_fix.py`, `restore_hypr.py`, `fix_migration_errors.py`) (#88)
-- [ ] Add `--dry-run` flag to `install.sh` (preview changes without applying) (#89)
-- [ ] Add version pinning/tagging for releases (#90)
+- [x] Create `update.sh` to pull latest dotfiles without full reinstall (#87)
+- [x] Remove root fix scripts from project root (`fix_hypr.py`, `force_fix.py`, `restore_hypr.py`, `fix_migration_errors.py`) (#88)
+- [x] Add `--dry-run` flag to `install.sh` (preview changes without applying) (#89)
+- [x] Add version pinning/tagging for releases (#90)
 
 ## CI & Quality <!-- phase:ci-quality -->
 
-- [ ] Add ShellCheck linting for all `.sh` scripts (#91)
-- [ ] Add Python linting for helper scripts (#92)
-- [ ] Add CI workflow to validate `install.sh --dry-run` on Arch container (#93)
-- [ ] Add CI workflow to validate theme JSON/config syntax (#94)
-- [ ] Add CHANGELOG.md auto-generation from commits (#95)
+- [x] Add ShellCheck linting for all `.sh` scripts (#91)
+- [x] Add Python linting for helper scripts (#92)
+- [x] Add CI workflow to validate `install.sh --dry-run` on Arch container (#93)
+- [x] Add CI workflow to validate theme JSON/config syntax (#94)
+- [x] Add CHANGELOG.md auto-generation from commits (#95)
 
 ## UX & Desktop Polish <!-- phase:ux-desktop-polish -->
 
 - [x] Migrate Wofi to Rofi fully (Wofi is unmaintained) (#96)
 - [x] Add clipboard manager integration (cliphist + Rofi picker) (#97)
-- [ ] Add media player widget to Waybar (playerctl) (#98)
-- [ ] Add power profile integration (power-profiles-daemon or TLP) (#99)
-- [ ] Verify XDG portals configuration (file picker, screen sharing) (#100)
-- [ ] Add OSD notifications for brightness/volume changes (#101)
+- [x] Add media player widget to Waybar (playerctl) (#98)
+- [x] Add power profile integration (power-profiles-daemon or TLP) (#99)
+- [x] Verify XDG portals configuration (file picker, screen sharing) (#100)
+- [x] Add OSD notifications for brightness/volume changes (#101)
 - [x] Leave just few wallpapers and add the possibility to add more through the release XWall package (#102)

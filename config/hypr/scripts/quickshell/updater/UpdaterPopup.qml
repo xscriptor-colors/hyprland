@@ -3,7 +3,6 @@ import QtQuick.Window
 import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import "../"
@@ -14,14 +13,11 @@ Item {
     focus: true
 
     Caching { id: paths }
-    readonly property string videoPath: paths.getRunDir("updater") + "/video.mp4"
     
     // WAYLAND ANTI-DEADLOCK: Guarantee the initial frame is never 0x0.
     // If mainCard.width evaluates to 0 on tick 1, it falls back to raw 500.
     implicitWidth: mainCard.width || 500
     implicitHeight: mainCard.height || 600
-
-    property bool _init: false
 
     // --- Responsive Scaling Logic ---
     Scaler {
@@ -58,12 +54,15 @@ Item {
     // -------------------------------------------------------------------------
     property string localVersion: "..."
     property string remoteVersion: "..."
-    
-    // Dynamic URL based on the user's current version vs the manifest
-    property string videoUrl: ""
-    property bool uiExpanded: false
-    property bool videoReady: false
-    
+
+    // Manifest de versión + changelog (repo xscriptor-colors/hyprland, main).
+    // Writable a propósito: los harness de test lo apuntan a un file:// local.
+    property string manifestUrl: "https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/updates.json"
+
+    // Cache del manifest (mismo path que usa dotfiles-update.sh): el popup no
+    // hace red si el sello es del mes actual. Writable para el harness.
+    property string cacheDir: paths.getCacheDir("updater")
+
     property var pendingCommits: []
     property int typeIndex: 0
 
@@ -88,11 +87,8 @@ Item {
         interval: 250 // Give Hyprland a quarter-second to map the window
         running: true
         onTriggered: {
-            window._init = true;
             localVerProcess.running = true;
-            remoteVerProcess.running = true;
-            videoResolveProcess.running = true;
-            commitFetchProcess.running = true;
+            manifestProcess.running = true;
         }
     }
 
@@ -109,183 +105,79 @@ Item {
         }
     }
 
-    // --- 2. REMOTE VERSION FETCH ---
-    Process {
-        id: remoteVerProcess
-        running: false
-        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let out = this.text ? this.text.trim() : "";
-                if (out !== "") window.remoteVersion = out;
-            }
-        }
-    }
+    // --- 2. MANIFEST (cache mensual + fetch único) ---
+    // Un solo Process: si el sello es del mes actual y hay cache → `cat` del
+    // cache (SIN red); si no → curl atómico (tmp+mv) del manifest, escribe el
+    // sello del mes y `cat`. Si el curl falla y hay cache viejo → cache viejo;
+    // si no hay nada → salida vacía. El texto se parsea en QML (JSON.parse).
+    // Un cache sin `version` de PRIMER nivel (manifest legacy/parcial) NO
+    // cuenta como fresco: así, tras publicar el manifest nuevo, la siguiente
+    // apertura lo coge sin esperar al próximo mes (en régimen normal, sin red).
+    property string manifestScript: `
+CACHE_DIR="$1"
+URL="$2"
+CACHE="$CACHE_DIR/manifest.json"
+STAMP="$CACHE_DIR/manifest_check"
+MONTH="$(date +%Y-%m)"
 
-    // --- 3. DYNAMIC VIDEO RESOLUTION ---
-    property string videoResolveScript: `
-import urllib.request, json, subprocess, sys
-try:
-    local_str = subprocess.check_output("source ~/.local/state/xshell-version 2>/dev/null && echo $LOCAL_VERSION", shell=True).decode('utf-8').strip()
-    if not local_str: local_str = '0.0.0'
-    
-    # Safe Semantic Version Parsing
-    def parse_v(v):
-        clean = ''.join(c if c.isdigit() or c == '.' else ' ' for c in v).strip().replace(' ', '.')
-        return [int(x) for x in clean.split('.') if x.isdigit()]
-        
-    local_v = parse_v(local_str)
+mkdir -p "$CACHE_DIR" || exit 0
 
-    req = urllib.request.Request('https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/updates.json')
-    res = urllib.request.urlopen(req, timeout=5)
-    data = json.loads(res.read().decode())
+FRESH=0
+if [ -f "$STAMP" ] && [ "$(cat "$STAMP" 2>/dev/null)" = "$MONTH" ] && [ -s "$CACHE" ]; then
+    if command -v jq >/dev/null 2>&1; then
+        jq -e '.version' "$CACHE" >/dev/null 2>&1 && FRESH=1
+    else
+        python3 -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1])).get("version") else 1)' "$CACHE" 2>/dev/null && FRESH=1
+    fi
+fi
 
-    valid_videos = []
-    for item in (data.get('releases') or data.get('videos') or []):
-        target_v = parse_v(item['version'])
-        # Only grab videos for versions newer than what the user currently has installed
-        if target_v > local_v:
-            valid_videos.append((target_v, item['url']))
+if [ "$FRESH" = "1" ]; then
+    cat "$CACHE"
+    exit 0
+fi
 
-    if valid_videos:
-        valid_videos.sort(key=lambda x: x[0])
-        url = valid_videos[-1][1] # Play the newest feature video they missed
-        
-        # Verify the video URL is actually alive before expanding the UI
-        head = urllib.request.Request(url, method='HEAD')
-        head_res = urllib.request.urlopen(head, timeout=5)
-        if head_res.getcode() in [200, 301, 302]:
-            print(url)
-except Exception:
-    pass
+TMP="$CACHE_DIR/.manifest.$$"
+if curl -fsSL -m 8 "$URL" -o "$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+    mv -f "$TMP" "$CACHE"
+    printf '%s' "$MONTH" > "$STAMP"
+    cat "$CACHE"
+else
+    rm -f "$TMP"
+    [ -s "$CACHE" ] && cat "$CACHE"
+fi
+exit 0
 `
 
     Process {
-        id: videoResolveProcess
+        id: manifestProcess
         running: false
-        command: ["python3", "-c", window.videoResolveScript]
+        command: ["bash", "-c", window.manifestScript, "bash",
+                  window.cacheDir, window.manifestUrl]
         stdout: StdioCollector {
             onStreamFinished: {
-                let url = this.text ? this.text.trim() : "";
-                if (url !== "" && url.startsWith("http")) {
-                    window.videoUrl = url;
-                    window.uiExpanded = true;
-                    videoDownloadProcess.running = true;
+                let raw = this.text ? this.text.trim() : "";
+                let data = null;
+                if (raw !== "") {
+                    try { data = JSON.parse(raw); } catch (e) { data = null; }
                 }
-            }
-        }
-    }
-
-    // --- 4. VIDEO DOWNLOAD (BACKGROUND DISK WRITE) ---
-    Process {
-        id: videoDownloadProcess
-        running: false
-        // Quietly pulls the mp4 to RAM/tmpfs to avoid locking the UI thread
-        command: ["bash", "-c", "curl -m 60 -s -L -o '" + window.videoPath + "' " + window.videoUrl]
-        onExited: {
-            if (exitCode === 0) {
-                videoPlayer.source = "file://" + window.videoPath;
-                videoPlayer.play();
-                window.videoReady = true; // Fades out spinner, fades in video
-            }
-        }
-    }
-
-    // --- 5. COMMIT LOG FETCH ---
-    property string fetchScript: `
-import urllib.request, json, subprocess
-
-repo = 'xscriptor-colors/hyprland'
-
-try:
-    local = subprocess.check_output("source ~/.local/state/xshell-version 2>/dev/null && echo $LOCAL_VERSION", shell=True).decode('utf-8').strip()
-except:
-    local = ''
-
-if not local:
-    local = '0.0.0'
-
-def get_latest():
-    try:
-        req = urllib.request.Request('https://api.github.com/repos/' + repo + '/commits/master', headers={'User-Agent': 'updater'})
-        res = urllib.request.urlopen(req, timeout=5)
-        print(json.loads(res.read().decode())['commit']['message'])
-    except Exception: print('No changelog available')
-
-try:
-    if local in ['0.0.0', '...', '']: 
-        get_latest()
-    else:
-        req_commits = urllib.request.Request('https://api.github.com/repos/' + repo + '/commits?path=install.sh&per_page=15', headers={'User-Agent': 'updater'})
-        res_commits = urllib.request.urlopen(req_commits, timeout=5)
-        file_commits = json.loads(res_commits.read().decode())
-        
-        local_sha = None
-        for c in file_commits:
-            sha = c['sha']
-            try:
-                raw_req = urllib.request.Request('https://raw.githubusercontent.com/' + repo + '/' + sha + '/install.sh', headers={'User-Agent': 'updater'})
-                raw_res = urllib.request.urlopen(raw_req, timeout=5)
-                content = raw_res.read().decode('utf-8')
-                
-                for line in content.splitlines():
-                    if line.startswith('DOTS_VERSION='):
-                        ver = line.split('=', 1)[1].strip().strip('"\\'')
-                        if ver == local:
-                            local_sha = sha
-                        break
-            except: pass
-            
-            if local_sha:
-                break
-                
-        if local_sha:
-            compare_req = urllib.request.Request('https://api.github.com/repos/' + repo + '/compare/' + local_sha + '...master', headers={'User-Agent': 'updater'})
-            compare_res = urllib.request.urlopen(compare_req, timeout=5)
-            data = json.loads(compare_res.read().decode())
-            commits = data.get('commits', [])
-            
-            if commits:
-                for c in reversed(commits):
-                    print(c['commit']['message'])
-                    print('---SPLIT---')
-            else:
-                get_latest()
-        else:
-            get_latest()
-except Exception as e:
-    get_latest()
-`
-
-    Process {
-        id: commitFetchProcess
-        running: false
-        command: ["python3", "-c", window.fetchScript]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let out = this.text ? this.text.trim() : "";
-                if (out !== "") {
-                    let blocks = out.split("---SPLIT---");
-                    let validLines = [];
-                    for (let i = 0; i < blocks.length; i++) {
-                        let blockTrimmed = blocks[i].trim();
-                        if (blockTrimmed === "") continue;
-                        let lines = blockTrimmed.split(/\r\n|\n/);
-                        for (let j = 0; j < lines.length; j++) {
-                            let trimmed = lines[j].trim();
-                            if (trimmed.length > 0) validLines.push(trimmed);
-                        }
+                // Versión remota (la animación se dispara con el cambio).
+                if (data && typeof data.version === "string" && data.version !== "")
+                    window.remoteVersion = data.version;
+                // Changelog: una entrada del manifest = una línea del modelo
+                // (se conserva la animación de tipeo de commitBoxTimer).
+                commitModel.clear();
+                let lines = [];
+                if (data && Array.isArray(data.changelog)) {
+                    for (let i = 0; i < data.changelog.length; i++) {
+                        let line = String(data.changelog[i]).trim();
+                        if (line.length > 0) lines.push(line);
                     }
-                    commitModel.clear();
-                    if (validLines.length > 0) {
-                        window.pendingCommits = validLines;
-                        window.typeIndex = 0;
-                        commitBoxTimer.start();
-                    } else {
-                        commitModel.append({ "lineText": "No changelog available." });
-                    }
+                }
+                if (lines.length > 0) {
+                    window.pendingCommits = lines;
+                    window.typeIndex = 0;
+                    commitBoxTimer.start();
                 } else {
-                    commitModel.clear();
                     commitModel.append({ "lineText": "No changelog available." });
                 }
             }
@@ -311,8 +203,8 @@ except Exception as e:
     // =========================================================================
     Rectangle {
         id: mainCard
-        width: window.uiExpanded ? window.s(950) : window.s(500)
-        height: window.uiExpanded ? window.s(850) : window.s(600)
+        width: window.s(500)
+        height: window.s(600)
         anchors.centerIn: parent 
         
         radius: window.s(21)
@@ -320,9 +212,6 @@ except Exception as e:
         border.color: window.surface1
         border.width: 1
         clip: true
-
-        Behavior on width { enabled: window._init; NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
-        Behavior on height { enabled: window._init; NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
 
         // --- AMBIENT BLOBS ---
         Rectangle {
@@ -423,66 +312,6 @@ except Exception as e:
                         if (window.remoteVersion !== "..." && window.remoteVersion !== "") {
                             versionAnim.start();
                         }
-                    }
-                }
-            }
-
-            // --- STRICT 16:9 DYNAMIC VIDEO PREVIEW ---
-            Item {
-                id: videoContainer
-                Layout.fillWidth: true
-                // Perfectly clamps height to a 16:9 ratio of the dynamic width
-                Layout.preferredHeight: window.uiExpanded ? (width * 9 / 16) : 0 
-                visible: window.uiExpanded || height > 0
-                clip: true
-                
-                Behavior on Layout.preferredHeight { enabled: window._init; NumberAnimation { duration: 600; easing.type: Easing.OutExpo } }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: window.s(16)
-                    color: window.crust 
-                    border.color: window.surface2 
-                    border.width: 1
-                    clip: true
-
-                    // Loading State Animation (Visible while downloading)
-                    Item {
-                        anchors.centerIn: parent
-                        width: window.s(42)
-                        height: window.s(42)
-                        visible: window.uiExpanded && !window.videoReady
-                        
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰑮"
-                            font.family: "Hack Nerd Font"
-                            font.pixelSize: window.s(42)
-                            color: window.mauve
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            transformOrigin: Item.Center
-                            
-                            RotationAnimation on rotation {
-                                from: 0; to: 360; duration: 2500; loops: Animation.Infinite; running: parent ? parent.visible : false
-                            }
-                        }
-                    }
-
-                    MediaPlayer {
-                        id: videoPlayer
-                        videoOutput: videoOutput
-                        loops: MediaPlayer.Infinite
-                    }
-
-                    VideoOutput {
-                        id: videoOutput
-                        anchors.fill: parent
-                        fillMode: VideoOutput.PreserveAspectFit 
-                        
-                        // Fades in smoothly once the local video is physically ready
-                        opacity: window.videoReady ? 1.0 : 0.0
-                        Behavior on opacity { NumberAnimation { duration: 800; easing.type: Easing.InOutQuad } }
                     }
                 }
             }

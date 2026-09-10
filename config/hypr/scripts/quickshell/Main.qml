@@ -145,7 +145,6 @@ PanelWindow {
     }
 
     Component.onCompleted: {
-        Qt.callLater(() => preloadWidget("settings"));
         preloadStaggerTimer.start();
     }
 
@@ -336,13 +335,45 @@ PanelWindow {
         if (currentItem && currentItem.targetMasterWidth !== undefined && finalW !== t.w) {
             finalX = Math.floor((masterWindow.width / 2) - (finalW / 2));
         }
+        let finalY = t.ry;
+        // Soporte opcional (retrocompatible): widgets que calculan su propia
+        // posición en pantalla (p.ej. el launcher con anclaje top/bottom/…).
+        if (currentItem && currentItem.targetMasterX !== undefined) finalX = currentItem.targetMasterX;
+        if (currentItem && currentItem.targetMasterY !== undefined) finalY = currentItem.targetMasterY;
 
         masterWindow.animX = finalX;
-        masterWindow.animY = t.ry;
+        masterWindow.animY = finalY;
         masterWindow.animW = finalW;
         masterWindow.animH = finalH;
         masterWindow.targetW = finalW;
         masterWindow.targetH = finalH;
+    }
+
+    // Aplica los targetMaster* del widget activo al morph. Se usa al abrir el
+    // widget y, vía Connections, cuando el propio widget cambia sus targets en
+    // vivo (p. ej. el panel Settings ensanchándose en la página Guide).
+    function applyMasterTargets() {
+        let it = widgetStack.currentItem;
+        if (!it) return;
+        if (it.targetMasterWidth !== undefined) {
+            masterWindow.animW = it.targetMasterWidth;
+            masterWindow.targetW = it.targetMasterWidth;
+            masterWindow.animX = Math.floor((masterWindow.width / 2) - (it.targetMasterWidth / 2));
+        }
+        if (it.targetMasterHeight !== undefined) {
+            masterWindow.animH = it.targetMasterHeight;
+            masterWindow.targetH = it.targetMasterHeight;
+        }
+        if (it.targetMasterX !== undefined) masterWindow.animX = it.targetMasterX;
+        if (it.targetMasterY !== undefined) masterWindow.animY = it.targetMasterY;
+    }
+
+    Connections {
+        target: widgetStack.currentItem
+        function onTargetMasterWidthChanged()  { masterWindow.applyMasterTargets(); }
+        function onTargetMasterHeightChanged() { masterWindow.applyMasterTargets(); }
+        function onTargetMasterXChanged()      { masterWindow.applyMasterTargets(); }
+        function onTargetMasterYChanged()      { masterWindow.applyMasterTargets(); }
     }
 
     onIsVisibleChanged: {
@@ -522,16 +553,9 @@ PanelWindow {
             if (currentItem.layoutHeight !== undefined) currentItem.layoutHeight = t.h;
             if (newWidget === "wallpaper" && currentItem.widgetArg !== undefined) currentItem.widgetArg = arg;
             if (arg !== "" && currentItem.activeMode !== undefined) currentItem.activeMode = arg;
-            if (currentItem.targetMasterWidth !== undefined) {
-                let dynW = currentItem.targetMasterWidth;
-                masterWindow.animW = dynW;
-                masterWindow.targetW = dynW;
-                masterWindow.animX = Math.floor((masterWindow.width / 2) - (dynW / 2));
-            }
-            if (currentItem.targetMasterHeight !== undefined) {
-                masterWindow.animH = currentItem.targetMasterHeight;
-                masterWindow.targetH = currentItem.targetMasterHeight;
-            }
+            // Targets opcionales (tamaño/posición propia): mismo helper que usa
+            // el seguimiento reactivo (Connections sobre el widget activo).
+            masterWindow.applyMasterTargets();
         }
 
         masterWindow.isVisible = true;

@@ -157,7 +157,7 @@ Every zone can render an optional **container background** behind its islands
 - `dock.zones[i].zoneBgSolid` — `true` makes the container opaque (default
   `false` = translucent at 0.35 alpha).
 - Not drawn while the zone is `unify` (unify already provides the background).
-- Editor: Dock Editor → Zones → per-zone **Container bg** toggle + color cycle
+- Editor: Settings panel → Zones → per-zone **Container bg** toggle + color cycle
   + **Solid** toggle. Pure helpers: `DockLayout.setZoneBg(dock, zoneId, role)`,
   `DockLayout.setZoneBgSolid(dock, zoneId, solid)`.
 
@@ -168,7 +168,7 @@ Empty-workspace markers (global, both engines via `WorkspacesModule`):
 - `dock.workspacesMarkerText` — the character shown when marker is `"custom"`
   (up to 4 chars — any Unicode glyph, e.g. a Japanese character).
 - Only EMPTY workspaces use the marker; occupied/active workspaces with apps
-  keep showing app icons. Editor: Dock Editor → Workspaces (visible in both
+  keep showing app icons. Editor: Settings panel → Workspaces (visible in both
   engines) → Numbers / Dots / Letters / Custom + Character field.
 
 ## 5. Adding / removing / customizing modules
@@ -191,7 +191,7 @@ commit (the new `dock.zones` order is written to `settings.json` atomically);
 release **outside** the bar to cancel (nothing changes). A short press without
 movement still triggers the module's normal click, so dragging never fights
 existing click behavior. Disable the whole gesture with the "Drag modules"
-toggle in the Dock Editor, or `dock.dragModules: false`.
+toggle in the Settings panel, or `dock.dragModules: false`.
 
 Implementation notes (for maintainers):
 
@@ -210,7 +210,7 @@ Implementation notes (for maintainers):
 
 ## 6. Bar styles & quick layout (one-click looks)
 
-The Dock Editor ships three **style presets** (Appearance → Style) that map to
+The Settings panel ships three **style presets** (Appearance → Style) that map to
 the pill/bar flags without ever clobbering unrelated manual tweaks (only the
 keys a preset declares are applied; `dock.stylePreset` is an informational
 label + apply shortcut — re-raise "Edge margin" after choosing Fill and the
@@ -300,7 +300,7 @@ engines**, switched live (no reload) through one top-level settings key:
   at the size the user's dock has). Corner radii scale with the **shared**
   `dock.roundness` knob and module fonts with `dock.font` — both are edited
   from the dock engine's Appearance card.
-- **Palette is shared**: the Palette card of the Dock Editor is available in
+- **Palette is shared**: the Palette card of the Settings panel is available in
   both engines and writes `dock.palette`; Colors roles recolor whichever
   engine is live.
 - No module changes: SerpBar instantiates the **same
@@ -364,7 +364,7 @@ Spacing between adjacent entries: `s(8)` in modular, `s(2)` on the strip
   along the cross axis (250 ms OutExpo) leaving only the tab; the exclusive
   zone drops to 0 while hidden and the input mask shrinks to the sliver, so
   maximized windows are fully usable. Hovering the tab (or the leftover
-  sliver) reveals it again. The settings popup keeps the bar revealed.
+  sliver) reveals it again. The settings panel (SUPER+SHIFT+D) keeps the bar revealed.
 - When sections do not fit (center + sides overlap), side sections keep their
   edge positions and the strip clip trims the overflow.
 
@@ -430,7 +430,7 @@ differences** are listed at the end.
 
 ## 7. Roadmap (mega menu)
 
-1. **Dock tab** in `SettingsPopup.qml` (replaces the old "Topbar" tab): position picker,
+1. **Bar pages** in `dock/BarEditor.qml` (replaces the old "Topbar" tab): position picker,
    palette picker, roundness/pill/border controls (reusing the existing live-edit +
    debounced-save pattern), and a **zone editor** that CRUDs on `dock.zones`.
 2. **Per-module options** (`dock.modules.<id>.*`): accent color, icon, label, click action,

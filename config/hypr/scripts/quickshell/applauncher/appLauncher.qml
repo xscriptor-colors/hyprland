@@ -7,6 +7,7 @@ import Quickshell
 import Quickshell.Io
 import "../"
 import "../dock"
+import "LauncherLayout.js" as LauncherLayout
 
 Item {
     id: window
@@ -21,6 +22,44 @@ Item {
     function s(val) { 
         return scaler.s(val); 
     }
+
+    // -------------------------------------------------------------------------
+    // LAUNCHER CONFIG (settings.json key "launcher", editable desde el panel)
+    // -------------------------------------------------------------------------
+    // lcfg: configuración normalizada (posición, ancho, nº de apps, margen y
+    // anti-solape con la barra). Es reactiva a Config y sobrescribible en tests.
+    property var lcfg: LauncherLayout.normalize(Config.rawSettings.launcher || ({}))
+    property var dockCfg: Config.rawSettings.dock || ({})
+    // Misma escala que el resto del widget (Scaler con currentWidth=Screen.width).
+    readonly property real layoutScale: scaler.baseScale
+    // Tamaño del panel para el nº de apps actual (crece/decrece al filtrar).
+    property var panelSize: LauncherLayout.panelSize(lcfg, layoutScale, appModel.count)
+    // Caja en pantalla (x/y/w/h) + dirección de entrada de la intro.
+    property var geo: LauncherLayout.geometry(lcfg, Screen.width, Screen.height,
+                                              panelSize.w, panelSize.h, layoutScale, dockCfg)
+
+    // Main lee targetMaster* al abrir el widget; para que el panel siga
+    // creciendo/decreciendo EN VIVO (filtrar) y la posición se recalcule,
+    // empujamos la caja al master cuando cambia (mismo patrón que
+    // CalendarPopup; guard por si el widget se carga aislado en tests).
+    property real targetMasterWidth: geo.w
+    property real targetMasterHeight: geo.h
+    property real targetMasterX: geo.x
+    property real targetMasterY: geo.y
+
+    function syncMasterBox() {
+        if (typeof masterWindow === "undefined") return;
+        masterWindow.animW = window.targetMasterWidth;
+        masterWindow.targetW = window.targetMasterWidth;
+        masterWindow.animH = window.targetMasterHeight;
+        masterWindow.targetH = window.targetMasterHeight;
+        masterWindow.animX = window.targetMasterX;
+        masterWindow.animY = window.targetMasterY;
+    }
+    onTargetMasterWidthChanged: syncMasterBox()
+    onTargetMasterHeightChanged: syncMasterBox()
+    onTargetMasterXChanged: syncMasterBox()
+    onTargetMasterYChanged: syncMasterBox()
 
     // -------------------------------------------------------------------------
     // COLORS (Expanded Dynamic Matugen Palette)
@@ -195,284 +234,307 @@ Item {
     // -------------------------------------------------------------------------
     Rectangle {
         id: mainBg
-        width: parent.width
-        
-        // --- DYNAMIC HEIGHT CALCULATION (Bottom-up Shrinking) ---
+        // Launcher configurable: el panel llena el morph exacto (Main fija su
+        // tamaño/posición desde panelSize/geo del root; crece/decrece al filtrar).
+        anchors.fill: parent
+
+        // --- MÉTRICAS INTERNAS (mismas constantes que LauncherLayout.panelSize) ---
         property real searchHeight: window.s(65)
         property real separatorHeight: 1
-        property real itemHeight: window.s(60)
+        property real itemHeight: window.s(window.lcfg.rowHeight)
         property real listSpacing: window.s(4)
-        property real maxListHeight: (8 * itemHeight) + (7 * listSpacing)
-        
-        property real targetListHeight: appModel.count === 0 ? 0 : Math.min((appModel.count * itemHeight) + ((appModel.count - 1) * listSpacing), maxListHeight)
+
         property real targetMargins: appModel.count > 0 ? window.s(20) : 0
 
-        // Smoothly animated properties for elegant container morphing
-        property real animatedListHeight: targetListHeight
+        // Morphing interno de los márgenes de la lista (filas).
         property real animatedMargins: targetMargins
-
-        Behavior on animatedListHeight { 
-            NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 
-        }
         Behavior on animatedMargins { 
             NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 
         }
-        
-        height: searchHeight + separatorHeight + animatedMargins + animatedListHeight
 
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        radius: window.s(21)
+        // Bordes configurables (radius/borderWidth/borderColor de la paleta).
+        radius: window.s(window.lcfg.radius)
         color: Qt.rgba(window.base.r, window.base.g, window.base.b, 1.0)
-        border.color: window.surface1
-        border.width: 1
+        border.color: window[window.lcfg.borderColor] !== undefined ? window[window.lcfg.borderColor] : window.surface1
+        border.width: window.s(window.lcfg.borderWidth)
         clip: true
 
-        transform: Translate { y: (window.introPhase - 1) * window.s(60) }
+        // Intro direccional (600 ms OutExpo): el panel "sale" de su extremo
+        // anclado — escala desde ese borde (transformOrigin) + deslizamiento
+        // (slideX/slideY) + el clip del morph.
+        scale: 0.94 + 0.06 * window.introPhase
+        transformOrigin: window.geo.origin === "top" ? Item.Top
+                       : window.geo.origin === "bottom" ? Item.Bottom
+                       : window.geo.origin === "left" ? Item.Left
+                       : window.geo.origin === "right" ? Item.Right
+                       : Item.Center
+        transform: Translate {
+            x: (1 - window.introPhase) * window.geo.slideX
+            y: (1 - window.introPhase) * window.geo.slideY
+        }
         opacity: window.introPhase
 
-        ColumnLayout {
-            anchors.fill: parent
-            spacing: 0
+        // --- SEARCH BAR (arriba o abajo según la posición) ---
+        Rectangle {
+            id: searchBox
+            x: 0
+            width: parent.width
+            height: mainBg.searchHeight
+            y: window.geo.searchAtBottom ? parent.height - height : 0
+            color: "transparent"
 
-            // --- SEARCH BAR ---
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: mainBg.searchHeight
-                color: "transparent"
-                
-                RowLayout {
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: window.s(15)
+                anchors.leftMargin: window.s(20)
+                anchors.rightMargin: window.s(20)
+                spacing: window.s(15)
+
+                Text {
+                    text: ""
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: window.s(18)
+                    color: searchInput.activeFocus ? window.mauve : window.subtext0
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
+                TextField {
+                    id: searchInput
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    background: Item {} 
+                    color: window.text
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: window.s(16)
+
+                    placeholderText: "Search..."
+                    placeholderTextColor: window.subtext0 
+
+                    verticalAlignment: TextInput.AlignVCenter
+                    horizontalAlignment: window.lcfg.align === "center" ? TextInput.AlignHCenter
+                                       : (window.lcfg.align === "right" ? TextInput.AlignRight : TextInput.AlignLeft)
+                    focus: true
+
+                    onTextChanged: filterApps(text)
+
+                    Keys.onDownPressed: {
+                        window.isKeyboardNav = true;
+                        keyboardNavTimer.restart();
+                        if (appList.currentIndex < appModel.count - 1) {
+                            appList.currentIndex++;
+                        }
+                        event.accepted = true;
+                    }
+                    Keys.onUpPressed: {
+                        window.isKeyboardNav = true;
+                        keyboardNavTimer.restart();
+                        if (appList.currentIndex > 0) {
+                            appList.currentIndex--;
+                        }
+                        event.accepted = true;
+                    }
+                    Keys.onReturnPressed: {
+                        if (appList.currentIndex >= 0 && appList.currentIndex < appModel.count) {
+                            launchApp(appModel.get(appList.currentIndex).exec);
+                        }
+                        event.accepted = true;
+                    }
+                    Keys.onEscapePressed: {
+                        Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
+                        event.accepted = true;
+                    }
+                }
+            }
+        }
+
+        // --- SEPARATOR (bajo el search, o sobre él en modo bottom) ---
+        Rectangle {
+            id: separator
+            x: 0
+            width: parent.width
+            height: mainBg.separatorHeight
+            y: window.geo.searchAtBottom ? searchBox.y - height : searchBox.y + searchBox.height
+            color: Qt.rgba(window.surface1.r, window.surface1.g, window.surface1.b, 0.5)
+        }
+
+        // --- APPLICATION LIST ---
+        ListView {
+            id: appList
+            x: window.s(10)
+            width: parent.width - window.s(20)
+
+            // Borde superior de la lista (0 si el search va abajo).
+            property real topEdge: window.geo.searchAtBottom ? 0 : separator.y + separator.height
+            y: topEdge + mainBg.animatedMargins / 2
+            height: (window.geo.searchAtBottom ? separator.y : parent.height - topEdge) - mainBg.animatedMargins
+
+            // clip: true is critical — it masks items that are outside the
+            // visible list area so they cannot bleed through during transitions.
+            clip: true
+            model: appModel
+            spacing: mainBg.listSpacing
+            currentIndex: 0
+            boundsBehavior: Flickable.StopAtBounds
+
+            highlightFollowsCurrentItem: false
+
+            onCurrentIndexChanged: {
+                if (currentIndex >= 0) {
+                    positionViewAtIndex(currentIndex, ListView.Contain);
+                }
+            }
+
+            // --- LIST ITEM TRANSITIONS ---
+            // Key fix: NO z-layer tricks. The ListView's own clip:true handles
+            // masking. Items animate only opacity + scale so they never visually
+            // "hang" outside the clipped region. The displaced transition slides
+            // existing items to their new positions without fighting the add/remove.
+
+            populate: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 550; easing.type: Easing.OutExpo }
+                    NumberAnimation { property: "scale"; from: 0.88; to: 1; duration: 600; easing.type: Easing.OutExpo }
+                }
+            }
+
+            add: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 380; easing.type: Easing.OutExpo }
+                    NumberAnimation { property: "scale"; from: 0.88; to: 1; duration: 420; easing.type: Easing.OutExpo }
+                }
+            }
+
+            remove: Transition {
+                ParallelAnimation {
+                    NumberAnimation { property: "opacity"; to: 0; duration: 280; easing.type: Easing.OutExpo }
+                    NumberAnimation { property: "scale"; to: 0.88; duration: 300; easing.type: Easing.OutExpo }
+                }
+            }
+
+            // displaced runs for items that are already in the list and just
+            // need to slide to a new position — keep it simple and fast so it
+            // finishes well before (or together with) the add transition.
+            displaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 380; easing.type: Easing.OutExpo }
+            }
+
+            ScrollBar.vertical: ScrollBar {
+                active: true
+                policy: ScrollBar.AsNeeded
+                contentItem: Rectangle {
+                    implicitWidth: window.s(4)
+                    radius: window.s(3)
+                    color: window.surface2
+                    opacity: 0.5
+                }
+            }
+
+            // --- MATTE MORPHING HIGHLIGHT ---
+            highlight: Item {
+                z: 0 
+
+                Rectangle {
+                    id: activeHighlight
+                    x: 0
+                    width: appList.width
+                    radius: window.s(10)
+                    color: window.mauve
+
+                    property int prevIdx: 0
+                    property int curIdx: appList.currentIndex
+
+                    onCurIdxChanged: {
+                        if (curIdx === -1) return; 
+
+                        if (curIdx > prevIdx) {
+                            bottomAnim.duration = 250; topAnim.duration = 450;
+                        } else if (curIdx < prevIdx) {
+                            topAnim.duration = 250; bottomAnim.duration = 450;
+                        }
+                        prevIdx = curIdx;
+                    }
+
+                    // Track the current item's ACTUAL coordinates so it sticks mid-flight
+                    property real targetTop: appList.currentItem ? appList.currentItem.y : 0
+                    property real targetBottom: appList.currentItem ? (appList.currentItem.y + appList.currentItem.height) : 0
+
+                    property real actualTop: targetTop
+                    property real actualBottom: targetBottom
+
+                    // Only enable the morphed lagging behavior during keyboard navigation.
+                    // During search/diffing, it will instantly track the moving item.
+                    Behavior on actualTop { 
+                        enabled: window.isKeyboardNav
+                        NumberAnimation { id: topAnim; easing.type: Easing.OutExpo } 
+                    }
+                    Behavior on actualBottom { 
+                        enabled: window.isKeyboardNav
+                        NumberAnimation { id: bottomAnim; easing.type: Easing.OutExpo } 
+                    }
+
+                    y: actualTop
+                    height: actualBottom - actualTop
+
+                    // Makes the highlight respect the item's pop-in scale animation
+                    scale: appList.currentItem ? appList.currentItem.scale : 1
+
+                    opacity: appList.count > 0 && appList.currentIndex >= 0 ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 300 } }
+                }
+            }
+
+            delegate: Item {
+                width: ListView.view.width
+                height: mainBg.itemHeight
+                z: 1 
+
+                transformOrigin: Item.Center 
+
+                Rectangle {
                     anchors.fill: parent
-                    anchors.margins: window.s(15)
-                    anchors.leftMargin: window.s(20)
-                    anchors.rightMargin: window.s(20)
-                    spacing: window.s(15)
-
-                    Text {
-                        text: ""
-                        font.family: "Hack Nerd Font"
-                        font.pixelSize: window.s(18)
-                        color: searchInput.activeFocus ? window.mauve : window.subtext0
-                        Behavior on color { ColorAnimation { duration: 150 } }
-                    }
-
-                    TextField {
-                        id: searchInput
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        background: Item {} 
-                        color: window.text
-                        font.family: "Hack Nerd Font"
-                        font.pixelSize: window.s(16)
-                        
-                        placeholderText: "Search..."
-                        placeholderTextColor: window.subtext0 
-                        
-                        verticalAlignment: TextInput.AlignVCenter
-                        focus: true
-
-                        onTextChanged: filterApps(text)
-
-                        Keys.onDownPressed: {
-                            window.isKeyboardNav = true;
-                            keyboardNavTimer.restart();
-                            if (appList.currentIndex < appModel.count - 1) {
-                                appList.currentIndex++;
-                            }
-                            event.accepted = true;
-                        }
-                        Keys.onUpPressed: {
-                            window.isKeyboardNav = true;
-                            keyboardNavTimer.restart();
-                            if (appList.currentIndex > 0) {
-                                appList.currentIndex--;
-                            }
-                            event.accepted = true;
-                        }
-                        Keys.onReturnPressed: {
-                            if (appList.currentIndex >= 0 && appList.currentIndex < appModel.count) {
-                                launchApp(appModel.get(appList.currentIndex).exec);
-                            }
-                            event.accepted = true;
-                        }
-                        Keys.onEscapePressed: {
-                            Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]);
-                            event.accepted = true;
-                        }
-                    }
-                }
-            }
-
-            // --- SEPARATOR ---
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: mainBg.separatorHeight
-                color: Qt.rgba(window.surface1.r, window.surface1.g, window.surface1.b, 0.5)
-            }
-
-            // --- APPLICATION LIST ---
-            ListView {
-                id: appList
-                Layout.fillWidth: true
-                
-                Layout.preferredHeight: mainBg.animatedListHeight
-                Layout.topMargin: mainBg.animatedMargins / 2
-                Layout.bottomMargin: mainBg.animatedMargins / 2
-                Layout.leftMargin: window.s(10)
-                Layout.rightMargin: window.s(10)
-                
-                // clip: true is critical — it masks items that are outside the
-                // visible list area so they cannot bleed through during transitions.
-                clip: true
-                model: appModel
-                spacing: mainBg.listSpacing
-                currentIndex: 0
-                boundsBehavior: Flickable.StopAtBounds
-
-                highlightFollowsCurrentItem: false
-
-                onCurrentIndexChanged: {
-                    if (currentIndex >= 0) {
-                        positionViewAtIndex(currentIndex, ListView.Contain);
-                    }
-                }
-
-                // --- LIST ITEM TRANSITIONS ---
-                // Key fix: NO z-layer tricks. The ListView's own clip:true handles
-                // masking. Items animate only opacity + scale so they never visually
-                // "hang" outside the clipped region. The displaced transition slides
-                // existing items to their new positions without fighting the add/remove.
-
-                populate: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 550; easing.type: Easing.OutExpo }
-                        NumberAnimation { property: "scale"; from: 0.88; to: 1; duration: 600; easing.type: Easing.OutExpo }
-                    }
-                }
-
-                add: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 380; easing.type: Easing.OutExpo }
-                        NumberAnimation { property: "scale"; from: 0.88; to: 1; duration: 420; easing.type: Easing.OutExpo }
-                    }
-                }
-                
-                remove: Transition {
-                    ParallelAnimation {
-                        NumberAnimation { property: "opacity"; to: 0; duration: 280; easing.type: Easing.OutExpo }
-                        NumberAnimation { property: "scale"; to: 0.88; duration: 300; easing.type: Easing.OutExpo }
-                    }
-                }
-                
-                // displaced runs for items that are already in the list and just
-                // need to slide to a new position — keep it simple and fast so it
-                // finishes well before (or together with) the add transition.
-                displaced: Transition {
-                    NumberAnimation { properties: "x,y"; duration: 380; easing.type: Easing.OutExpo }
-                }
-
-                ScrollBar.vertical: ScrollBar {
-                    active: true
-                    policy: ScrollBar.AsNeeded
-                    contentItem: Rectangle {
-                        implicitWidth: window.s(4)
-                        radius: window.s(3)
-                        color: window.surface2
-                        opacity: 0.5
-                    }
-                }
-
-                // --- MATTE MORPHING HIGHLIGHT ---
-                highlight: Item {
-                    z: 0 
-                    
-                    Rectangle {
-                        id: activeHighlight
-                        x: 0
-                        width: appList.width
-                        radius: window.s(10)
-                        color: window.mauve
-
-                        property int prevIdx: 0
-                        property int curIdx: appList.currentIndex
-
-                        onCurIdxChanged: {
-                            if (curIdx === -1) return; 
-                            
-                            if (curIdx > prevIdx) {
-                                bottomAnim.duration = 250; topAnim.duration = 450;
-                            } else if (curIdx < prevIdx) {
-                                topAnim.duration = 250; bottomAnim.duration = 450;
-                            }
-                            prevIdx = curIdx;
-                        }
-
-                        // Track the current item's ACTUAL coordinates so it sticks mid-flight
-                        property real targetTop: appList.currentItem ? appList.currentItem.y : 0
-                        property real targetBottom: appList.currentItem ? (appList.currentItem.y + appList.currentItem.height) : 0
-
-                        property real actualTop: targetTop
-                        property real actualBottom: targetBottom
-
-                        // Only enable the morphed lagging behavior during keyboard navigation.
-                        // During search/diffing, it will instantly track the moving item.
-                        Behavior on actualTop { 
-                            enabled: window.isKeyboardNav
-                            NumberAnimation { id: topAnim; easing.type: Easing.OutExpo } 
-                        }
-                        Behavior on actualBottom { 
-                            enabled: window.isKeyboardNav
-                            NumberAnimation { id: bottomAnim; easing.type: Easing.OutExpo } 
-                        }
-
-                        y: actualTop
-                        height: actualBottom - actualTop
-                        
-                        // Makes the highlight respect the item's pop-in scale animation
-                        scale: appList.currentItem ? appList.currentItem.scale : 1
-                        
-                        opacity: appList.count > 0 && appList.currentIndex >= 0 ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 300 } }
-                    }
-                }
-
-                delegate: Item {
-                    width: ListView.view.width
-                    height: mainBg.itemHeight
-                    z: 1 
-                    
-                    transformOrigin: Item.Center 
+                    radius: window.s(10)
+                    color: "transparent"
 
                     Rectangle {
                         anchors.fill: parent
                         radius: window.s(10)
-                        color: "transparent"
-                        
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: window.s(10)
-                            color: window.surface0
-                            opacity: ma.containsMouse && index !== appList.currentIndex ? 0.4 : 0
-                            Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutSine } }
-                        }
+                        color: window.surface0
+                        opacity: ma.containsMouse && index !== appList.currentIndex ? 0.4 : 0
+                        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutSine } }
+                    }
 
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: window.s(10)
-                            anchors.leftMargin: window.s(12)
-                            spacing: window.s(15)
+                    Item {
+                        id: rowWrap
+                        anchors.fill: parent
+                        anchors.topMargin: window.s(10)
+                        anchors.bottomMargin: window.s(10)
+                        anchors.leftMargin: window.s(12)
+                        anchors.rightMargin: window.s(10)
 
-                            // --- TINTED ICON MATTE BOX ---
+                        Row {
+                            id: rowContent
+                            anchors.verticalCenter: parent.verticalCenter
+                            // Alineación configurable (left/center/right) del icono + nombre.
+                            x: window.lcfg.align === "center" ? Math.max(0, (parent.width - width) / 2)
+                             : (window.lcfg.align === "right" ? Math.max(0, parent.width - width) : 0)
+                            // Sin iconos no debe quedar hueco a la izquierda.
+                            spacing: window.lcfg.showIcons ? window.s(15) : 0
+
+                            // --- TINTED ICON MATTE BOX (opcional: Show icons) ---
                             Rectangle {
-                                Layout.preferredWidth: window.s(40)
-                                Layout.preferredHeight: window.s(40)
-                                radius: window.s(16)
-                                
+                                id: iconBox
+                                visible: window.lcfg.showIcons
+                                // Tamaño proporcional a la fila: con rowHeight 60
+                                // equivale al s(40) histórico (radio 16, font 16, img 24).
+                                property real iconSize: Math.max(window.s(24), Math.min(window.s(40), mainBg.itemHeight - window.s(20)))
+                                width: visible ? iconSize : 0
+                                height: width
+                                radius: iconSize * 0.4
+
                                 color: index === appList.currentIndex ? window.crust : window.surface0
                                 border.width: 0 
                                 clip: true
-                                
+
                                 property real activeScale: index === appList.currentIndex ? 1.15 : 1
                                 scale: activeScale
                                 Behavior on activeScale { 
@@ -485,13 +547,13 @@ Item {
                                     text: model.name.charAt(0).toUpperCase()
                                     color: window.subtext0
                                     font.family: "Hack Nerd Font"
-                                    font.pixelSize: window.s(16)
+                                    font.pixelSize: iconBox.iconSize * 0.4
                                     font.weight: Font.Bold
                                 }
                                 Image {
                                     anchors.centerIn: parent
-                                    width: window.s(24)
-                                    height: window.s(24)
+                                    width: iconBox.iconSize * 0.6
+                                    height: width
                                     source: model.icon && model.icon.length > 0
                                         ? (model.icon.startsWith("/") ? "file://" + model.icon : "image://icon/" + model.icon)
                                         : ""
@@ -502,15 +564,15 @@ Item {
                                     mipmap: true
                                     visible: source !== ""
                                 }
-                                
+
                                 // The Matugen Tint Overlay
                                 Rectangle {
                                     anchors.fill: parent
-                                    radius: window.s(16) 
-                                    
+                                    radius: iconBox.radius
+
                                     color: window.mauve
                                     opacity: index === appList.currentIndex ? 0.25 : 0.08 
-                                    
+
                                     Behavior on opacity { 
                                         NumberAnimation { duration: 300; easing.type: Easing.OutExpo } 
                                     }
@@ -518,34 +580,39 @@ Item {
                             }
 
                             Text {
-                                Layout.fillWidth: true
+                                id: launchItem
+                                // El nombre se recorta al espacio libre (sin icono,
+                                // todo el ancho disponible). height = alto de fila
+                                // para que verticalAlignment centre el texto (un
+                                // Row no centra a sus hijos verticalmente).
+                                width: Math.min(implicitWidth, rowWrap.width - (iconBox.visible ? iconBox.width + rowContent.spacing : 0))
+                                height: rowWrap.height
                                 text: model.name
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: window.s(14)
-                                id: launchItem
                                 font.weight: index === appList.currentIndex ? Font.Bold : Font.Medium
                                 color: index === appList.currentIndex ? window.crust : window.text
                                 elide: Text.ElideRight
                                 verticalAlignment: Text.AlignVCenter
-                                
+
                                 property real textShift: index === appList.currentIndex ? window.s(6) : 0
                                 transform: Translate { x: launchItem.textShift }
-                                
+
                                 Behavior on textShift { 
                                     NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 
                                 }
                                 Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
                             }
                         }
+                    }
 
-                        MouseArea {
-                            id: ma
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: {
-                                appList.currentIndex = index;
-                                launchApp(model.exec);
-                            }
+                    MouseArea {
+                        id: ma
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            appList.currentIndex = index;
+                            launchApp(model.exec);
                         }
                     }
                 }
