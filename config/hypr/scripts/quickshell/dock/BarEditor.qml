@@ -92,7 +92,7 @@ Item {
             "monitors": "s_monitors", "startup": "s_startup", "topbar": "d_engine",
             "bar": "d_engine", "engine": "d_engine", "launcher": "d_launcher",
             "hyprland": "d_hyprland", "idle": "d_idle", "gpu": "d_gpu",
-            "notifications": "d_notifications"
+            "notifications": "d_notifications", "guide": "d_guide", "about": "d_guide"
         };
         let page = map[root.activeMode] !== undefined ? map[root.activeMode] : root.activeMode;
         if (root.navIndex(page) === -1) return;
@@ -532,6 +532,14 @@ Item {
     // (bar = root). La píldora mauve sigue al item activo por su POSICIÓN REAL
     // (navItemMap + mapToItem) con scroll-follow por contentY.
     property string currentPage: "s_general"
+
+    // El panel se ensancha SOLO en la página Guide (el popup embebido está
+    // diseñado a 1160px); Main sigue estos targets en vivo y anima el morph
+    // al cambiar de página (y vuelve a 1120 en el resto).
+    property real targetMasterWidth: root.currentPage === "d_guide"
+        ? Math.min(root.s(1440), Screen.width - root.s(40))
+        : root.s(1120)
+    property real targetMasterHeight: root.s(760)
     property var navGroups: [
         { id: "desktop", label: "Desktop", items: [
             { id: "s_general",  icon: "󰒓", label: "General" },
@@ -556,7 +564,8 @@ Item {
             { id: "d_input",         icon: "󰌌", label: "Input" },
             { id: "d_idle",          icon: "󰒲", label: "Idle" },
             { id: "d_gpu",           icon: "󰢮", label: "GPU" },
-            { id: "d_notifications", icon: "󰂚", label: "Notifications" }
+            { id: "d_notifications", icon: "󰂚", label: "Notifications" },
+            { id: "d_guide",         icon: "󰅖", label: "About" }
         ] }
     ]
     // El grupo Dock/Bar arranca expandido; cambiar de engine NO lo colapsa.
@@ -645,6 +654,7 @@ Item {
             "d_idle":          "editor/IdlePage.qml",
             "d_gpu":           "editor/GpuPage.qml",
             "d_notifications": "editor/NotificationsPage.qml",
+            "d_guide":         "editor/GuidePage.qml",
             "d_hyprland":      "editor/HyprlandPage.qml",
             "d_animations":    "editor/AnimationsPage.qml",
             "d_input":         "editor/InputPage.qml"
@@ -669,6 +679,7 @@ Item {
             "d_idle":          idleLoader,
             "d_gpu":           gpuLoader,
             "d_notifications": notificationsLoader,
+            "d_guide":         guidePageLoader,
             "d_hyprland":      hyprlandLoader,
             "d_animations":    animationsLoader,
             "d_input":         inputLoader
@@ -695,6 +706,14 @@ Item {
         }
     }
     onCurrentPageChanged: root.ensurePage(root.currentPage)
+
+
+
+
+
+
+
+
 
 
 
@@ -1547,6 +1566,17 @@ Item {
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
                         transform: Translate { y: notificationsLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+
+                    Loader {
+                        id: guidePageLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_guide"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: guidePageLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {

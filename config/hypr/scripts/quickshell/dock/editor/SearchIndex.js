@@ -83,6 +83,8 @@ function pageEntries() {
         { page: "d_input", label: "Disable while typing",  desc: "Touchpad off while typing",              icon: "\uF11C", color: "sapphire", y: 280 },
         // Notifications (d_notifications)
         { page: "d_notifications", label: "Do Not Disturb", desc: "Silences notification popups",         icon: "󰂛", color: "mauve",    y: 60 },
+        // Guide (d_guide) — popup de la X embebido tal cual (sistema/paletas/about)
+        { page: "d_guide", label: "About", desc: "System info, GitHub, palettes and repos", icon: "\uF05A", color: "mauve", y: 0 },
         // Páginas de barra (resumen; y = 0 → arriba). Iconos = navGroups.
         { page: "d_engine",     label: "Engine",     desc: "Dock or Serpantinum bar",          icon: "󰮯", color: "mauve",    y: 0 },
         { page: "d_position",   label: "Position",   desc: "Bar position on screen",           icon: "󱂬", color: "blue",     y: 0 },

@@ -182,6 +182,7 @@ Item {
         case "d_notifications": return "Notifications";
         case "d_animations": return "Animations";
         case "d_input": return "Input";
+        case "d_guide": return "About";
         }
         return id;
     }

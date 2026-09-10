@@ -195,6 +195,7 @@ CORE_PACKAGES_ARCH=(
 
     # Terminal
     "kitty"
+    "starship"
 
     # Utilities
     "awww"
@@ -594,6 +595,46 @@ install_kitty_config() {
 }
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
+# │ INSTALL STARSHIP WITH CUSTOM CONFIG                                               │
+# └───────────────────────────────────────────────────────────────────────────────────┘
+
+install_starship_config() {
+    log "Installing Starship configuration from xscriptor-colors/terminal..."
+
+    if ! command -v git >/dev/null 2>&1; then
+        warn "git not found. Cannot clone xscriptor-colors/terminal."
+        warn "Install git and run: wget -qO- https://raw.githubusercontent.com/xscriptor-colors/terminal/main/prompts/starship/install.sh | bash"
+        return
+    fi
+
+    local TMP_DIR
+    TMP_DIR="$(mktemp -d)"
+    if ! git clone --depth 1 https://github.com/xscriptor-colors/terminal.git "$TMP_DIR/terminal" >/dev/null 2>&1; then
+        warn "Failed to clone xscriptor-colors/terminal."
+        rm -rf "$TMP_DIR"
+        return
+    fi
+
+    local STARSHIP_INSTALLER="$TMP_DIR/terminal/prompts/starship/install.sh"
+    if [ -f "$STARSHIP_INSTALLER" ]; then
+        log "Running starship installer (themes, shell function, STARSHIP_CONFIG)..."
+        bash "$STARSHIP_INSTALLER" || warn "Starship installer finished with warnings (non-fatal)"
+        log "Starship configuration installed from xscriptor-colors/terminal!"
+    else
+        warn "starship installer not found in cloned repo."
+    fi
+    rm -rf "$TMP_DIR"
+
+    # Regenerate the starship themes from the dock palettes (single source of
+    # truth) and write the fixed active config (~/.config/starship.toml), so
+    # the prompt follows the bar palette like kitty does.
+    if [ -f "$SCRIPT_DIR/scripts/theme-sync.sh" ]; then
+        bash "$SCRIPT_DIR/scripts/theme-sync.sh" || warn "Starship theme sync failed (non-fatal)"
+        log "Starship themes synced from the active palette"
+    fi
+}
+
+# ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ INSTALL MATUGEN CONFIG                                                            │
 # └───────────────────────────────────────────────────────────────────────────────────┘
 
@@ -921,7 +962,7 @@ main() {
         fedora)
             warn "Fedora support is experimental. Some packages may not be available."
             # Basic packages for Fedora
-            install_packages_fedora hyprland rofi-wayland kitty dunst grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
+            install_packages_fedora hyprland rofi-wayland kitty starship dunst grim slurp wl-clipboard jq imagemagick librsvg2 ddcutil
             ;;
         debian|ubuntu|pop)
             error "Debian/Ubuntu requires manual Hyprland installation from source."
@@ -946,6 +987,13 @@ main() {
     read -r kitty_response
     if [[ ! "$kitty_response" =~ ^[Nn]$ ]]; then
         install_kitty_config
+    fi
+
+    # Install Starship config
+    prompt "Install custom Starship configuration? [Y/n] "
+    read -r starship_response
+    if [[ ! "$starship_response" =~ ^[Nn]$ ]]; then
+        install_starship_config
     fi
 
     # Install Hack Nerd Font
@@ -1045,6 +1093,7 @@ case "$1" in
         install_dotfiles
         write_xshell_version
         install_kitty_config
+        install_starship_config
         install_hack_nerd_font
         install_nvim_config
         create_directories
