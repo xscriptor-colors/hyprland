@@ -6,6 +6,7 @@
     "Configurable app launcher: position, size, visible apps, row height, alignment, borders and icons",
     "New pages: Hyprland window effects, Animations, Input, Idle, GPU and Notifications",
     "Monthly dotfiles updater (systemd user timer) with bar update indicator",
-    "Guide (About) embedded as a panel page; legacy settings popup removed"
+    "Guide (About) embedded as a panel page; legacy settings popup removed",
+    "Versioning standardized to xshell v1.0.0 (installer, update manifest and About panel aligned)"
   ]
 }
