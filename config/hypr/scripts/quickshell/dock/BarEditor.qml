@@ -152,6 +152,24 @@ Item {
         root.applySerp({ modules: DockLayout.dockToSerpModules(root.dock) });
     }
 
+    // ════ LAUNCHER (applauncher, SUPER+D) ════
+    // Config del launcher en la key "launcher" de settings.json. El merge con
+    // los defaults vive aquí (merge simple); la normalización/clamps la hace
+    // el propio launcher con LauncherLayout.normalize al abrirse.
+    // NOTA: Config.setSetting muta rawSettings en memoria SIN reasignar la
+    // propiedad, por lo que los bindings que leen Config.rawSettings no se
+    // re-evalúan; este property local sí notifica y mantiene la UI en vivo.
+    property var launcherCfg: (function() {
+        let d = { position: "center", width: 800, maxApps: 8, margin: 24, avoidBar: true, showIcons: true };
+        let raw = Config.rawSettings.launcher;
+        return (raw && typeof raw === "object") ? Object.assign({}, d, raw) : d;
+    })()
+    function launcherConfig() { return root.launcherCfg; }
+    function applyLauncher(partial) {
+        root.launcherCfg = Object.assign({}, root.launcherCfg, partial);
+        Config.setSetting("launcher", root.launcherCfg);
+    }
+
     // Member count of the group currently being dragged (0 = module drag).
     function serpGroupCount() {
         if (root.dndModuleId !== "" || root.dndSourceSerpList === "" || root.dndSourceItemIndex < 0) return 0;
@@ -393,7 +411,8 @@ Item {
             { id: "s_keyboard", icon: "󰌌", label: "Keyboard" },
             { id: "s_monitors", icon: "󰍹", label: "Monitors" },
             { id: "s_startup",  icon: "󰐥", label: "Startup" },
-            { id: "s_topbar",   icon: "󰹑", label: "Topbar" }
+            { id: "s_topbar",   icon: "󰹑", label: "Topbar" },
+            { id: "d_launcher", icon: "󰀻", label: "Launcher" }
         ] },
         { id: "dockbar", label: "Dock / Bar", expandable: true, items: [
             { id: "d_engine",     icon: "󰮯", label: "Engine" },
@@ -487,7 +506,8 @@ Item {
             "d_palette":    "editor/PalettePage.qml",
             "d_zones":      "editor/ZonesPage.qml",
             "d_workspaces": "editor/WorkspacesPage.qml",
-            "d_serp":       "editor/SerpBarPage.qml"
+            "d_serp":       "editor/SerpBarPage.qml",
+            "d_launcher":   "editor/LauncherPage.qml"
         };
         return map[id] || "";
     }
@@ -505,7 +525,8 @@ Item {
             "d_palette":    dPaletteLoader,
             "d_zones":      dZonesLoader,
             "d_workspaces": dWorkspacesLoader,
-            "d_serp":       dSerpLoader
+            "d_serp":       dSerpLoader,
+            "d_launcher":   launcherLoader
         };
         return map[id] || null;
     }
@@ -529,6 +550,8 @@ Item {
         }
     }
     onCurrentPageChanged: root.ensurePage(root.currentPage)
+
+
 
 
 
@@ -1289,6 +1312,16 @@ Item {
                         transform: Translate { y: dSerpLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                         onLoaded: { if (dSerpLoader.item) root.serpPage = dSerpLoader.item; }
+                    }
+                    Loader {
+                        id: launcherLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_launcher"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: launcherLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     // ── Tabs compartidas de settings (host = settingsHost) ──
                     Loader {

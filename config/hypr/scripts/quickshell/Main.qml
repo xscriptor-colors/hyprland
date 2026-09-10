@@ -336,9 +336,14 @@ PanelWindow {
         if (currentItem && currentItem.targetMasterWidth !== undefined && finalW !== t.w) {
             finalX = Math.floor((masterWindow.width / 2) - (finalW / 2));
         }
+        let finalY = t.ry;
+        // Soporte opcional (retrocompatible): widgets que calculan su propia
+        // posición en pantalla (p.ej. el launcher con anclaje top/bottom/…).
+        if (currentItem && currentItem.targetMasterX !== undefined) finalX = currentItem.targetMasterX;
+        if (currentItem && currentItem.targetMasterY !== undefined) finalY = currentItem.targetMasterY;
 
         masterWindow.animX = finalX;
-        masterWindow.animY = t.ry;
+        masterWindow.animY = finalY;
         masterWindow.animW = finalW;
         masterWindow.animH = finalH;
         masterWindow.targetW = finalW;
@@ -532,6 +537,9 @@ PanelWindow {
                 masterWindow.animH = currentItem.targetMasterHeight;
                 masterWindow.targetH = currentItem.targetMasterHeight;
             }
+            // Posición propia opcional (retrocompatible; p.ej. launcher).
+            if (currentItem.targetMasterX !== undefined) masterWindow.animX = currentItem.targetMasterX;
+            if (currentItem.targetMasterY !== undefined) masterWindow.animY = currentItem.targetMasterY;
         }
 
         masterWindow.isVisible = true;
