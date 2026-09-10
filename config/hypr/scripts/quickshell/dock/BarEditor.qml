@@ -224,6 +224,80 @@ Item {
         Config.setSetting("launcher", root.launcherCfg);
     }
 
+    // ════ ANIMATIONS / INPUT (grupo System) ════
+    // Overrides generados: el panel escribe config/user-animations.lua y
+    // config/user-input.lua vía persist-hypr.sh (luac -p + reload). Mismo
+    // patrón que launcherCfg: property local con merge de Config.rawSettings
+    // para que la UI viva no dependa de rawSettings (setSetting no reasigna).
+    property var animationsCfg: (function() {
+        let d = { enabled: true, speed: 1.0 };
+        let raw = Config.rawSettings.animations;
+        return (raw && typeof raw === "object") ? Object.assign({}, d, raw) : d;
+    })()
+    property var inputCfg: (function() {
+        let d = { sensitivity: 0, accelProfile: "flat", tapToClick: true, naturalScroll: true, disableWhileTyping: true };
+        let raw = Config.rawSettings.input;
+        return (raw && typeof raw === "object") ? Object.assign({}, d, raw) : d;
+    })()
+    function animationsConfig() { return root.animationsCfg; }
+    function applyAnimations(partial) {
+        root.animationsCfg = Object.assign({}, root.animationsCfg, partial);
+        Config.setSetting("animations", root.animationsCfg);
+        root._animDirty = true;
+        hyprPersistTimer.restart();
+    }
+    function inputConfig() { return root.inputCfg; }
+    function applyInput(partial) {
+        root.inputCfg = Object.assign({}, root.inputCfg, partial);
+        Config.setSetting("input", root.inputCfg);
+        root._inputDirty = true;
+        hyprPersistTimer.restart();
+    }
+    // Semilla de InputPage: solo si settings.json no tiene key "input" y solo
+    // una vez por sesión del panel. NO persiste: rellena la UI con los valores
+    // vivos de hyprctl hasta que el usuario cambie algo.
+    property bool _inputSeeded: false
+    function needsInputSeed() {
+        return !root._inputSeeded && Config.rawSettings.input === undefined;
+    }
+    function seedInputCfg(obj) {
+        if (!root.needsInputSeed()) return;
+        root._inputSeeded = true;
+        root.inputCfg = Object.assign({}, root.inputCfg, obj);
+    }
+    // Debounce 600 ms (igual que HyprlandPage): una ráfaga de cambios produce
+    // una sola llamada por modo. persist-hypr.sh valida con luac -p y recarga.
+    property bool _animDirty: false
+    property bool _inputDirty: false
+    Timer {
+        id: hyprPersistTimer
+        interval: 600
+        onTriggered: root.persistHypr()
+    }
+    function persistHypr() {
+        if (root._animDirty) {
+            root._animDirty = false;
+            Quickshell.execDetached(["bash",
+                Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/dock/editor/persist-hypr.sh",
+                "animations",
+                root.animationsCfg.enabled ? "1" : "0",
+                Number(root.animationsCfg.speed).toFixed(1)
+            ]);
+        }
+        if (root._inputDirty) {
+            root._inputDirty = false;
+            Quickshell.execDetached(["bash",
+                Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/dock/editor/persist-hypr.sh",
+                "input",
+                String(root.inputCfg.sensitivity),
+                String(root.inputCfg.accelProfile),
+                root.inputCfg.tapToClick ? "1" : "0",
+                root.inputCfg.naturalScroll ? "1" : "0",
+                root.inputCfg.disableWhileTyping ? "1" : "0"
+            ]);
+        }
+    }
+
     // Member count of the group currently being dragged (0 = module drag).
     function serpGroupCount() {
         if (root.dndModuleId !== "" || root.dndSourceSerpList === "" || root.dndSourceItemIndex < 0) return 0;
@@ -478,6 +552,8 @@ Item {
         ] },
         { id: "system", label: "System", items: [
             { id: "d_hyprland",      icon: "󰣇", label: "Hyprland" },
+            { id: "d_animations",    icon: "󰔟", label: "Animations" },
+            { id: "d_input",         icon: "󰌌", label: "Input" },
             { id: "d_idle",          icon: "󰒲", label: "Idle" },
             { id: "d_gpu",           icon: "󰢮", label: "GPU" },
             { id: "d_notifications", icon: "󰂚", label: "Notifications" }
@@ -569,7 +645,9 @@ Item {
             "d_idle":          "editor/IdlePage.qml",
             "d_gpu":           "editor/GpuPage.qml",
             "d_notifications": "editor/NotificationsPage.qml",
-            "d_hyprland":      "editor/HyprlandPage.qml"
+            "d_hyprland":      "editor/HyprlandPage.qml",
+            "d_animations":    "editor/AnimationsPage.qml",
+            "d_input":         "editor/InputPage.qml"
         };
         return map[id] || "";
     }
@@ -591,7 +669,9 @@ Item {
             "d_idle":          idleLoader,
             "d_gpu":           gpuLoader,
             "d_notifications": notificationsLoader,
-            "d_hyprland":      hyprlandLoader
+            "d_hyprland":      hyprlandLoader,
+            "d_animations":    animationsLoader,
+            "d_input":         inputLoader
         };
         return map[id] || null;
     }
@@ -1467,6 +1547,26 @@ Item {
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
                         transform: Translate { y: notificationsLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: animationsLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_animations"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: animationsLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: inputLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_input"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: inputLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {

@@ -72,6 +72,15 @@ function pageEntries() {
         { page: "d_gpu", label: "Integrated",             desc: "Optimus mode: integrated GPU only",      icon: "󰁹", color: "green",    y: 128 },
         { page: "d_gpu", label: "Hybrid",                 desc: "Optimus mode: hybrid (default)",         icon: "󰚰", color: "blue",     y: 128 },
         { page: "d_gpu", label: "NVIDIA",                 desc: "Optimus mode: NVIDIA only",              icon: "󰓅", color: "red",      y: 128 },
+        // Animations (d_animations) — iconos de AnimationsPage
+        { page: "d_animations", label: "Animations",        desc: "Enable or disable animations",           icon: "\uF0E7", color: "mauve",    y: 70 },
+        { page: "d_animations", label: "Animation speed",   desc: "Snappy / Fast / Normal / Slow + fine",   icon: "\uF021", color: "sapphire", y: 150 },
+        // Input (d_input) — iconos de InputPage
+        { page: "d_input", label: "Sensitivity",           desc: "Pointer sensitivity",                    icon: "\uF245", color: "blue",     y: 70 },
+        { page: "d_input", label: "Accel profile",         desc: "Adaptive or flat pointer accel",         icon: "\uF0E7", color: "green",    y: 130 },
+        { page: "d_input", label: "Tap to click",          desc: "Touchpad tap click",                     icon: "\uF245", color: "peach",    y: 200 },
+        { page: "d_input", label: "Natural scroll",        desc: "Touchpad natural scrolling",             icon: "\uF7A4", color: "mauve",    y: 240 },
+        { page: "d_input", label: "Disable while typing",  desc: "Touchpad off while typing",              icon: "\uF11C", color: "sapphire", y: 280 },
         // Notifications (d_notifications)
         { page: "d_notifications", label: "Do Not Disturb", desc: "Silences notification popups",         icon: "󰂛", color: "mauve",    y: 60 },
         // Páginas de barra (resumen; y = 0 → arriba). Iconos = navGroups.

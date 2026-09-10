@@ -180,6 +180,8 @@ Item {
         case "d_idle": return "Idle";
         case "d_gpu": return "GPU";
         case "d_notifications": return "Notifications";
+        case "d_animations": return "Animations";
+        case "d_input": return "Input";
         }
         return id;
     }
