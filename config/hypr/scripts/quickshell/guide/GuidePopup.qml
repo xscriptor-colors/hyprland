@@ -153,7 +153,17 @@ Item {
 
     Process {
         id: updateChecker
-        command: ["bash", "-c", "curl -m 5 -s https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/install.sh | grep '^DOTS_VERSION=' | cut -d'\"' -f2"]
+        // Versión remota desde el manifest (updates.json), usando el cache
+        // mensual del updater: si el cache es fresco NO hay red; si no, se
+        // descarga una vez y se cachea. Sustituye el scrape muerto de
+        // DOTS_VERSION (ya no existe en install.sh).
+        command: ["bash", "-c",
+            "C=\"$HOME/.cache/quickshell/updater/manifest.json\"; " +
+            "S=\"$HOME/.cache/quickshell/updater/manifest_check\"; " +
+            "U=\"https://raw.githubusercontent.com/xscriptor-colors/hyprland/main/updates.json\"; " +
+            "if [ -f \"$C\" ] && [ \"$(cat \"$S\" 2>/dev/null)\" = \"$(date +%Y-%m)\" ] && jq -e '.version' \"$C\" >/dev/null 2>&1; then cat \"$C\"; " +
+            "else mkdir -p \"$(dirname \"$C\")\"; T=\"$C.tmp.$$\"; if curl -fsSL -m 8 \"$U\" -o \"$T\"; then mv \"$T\" \"$C\"; date +%Y-%m > \"$S\"; fi; [ -f \"$C\" ] && cat \"$C\"; fi | jq -r '.version // empty'"
+        ]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
