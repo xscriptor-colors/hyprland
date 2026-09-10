@@ -51,8 +51,8 @@ Rectangle {
         : DockLayout.serpSectionItems(serpCard.bar.serp, serpCard.listId)
 
     height: contentCol.implicitHeight + bar.s(16)
-    radius: bar.s(14)
-    color: bar.colors.surface0
+    radius: bar.s(21)
+    color: Qt.alpha(bar.colors.surface0, 0.4)
     border.width: bar.s(1); border.color: bar.colors.surface1
 
     // Is a point in editor-root coordinates inside this card?
@@ -192,7 +192,7 @@ Rectangle {
                 text: serpCard.listId === "available" ? "Not on the bar — drag a chip into a section (or onto a group) to add it."
                                                        : "Drop chips here · onto a group to join it · drag headers to move whole clusters."
                 font.pixelSize: bar.s(10)
-                color: bar.colors.overlay1
+                color: bar.colors.subtext0
             }
         }
 
@@ -203,8 +203,8 @@ Rectangle {
             visible: serpCard.chipsModel.length === 0
             text: serpCard.listId === "available" ? "Every catalog module is on the bar."
                                                   : "Empty section — drop modules here from any other list."
-            font.pixelSize: bar.s(10)
-            color: bar.colors.overlay1
+            font.pixelSize: bar.s(11)
+            color: bar.colors.subtext0
         }
 
         // item chips: one per entry (loose id or group array)
@@ -301,7 +301,7 @@ Rectangle {
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: bar.s(11)
                                 font.weight: Font.Bold
-                                color: bar.colors.accent
+                                color: bar.colors.mauve
                             }
                             Text {
                                 text: "Group"
@@ -314,7 +314,7 @@ Rectangle {
                                 text: "· " + chipRoot.modelData.length
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: bar.s(10)
-                                color: bar.colors.overlay1
+                                color: bar.colors.subtext0
                             }
                         }
                         // Members: smaller chips, individually draggable.
@@ -573,11 +573,11 @@ Rectangle {
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: bar.s(1)
-                        radius: bar.s(9)
+                        radius: bar.s(10)
                         visible: chipRoot.chipIsGroup && serpCard.dndActive && serpCard.dndJoinIndex === chipRoot.chipItemIndex
                         color: "transparent"
                         border.width: bar.s(2)
-                        border.color: bar.colors.accent
+                        border.color: bar.colors.mauve
                         opacity: 0.9
                         enabled: false
                         Behavior on opacity { NumberAnimation { duration: 90 } }
@@ -593,11 +593,11 @@ Rectangle {
         id: dropHighlight
         anchors.fill: parent
         anchors.margins: bar.s(1)
-        radius: bar.s(13)
+        radius: bar.s(20)
         visible: serpCard.dndActive
         color: "transparent"
         border.width: bar.s(2)
-        border.color: bar.colors.accent
+        border.color: bar.colors.mauve
         opacity: 0.9
         enabled: false
         Behavior on opacity { NumberAnimation { duration: 90 } }
@@ -609,7 +609,7 @@ Rectangle {
         visible: false
         width: bar.s(3)
         radius: bar.s(1.5)
-        color: bar.colors.accent
+        color: bar.colors.mauve
         enabled: false
         Behavior on x { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
         Behavior on y { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }

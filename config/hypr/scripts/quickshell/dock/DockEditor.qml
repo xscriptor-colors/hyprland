@@ -7,14 +7,17 @@ import "../WindowRegistry.js" as LayoutMath
 import "DockLayout.js" as DockLayout
 import "Colors.qml"
 import "edit"
+// Phase 3: pages load lazily via Loader.setSource("editor/<file>.qml", {bar})
+// — no `import "editor"` needed (typed instancing caused a null-bar burst).
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DockEditor — the dock mega menu (SUPER+SHIFT+D).
-//
-// Matches the QuickShell widget aesthetic (SettingsPopup-style): a rounded
-// panel with a single scrollable column of section cards (surface0 + surface1
-// border). Every edit writes live to settings.json "dock" and the dock
-// hot-reloads through its own watcher.
+// DockEditor — the dock mega menu (SUPER+SHIFT+D), PHASE 2 rewrite.
+// Serpantium-style rail shell: sidebar (brand + animated accent nav pill over
+// NavItem rows + footer hints) + content stage where the 7 Phase-1 pages
+// (dock/editor/*.qml) stay ALWAYS instantiated (visible switches by page).
+// Pages only talk to root via `bar`; ZonesPage/SerpBarPage expose flickable +
+// zonasCol/serpListsCol for the editor-wide DnD (chips feed root coordinates
+// via mapToItem(bar,...)). Edits write live to settings.json; bar untouched.
 // ═══════════════════════════════════════════════════════════════════════════
 
 Item {
@@ -39,20 +42,24 @@ Item {
     property bool _dirty: false
     property bool borderTargetActive: true
 
+    // ════ FASE 4: INTRO/CIERRE (paridad con GuidePopup) ════
+    // introBase = panel (opacity+scale), introSidebar = rail (opacity+slide x),
+    // introContent = stage de páginas (opacity+scale+slide y). GP:214-287.
+    property real introBase: 0.0
+    property real introSidebar: 0.0
+    property real introContent: 0.0
+
     // ════ DUAL ENGINE STATE (Phase D4-E2) ════
-    // The editor edits whichever engine the settings say is live: "dock"
-    // (zone cards) or "serp" (serpbar cards). root.serp mirrors settings.json's
-    // top-level "serpbar" key; the dock config is preserved untouched while
-    // the serp engine is active (and vice versa).
+    // The editor edits whichever engine settings.json says is live ("dock" or
+    // "serp"); root.serp mirrors the "serpbar" key, dock config untouched.
     property string engine: "dock"
     property var serp: DockLayout.serpbarDefaults()
     property bool _serpDirty: false
 
     Timer { id: saveTimer; interval: 220; onTriggered: flushSave() }
     function markDirty() { _dirty = true; saveTimer.restart(); }
-    // Serp edits share the same debounce; flushSave() writes whichever key is
-    // dirty ("dock" and "serpbar" are independent top-level settings keys, so
-    // the two queues never clobber each other and the dock flush is intact).
+    // Serp edits share the same debounce; both keys are independent top-level
+    // settings keys, so the queues never clobber each other.
     function markDirtySerp() { _serpDirty = true; saveTimer.restart(); }
     function flushSave() {
         if (_dirty) {
@@ -72,11 +79,9 @@ Item {
     }
 
     // ════ ENGINE SWITCHING + SERP EDITS (Phase D4-E2) ════
-    // Hot engine switch: writes the top-level "barEngine" key; the live dock
-    // host swaps its render engine in-process (no reload) and never touches
-    // the persisted "dock" config. The FIRST switch to "serp" seeds the
-    // "serpbar" key from the dock's position + ENABLED modules, so the classic
-    // bar starts with the current layout instead of the stock defaults.
+    // Hot engine switch via the top-level "barEngine" key (the live host swaps
+    // in-process). The FIRST switch to "serp" seeds "serpbar" from the dock's
+    // position + ENABLED modules, so the classic bar starts with the layout.
     function setEngine(v) {
         if (v === "serp") {
             let raw = Config.rawSettings;
@@ -96,6 +101,11 @@ Item {
             Config.setSetting("barEngine", "dock");
         }
         root.engine = v === "serp" ? "serp" : "dock";
+        // Phase 2: the rail filters by engine — a page gone from the list
+        // falls back to General; mid-drag flips abort DnD (pill re-syncs).
+        if (root.navIndex(root.currentPage) === -1) root.currentPage = "general";
+        root.cancelDnd();
+        Qt.callLater(root.syncNavPill);
     }
 
     // Full-config commit (already normalized): replace root.serp + queue save.
@@ -104,15 +114,13 @@ Item {
         root.markDirtySerp();
     }
 
-    // Shallow partial merge (position/style/width/autohide/modules/...) then
-    // normalize, so the in-memory state always satisfies the host invariants
-    // before the debounced file write lands.
+    // Shallow partial merge + normalize so the in-memory state always
+    // satisfies the host invariants before the debounced file write lands.
     function applySerp(partial) {
         root.commitSerp(DockLayout.normalizeSerpbar(Object.assign({}, root.serp, partial)));
     }
 
-    // Pure-engine op helper: compute `next` through DockLayout and commit only
-    // when the JSON really changed (no-op drops never write settings).
+    // Pure-engine op helper: commit only when the JSON really changed.
     function commitSerpOp(next) {
         if (next && JSON.stringify(next) !== JSON.stringify(root.serp)) root.commitSerp(next);
     }
@@ -125,12 +133,18 @@ Item {
         root.commitSerpOp(DockLayout.serpUngroup(root.serp, list, itemIndex));
     }
 
-    // "Serp defaults": stock layout (including the module lists) while keeping
-    // the position the user currently has the bar at.
+    // "Serp defaults": stock layout keeping the current position.
     function serpDefaultsAction() {
         let d = DockLayout.serpbarDefaults();
         d.position = root.serp.position;
         root.applySerp(d);
+    }
+
+    // "Mirror dock layout": importa los módulos enabled del dock a serp.
+    // Compartida por SerpBarPage (señal mirrorDock → Connections) y
+    // GeneralPage (llamada directa bar.mirrorDockAction()).
+    function mirrorDockAction() {
+        root.applySerp({ modules: DockLayout.dockToSerpModules(root.dock) });
     }
 
     // Member count of the group currently being dragged (0 = module drag).
@@ -147,34 +161,48 @@ Item {
         root.applyDock(DockLayout.applyStylePreset(root.dock, preset));
     }
 
-    // ════ MODULE CHIP DRAG & DROP (Phase D3) ════
-    // One editor-wide session: a chip MouseArea in a ZoneEditorCard crosses its
-    // threshold and calls startDnd(); we then own the gesture — paint the ghost
-    // at the pointer, highlight the card under the cursor (dndActive) with its
-    // insertion index (dndInsertIndex), auto-scroll the editor when the pointer
-    // nears the top/bottom edge, and commit with DockLayout.moduleMoveTo on
-    // release (drop outside every card = cancel). The whole session keeps
-    // root.dock untouched until the drop, so no-op drops never write settings.
+    // ════ MODULE CHIP DRAG & DROP (Phase D3, adapted Phase 2) ════
+    // One editor-wide session: a chip MouseArea crosses its threshold and
+    // calls startDnd()/startSerpDnd(); we own the gesture — ghost at pointer,
+    // dndActive + dndInsertIndex on the card under the cursor, auto-scroll of
+    // the ACTIVE page's flickable, commit with DockLayout.*MoveTo on release
+    // (drop outside every card = cancel). root.dock/root.serp stay untouched
+    // until the drop, so no-op drops never write settings.
+    //
+    // Phase 2: cards now live in the pages' own Flickables (ZonesPage /
+    // SerpBarPage). The chips' coordinate contract is unchanged — cards map
+    // with mapToItem(bar,...)/mapFromItem(bar,...), points stay in root
+    // coordinates and nested scrolls cancel out; only the auto-scroll target
+    // becomes dynamic (dndFlick = the current page's flickable).
     property bool dndBusy: false
     property string dndModuleId: ""
     property string dndSourceZoneId: ""
     property point dndPointer: Qt.point(-10000, -10000)
 
-    // Serp drags additionally remember where the dragged item sits: module
-    // drags (loose chip, group member or pool chip) keep dndSourceItemIndex
-    // at -1 because removal is by id; whole-GROUP drags use dndModuleId === ""
-    // and point dndSourceItemIndex at the group's ITEM in dndSourceSerpList.
+    // Serp drags remember where the dragged item sits: module drags keep
+    // dndSourceItemIndex -1 (removal by id); GROUP drags use dndModuleId ""
+    // + the group's ITEM index inside dndSourceSerpList.
     property string dndSourceSerpList: ""
     property int dndSourceItemIndex: -1
 
-    // Live list of zone cards (children of the Zones column; filtered by the
-    // isZoneEditorCard marker so the Repeater object itself is skipped). Only
-    // reachable while the dock engine UI is showing: hidden dock cards would
-    // still answer containsRootPoint geometrically, so they are excluded.
+    // Phase 2: page Flickable locked while a drag runs + auto-scrolled
+    // (ZonesPage/SerpBarPage expose their flickables; engine picks the owner).
+    property var dndFlick: null
+
+    // Phase 3: lazily-loaded page items (Loader.setSource initial props give
+    // `bar` to the page BEFORE its inner bindings evaluate). Null until the
+    // page has been opened once; DnD targets only exist while loaded, which is
+    // exactly when their page is the visible one.
+    property var zonesPage: null   // ZonesPage item (lazy; zone DnD targets)
+    property var serpPage: null    // SerpBarPage item (lazy; serp DnD targets)
+
+    // Zone cards: children of the Zones page's zonasCol (isZoneEditorCard
+    // marker skips the Repeater). Hidden pages keep valid geometry, so the
+    // currentPage guard excludes them.
     function zoneCards() {
-        if (root.engine !== "dock") return [];
+        if (root.engine !== "dock" || root.currentPage !== "zones") return [];
         let out = [];
-        let kids = zonasCol.children;
+        let kids = root.zonesPage ? root.zonesPage.zonasCol.children : [];
         for (let i = 0; i < kids.length; i++) {
             let c = kids[i];
             if (c && c.isZoneEditorCard) out.push(c);
@@ -182,12 +210,12 @@ Item {
         return out;
     }
 
-    // Live list of serp list cards (children of the Modules card's column,
-    // isSerpEditorCard marker), only reachable while the serp UI is showing.
+    // Live list of serp list cards (SerpBar page's serpListsCol, marker
+    // isSerpEditorCard); same hidden-page + engine guard as zoneCards().
     function serpCards() {
-        if (root.engine !== "serp") return [];
+        if (root.engine !== "serp" || root.currentPage !== "serp") return [];
         let out = [];
-        let kids = serpListsCol.children;
+        let kids = root.serpPage ? root.serpPage.serpListsCol.children : [];
         for (let i = 0; i < kids.length; i++) {
             let c = kids[i];
             if (c && c.isSerpEditorCard) out.push(c);
@@ -195,9 +223,7 @@ Item {
         return out;
     }
 
-    // Both engine UIs never render at the same time, so the target universe is
-    // always exactly one kind of card — the manager can branch without fear of
-    // overlapping drop zones.
+    // Only one engine UI renders at a time: targets are always one card kind.
     function dndTargets() {
         return root.engine === "dock" ? root.zoneCards() : root.serpCards();
     }
@@ -209,11 +235,13 @@ Item {
         root.dndSourceZoneId = zoneId;
         root.dndSourceSerpList = "";
         root.dndSourceItemIndex = -1;
-        if (editorFlick) editorFlick.interactive = false;
+        root.dndFlick = (root.engine === "dock" && root.zonesPage) ? root.zonesPage.flickable
+                    : (root.serpPage ? root.serpPage.flickable : null);
+        if (root.dndFlick) root.dndFlick.interactive = false;
     }
 
     // Serp chips enter the SAME editor-wide session: moduleId "" marks a
-    // whole-group drag whose itemIndex locates the group ITEM in listId.
+    // whole-group drag located by dndSourceItemIndex inside listId.
     function startSerpDnd(listId, moduleId, itemIndex) {
         if (root.dndBusy) return;
         root.dndBusy = true;
@@ -221,12 +249,13 @@ Item {
         root.dndSourceZoneId = "";
         root.dndSourceSerpList = listId;
         root.dndSourceItemIndex = (moduleId === "") ? (isFinite(itemIndex) ? itemIndex : -1) : -1;
-        if (editorFlick) editorFlick.interactive = false;
+        root.dndFlick = (root.engine === "dock" && root.zonesPage) ? root.zonesPage.flickable
+                    : (root.serpPage ? root.serpPage.flickable : null);
+        if (root.dndFlick) root.dndFlick.interactive = false;
     }
 
-    // Pointer moved (root/editor coordinates): repaint ghost + drop feedback.
-    // Zone and serp cards share one state vocabulary; serp cards additionally
-    // expose a join slot (drop INTO a group under the pointer).
+    // Pointer moved (root/editor coordinates): repaint ghost + drop feedback
+    // (dndActive / dndInsertIndex / serp group join slot under the cursor).
     function updateDnd(px, py) {
         if (!root.dndBusy) return;
         root.dndPointer = Qt.point(px, py);
@@ -253,13 +282,11 @@ Item {
     }
 
     // Drop: commit only when released over a card. The TARGET KIND decides the
-    // engine: zone cards (dock UI) commit through DockLayout.moduleMoveTo +
-    // applyDock; serp cards (serp UI) branch by payload — module drags join
-    // the group under the pointer when the card offers one, otherwise they
-    // insert as a loose item (a drop on "available" only detaches the module
-    // from the bar); whole-group drags relocate the cluster, or release it on
-    // "available". Both engines write through the shared debounced queue, and
-    // identical-result drops (JSON-equal) never write settings.
+    // engine: zone cards commit via DockLayout.moduleMoveTo + applyDock; serp
+    // cards branch by payload — module drags join the group under the pointer
+    // when offered, else insert as a loose item ("available" only detaches),
+    // whole-group drags relocate the cluster (or release on "available").
+    // Identical-result drops (JSON-equal) never write settings.
     function endDnd(px, py) {
         if (!root.dndBusy) return;
         let target = null;
@@ -323,79 +350,138 @@ Item {
         root.dndSourceSerpList = "";
         root.dndSourceItemIndex = -1;
         root.dndPointer = Qt.point(-10000, -10000);
-        if (editorFlick) editorFlick.interactive = true;
+        if (root.dndFlick) root.dndFlick.interactive = true;
+        root.dndFlick = null;
     }
 
-    // Auto-scroll while dragging: keeps off-screen zone cards reachable.
+    // Auto-scroll: keeps off-screen cards of the ACTIVE page reachable
+    // (dndFlick null-guards a mid-session page switch).
     Timer {
         id: dndScrollTimer
         interval: 16
         repeat: true
         running: root.dndBusy
         onTriggered: {
-            if (!editorFlick || !root.dndBusy) return;
-            let local = editorFlick.mapFromItem(root, root.dndPointer.x, root.dndPointer.y);
+            if (!root.dndFlick || !root.dndBusy) return;
+            let local = root.dndFlick.mapFromItem(root, root.dndPointer.x, root.dndPointer.y);
             let band = root.s(26);
             if (local.y < band) {
-                editorFlick.contentY = Math.max(0, editorFlick.contentY - root.s(5));
-            } else if (local.y > editorFlick.height - band) {
-                let maxY = Math.max(0, editorFlick.contentHeight - editorFlick.height);
-                editorFlick.contentY = Math.min(maxY, editorFlick.contentY + root.s(5));
+                root.dndFlick.contentY = Math.max(0, root.dndFlick.contentY - root.s(5));
+            } else if (local.y > root.dndFlick.height - band) {
+                let maxY = Math.max(0, root.dndFlick.contentHeight - root.dndFlick.height);
+                root.dndFlick.contentY = Math.min(maxY, root.dndFlick.contentY + root.s(5));
             }
         }
     }
 
-    Component.onCompleted: {
-        reload();
-        paletteReader.running = true;
-        scaleReader.running = true;
-        // Push window-border colors to Hyprland live whenever the palette
-        // re-applies or settings.json changes (only this instance pushes).
-        themeColors.paletteApplied.connect(function() { themeColors.syncWindowBorders(); });
-        themeColors.settingsUpdated.connect(function() { themeColors.syncWindowBorders(); });
-        // Live palette editor: mirror every palette re-apply into the slot
-        // rows and refresh the Reset state (own edits, palette switches and
-        // external file changes all land here).
-        themeColors.paletteApplied.connect(function() { root.syncSlotValues(); });
-        themeColors.paletteNameChanged.connect(function() { root.checkBackupExists(); });
-        root.syncSlotValues();
+    // ════ PHASE 2 NAVIGATION (rail) ════
+    // currentPage picks the visible child; the sidebar lists pages filtered by
+    // engine. NavItem rows are transparent — navPill (viewport-fixed, BELOW
+    // them) glides to the active slot: navPillTargetY animates (300 ms
+    // OutQuint), y subtracts contentY, navArea clips.
+    property string currentPage: "general"
+    property var navModel: [
+        { id: "general",     icon: "󰒓", label: "General",     both: true },
+        { id: "position",    icon: "󱂬", label: "Position",    both: true },
+        { id: "style",       icon: "󰏘", label: "Style",       engine: "dock" },
+        { id: "palette",     icon: "✦", label: "Palette",     both: true },
+        { id: "zones",       icon: "󰮯", label: "Zones",       engine: "dock" },
+        { id: "workspaces",  icon: "󰠰", label: "Workspaces",  both: true },
+        { id: "serp",        icon: "󰹑", label: "Serp Bar",    engine: "serp" }
+    ]
+    // Animated pill slot (content px); Behavior lives here so scroll-follow
+    // updates through the y binding never lag.
+    property real navPillTargetY: 0
+
+    // Pages visible under the current engine, in rail order.
+    function navForEngine() {
+        let out = [];
+        let m = root.navModel;
+        for (let i = 0; i < m.length; i++) {
+            if (m[i].both === true || m[i].engine === root.engine) out.push(m[i]);
+        }
+        return out;
+    }
+    function visibleNav() { return root.navForEngine(); }
+    function navIndex(id) {
+        let nav = root.navForEngine();
+        for (let i = 0; i < nav.length; i++) {
+            if (nav[i].id === id) return i;
+        }
+        return -1;
+    }
+    function gotoPage(id) {
+        if (root.navIndex(id) === -1) return;
+        root.currentPage = id;
+        root.syncNavPill();
+    }
+    // Recompute the pill's animated target (page/engine change; the y
+    // binding handles scroll-follow continuously). Fase 4: filas sin gap,
+    // target = idx * s(44) (GP:440-456) y animación 400 ms OutExpo.
+    function syncNavPill() {
+        if (!navPill || !colNav) return;
+        let idx = root.navIndex(root.currentPage);
+        if (idx < 0) idx = 0;
+        root.navPillTargetY = idx * root.s(44);
+    }
+    Behavior on navPillTargetY {
+        NumberAnimation { duration: 400; easing.type: Easing.OutExpo }
     }
 
-    Process {
-        id: scaleReader
-        command: ["bash", "-c", "cat ~/.config/hypr/settings.json 2>/dev/null | jq -r '.uiScale // 1'"]
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let v = parseFloat(this.text.trim());
-                if (!isNaN(v) && v > 0) root.uiScale = v;
-            }
-        }
+    // ════ PHASE 3: LAZY PAGE LOADING ════
+    // Pages are Loaders in the content stage; opening a page (rail click, Tab
+    // cycle, initial open) calls ensurePage(), which instantiates the page
+    // component with setSource(file, { bar: root }) — initial properties are
+    // applied BEFORE the page's internal bindings first evaluate, so `bar` is
+    // never null during construction (kills the burst of TypeErrors the typed
+    // always-instantiated children produced). Once loaded, the item persists;
+    // hiding the page only toggles visible.
+    // DnD hooks: zones/serp items are mirrored into root.zonesPage/root.serpPage
+    // from their Loader's onLoaded (zoneCards()/serpCards() read the property;
+    // Connections below retarget automatically).
+    function pageFile(id) {
+        let map = {
+            "general": "GeneralPage.qml",
+            "position": "PositionPage.qml",
+            "style": "DockStylePage.qml",
+            "palette": "PalettePage.qml",
+            "zones": "ZonesPage.qml",
+            "workspaces": "WorkspacesPage.qml",
+            "serp": "SerpBarPage.qml"
+        };
+        return map[id] || "";
     }
-
-    Process {
-        id: paletteReader
-        command: ["cat", Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/dock/palettes/index.json"]
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try { root.palettes = JSON.parse(this.text.trim()); } catch (e) {}
-            }
-        }
+    function pageLoader(id) {
+        let map = {
+            "general": generalLoader,
+            "position": positionLoader,
+            "style": styleLoader,
+            "palette": paletteLoader,
+            "zones": zonesLoader,
+            "workspaces": workspacesLoader,
+            "serp": serpLoader
+        };
+        return map[id] || null;
     }
+    function ensurePage(id) {
+        let loader = root.pageLoader(id);
+        if (!loader) return;
+        // NOTE: Loader.source is a QUrl — strict-compare its string form, a
+        // bare `loader.source !== ""` is always true and would block loading.
+        if (loader.item || String(loader.source) !== "") return;
+        let file = root.pageFile(id);
+        if (file === "") return;
+        loader.setSource("editor/" + file, { bar: root });
+    }
+    onCurrentPageChanged: root.ensurePage(root.currentPage)
 
     // ════ LIVE PALETTE EDITOR (Phase T) ════
-    // Edits the ACTIVE palette file (dock/palettes/<slug>.json) straight from
-    // the Palette card: validated hex commits are debounced (~250 ms, grouped
-    // per palette) and written atomically with jq (tmp + mv, preserving
-    // name/author/slug/roles and unknown keys). The first edit of a palette
-    // snapshots the pristine file to
-    // ~/.local/state/quickshell/palette_backup/<slug>.json; "Reset" restores
-    // that snapshot atomically and removes it. settings.json is never touched:
-    // the palette file IS the source. Every Colors instance watches the
-    // palettes directory (see dock/Colors.qml) and the Theme singleton does
-    // too, so edits re-apply live to the dock, window borders (via
-    // syncWindowBorders), kitty/starship/SDDM and the desktop-widget faces.
+    // Edits the ACTIVE palette file (dock/palettes/<slug>.json): validated hex
+    // commits are debounced (~250 ms, grouped) and written atomically with jq
+    // (tmp + mv, unknown keys preserved). First edit snapshots the file to
+    // ~/.local/state/quickshell/palette_backup/<slug>.json; Reset restores it.
+    // settings.json is never touched: the palette file IS the source and
+    // Colors/Theme watchers re-apply edits live.
     property bool paletteEditOpen: false
     property bool _hasSessionBackup: false
     property var _slotRows: ([])
@@ -461,8 +547,8 @@ Item {
         chip.color = hex;
     }
 
-    // Re-read every slot from themeColors (kept live by the file watcher).
-    // Rows whose hex field is focused keep their in-progress draft untouched.
+    // Re-read slots from themeColors (file watcher keeps it live); focused
+    // rows keep their in-progress draft.
     function syncSlotValues() {
         for (let i = 0; i < root._slotRows.length; i++) {
             let s = root._slotRows[i];
@@ -473,9 +559,8 @@ Item {
         }
     }
 
-    // Valid hex commit (hexField.onEditingFinished): normalize to lowercase,
-    // reflect the value in its row immediately, then queue the debounced
-    // atomic file write (batched: rapid edits of several slots share one jq).
+    // Valid hex commit: normalize, mirror in the row, queue the debounced
+    // atomic file write (rapid edits of several slots share one jq).
     function commitPaletteSlot(key, hex) {
         hex = String(hex || "").toLowerCase();
         if (!/^#[0-9a-f]{6}$/.test(hex)) return;
@@ -493,9 +578,8 @@ Item {
         paletteWriteTimer.restart();
     }
 
-    // Commit entry point for a hex field: Enter, focus-out or blur all land
-    // here. Valid hexes are committed (live write), anything else drops the
-    // draft and shows the currently applied color again.
+    // Hex-field commit entry (Enter / focus-out / blur): valid hexes are
+    // committed live, anything else drops the draft and re-shows the color.
     function finishSlotEdit(field, key) {
         let t = field.text.trim();
         if (field.acceptableInput && /^#[0-9a-fA-F]{6}$/.test(t)) {
@@ -521,10 +605,8 @@ Item {
             args.push("--arg", "a" + i, w.edits[k]);
             parts.push(((k === "background" || k === "foreground") ? "." : ".base16.") + k + " = $a" + i);
         }
-        // The chain snapshots the pristine file on the FIRST edit of the
-        // palette: mkdir + cp are guarded by [ ! -f backup ], so a snapshot
-        // from an earlier session is never overwritten and Reset always
-        // restores the state the palette had before it was first edited.
+        // Chain: snapshot on the FIRST edit ([ ! -f backup ] guard, so a
+        // snapshot from an earlier session is never overwritten).
         let cmd = "mkdir -p '" + root.backupDir() + "' && { [ ! -f '" + backup + "' ] && cp '" + file + "' '" + backup + "'; }; "
                 + "tmp=$(mktemp '" + dir + "/palette.tmp.XXXXXX') && "
                 + "jq " + args.join(" ") + " '" + parts.join(" | ") + "' '" + file + "' > \"$tmp\" && "
@@ -552,918 +634,404 @@ Item {
     }
 
     // Async existence check of the CURRENT palette's session snapshot; drives
-    // the Reset button's enabled look. Refresh on open, on write and on reset.
+    // the Reset button's enabled look (open / write / reset).
     function checkBackupExists() {
         backupProbe.command = ["bash", "-c", "cat '" + root.backupFilePath(root.activeSlug()) + "' 2>/dev/null | head -c 1"];
         backupProbe.running = false;
         backupProbe.running = true;
     }
 
-    // Never lose a queued edit: the popup instance can be torn down right
-    // after closing (StackView clear), so flush any pending write on destroy.
+    // The instance is torn down right after closing (StackView clear):
+    // flush any pending palette write on destroy.
     Component.onDestruction: root.flushPaletteWrite()
 
-    // ════ PANEL (widget-style) ════
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: s(10)
-        radius: s(26)
-        color: Qt.rgba(colors.base.r, colors.base.g, colors.base.b, 0.97)
-        border.width: s(1)
-        border.color: colors.surface0
-        clip: true
-
-        Column {
-            anchors.fill: parent
-            anchors.margins: s(16)
-            spacing: s(10)
-
-            // header
-            Row {
-                width: parent.width
-                spacing: s(10)
-                Rectangle {
-                    width: s(34); height: s(34); radius: s(10)
-                    color: colors.accent
-                    Text { anchors.centerIn: parent; text: "󰫧"; font.family: "Hack Nerd Font"; font.pixelSize: s(18); color: colors.base }
-                }
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    Text { text: "Dock Editor"; font.family: "Hack Nerd Font"; font.pixelSize: s(17); font.weight: Font.Black; color: colors.text }
-                    Text { text: "Customize the bar · SUPER+SHIFT+D · ESC to close"; font.family: "Hack Nerd Font"; font.pixelSize: s(10); color: colors.overlay1 }
-                }
+    Process {
+        id: scaleReader
+        command: ["bash", "-c", "cat ~/.config/hypr/settings.json 2>/dev/null | jq -r '.uiScale // 1'"]
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let v = parseFloat(this.text.trim());
+                if (!isNaN(v) && v > 0) root.uiScale = v;
             }
-            Rectangle { width: parent.width; height: 1; color: colors.surface1; opacity: 0.5 }
+        }
+    }
 
-            // scrollable cards
-            Flickable {
-                id: editorFlick
-                width: parent.width
-                height: parent.height - s(64)
-                contentHeight: cardsCol.height
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
+    Process {
+        id: paletteReader
+        command: ["cat", Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/dock/palettes/index.json"]
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { root.palettes = JSON.parse(this.text.trim()); } catch (e) {}
+            }
+        }
+    }
 
-                Column {
-                    id: cardsCol
-                    width: parent.width
-                    spacing: s(12)
+    Component.onCompleted: {
+        startupSequence.start();
+        reload();
+        paletteReader.running = true;
+        scaleReader.running = true;
+        // Push window-border colors to Hyprland live on palette re-apply and
+        // on settings.json changes (only this instance pushes).
+        themeColors.paletteApplied.connect(function() { themeColors.syncWindowBorders(); });
+        themeColors.settingsUpdated.connect(function() { themeColors.syncWindowBorders(); });
+        // Live palette editor: mirror every palette re-apply into the slot
+        // rows (own edits, palette switches and external changes all land here).
+        themeColors.paletteApplied.connect(function() { root.syncSlotValues(); });
+        themeColors.paletteNameChanged.connect(function() { root.checkBackupExists(); });
+        root.syncSlotValues();
+        Qt.callLater(root.syncNavPill);
+        root.ensurePage(root.currentPage);
+    }
 
-                    // ── CARD: ENGINE (D4-E2) ───────────────────────────────
-                    Rectangle {
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: engineCol.implicitHeight + s(28)
-                        Column {
-                            id: engineCol
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(10)
-                            SectionTitle { bar: root; text: "Engine" }
-                            Row {
-                                width: parent.width
-                                spacing: s(8)
-                                EditPill { bar: root; text: "Dock"; active: root.engine === "dock"; onActivated: root.setEngine("dock") }
-                                EditPill { bar: root; text: "Serpantinum"; active: root.engine === "serp"; onActivated: root.setEngine("serp") }
+    // ════ FASE 4: SECUENCIAS INTRO/CIERRE (GP:223-287) ════
+    // Escalonado: base 900 ms OutExpo · sidebar +150 ms 1000 ms OutBack 1.05 ·
+    // content +250 ms 1100 ms OutBack 1.02. El cierre colapsa content/sidebar
+    // (150 ms InExpo), luego base (200 ms InQuart) y solo entonces flush+close.
+    ParallelAnimation {
+        id: startupSequence
+        NumberAnimation { target: root; property: "introBase"; from: 0.0; to: 1.0; duration: 900; easing.type: Easing.OutExpo }
+        SequentialAnimation {
+            PauseAnimation { duration: 150 }
+            NumberAnimation { target: root; property: "introSidebar"; from: 0.0; to: 1.0; duration: 1000; easing.type: Easing.OutBack; easing.overshoot: 1.05 }
+        }
+        SequentialAnimation {
+            PauseAnimation { duration: 250 }
+            NumberAnimation { target: root; property: "introContent"; from: 0.0; to: 1.0; duration: 1100; easing.type: Easing.OutBack; easing.overshoot: 1.02 }
+        }
+    }
+
+    // Flush de ambos buffers antes de cerrar (mismo contrato que el ESC de la
+    // Fase 1: nunca perder un debounce pendiente).
+    function closeFlush() {
+        flushSave();
+        flushPaletteWrite();
+    }
+
+    SequentialAnimation {
+        id: closeSequence
+        ParallelAnimation {
+            NumberAnimation { target: root; property: "introContent"; to: 0.0; duration: 150; easing.type: Easing.InExpo }
+            NumberAnimation { target: root; property: "introSidebar"; to: 0.0; duration: 150; easing.type: Easing.InExpo }
+        }
+        NumberAnimation { target: root; property: "introBase"; to: 0.0; duration: 200; easing.type: Easing.InQuart }
+        ScriptAction { script: root.closeFlush() }
+        ScriptAction { script: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh close"]) }
+    }
+
+    // ════ PANEL (Fase 4: paridad visual con GuidePopup) ════
+    // Fondo base + borde surface0 1 px + radio s(21), SIN márgenes externos;
+    // wrapper con intro (opacity/scale, GP:292-303). Interior: Row con
+    // márgenes s(20) y spacing s(20) (GP:358-361).
+    Item {
+        anchors.fill: parent
+        opacity: root.introBase
+        scale: 0.95 + (0.05 * root.introBase)
+
+        Rectangle {
+            anchors.fill: parent
+            radius: s(21)
+            color: colors.base
+            border.width: 1
+            border.color: colors.surface0
+            clip: true
+
+            Row {
+                anchors.fill: parent
+                anchors.margins: s(20)
+                spacing: s(20)
+
+                // ── SIDEBAR (Fase 4: tokens del Guide) ──────────────────────
+                Rectangle {
+                    id: sidebar
+                    width: s(220)
+                    height: parent.height
+                    radius: s(16)
+                    color: Qt.alpha(colors.surface0, 0.4)
+                    border.width: 1
+                    border.color: colors.surface1
+                    clip: true
+                    opacity: root.introSidebar
+                    transform: Translate { x: s(-30) * (1.0 - root.introSidebar) }
+
+                    // Brand: caja mauve + título + paleta activa en vivo
+                    Column {
+                        id: brandCol
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: s(15)
+                        anchors.leftMargin: s(15)
+                        anchors.rightMargin: s(15)
+                        spacing: s(10)
+                        Row {
+                            width: parent.width
+                            spacing: s(12)
+                            Rectangle {
+                                width: s(36); height: s(36); radius: s(13)
+                                color: colors.mauve
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰫧"
+                                    font.family: "Hack Nerd Font"
+                                    font.pixelSize: s(20)
+                                    color: colors.crust
+                                }
                             }
-                            EditLabel {
-                                width: parent.width
-                                text: "Hot switch between the zone dock and the left/center/right bar."
-                                font.pixelSize: s(10)
-                                color: colors.overlay1
-                            }
-                        }
-                    }
-
-                    // ── CARD: POSICIÓN ────────────────────────────────────────
-                    Rectangle {
-                        visible: root.engine === "dock"
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: posCol.implicitHeight + s(28)
-                        Column {
-                            id: posCol
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(10)
-                            SectionTitle { bar: root; text: "Position" }
-                            Row {
-                                width: parent.width
-                                spacing: s(8)
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "top";    label: "Top";    glyph: "↑" }
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "bottom"; label: "Bottom";     glyph: "↓" }
-                            }
-                            Row {
-                                width: parent.width
-                                spacing: s(8)
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "left";   label: "Left"; glyph: "←" }
-                                PosCard { width: (parent.width - s(8)) / 2; bar: root; dockRef: root.dock; pos: "right";  label: "Right";   glyph: "→" }
-                            }
-                        }
-                    }
-
-                    // ── CARD: PALETA ──────────────────────────────────────────
-                    // Shown in BOTH engines (Phase R1): the palette is shared
-                    // through settings.json "dock.palette" — the classic serp
-                    // bar reads the same Colors roles, so switching palettes
-                    // recolors whichever engine is live. Writes go through
-                    // root.dock (the persisted dock config) exactly as before.
-                    Rectangle {
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: palCol.implicitHeight + s(28)
-                        Column {
-                            id: palCol
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(10)
-                            SectionTitle { bar: root; text: "Palette" }
-                            Flickable {
-                                width: parent.width
-                                height: s(100)
-                                contentWidth: palRow.width
-                                clip: true
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: s(2)
+                                Text {
+                                    text: "Dock Editor"
+                                    font.family: "Hack Nerd Font"
+                                    font.pixelSize: s(15)
+                                    font.weight: Font.Black
+                                    color: colors.text
+                                }
                                 Row {
-                                    id: palRow
-                                    spacing: s(8)
-                                    Repeater {
-                                        model: root.palettes
-                                        delegate: Item {
-                                            required property var modelData
-                                            property var pal: modelData
-                                            width: s(70)
-                                            height: s(100)
-                                            Rectangle {
-                                                width: parent.width
-                                                height: s(70)
-                                                radius: s(10)
-                                                color: root.dock.palette === pal.slug ? colors.accent : colors.surface2
-                                                opacity: root.dock.palette === pal.slug ? 1 : 0.5
-                                                Behavior on color { ColorAnimation { duration: 150 } }
-                                                Rectangle {
-                                                    anchors.fill: parent
-                                                    anchors.margins: s(2)
-                                                    radius: s(8)
-                                                    color: colors.base
-                                                    Column {
-                                                        anchors.centerIn: parent
-                                                        spacing: s(3)
-                                                        Row {
-                                                            spacing: s(3)
-                                                            Repeater { model: [0,1,2]; delegate: Rectangle { width: s(12); height: s(8); radius: s(2); color: pal.colors[0] } }
-                                                        }
-                                                        Row {
-                                                            spacing: s(3)
-                                                            Repeater { model: [0,1,2]; delegate: Rectangle { width: s(12); height: s(8); radius: s(2); color: pal.colors[1 + index] } }
-                                                        }
-                                                    }
-                                                }
-                                                Rectangle {
-                                                    anchors.right: parent.right; anchors.top: parent.top; anchors.margins: s(3)
-                                                    width: s(14); height: s(14); radius: s(7)
-                                                    visible: root.dock.palette === pal.slug
-                                                    color: colors.base
-                                                    Text { anchors.centerIn: parent; text: "✓"; font.family: "Hack Nerd Font"; font.pixelSize: s(9); color: colors.accent }
-                                                }
-                                            }
-                                            Text {
-                                                anchors.top: parent.top; anchors.topMargin: s(74)
-                                                anchors.horizontalCenter: parent.horizontalCenter
-                                                text: pal.name
-                                                font.family: "Hack Nerd Font"; font.pixelSize: s(10); font.weight: Font.Bold
-                                                color: root.dock.palette === pal.slug ? colors.text : colors.overlay1
-                                            }
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                onClicked: root.applyDock(Object.assign({}, root.dock, { palette: pal.slug }))
-                                            }
-                                        }
+                                    spacing: s(6)
+                                    Rectangle {
+                                        width: s(8); height: s(8); radius: s(4)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: colors.mauve
+                                    }
+                                    Text {
+                                        // Live palette name (Colors watcher keeps it fresh)
+                                        text: themeColors.paletteName
+                                        font.family: "Hack Nerd Font"
+                                        font.pixelSize: s(11)
+                                        color: colors.subtext0
+                                        anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
                             }
                         }
+                    }
+                    Rectangle {
+                        id: navHairline
+                        anchors.top: brandCol.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: s(10)
+                        anchors.leftMargin: s(15)
+                        anchors.rightMargin: s(15)
+                        height: 1
+                        color: Qt.alpha(colors.surface1, 0.5)
+                    }
 
-                        // Actions row: open/close the live base16 editor + Reset
-                        // (dimmed and inert until a session snapshot exists).
-                        Item {
+                    // Nav zone: navPill (mauve) es overlay viewport-fixed — NO
+                    // hija del Flickable: el contenido scrollea con contentY y
+                    // la píldora debe quedar pegada al slot de la fila activa.
+                    Item {
+                        id: navArea
+                        anchors.top: navHairline.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: footerCol.top
+                        anchors.topMargin: s(10)
+                        clip: true
+
+                        Rectangle {
+                            id: navPill
+                            x: colNav.x
+                            width: colNav.width
+                            height: s(44)
+                            radius: s(18)
+                            color: colors.mauve
+                            // y = target animado (idx*44) − scroll (GP:440-456).
+                            y: colNav.y + root.navPillTargetY - navFlick.contentY
+                        }
+
+                        Flickable {
+                            id: navFlick
+                            anchors.fill: parent
+                            clip: true
+                            boundsBehavior: Flickable.StopAtBounds
+                            contentHeight: colNav.height + s(15)
+                            ScrollBar.vertical: ScrollBar {
+                                id: navScroll
+                                width: s(4)
+                                policy: ScrollBar.AsNeeded
+                                hoverEnabled: true
+                                active: navFlick.moving || navScroll.hovered
+                                contentItem: Rectangle {
+                                    radius: s(2)
+                                    color: colors.surface2
+                                    opacity: navScroll.active ? 1.0 : 0.45
+                                }
+                                background: Item {}
+                            }
+
+                            Column {
+                                id: colNav
+                                x: s(15)
+                                width: navFlick.width - s(30)
+                                spacing: 0
+
+                                Repeater {
+                                    model: root.visibleNav()
+                                    delegate: NavItem {
+                                        required property var modelData
+                                        width: colNav.width
+                                        bar: root
+                                        icon: modelData.icon
+                                        label: modelData.label
+                                        active: root.currentPage === modelData.id
+                                        onActivated: root.gotoPage(modelData.id)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Footer hints
+                    Column {
+                        id: footerCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: s(15)
+                        anchors.rightMargin: s(15)
+                        anchors.bottomMargin: s(15)
+                        spacing: s(8)
+                        Rectangle {
                             width: parent.width
-                            height: s(30)
-                            Row {
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: s(8)
-                                EditPill {
-                                    bar: root
-                                    text: "Edit colors"
-                                    active: root.paletteEditOpen
-                                    onActivated: {
-                                        root.paletteEditOpen = !root.paletteEditOpen;
-                                        if (root.paletteEditOpen) {
-                                            root.syncSlotValues();
-                                            root.checkBackupExists();
-                                        }
-                                    }
-                                }
-                                EditPill {
-                                    bar: root
-                                    text: "Reset"
-                                    opacity: root._hasSessionBackup ? 1 : 0.45
-                                    onActivated: root.resetActivePalette()
-                                }
-                            }
-                            EditLabel {
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: root.paletteEditOpen ? ("Editing " + root.activeSlug() + (root._hasSessionBackup ? " · snapshot ready" : " · first edit saves a snapshot"))
-                                                           : "Recolor the active palette file live"
-                                font.pixelSize: s(10)
-                                color: colors.overlay1
-                            }
+                            height: 1
+                            color: Qt.alpha(colors.surface1, 0.5)
                         }
-
-                        // Inline base16 editor (visible while editing): 18 slots
-                        // (color0..15 + background + foreground), one compact
-                        // row per slot, 3 per line so nothing breaks the width.
                         Column {
                             width: parent.width
-                            visible: root.paletteEditOpen
-                            spacing: s(6)
-                            Flow {
-                                id: slotFlow
-                                width: parent.width
-                                spacing: s(8)
-                                Repeater {
-                                    model: root.slotDescriptors
-                                    delegate: Item {
-                                        required property var modelData
-                                        width: (slotFlow.width - s(16)) / 3
-                                        height: s(26)
-                                        Row {
-                                            anchors.fill: parent
-                                            spacing: s(6)
-                                            Rectangle {
-                                                id: chip
-                                                width: s(18)
-                                                height: s(18)
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                radius: s(5)
-                                                border.width: 1
-                                                border.color: colors.surface2
-                                            }
-                                            Text {
-                                                text: modelData.label
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                width: s(64)
-                                                font.family: "Hack Nerd Font"
-                                                font.pixelSize: s(10)
-                                                font.weight: Font.Bold
-                                                color: colors.text
-                                            }
-                                            TextField {
-                                                id: hexField
-                                                width: s(96)
-                                                height: s(24)
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                font.family: "Hack Nerd Font"
-                                                font.pixelSize: s(11)
-                                                color: colors.text
-                                                selectByMouse: true
-                                                maximumLength: 7
-                                                validator: RegularExpressionValidator { regularExpression: /^#[0-9a-fA-F]{6}$/ }
-                                                background: Rectangle {
-                                                    color: colors.surface1
-                                                    radius: s(6)
-                                                    border.width: 1
-                                                    border.color: hexField.acceptableInput ? colors.surface2 : "#e05561"
-                                                }
-                                                onEditingFinished: root.finishSlotEdit(hexField, modelData.key)
-                                                onActiveFocusChanged: {
-                                                    // Commit on blur too (clicking another row / closing the editor).
-                                                    if (!hexField.activeFocus) root.finishSlotEdit(hexField, modelData.key);
-                                                }
-                                            }
-                                        }
-                                        Component.onCompleted: root.registerSlot(modelData.key, hexField, chip)
-                                    }
-                                }
-                            }
+                            spacing: s(2)
                             Text {
-                                width: parent.width
-                                text: "Edits apply live to the dock, window borders and desktop widgets. Reset restores the session snapshot. Other palettes are untouched."
+                                text: "TAB / SHIFT+TAB — switch page"
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: s(10)
-                                color: colors.overlay1
-                                wrapMode: Text.WordWrap
-                            }
-                        }
-                    }
-
-                    // ── CARD: ASPECTO ─────────────────────────────────────────
-                    Rectangle {
-                        visible: root.engine === "dock"
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: aspCol.implicitHeight + s(28)
-                        Column {
-                            id: aspCol
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(9)
-                            SectionTitle { bar: root; text: "Appearance" }
-                            Item {
-                                width: parent.width
-                                height: s(34)
-                                EditLabel { bar: root; text: "Style"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Row {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: s(6)
-                                    EditPill { bar: root; text: "Modular"; active: root.dock.stylePreset === "modular"; onActivated: root.applyStyle("modular") }
-                                    EditPill { bar: root; text: "Solid"; active: root.dock.stylePreset === "solid"; onActivated: root.applyStyle("solid") }
-                                    EditPill { bar: root; text: "Fill"; active: root.dock.stylePreset === "fill"; onActivated: root.applyStyle("fill") }
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(22)
-                                Text {
-                                    anchors.fill: parent
-                                    text: "Modular: floating islands · Solid: continuous bar · Fill: edge-to-edge strip (no gap). Presets are shortcuts — manual tweaks below stay possible."
-                                    font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                    color: colors.overlay1
-                                    wrapMode: Text.WordWrap
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Roundness"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Stepper { bar: root; label: Math.round(root.dock.roundness*100)+"%"
-                                    anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { roundness: Math.max(0, +(root.dock.roundness-0.1).toFixed(1)) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { roundness: Math.min(1, +(root.dock.roundness+0.1).toFixed(1)) })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Thickness"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Stepper { bar: root; label: Math.round(root.dock.thickness)+"px"
-                                    anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { thickness: Math.max(32, root.dock.thickness-4) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { thickness: Math.min(96, root.dock.thickness+4) })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Edge margin"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Stepper { bar: root; label: Math.round(root.dock.edgeGap)+"px"
-                                    anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.max(0, root.dock.edgeGap-2) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { edgeGap: Math.min(24, root.dock.edgeGap+2) })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Island fill"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                ToggleSwitch { bar: root; checked: root.dock.pillBg; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { pillBg: !root.dock.pillBg })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Solid fill"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                ToggleSwitch { bar: root; checked: root.dock.pillSolid; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { pillSolid: !root.dock.pillSolid })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Unified bar"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                ToggleSwitch { bar: root; checked: root.dock.barBg; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { barBg: !root.dock.barBg })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Bar opacity"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Stepper { bar: root; label: Math.round(root.dock.barOpacity * 100) + "%"
-                                    anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                    onDec: root.applyDock(Object.assign({}, root.dock, { barOpacity: Math.max(0.2, +(root.dock.barOpacity - 0.05).toFixed(2)) }))
-                                    onInc: root.applyDock(Object.assign({}, root.dock, { barOpacity: Math.min(1.0, +(root.dock.barOpacity + 0.05).toFixed(2)) })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Drag modules"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                ToggleSwitch { bar: root; checked: root.dock.dragModules !== false; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applyDock(Object.assign({}, root.dock, { dragModules: root.dock.dragModules !== false ? false : true })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(34)
-                                Text {
-                                    anchors.fill: parent
-                                    text: "Tip: grab any island and drag it along the bar to reorder it between zones (release outside the bar cancels)."
-                                    font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                    color: colors.overlay1
-                                    wrapMode: Text.WordWrap
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(32)
-                                EditLabel { bar: root; text: "Font"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                TextField {
-                                    id: fontField
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: s(240)
-                                    height: s(30)
-                                    text: root.dock.font || "Hack Nerd Font"
-                                    font.family: text
-                                    font.pixelSize: s(12)
-                                    color: colors.text
-                                    selectByMouse: true
-                                    background: Rectangle { color: colors.surface1; radius: s(8); border.color: colors.surface2 }
-                                    onEditingFinished: {
-                                        let v = text.trim();
-                                        root.applyDock(Object.assign({}, root.dock, { font: v !== "" ? v : "Hack Nerd Font" }));
-                                    }
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Border (global)"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Row {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: s(8)
-                                    Stepper { bar: root; label: Math.round(root.dock.borderWidth)+"px"
-                                        onDec: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.max(0, root.dock.borderWidth-1) }))
-                                        onInc: root.applyDock(Object.assign({}, root.dock, { borderWidth: Math.min(8, root.dock.borderWidth+1) })) }
-                                    ColorCycle { bar: root; role: root.dock.borderColor; onCycled: (role) => root.applyDock(Object.assign({}, root.dock, { borderColor: role })) }
-                                }
-                            }
-                        }
-                    }
-
-                    // ── CARD: WINDOW BORDERS ──────────────────────────────────
-                    Rectangle {
-                        visible: root.engine === "dock"
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: winBordCol.implicitHeight + s(28)
-                        Column {
-                            id: winBordCol
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(9)
-                            SectionTitle { bar: root; text: "Window borders" }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Follow palette"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                ToggleSwitch { bar: root; checked: root.dock.borderFollowPalette !== false; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter;
-                                    onToggled: root.applyDock(Object.assign({}, root.dock, { borderFollowPalette: root.dock.borderFollowPalette !== false ? false : true })) }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                visible: root.dock.borderFollowPalette === false
-                                EditLabel { bar: root; text: "Target"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Row {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: s(8)
-                                    EditPill { bar: root; text: "Active"; active: root.borderTargetActive; onActivated: root.borderTargetActive = true }
-                                    EditPill { bar: root; text: "Inactive"; active: !root.borderTargetActive; onActivated: root.borderTargetActive = false }
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                visible: root.dock.borderFollowPalette === false
-                                EditLabel { bar: root; text: root.borderTargetActive ? "Active color" : "Inactive color"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Rectangle {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: s(92); height: s(26); radius: s(8)
-                                    color: root.borderTargetActive ? themeColors.borderHex("active") : themeColors.borderHex("inactive")
-                                    border.width: 1; border.color: colors.surface2
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: root.borderTargetActive ? themeColors.borderHex("active") : themeColors.borderHex("inactive")
-                                        font.family: "Hack Nerd Font"; font.pixelSize: s(9); font.weight: Font.Bold
-                                        color: colors.text
-                                    }
-                                }
-                            }
-                            Flow {
-                                width: parent.width
-                                visible: root.dock.borderFollowPalette === false
-                                spacing: s(6)
-                                Repeater {
-                                    model: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-                                    delegate: Rectangle {
-                                        required property int modelData
-                                        width: s(26); height: s(26); radius: s(7)
-                                        color: themeColors["color" + modelData]
-                                        border.width: 1; border.color: colors.surface2
-                                        Rectangle {
-                                            anchors.fill: parent; anchors.margins: s(2); radius: s(5)
-                                            visible: (root.borderTargetActive
-                                                ? themeColors.borderHex("active") === themeColors.hexOf(themeColors["color" + modelData])
-                                                : themeColors.borderHex("inactive") === themeColors.hexOf(themeColors["color" + modelData]))
-                                            border.width: 2; border.color: colors.text
-                                        }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                let hex = themeColors.hexOf(themeColors["color" + modelData]);
-                                                root.applyDock(Object.assign({}, root.dock, root.borderTargetActive
-                                                    ? { borderActive: hex }
-                                                    : { borderInactive: hex }));
-                                            }
-                                        }
-                                    }
-                                }
+                                color: colors.subtext0
                             }
                             Text {
-                                width: parent.width
-                                visible: root.dock.borderFollowPalette !== false
-                                text: "Borders follow the active palette accent. Turn this off to pick custom colors (applies live, no window restart)."
-                                font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                color: colors.overlay1
-                                wrapMode: Text.WordWrap
+                                text: "ESC — save & close"
+                                font.family: "Hack Nerd Font"
+                                font.pixelSize: s(10)
+                                color: colors.subtext0
                             }
                         }
                     }
+                }
 
-                    // ── CARD: ZONAS ───────────────────────────────────────────
-                    Rectangle {
-                        visible: root.engine === "dock"
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: zonasCol.implicitHeight + s(28)
-                        Column {
-                            id: zonasCard
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(8)
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                SectionTitle { bar: root; text: "Zones"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Row {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: s(8)
-                                    EditPill { bar: root; modelData: "add"; text: "+ Add"; accentFill: true; onActivated: root.applyDock(DockLayout.addZone(root.dock, "start")) }
-                                    EditPill { bar: root; text: "Center all"; onActivated: root.applyDock(DockLayout.arrangeAllInZone(root.dock, "center")) }
-                                    EditPill { bar: root; modelData: "reset"; text: "Default"; onActivated: root.applyDock(DockLayout.defaultDock()) }
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(24)
-                                Text {
-                                    anchors.fill: parent
-                                    text: "Center all gathers every enabled island into the center zone. Tip: drag a chip onto another zone card to move the island there (release between chips to choose the exact spot)."
-                                    font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                    color: colors.overlay1
-                                    wrapMode: Text.WordWrap
-                                }
-                            }
-                            Column {
-                                id: zonasCol
-                                width: parent.width
-                                spacing: s(8)
-                                Repeater {
-                                    model: root.dock.zones
-                                    delegate: ZoneEditorCard {
-                                        required property var modelData
-                                        required property int index
-                                        width: parent.width
-                                        bar: root
-                                        zoneData: modelData
-                                        zoneIndex: index
-                                    }
-                                }
-                            }
-                        }
+                // ── CONTENT STAGE (Fase 3 lazy Loaders + Fase 4 transición) ──
+                // Cada página se instancia UNA vez via ensurePage() (visible
+                // false conserva el item). Transición tipo Guide (GP:655-664):
+                // opacity 250 ms + slideY s(10) 250 ms OutQuart; el wrapper
+                // aplica la intro (opacity/scale/translate y).
+                Item {
+                    // Ancho = Row − sidebar − spacing s(20) (evita el overflow
+                    // que dejaba la stage 20 px fuera del panel).
+                    width: parent.width - s(220) - s(20)
+                    height: parent.height
+                    opacity: root.introContent
+                    scale: 0.95 + (0.05 * root.introContent)
+                    transform: Translate { y: s(20) * (1.0 - root.introContent) }
+
+                    Loader {
+                        id: generalLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "general"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: generalLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
-
-                    // ── CARD: WORKSPACES ──────────────────────────────────────
-                    Rectangle {
-                        width: parent.width
-                        radius: s(18)
-                        color: colors.surface0
-                        border.width: s(1); border.color: colors.surface1
-                        height: wsCol.implicitHeight + s(28)
-                        Column {
-                            id: wsCol
-                            anchors.fill: parent
-                            anchors.margins: s(14)
-                            spacing: s(9)
-                            SectionTitle { bar: root; text: "Workspaces" }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                EditLabel { bar: root; text: "Empty workspace"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                Row {
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: s(6)
-                                    EditPill { bar: root; text: "Numbers"; active: root.dock.workspacesMarker === "number"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "number" })) }
-                                    EditPill { bar: root; text: "Dots"; active: root.dock.workspacesMarker === "dot"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "dot" })) }
-                                    EditPill { bar: root; text: "Letters"; active: root.dock.workspacesMarker === "letter"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "letter" })) }
-                                    EditPill { bar: root; text: "Custom"; active: root.dock.workspacesMarker === "custom"; onActivated: root.applyDock(Object.assign({}, root.dock, { workspacesMarker: "custom" })) }
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(28)
-                                visible: root.dock.workspacesMarker === "custom"
-                                EditLabel { bar: root; text: "Character"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                TextField {
-                                    id: wsMarkerCharField
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: s(110)
-                                    height: s(28)
-                                    text: root.dock.workspacesMarkerText || ""
-                                    font.family: root.dock.font || "Hack Nerd Font"
-                                    font.pixelSize: s(13)
-                                    color: colors.text
-                                    selectByMouse: true
-                                    maximumLength: 4
-                                    background: Rectangle { color: colors.surface1; radius: s(8); border.color: colors.surface2 }
-                                    onEditingFinished: {
-                                        let v = text.trim().slice(0, 4);
-                                        if (v !== root.dock.workspacesMarkerText) {
-                                            root.applyDock(Object.assign({}, root.dock, { workspacesMarkerText: v }));
-                                        }
-                                    }
-                                }
-                            }
-                            Item {
-                                width: parent.width
-                                height: s(26)
-                                Text {
-                                    anchors.fill: parent
-                                    text: "Only for empty workspaces — occupied ones keep showing their app icons. Tip: the Container bg option in each zone adds a themed background behind its islands without unifying them."
-                                    font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                    color: colors.overlay1
-                                    wrapMode: Text.WordWrap
-                                }
-                            }
-                        }
+                    Loader {
+                        id: positionLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "position"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: positionLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
-                    // ════ SERP ENGINE CARDS (Phase D4-E2) ════
-                    // Visible only while root.engine === "serp": the classic
-                    // bar's position, style & size, module lists and quick
-                    // actions. Every edit lands on the top-level "serpbar"
-                    // settings key (never on "dock") through applySerp()/
-                    // commitSerpOp() and hot-reloads in the live host.
-                    Column {
-                        id: serpUi
-                        width: parent.width
-                        spacing: s(12)
-                        visible: root.engine === "serp"
-
-                        // ── SERP CARD: POSITION ────────────────────────────────
-                        Rectangle {
-                            width: parent.width
-                            radius: s(18)
-                            color: colors.surface0
-                            border.width: s(1); border.color: colors.surface1
-                            height: serpPosCol.implicitHeight + s(28)
-                            Column {
-                                id: serpPosCol
-                                anchors.fill: parent
-                                anchors.margins: s(14)
-                                spacing: s(10)
-                                SectionTitle { bar: root; text: "Position" }
-                                Row {
-                                    width: parent.width
-                                    spacing: s(8)
-                                    PosCardSerp { width: (parent.width - s(8)) / 2; bar: root; pos: "top"; label: "Top"; glyph: "↑"; onActivated: root.applySerp({ position: "top" }) }
-                                    PosCardSerp { width: (parent.width - s(8)) / 2; bar: root; pos: "bottom"; label: "Bottom"; glyph: "↓"; onActivated: root.applySerp({ position: "bottom" }) }
-                                }
-                                Row {
-                                    width: parent.width
-                                    spacing: s(8)
-                                    PosCardSerp { width: (parent.width - s(8)) / 2; bar: root; pos: "left"; label: "Left"; glyph: "←"; onActivated: root.applySerp({ position: "left" }) }
-                                    PosCardSerp { width: (parent.width - s(8)) / 2; bar: root; pos: "right"; label: "Right"; glyph: "→"; onActivated: root.applySerp({ position: "right" }) }
-                                }
-                            }
-                        }
-
-                        // ── SERP CARD: STYLE & SIZE ────────────────────────────
-                        Rectangle {
-                            width: parent.width
-                            radius: s(18)
-                            color: colors.surface0
-                            border.width: s(1); border.color: colors.surface1
-                            height: serpStyleCol.implicitHeight + s(28)
-                            Column {
-                                id: serpStyleCol
-                                anchors.fill: parent
-                                anchors.margins: s(14)
-                                spacing: s(9)
-                                SectionTitle { bar: root; text: "Style & size" }
-                                Item {
-                                    width: parent.width
-                                    height: s(34)
-                                    EditLabel { bar: root; text: "Style"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Row {
-                                        anchors.right: parent.right
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: s(6)
-                                        EditPill { bar: root; text: "Modular"; active: root.serp.style === "modular"; onActivated: root.applySerp({ style: "modular" }) }
-                                        EditPill { bar: root; text: "Solid"; active: root.serp.style === "solid"; onActivated: root.applySerp({ style: "solid" }) }
-                                        EditPill { bar: root; text: "Fill"; active: root.serp.style === "fill"; onActivated: root.applySerp({ style: "fill" }) }
-                                    }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    // serpantium offers distinct pills on every
-                                    // style but fill (BarTab.qml:1175: the fill
-                                    // bar is edge-to-edge and always unified).
-                                    visible: root.serp.style !== "fill"
-                                    EditLabel { bar: root; text: "Distinct pills"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    ToggleSwitch { bar: root; checked: root.serp.distinctPills === true; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applySerp({ distinctPills: root.serp.distinctPills !== true }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    // Corner knob for every serp unit (islands,
-                                    // groups, slabs, strip). roundness 0.6 ≈ the
-                                    // serpantium theme radius on a s(40) band.
-                                    EditLabel { bar: root; text: "Roundness"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Stepper { bar: root; label: Math.round(root.serp.roundness * 100) + "%"
-                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                        onDec: root.applySerp({ roundness: Math.max(0, +(root.serp.roundness - 0.1).toFixed(1)) })
-                                        onInc: root.applySerp({ roundness: Math.min(1, +(root.serp.roundness + 0.1).toFixed(1)) }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    EditLabel { bar: root; text: "Time format"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Row {
-                                        anchors.right: parent.right
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: s(6)
-                                        EditPill { bar: root; text: "24h"; active: root.serp.timeFormat === "HH:mm:ss" || !root.serp.timeFormat; onActivated: root.applySerp({ timeFormat: "HH:mm:ss" }) }
-                                        EditPill { bar: root; text: "24h :mm"; active: root.serp.timeFormat === "HH:mm"; onActivated: root.applySerp({ timeFormat: "HH:mm" }) }
-                                        EditPill { bar: root; text: "12h"; active: root.serp.timeFormat === "h:mm a"; onActivated: root.applySerp({ timeFormat: "h:mm a" }) }
-                                    }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    EditLabel { bar: root; text: "Thickness"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Stepper { bar: root; label: Math.round(root.serp.thickness !== null ? root.serp.thickness : root.dock.thickness) + "px"
-                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                        onDec: root.applySerp({ thickness: Math.max(24, Math.round(root.serp.thickness !== null ? root.serp.thickness : root.dock.thickness) - 4) })
-                                        onInc: root.applySerp({ thickness: Math.min(120, Math.round(root.serp.thickness !== null ? root.serp.thickness : root.dock.thickness) + 4) }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    visible: root.serp.style !== "modular"
-                                    EditLabel { bar: root; text: "Bar opacity"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Stepper { bar: root; label: Math.round(root.serp.opacity) + "%"
-                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                        onDec: root.applySerp({ opacity: Math.max(20, Math.round(root.serp.opacity) - 5) })
-                                        onInc: root.applySerp({ opacity: Math.min(100, Math.round(root.serp.opacity) + 5) }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    visible: root.serp.style !== "fill"
-                                    EditLabel { bar: root; text: "Width"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Stepper { bar: root; label: Math.round(root.serp.widthPercent) + "%"
-                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                        onDec: root.applySerp({ widthPercent: Math.max(40, Math.round(root.serp.widthPercent) - 5) })
-                                        onInc: root.applySerp({ widthPercent: Math.min(100, Math.round(root.serp.widthPercent) + 5) }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    EditLabel { bar: root; text: "Autohide"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    ToggleSwitch { bar: root; checked: root.serp.autohide === true; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; onToggled: root.applySerp({ autohide: root.serp.autohide !== true }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(28)
-                                    visible: root.serp.autohide === true
-                                    EditLabel { bar: root; text: "Hide delay"; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }
-                                    Stepper { bar: root; label: root.serp.autohideTimeout + "ms"
-                                        anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
-                                        onDec: root.applySerp({ autohideTimeout: Math.max(200, root.serp.autohideTimeout - 100) })
-                                        onInc: root.applySerp({ autohideTimeout: Math.min(5000, root.serp.autohideTimeout + 100) }) }
-                                }
-                                Item {
-                                    width: parent.width
-                                    height: s(24)
-                                    Text {
-                                        anchors.fill: parent
-                                        text: "Modular: floating islands · Solid: continuous strip · Fill: edge-to-edge strip (width locked at 100%). Distinct pills give every module and group its own subtle slab on the strip; opacity fades the strip itself. Thickness = the bar's own size (null inherits the dock engine's). Corners follow the shared Roundness knob (Dock engine → Appearance); module fonts follow dock.font. Autohide slides the bar off-screen; touching the screen edge reveals it."
-                                        font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                        color: colors.overlay1
-                                        wrapMode: Text.WordWrap
-                                    }
-                                }
-                            }
-                        }
-
-                        // ── SERP CARD: MODULES ─────────────────────────────────
-                        Rectangle {
-                            width: parent.width
-                            radius: s(18)
-                            color: colors.surface0
-                            border.width: s(1); border.color: colors.surface1
-                            height: serpModCard.implicitHeight + s(28)
-                            Column {
-                                id: serpModCard
-                                anchors.fill: parent
-                                anchors.margins: s(14)
-                                spacing: s(8)
-                                SectionTitle { bar: root; text: "Modules" }
-                                Item {
-                                    width: parent.width
-                                    height: s(24)
-                                    Text {
-                                        anchors.fill: parent
-                                        text: "Each box is one continuous pill (a group). Drag chips between sections, drop a chip onto a group to join it, drag group headers to move whole clusters, use – to send a module back to Available."
-                                        font.family: "Hack Nerd Font"; font.pixelSize: s(10)
-                                        color: colors.overlay1
-                                        wrapMode: Text.WordWrap
-                                    }
-                                }
-                                Column {
-                                    id: serpListsCol
-                                    width: parent.width
-                                    spacing: s(8)
-                                    SerpSectionCard { width: parent.width; bar: root; listId: "left" }
-                                    SerpSectionCard { width: parent.width; bar: root; listId: "center" }
-                                    SerpSectionCard { width: parent.width; bar: root; listId: "right" }
-                                    SerpSectionCard { width: parent.width; bar: root; listId: "available" }
-                                }
-                            }
-                        }
-
-                        // ── SERP CARD: ACTIONS ─────────────────────────────────
-                        Rectangle {
-                            width: parent.width
-                            radius: s(18)
-                            color: colors.surface0
-                            border.width: s(1); border.color: colors.surface1
-                            height: serpActCol.implicitHeight + s(28)
-                            Column {
-                                id: serpActCol
-                                anchors.fill: parent
-                                anchors.margins: s(14)
-                                spacing: s(10)
-                                SectionTitle { bar: root; text: "Actions" }
-                                Row {
-                                    width: parent.width
-                                    spacing: s(8)
-                                    EditPill { bar: root; text: "Mirror dock layout"; onActivated: root.applySerp({ modules: DockLayout.dockToSerpModules(root.dock) }) }
-                                    EditPill { bar: root; text: "Serp defaults"; onActivated: root.serpDefaultsAction() }
-                                }
-                                EditLabel {
-                                    width: parent.width
-                                    text: "Mirror imports the zone dock's enabled modules into the classic sections (the dock config itself stays untouched). Serp defaults restores the stock layout and keeps the current position."
-                                    font.pixelSize: s(10)
-                                    color: colors.overlay1
-                                    wrapMode: Text.WordWrap
-                                }
-                            }
-                        }
+                    Loader {
+                        id: styleLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "style"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: styleLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
-                    Item { width: 1; height: s(12) }
+                    Loader {
+                        id: paletteLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "palette"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: paletteLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: zonesLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "zones"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: zonesLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                        onLoaded: { if (zonesLoader.item) root.zonesPage = zonesLoader.item; }
+                    }
+                    Loader {
+                        id: workspacesLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "workspaces"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: workspacesLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: serpLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "serp"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: serpLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                        onLoaded: { if (serpLoader.item) root.serpPage = serpLoader.item; }
+                    }
                 }
             }
         }
     }
 
+    // ════ PAGE SIGNAL ROUTING (Phase 2/3) ════
+    // Pages never import DockLayout: they declare intent signals, this root
+    // computes and commits through the shared helpers. Targets are the lazy
+    // item properties (null until loaded): Connections follows the binding,
+    // so the routes arm themselves when zonesPage/serpPage get assigned in
+    // the Loaders' onLoaded.
+    Connections {
+        target: root.zonesPage
+        function onAddZone() { root.applyDock(DockLayout.addZone(root.dock, "start")); }
+        function onCenterAll() { root.applyDock(DockLayout.arrangeAllInZone(root.dock, "center")); }
+        function onResetDock() { root.applyDock(DockLayout.defaultDock()); }
+    }
+    Connections {
+        target: root.serpPage
+        function onMirrorDock() { root.mirrorDockAction(); }
+        function onSerpDefaults() { root.serpDefaultsAction(); }
+    }
+
     // ════ DnD GHOST (Phase D3) ════
-    // Floating chip that follows the pointer while a module chip drags. Purely
-    // visual (enabled: false) — the real input still belongs to the chip's
-    // MouseArea grab.
+    // Floating chip following the pointer during a drag. Purely visual
+    // (enabled: false) — input stays with the chip's MouseArea grab.
     Item {
         id: dndGhostLayer
         anchors.fill: parent
@@ -1473,8 +1041,7 @@ Item {
 
         Rectangle {
             id: dndGhost
-            // Whole-group drags have dndModuleId === "" (the ghost then shows
-            // the cluster glyph + member count via serpGroupCount()).
+            // group drags have dndModuleId === "" (glyph + member count).
             property bool groupGhost: root.dndModuleId === ""
             property var modInfo: root.dndModuleId !== "" ? DockLayout.getModule(root.dndModuleId) : null
             readonly property int ghostW: ghostRow.implicitWidth + root.s(24)
@@ -1483,7 +1050,7 @@ Item {
             x: root.dndPointer.x - width / 2
             y: root.dndPointer.y - height / 2 - root.s(8)
             radius: root.s(8)
-            color: colors.accent
+            color: colors.mauve
             opacity: 0.95
             scale: 1.06
             Behavior on x { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
@@ -1494,22 +1061,39 @@ Item {
                 spacing: root.s(5)
                 Text {
                     text: dndGhost.groupGhost ? "◧" : (dndGhost.modInfo ? dndGhost.modInfo.icon : "?")
-                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: colors.base
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(12); color: colors.crust
                 }
                 Text {
                     text: dndGhost.groupGhost
                         ? ("Group" + (root.serpGroupCount() > 0 ? " (" + root.serpGroupCount() + ")" : ""))
                         : (dndGhost.modInfo ? dndGhost.modInfo.label : root.dndModuleId)
-                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11); font.weight: Font.Bold; color: colors.base
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11); font.weight: Font.Bold; color: colors.crust
                 }
             }
         }
     }
 
+    // Fase 4: ESC ya no cierra en seco — closeSequence flushea los buffers
+    // pendientes (closeFlush) y anima la salida antes de qs_manager.sh close.
     Keys.onEscapePressed: {
-        flushSave();
-        flushPaletteWrite();
-        Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh close"]);
+        closeSequence.start();
         event.accepted = true;
+    }
+    // Phase 2: Tab / Shift+Tab cycle the pages visible under the current
+    // engine (same list the rail renders); ESC keeps the phase-1 contract.
+    Keys.onTabPressed: {
+        event.accepted = true;
+        let nav = root.navForEngine();
+        if (nav.length === 0) return;
+        let idx = root.navIndex(root.currentPage);
+        root.gotoPage(nav[(idx + 1) % nav.length].id);
+    }
+    Keys.onBacktabPressed: {
+        event.accepted = true;
+        let nav = root.navForEngine();
+        if (nav.length === 0) return;
+        let idx = root.navIndex(root.currentPage);
+        if (idx < 0) idx = 0;
+        root.gotoPage(nav[(idx - 1 + nav.length) % nav.length].id);
     }
 }
