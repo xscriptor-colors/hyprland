@@ -241,7 +241,7 @@ Item {
         // --- MÉTRICAS INTERNAS (mismas constantes que LauncherLayout.panelSize) ---
         property real searchHeight: window.s(65)
         property real separatorHeight: 1
-        property real itemHeight: window.s(60)
+        property real itemHeight: window.s(window.lcfg.rowHeight)
         property real listSpacing: window.s(4)
 
         property real targetMargins: appModel.count > 0 ? window.s(20) : 0
@@ -252,10 +252,11 @@ Item {
             NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 
         }
 
-        radius: window.s(21)
+        // Bordes configurables (radius/borderWidth/borderColor de la paleta).
+        radius: window.s(window.lcfg.radius)
         color: Qt.rgba(window.base.r, window.base.g, window.base.b, 1.0)
-        border.color: window.surface1
-        border.width: 1
+        border.color: window[window.lcfg.borderColor] !== undefined ? window[window.lcfg.borderColor] : window.surface1
+        border.width: window.s(window.lcfg.borderWidth)
         clip: true
 
         // Intro direccional (600 ms OutExpo): el panel "sale" de su extremo
@@ -310,6 +311,8 @@ Item {
                     placeholderTextColor: window.subtext0 
 
                     verticalAlignment: TextInput.AlignVCenter
+                    horizontalAlignment: window.lcfg.align === "center" ? TextInput.AlignHCenter
+                                       : (window.lcfg.align === "right" ? TextInput.AlignRight : TextInput.AlignLeft)
                     focus: true
 
                     onTextChanged: filterApps(text)
@@ -500,86 +503,106 @@ Item {
                         Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutSine } }
                     }
 
-                    RowLayout {
+                    Item {
+                        id: rowWrap
                         anchors.fill: parent
-                        anchors.margins: window.s(10)
+                        anchors.topMargin: window.s(10)
+                        anchors.bottomMargin: window.s(10)
                         anchors.leftMargin: window.s(12)
-                        // Sin iconos no debe quedar hueco a la izquierda.
-                        spacing: window.lcfg.showIcons ? window.s(15) : 0
+                        anchors.rightMargin: window.s(10)
 
-                        // --- TINTED ICON MATTE BOX (opcional: Show icons) ---
-                        Rectangle {
-                            visible: window.lcfg.showIcons
-                            Layout.preferredWidth: window.lcfg.showIcons ? window.s(40) : 0
-                            Layout.preferredHeight: window.lcfg.showIcons ? window.s(40) : 0
-                            radius: window.s(16)
+                        Row {
+                            id: rowContent
+                            anchors.verticalCenter: parent.verticalCenter
+                            // Alineación configurable (left/center/right) del icono + nombre.
+                            x: window.lcfg.align === "center" ? Math.max(0, (parent.width - width) / 2)
+                             : (window.lcfg.align === "right" ? Math.max(0, parent.width - width) : 0)
+                            // Sin iconos no debe quedar hueco a la izquierda.
+                            spacing: window.lcfg.showIcons ? window.s(15) : 0
 
-                            color: index === appList.currentIndex ? window.crust : window.surface0
-                            border.width: 0 
-                            clip: true
-
-                            property real activeScale: index === appList.currentIndex ? 1.15 : 1
-                            scale: activeScale
-                            Behavior on activeScale { 
-                                NumberAnimation { duration: 500; easing.type: Easing.OutBack; easing.overshoot: 1.5 } 
-                            }
-                            Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: model.name.charAt(0).toUpperCase()
-                                color: window.subtext0
-                                font.family: "Hack Nerd Font"
-                                font.pixelSize: window.s(16)
-                                font.weight: Font.Bold
-                            }
-                            Image {
-                                anchors.centerIn: parent
-                                width: window.s(24)
-                                height: window.s(24)
-                                source: model.icon && model.icon.length > 0
-                                    ? (model.icon.startsWith("/") ? "file://" + model.icon : "image://icon/" + model.icon)
-                                    : ""
-                                sourceSize: Qt.size(64, 64)
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
-                                smooth: true
-                                mipmap: true
-                                visible: source !== ""
-                            }
-
-                            // The Matugen Tint Overlay
+                            // --- TINTED ICON MATTE BOX (opcional: Show icons) ---
                             Rectangle {
-                                anchors.fill: parent
-                                radius: window.s(16) 
+                                id: iconBox
+                                visible: window.lcfg.showIcons
+                                // Tamaño proporcional a la fila: con rowHeight 60
+                                // equivale al s(40) histórico (radio 16, font 16, img 24).
+                                property real iconSize: Math.max(window.s(24), Math.min(window.s(40), mainBg.itemHeight - window.s(20)))
+                                width: visible ? iconSize : 0
+                                height: width
+                                radius: iconSize * 0.4
 
-                                color: window.mauve
-                                opacity: index === appList.currentIndex ? 0.25 : 0.08 
+                                color: index === appList.currentIndex ? window.crust : window.surface0
+                                border.width: 0 
+                                clip: true
 
-                                Behavior on opacity { 
-                                    NumberAnimation { duration: 300; easing.type: Easing.OutExpo } 
+                                property real activeScale: index === appList.currentIndex ? 1.15 : 1
+                                scale: activeScale
+                                Behavior on activeScale { 
+                                    NumberAnimation { duration: 500; easing.type: Easing.OutBack; easing.overshoot: 1.5 } 
+                                }
+                                Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: model.name.charAt(0).toUpperCase()
+                                    color: window.subtext0
+                                    font.family: "Hack Nerd Font"
+                                    font.pixelSize: iconBox.iconSize * 0.4
+                                    font.weight: Font.Bold
+                                }
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: iconBox.iconSize * 0.6
+                                    height: width
+                                    source: model.icon && model.icon.length > 0
+                                        ? (model.icon.startsWith("/") ? "file://" + model.icon : "image://icon/" + model.icon)
+                                        : ""
+                                    sourceSize: Qt.size(64, 64)
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                    smooth: true
+                                    mipmap: true
+                                    visible: source !== ""
+                                }
+
+                                // The Matugen Tint Overlay
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: iconBox.radius
+
+                                    color: window.mauve
+                                    opacity: index === appList.currentIndex ? 0.25 : 0.08 
+
+                                    Behavior on opacity { 
+                                        NumberAnimation { duration: 300; easing.type: Easing.OutExpo } 
+                                    }
                                 }
                             }
-                        }
 
-                        Text {
-                            Layout.fillWidth: true
-                            text: model.name
-                            font.family: "Hack Nerd Font"
-                            font.pixelSize: window.s(14)
-                            id: launchItem
-                            font.weight: index === appList.currentIndex ? Font.Bold : Font.Medium
-                            color: index === appList.currentIndex ? window.crust : window.text
-                            elide: Text.ElideRight
-                            verticalAlignment: Text.AlignVCenter
+                            Text {
+                                id: launchItem
+                                // El nombre se recorta al espacio libre (sin icono,
+                                // todo el ancho disponible). height = alto de fila
+                                // para que verticalAlignment centre el texto (un
+                                // Row no centra a sus hijos verticalmente).
+                                width: Math.min(implicitWidth, rowWrap.width - (iconBox.visible ? iconBox.width + rowContent.spacing : 0))
+                                height: rowWrap.height
+                                text: model.name
+                                font.family: "Hack Nerd Font"
+                                font.pixelSize: window.s(14)
+                                font.weight: index === appList.currentIndex ? Font.Bold : Font.Medium
+                                color: index === appList.currentIndex ? window.crust : window.text
+                                elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
 
-                            property real textShift: index === appList.currentIndex ? window.s(6) : 0
-                            transform: Translate { x: launchItem.textShift }
+                                property real textShift: index === appList.currentIndex ? window.s(6) : 0
+                                transform: Translate { x: launchItem.textShift }
 
-                            Behavior on textShift { 
-                                NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 
+                                Behavior on textShift { 
+                                    NumberAnimation { duration: 500; easing.type: Easing.OutExpo } 
+                                }
+                                Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
                             }
-                            Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutExpo } }
                         }
                     }
 

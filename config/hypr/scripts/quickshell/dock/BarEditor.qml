@@ -160,7 +160,7 @@ Item {
     // propiedad, por lo que los bindings que leen Config.rawSettings no se
     // re-evalúan; este property local sí notifica y mantiene la UI en vivo.
     property var launcherCfg: (function() {
-        let d = { position: "center", width: 800, maxApps: 8, margin: 24, avoidBar: true, showIcons: true };
+        let d = { position: "center", width: 800, maxApps: 8, margin: 24, avoidBar: true, showIcons: true, rowHeight: 60, align: "left", radius: 21, borderWidth: 1, borderColor: "surface1" };
         let raw = Config.rawSettings.launcher;
         return (raw && typeof raw === "object") ? Object.assign({}, d, raw) : d;
     })()

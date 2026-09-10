@@ -159,8 +159,66 @@ Item {
                         bar: root.bar
                         label: "Margin"
                         value: Math.round(root.bar.launcherCfg.margin) + "px"
-                        onDec: root.bar.applyLauncher({ margin: Math.max(0, root.bar.launcherCfg.margin - 8) })
+                        onDec: root.bar.applyLauncher({ margin: Math.max(-200, root.bar.launcherCfg.margin - 8) })
                         onInc: root.bar.applyLauncher({ margin: Math.min(200, root.bar.launcherCfg.margin + 8) })
+                    }
+                    StepperCard {
+                        width: parent.width
+                        bar: root.bar
+                        label: "Row height"
+                        value: Math.round(root.bar.launcherCfg.rowHeight) + "px"
+                        onDec: root.bar.applyLauncher({ rowHeight: Math.max(40, root.bar.launcherCfg.rowHeight - 4) })
+                        onInc: root.bar.applyLauncher({ rowHeight: Math.min(80, root.bar.launcherCfg.rowHeight + 4) })
+                    }
+
+                    // ── Bordes ──────────────────────────────────────────────
+                    Text {
+                        text: "Borders"
+                        font.family: "Hack Nerd Font"
+                        font.weight: Font.Black
+                        font.pixelSize: bar.s(16)
+                        color: bar.colors.text
+                    }
+                    StepperCard {
+                        width: parent.width
+                        bar: root.bar
+                        label: "Border width"
+                        value: Math.round(root.bar.launcherCfg.borderWidth) + "px"
+                        onDec: root.bar.applyLauncher({ borderWidth: Math.max(0, root.bar.launcherCfg.borderWidth - 1) })
+                        onInc: root.bar.applyLauncher({ borderWidth: Math.min(4, root.bar.launcherCfg.borderWidth + 1) })
+                    }
+                    StepperCard {
+                        width: parent.width
+                        bar: root.bar
+                        label: "Radius"
+                        value: Math.round(root.bar.launcherCfg.radius) + "px"
+                        onDec: root.bar.applyLauncher({ radius: Math.max(0, root.bar.launcherCfg.radius - 2) })
+                        onInc: root.bar.applyLauncher({ radius: Math.min(28, root.bar.launcherCfg.radius + 2) })
+                    }
+                    Item {
+                        width: parent.width
+                        height: bar.s(44)
+                        EditLabel {
+                            bar: root.bar
+                            text: "Border color"
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        ColorCycle {
+                            bar: root.bar
+                            role: root.bar.launcherCfg.borderColor
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            onCycled: (role) => root.bar.applyLauncher({ borderColor: role })
+                        }
+                    }
+                    EditLabel {
+                        bar: root.bar
+                        width: parent.width
+                        text: "Border width 0 hides the border. Negative margin pushes the panel past the screen edge so it looks like it slides out of its side."
+                        font.pixelSize: bar.s(11)
+                        color: bar.colors.subtext0
+                        wrapMode: Text.WordWrap
                     }
 
                     // ── Anti-solape con la barra ────────────────────────────
@@ -179,6 +237,44 @@ Item {
                         label: "Show icons"
                         checked: root.bar.launcherCfg.showIcons
                         onToggled: root.bar.applyLauncher({ showIcons: !root.bar.launcherCfg.showIcons })
+                    }
+                    // ── Alineación del contenido ────────────────────────────
+                    Text {
+                        text: "Content alignment"
+                        font.family: "Hack Nerd Font"
+                        font.weight: Font.Black
+                        font.pixelSize: bar.s(16)
+                        color: bar.colors.text
+                    }
+                    GridLayout {
+                        width: parent.width
+                        columns: 3
+                        columnSpacing: bar.s(10)
+                        rowSpacing: bar.s(10)
+                        OptionCard {
+                            Layout.fillWidth: true
+                            bar: root.bar
+                            icon: "⇤"
+                            label: "Left"
+                            active: root.bar.launcherCfg.align === "left"
+                            onActivated: root.bar.applyLauncher({ align: "left" })
+                        }
+                        OptionCard {
+                            Layout.fillWidth: true
+                            bar: root.bar
+                            icon: "↔"
+                            label: "Center"
+                            active: root.bar.launcherCfg.align === "center"
+                            onActivated: root.bar.applyLauncher({ align: "center" })
+                        }
+                        OptionCard {
+                            Layout.fillWidth: true
+                            bar: root.bar
+                            icon: "⇥"
+                            label: "Right"
+                            active: root.bar.launcherCfg.align === "right"
+                            onActivated: root.bar.applyLauncher({ align: "right" })
+                        }
                     }
 
                     EditLabel {
