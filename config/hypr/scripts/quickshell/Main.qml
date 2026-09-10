@@ -145,7 +145,6 @@ PanelWindow {
     }
 
     Component.onCompleted: {
-        Qt.callLater(() => preloadWidget("settings"));
         preloadStaggerTimer.start();
     }
 

@@ -53,6 +53,60 @@ Item {
     property real introSidebar: 0.0
     property real introContent: 0.0
 
+    // ════ BUSCADOR GLOBAL (overlay estilo Guide) ════
+    // Migrado de settings/SettingsPopup.qml: `/` (o Ctrl+F) abre el overlay,
+    // que cubre la stage con búsqueda de settings (cards + páginas d_*) y
+    // keybinds. El overlay se carga lazy con setSource (patrón Fase 3, evita
+    // el burst de null-bar de instanciarlo tipado).
+    property bool searchOpen: false
+    function ensureSearchOverlay() {
+        if (!searchLoader.item)
+            searchLoader.setSource("editor/SearchOverlay.qml", { bar: root });
+    }
+    function openSearch() {
+        root.ensureSearchOverlay();
+        root.searchOpen = true;
+        if (searchLoader.item) searchLoader.item.open();
+    }
+    function closeSearch() {
+        if (searchLoader.item) searchLoader.item.close();
+    }
+    // El overlay resalta una caja de una tab de settings a través del adapter
+    // (settingsHost es un id local; los ficheros externos no pueden verlo).
+    function highlightSettingsBox(boxIndex) {
+        settingsHost.highlightedBox = boxIndex;
+    }
+
+    // ════ ACTIVE MODE (qs_manager.sh toggle bar-editor <mode>) ════
+    // Mismo contrato que SettingsPopup.activeMode: Main.qml escribe esta
+    // propiedad al abrir/togglear la ventana con argumento. Los modos de
+    // settings abren su tab (s_*) y los del editor su página (d_*); si el
+    // valor ya es un page id válido, se abre esa página.
+    property string activeMode: ""
+    property string activeModePage: ""
+    onActiveModeChanged: root.applyActiveMode()
+    function applyActiveMode() {
+        if (root.activeMode === "") return;
+        let map = {
+            "general": "s_general", "weather": "s_weather", "keyboard": "s_keyboard",
+            "monitors": "s_monitors", "startup": "s_startup", "topbar": "d_engine",
+            "bar": "d_engine", "engine": "d_engine", "launcher": "d_launcher",
+            "hyprland": "d_hyprland", "idle": "d_idle", "gpu": "d_gpu",
+            "notifications": "d_notifications"
+        };
+        let page = map[root.activeMode] !== undefined ? map[root.activeMode] : root.activeMode;
+        if (root.navIndex(page) === -1) return;
+        // Timer (220 ms, como el popup): la ventana acaba de abrirse y la
+        // intro anima; el layout debe estar resuelto antes de navegar.
+        root.activeModePage = page;
+        activeModeTimer.restart();
+    }
+    Timer {
+        id: activeModeTimer
+        interval: 220
+        onTriggered: if (root.activeModePage !== "") root.gotoPage(root.activeModePage);
+    }
+
     // ════ DUAL ENGINE STATE (Phase D4-E2) ════
     // The editor edits whichever engine settings.json says is live ("dock" or
     // "serp"); root.serp mirrors the "serpbar" key, dock config untouched.
@@ -411,7 +465,6 @@ Item {
             { id: "s_keyboard", icon: "󰌌", label: "Keyboard" },
             { id: "s_monitors", icon: "󰍹", label: "Monitors" },
             { id: "s_startup",  icon: "󰐥", label: "Startup" },
-            { id: "s_topbar",   icon: "󰹑", label: "Topbar" },
             { id: "d_launcher", icon: "󰀻", label: "Launcher" }
         ] },
         { id: "dockbar", label: "Dock / Bar", expandable: true, items: [
@@ -504,7 +557,6 @@ Item {
             "s_keyboard": "../settings/tabs/KeybindTab.qml",
             "s_monitors": "../settings/tabs/MonitorsTab.qml",
             "s_startup":  "../settings/tabs/StartupTab.qml",
-            "s_topbar":   "../settings/tabs/TopbarTab.qml",
             // Páginas del editor (bar = root)
             "d_engine":     "editor/GeneralPage.qml",
             "d_position":   "editor/PositionPage.qml",
@@ -528,7 +580,6 @@ Item {
             "s_keyboard": sKeyboardLoader,
             "s_monitors": sMonitorsLoader,
             "s_startup":  sStartupLoader,
-            "s_topbar":   sTopbarLoader,
             "d_engine":     dEngineLoader,
             "d_position":   dPositionLoader,
             "d_style":      dStyleLoader,
@@ -901,14 +952,17 @@ Item {
 
         Connections {
             target: Config
-            function onKeybindsLoaded() { populateKbModel(); }
-            function onKeybindsDataChanged() { populateKbModel(); }
-            function onStartupLoaded() { populateStartupModel(); }
-            function onStartupDataChanged() { populateStartupModel(); }
+            // Los handlers de Connections no ven los métodos del Item padre
+            // (cadena de scope: Connections → root → global), por eso hay que
+            // cualificar con el id: sin esto los modelos nunca se poblaban.
+            function onKeybindsLoaded() { settingsHost.populateKbModel(); }
+            function onKeybindsDataChanged() { settingsHost.populateKbModel(); }
+            function onStartupLoaded() { settingsHost.populateStartupModel(); }
+            function onStartupDataChanged() { settingsHost.populateStartupModel(); }
             function onDataReadyChanged() {
                 if (Config.dataReady) {
-                    populateKbModel();
-                    populateStartupModel();
+                    settingsHost.populateKbModel();
+                    settingsHost.populateStartupModel();
                 }
             }
         }
@@ -1249,6 +1303,16 @@ Item {
                         anchors.rightMargin: s(15)
                         anchors.bottomMargin: s(15)
                         spacing: s(8)
+                        // Buscador global (botón lupa, misma acción que `/`).
+                        EditorButton {
+                            compact: true
+                            bar: root
+                            icon: "󰍉"
+                            label: "Search"
+                            accentRole: "sapphire"
+                            width: parent.width
+                            onActivated: root.openSearch()
+                        }
                         Rectangle {
                             width: parent.width
                             height: 1
@@ -1265,6 +1329,12 @@ Item {
                             }
                             Text {
                                 text: "ESC — save & close"
+                                font.family: "Hack Nerd Font"
+                                font.pixelSize: s(10)
+                                color: colors.subtext0
+                            }
+                            Text {
+                                text: "/ — search settings"
                                 font.family: "Hack Nerd Font"
                                 font.pixelSize: s(10)
                                 color: colors.subtext0
@@ -1460,16 +1530,6 @@ Item {
                         transform: Translate { y: sStartupLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
-                    Loader {
-                        id: sTopbarLoader
-                        anchors.fill: parent
-                        visible: root.currentPage === "s_topbar"
-                        opacity: visible ? 1.0 : 0.0
-                        property real slideY: visible ? 0 : root.s(10)
-                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: sTopbarLoader.slideY }
-                        Behavior on opacity { NumberAnimation { duration: 250 } }
-                    }
 
                     // ── ADD FLOTANTE (Keyboard / Startup) ───────────────────
                     // El botón "+ Add" del popup vive en SU header (fuera de las
@@ -1496,6 +1556,24 @@ Item {
                                 let l = root.pageLoader("s_keyboard");
                                 if (l && l.item && l.item.scrollToBottom) Qt.callLater(() => l.item.scrollToBottom());
                             }
+                        }
+                    }
+
+                    // ── BUSCADOR GLOBAL (overlay estilo Guide) ──────────────
+                    // Cubre toda la stage (z por encima del "+ Add"). El item se
+                    // crea en el primer openSearch() y persiste (setSource).
+                    Loader {
+                        id: searchLoader
+                        anchors.fill: parent
+                        z: 200
+                        // Salvaguarda: si setSource cargase async, abrir al cargar.
+                        onLoaded: if (root.searchOpen && item) item.open();
+                    }
+                    Connections {
+                        target: searchLoader.item
+                        function onClosed() {
+                            root.searchOpen = false;
+                            root.forceActiveFocus();
                         }
                     }
                 }
@@ -1567,14 +1645,23 @@ Item {
 
     // Fase 4: ESC ya no cierra en seco — closeSequence flushea los buffers
     // pendientes (closeFlush) y anima la salida antes de qs_manager.sh close.
+    // Buscador (Fase 5): si el overlay está abierto, ESC lo cierra primero y
+    // NO cierra el panel (el overlay devuelve el foco con onClosed).
     Keys.onEscapePressed: {
+        if (root.searchOpen) {
+            root.closeSearch();
+            event.accepted = true;
+            return;
+        }
         closeSequence.start();
         event.accepted = true;
     }
     // Phase 2: Tab / Shift+Tab cycle the pages visible under the current
     // engine (same list the rail renders); ESC keeps the phase-1 contract.
+    // Con el buscador abierto no cambian de página (el foco vive en el input).
     Keys.onTabPressed: {
         event.accepted = true;
+        if (root.searchOpen) return;
         let nav = root.navForEngine();
         if (nav.length === 0) return;
         let idx = root.navIndex(root.currentPage);
@@ -1582,10 +1669,22 @@ Item {
     }
     Keys.onBacktabPressed: {
         event.accepted = true;
+        if (root.searchOpen) return;
         let nav = root.navForEngine();
         if (nav.length === 0) return;
         let idx = root.navIndex(root.currentPage);
         if (idx < 0) idx = 0;
         root.gotoPage(nav[(idx - 1 + nav.length) % nav.length].id);
+    }
+    // Buscador global: `/` o Ctrl+F lo abren (misma semántica que el popup).
+    // Los TextField consumen `/` al escribir, así que solo llega aquí cuando
+    // el foco no está en un input.
+    Keys.onPressed: {
+        if (root.searchOpen) return;
+        if (event.key === Qt.Key_Slash
+            || (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier))) {
+            root.openSearch();
+            event.accepted = true;
+        }
     }
 }

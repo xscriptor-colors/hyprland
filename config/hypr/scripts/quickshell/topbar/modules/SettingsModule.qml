@@ -10,7 +10,7 @@ ModulePill {
     idleRole: "text"
     hoverRole: "blue"
 
-    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle settings"])
+    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle bar-editor"])
 
     Text {
         text: "󰕙"

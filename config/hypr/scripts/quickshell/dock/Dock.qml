@@ -518,9 +518,6 @@ Variants {
             property int pillWidth: orientation === "horizontal" ? barHeight - s(12) : barWidth - s(8)
             function pillRadius(h) { return Math.round(h * 0.5 * roundness); }
 
-            // The settings panel occupies the edge opposite a left/right dock.
-            property bool panelFromLeft: position !== "left"
-
             implicitHeight: orientation === "horizontal" ? barHeight : (dockWindow.screen ? dockWindow.screen.height : 1080)
             implicitWidth: orientation === "horizontal" ? (dockWindow.screen ? dockWindow.screen.width : 1920) : barWidth
 
@@ -622,12 +619,11 @@ Variants {
             // ================================================================
             property bool pendingReload: false
             property string activeWidget: ""
-            property bool isSettingsOpen: activeWidget === "settings"
-            property real settingsSlideProgress: isSettingsOpen ? 1.0 : 0.0
-            Behavior on settingsSlideProgress {
-                enabled: dockWindow.startupCascadeFinished
-                NumberAnimation { duration: 600; easing.type: Easing.OutExpo }
-            }
+            // El panel Settings unificado (bar-editor, SUPER+SHIFT+S/D) sustituye
+            // al antiguo popup "settings"; ambos ids cuentan como panel abierto.
+            // Solo se usa para diferir reloads y mantener la barra serp visible:
+            // el panel nuevo es CENTRADO, así que la barra NO se desplaza.
+            property bool isSettingsOpen: activeWidget === "settings" || activeWidget === "bar-editor"
             onIsSettingsOpenChanged: {
                 if (!dockWindow.isSettingsOpen && dockWindow.pendingReload) {
                     dockWindow.pendingReload = false;
@@ -1222,11 +1218,6 @@ Variants {
             Item {
                 id: barContent
                 anchors.fill: parent
-
-                // Settings panel occupies an edge while open; shift the dock
-                // content so nothing sits underneath it.
-                anchors.leftMargin: settingsSlideProgress * (dockWindow.panelFromLeft ? s(780) : 0)
-                anchors.rightMargin: settingsSlideProgress * (dockWindow.panelFromLeft ? 0 : s(780))
 
                 // Zones only build once uiScale/baseScale are final (bar.s() is a
                 // function, so modules can't reactively rescale after creation).

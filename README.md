@@ -89,7 +89,7 @@ chmod +x install.sh
 
 <h2>Customization</h2>
 
-<p><code>SUPER + W</code> wallpaper picker &middot; <code>SUPER + SHIFT + S</code> settings panel (scale, language, startup) &middot; <code>SUPER + SHIFT + D</code> dock editor (palette, borders, zones) &middot; <code>SUPER + SHIFT + B</code> window effects (opacity, blur, rounding)</p>
+<p><code>SUPER + W</code> wallpaper picker &middot; <code>SUPER + SHIFT + S</code> / <code>SUPER + SHIFT + D</code> settings panel (unified bar-editor: scale, language, startup, dock, palette, borders, zones) &middot; <code>SUPER + SHIFT + B</code> window effects (opacity, blur, rounding)</p>
 <p>See <a href="docs/hyprland-config.md">Hyprland Config</a> for file structure, <a href="docs/quick-reference.md">Quick Reference</a> for all keybinds, and <a href="docs/quickshell-widgets.md">Widgets</a> for widget details.</p>
 
 <hr>

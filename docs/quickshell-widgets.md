@@ -27,7 +27,7 @@ Accessible via keybinds (SUPER + letter):
 | Music Player | `music/MusicPopup.qml` | SUPER + M | Top left |
 | Wallpaper Picker | `wallpaper/WallpaperPicker.qml` | SUPER + W | Center |
 | Guide/Help | `guide/GuidePopup.qml` | SUPER + H | Center |
-| Settings | `settings/SettingsPopup.qml` | SUPER + SHIFT + S | Left edge |
+| Settings | `dock/BarEditor.qml` | SUPER + SHIFT + S / D | Center |
 | Display Scale | `scale/ScalePicker.qml` | SUPER + Z | Center |
 | Focus Time | `focustime/FocusTimePopup.qml` | SUPER + SHIFT + T | Center |
 | Updater | `updater/UpdaterPopup.qml` | SUPER + U | Center |

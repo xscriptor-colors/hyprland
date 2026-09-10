@@ -364,7 +364,7 @@ Spacing between adjacent entries: `s(8)` in modular, `s(2)` on the strip
   along the cross axis (250 ms OutExpo) leaving only the tab; the exclusive
   zone drops to 0 while hidden and the input mask shrinks to the sliver, so
   maximized windows are fully usable. Hovering the tab (or the leftover
-  sliver) reveals it again. The settings popup keeps the bar revealed.
+  sliver) reveals it again. The settings panel (SUPER+SHIFT+D) keeps the bar revealed.
 - When sections do not fit (center + sides overlap), side sections keep their
   edge positions and the strip clip trims the overflow.
 
@@ -430,7 +430,7 @@ differences** are listed at the end.
 
 ## 7. Roadmap (mega menu)
 
-1. **Dock tab** in `SettingsPopup.qml` (replaces the old "Topbar" tab): position picker,
+1. **Bar pages** in `dock/BarEditor.qml` (replaces the old "Topbar" tab): position picker,
    palette picker, roundness/pill/border controls (reusing the existing live-edit +
    debounced-save pattern), and a **zone editor** that CRUDs on `dock.zones`.
 2. **Per-module options** (`dock.modules.<id>.*`): accent color, icon, label, click action,
