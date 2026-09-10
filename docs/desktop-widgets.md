@@ -20,7 +20,7 @@ quickshell/
 
 The widget subsystem is **live-themed**: faces read the `Theme` singleton
 (`dock/palettes/<active>.json`, same derivation as the dock) and the shared `Cava`
-singleton feeds the visualizers, so switching the palette in the Dock Editor recolors
+singleton feeds the visualizers, so switching the palette in the Settings panel recolors
 every widget instantly without a reload.
 
 ---
@@ -126,7 +126,7 @@ Image widgets pull from the wallpaper collection:
   `Cava` instance only while they are actually visible. During an editor session the
   hidden previews never register consumers, so no double audio processing occurs.
 - **Palette is live**: all faces and the editor chrome bind `Theme` colors; editing
-  or switching palettes (Dock Editor → Palette) repaints them instantly.
+  or switching palettes (Settings panel → Palette) repaints them instantly.
 - **Multi-monitor**: the editor edits the monitor it opens on (the one where the
   central popup appears); every monitor keeps an independent `layout.json`.
 - **Z order** follows the widget list order: the last added widget renders on top.

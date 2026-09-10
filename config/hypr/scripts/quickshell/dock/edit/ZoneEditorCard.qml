@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import "../DockLayout.js" as DockLayout
 
-// Per-zone editor card for the DockEditor. Height grows with content so the
+// Per-zone editor card for the BarEditor. Height grows with content so the
 // module chips never overlap the rows below. Width is managed by the parent
 // layout (Layout.fillWidth) so it never fights the container.
 //
 // ── Editor module drag & drop (Phase D3) ────────────────────────────────────
-// The DockEditor (this card's `bar`) coordinates ONE editor-wide drag session:
+// The BarEditor (this card's `bar`) coordinates ONE editor-wide drag session:
 //   * ENABLED chips are draggable with the left button past a ~bar.s(10)
 //     visual threshold; short presses stay clicks, so the chip toggle and the
 //     ◀ ▶ buttons (which sit above this area) keep working untouched.
@@ -21,7 +21,7 @@ import "../DockLayout.js" as DockLayout
 //     click, then they can be dragged like any other chip.
 //   * A card with zero chips is still a valid drop target (index 0).
 //   * Dropping outside every card cancels the gesture.
-// Contract with the DockEditor:
+// Contract with the BarEditor:
 //   * bar.startDnd(zoneId, moduleId) / bar.updateDnd(px,py) /
 //     bar.endDnd(px,py) / bar.cancelDnd() plus bar.dndBusy + bar.dndModuleId.
 //   * The editor enumerates the cards through the Zones card's column children
@@ -282,7 +282,7 @@ Rectangle {
                     }
                     // Chip click (toggle) + editor drag & drop (Phase D3).
                     // Short presses toggle; movements past ~s(10) px start a
-                    // drag session owned by the DockEditor (bar.startDnd…).
+                    // drag session owned by the BarEditor (bar.startDnd…).
                     MouseArea {
                         id: chipDrag
                         anchors.fill: parent

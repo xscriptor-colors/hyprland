@@ -1,6 +1,6 @@
 import QtQuick
 
-// on/off toggle del DockEditor (Fase 4: familia GuidePopup).
+// on/off toggle del BarEditor (Fase 4: familia GuidePopup).
 // Track: surface1 (off) → mauve (on); handle: text (off) → crust (on);
 // press scale 0.95 (200 ms OutBack). API intacta: checked / toggled().
 Rectangle {

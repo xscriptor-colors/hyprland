@@ -1,6 +1,6 @@
 import QtQuick
 
-// Ciclo de color de borde del DockEditor (Fase 4: familia GuidePopup).
+// Ciclo de color de borde del BarEditor (Fase 4: familia GuidePopup).
 // alpha(surface0, 0.4) + borde surface1; hover alpha(mauve, 0.15) + borde
 // mauve; press scale 0.95. API intacta: bar / role / cycled().
 Rectangle {

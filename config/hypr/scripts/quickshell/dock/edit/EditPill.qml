@@ -1,6 +1,6 @@
 import QtQuick
 
-// Opción segmentada del DockEditor (Fase 4: familia GuidePopup).
+// Opción segmentada del BarEditor (Fase 4: familia GuidePopup).
 // Inactiva: alpha(surface0, 0.4) + borde surface1; hover: alpha(mauve, 0.12) +
 // borde mauve; activa: relleno mauve + texto crust; press scale 0.95 (150 ms).
 // API intacta: bar / modelData / text / active / accentFill / activated().

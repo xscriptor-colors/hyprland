@@ -2,14 +2,14 @@ import QtQuick
 import QtQuick.Layouts
 import "../DockLayout.js" as DockLayout
 
-// Per-section list card for the SERP engine editor (DockEditor, Phase D4-E2).
+// Per-section list card for the SERP engine editor (BarEditor, Phase D4-E2).
 // Renders one section ("left" | "center" | "right") or the synthetic
 // "available" pool as a wrap-flow of chips — one chip per ITEM: loose module
 // ids (or layout tokens) as single pills, arrays as GROUP boxes whose header
 // drags the whole cluster and whose member chips drag individually.
 //
 // ── Editor drag & drop contract (extension of the ZoneEditorCard one) ────────
-// The DockEditor (this card's `bar`) coordinates ONE editor-wide session:
+// The BarEditor (this card's `bar`) coordinates ONE editor-wide session:
 //   * every chip (loose, group member, group header, available) is draggable
 //     past a ~bar.s(10) threshold; short presses stay inert,
 //   * while a chip drags, the editor paints the ghost at the pointer, marks
@@ -411,7 +411,7 @@ Rectangle {
                                             font.family: "Hack Nerd Font"
                                             font.pixelSize: bar.s(10)
                                             font.weight: Font.Black
-                                            color: bar.colors.base
+                                            color: bar.colors.text
                                         }
                                         MouseArea {
                                             anchors.fill: parent
@@ -483,7 +483,7 @@ Rectangle {
                             font.family: "Hack Nerd Font"
                             font.pixelSize: bar.s(12)
                             font.weight: Font.Black
-                            color: bar.colors.base
+                            color: bar.colors.text
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -559,7 +559,7 @@ Rectangle {
                             font.family: "Hack Nerd Font"
                             font.pixelSize: bar.s(11)
                             font.weight: Font.Black
-                            color: bar.colors.base
+                            color: bar.colors.text
                         }
                         MouseArea {
                             anchors.fill: parent

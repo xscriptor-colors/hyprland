@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-// Selector de posición del DockEditor (Fase 4: familia GuidePopup).
+// Selector de posición del BarEditor (Fase 4: familia GuidePopup).
 // Inactivo: alpha(surface0, 0.4) + borde surface1; hover alpha(mauve, 0.1) +
 // borde mauve; activo: relleno mauve + contenido crust; press scale 0.98.
 // API intacta: bar / dockRef / pos / label / glyph.

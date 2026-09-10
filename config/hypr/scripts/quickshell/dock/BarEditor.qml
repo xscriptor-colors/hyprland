@@ -11,13 +11,17 @@ import "edit"
 // — no `import "editor"` needed (typed instancing caused a null-bar burst).
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DockEditor — the dock mega menu (SUPER+SHIFT+D), PHASE 2 rewrite.
-// Serpantium-style rail shell: sidebar (brand + animated accent nav pill over
-// NavItem rows + footer hints) + content stage where the 7 Phase-1 pages
-// (dock/editor/*.qml) stay ALWAYS instantiated (visible switches by page).
-// Pages only talk to root via `bar`; ZonesPage/SerpBarPage expose flickable +
-// zonasCol/serpListsCol for the editor-wide DnD (chips feed root coordinates
-// via mapToItem(bar,...)). Edits write live to settings.json; bar untouched.
+// BarEditor — the dock mega menu (SUPER+SHIFT+D), visiblemente "Settings".
+//
+// Fase B: el rail agrupa dos familias de páginas:
+//   · "Desktop"  → las 6 tabs compartidas settings/tabs/*.qml (host =
+//                  settingsHost, el adaptador que replica la API del popup).
+//   · "Dock / Bar" → las 7 páginas del editor dock/editor/*.qml (bar = root),
+//                  expandible, subtabs indentados con línea de rail.
+// Los Loaders son lazy (ensurePage/setSource con initial properties) y las
+// páginas del editor exponen flickable + zonasCol/serpListsCol para el DnD
+// (chips en coordenadas del root vía mapToItem(bar,...)). Edits en vivo a
+// settings.json; la barra viva no se toca.
 // ═══════════════════════════════════════════════════════════════════════════
 
 Item {
@@ -101,9 +105,10 @@ Item {
             Config.setSetting("barEngine", "dock");
         }
         root.engine = v === "serp" ? "serp" : "dock";
-        // Phase 2: the rail filters by engine — a page gone from the list
-        // falls back to General; mid-drag flips abort DnD (pill re-syncs).
-        if (root.navIndex(root.currentPage) === -1) root.currentPage = "general";
+        // Fase B: d_style/d_zones (dock) y d_serp (serp) dependen del engine;
+        // si la página activa desaparece del rail caemos a d_engine (grupo
+        // Dock/Bar). El grupo NO se colapsa al cambiar de engine.
+        if (root.navIndex(root.currentPage) === -1) root.currentPage = "d_engine";
         root.cancelDnd();
         Qt.callLater(root.syncNavPill);
     }
@@ -200,7 +205,7 @@ Item {
     // marker skips the Repeater). Hidden pages keep valid geometry, so the
     // currentPage guard excludes them.
     function zoneCards() {
-        if (root.engine !== "dock" || root.currentPage !== "zones") return [];
+        if (root.engine !== "dock" || root.currentPage !== "d_zones") return [];
         let out = [];
         let kids = root.zonesPage ? root.zonesPage.zonasCol.children : [];
         for (let i = 0; i < kids.length; i++) {
@@ -213,7 +218,7 @@ Item {
     // Live list of serp list cards (SerpBar page's serpListsCol, marker
     // isSerpEditorCard); same hidden-page + engine guard as zoneCards().
     function serpCards() {
-        if (root.engine !== "serp" || root.currentPage !== "serp") return [];
+        if (root.engine !== "serp" || root.currentPage !== "d_serp") return [];
         let out = [];
         let kids = root.serpPage ? root.serpPage.serpListsCol.children : [];
         for (let i = 0; i < kids.length; i++) {
@@ -374,35 +379,61 @@ Item {
         }
     }
 
-    // ════ PHASE 2 NAVIGATION (rail) ════
-    // currentPage picks the visible child; the sidebar lists pages filtered by
-    // engine. NavItem rows are transparent — navPill (viewport-fixed, BELOW
-    // them) glides to the active slot: navPillTargetY animates (300 ms
-    // OutQuint), y subtracts contentY, navArea clips.
-    property string currentPage: "general"
-    property var navModel: [
-        { id: "general",     icon: "󰒓", label: "General",     both: true },
-        { id: "position",    icon: "󱂬", label: "Position",    both: true },
-        { id: "style",       icon: "󰏘", label: "Style",       engine: "dock" },
-        { id: "palette",     icon: "✦", label: "Palette",     both: true },
-        { id: "zones",       icon: "󰮯", label: "Zones",       engine: "dock" },
-        { id: "workspaces",  icon: "󰠰", label: "Workspaces",  both: true },
-        { id: "serp",        icon: "󰹑", label: "Serp Bar",    engine: "serp" }
+    // ════ FASE B: RAIL CON GRUPOS ════
+    // Grupo "Desktop" (6 tabs compartidas de settings) + grupo "Dock / Bar"
+    // (las 7 páginas del editor, expandible). currentPage usa ids prefijados:
+    // s_* = settings/tabs/*.qml (host = settingsHost) · d_* = dock/editor/*.qml
+    // (bar = root). La píldora mauve sigue al item activo por su POSICIÓN REAL
+    // (navItemMap + mapToItem) con scroll-follow por contentY.
+    property string currentPage: "s_general"
+    property var navGroups: [
+        { id: "desktop", label: "Desktop", items: [
+            { id: "s_general",  icon: "󰒓", label: "General" },
+            { id: "s_weather",  icon: "󰖐", label: "Weather" },
+            { id: "s_keyboard", icon: "󰌌", label: "Keyboard" },
+            { id: "s_monitors", icon: "󰍹", label: "Monitors" },
+            { id: "s_startup",  icon: "󰐥", label: "Startup" },
+            { id: "s_topbar",   icon: "󰹑", label: "Topbar" }
+        ] },
+        { id: "dockbar", label: "Dock / Bar", expandable: true, items: [
+            { id: "d_engine",     icon: "󰮯", label: "Engine" },
+            { id: "d_position",   icon: "󱂬", label: "Position" },
+            { id: "d_style",      icon: "󰏘", label: "Style",      engine: "dock" },
+            { id: "d_palette",    icon: "✦", label: "Palette" },
+            { id: "d_zones",      icon: "󰮯", label: "Zones",      engine: "dock" },
+            { id: "d_workspaces", icon: "󰠰", label: "Workspaces" },
+            { id: "d_serp",       icon: "󰹑", label: "Serp Bar",   engine: "serp" }
+        ] }
     ]
+    // El grupo Dock/Bar arranca expandido; cambiar de engine NO lo colapsa.
+    property bool dockGroupExpanded: true
+    // Item del rail por id (lo registran los delegates): la píldora se coloca
+    // con la y real del item, no con índices fijos.
+    property var navItemMap: ({})
     // Animated pill slot (content px); Behavior lives here so scroll-follow
     // updates through the y binding never lag.
     property real navPillTargetY: 0
 
-    // Pages visible under the current engine, in rail order.
-    function navForEngine() {
+    // Items de un grupo visibles bajo el engine actual.
+    function groupItems(group) {
         let out = [];
-        let m = root.navModel;
-        for (let i = 0; i < m.length; i++) {
-            if (m[i].both === true || m[i].engine === root.engine) out.push(m[i]);
+        for (let i = 0; i < group.items.length; i++) {
+            let it = group.items[i];
+            if (!it.engine || it.engine === root.engine) out.push(it);
         }
         return out;
     }
-    function visibleNav() { return root.navForEngine(); }
+    // Lista plana (Desktop + Dock/Bar si expandido) para Tab/Shift+Tab.
+    function navForEngine() {
+        let out = [];
+        for (let i = 0; i < root.navGroups.length; i++) {
+            let g = root.navGroups[i];
+            if (g.expandable && !root.dockGroupExpanded) continue;
+            let items = root.groupItems(g);
+            for (let j = 0; j < items.length; j++) out.push(items[j]);
+        }
+        return out;
+    }
     function navIndex(id) {
         let nav = root.navForEngine();
         for (let i = 0; i < nav.length; i++) {
@@ -415,14 +446,15 @@ Item {
         root.currentPage = id;
         root.syncNavPill();
     }
-    // Recompute the pill's animated target (page/engine change; the y
-    // binding handles scroll-follow continuously). Fase 4: filas sin gap,
-    // target = idx * s(44) (GP:440-456) y animación 400 ms OutExpo.
+    // Recompute the pill's animated target from the ACTIVE ITEM's real y
+    // (content px). Si la página activa no está en el rail (p.ej. grupo
+    // colapsado) la píldora se oculta. Behavior 400 ms OutExpo (GP:440-456).
     function syncNavPill() {
         if (!navPill || !colNav) return;
-        let idx = root.navIndex(root.currentPage);
-        if (idx < 0) idx = 0;
-        root.navPillTargetY = idx * root.s(44);
+        let item = root.navItemMap[root.currentPage];
+        if (!item) { navPill.visible = false; return; }
+        navPill.visible = true;
+        root.navPillTargetY = item.mapToItem(colNav, 0, 0).y;
     }
     Behavior on navPillTargetY {
         NumberAnimation { duration: 400; easing.type: Easing.OutExpo }
@@ -441,25 +473,39 @@ Item {
     // Connections below retarget automatically).
     function pageFile(id) {
         let map = {
-            "general": "GeneralPage.qml",
-            "position": "PositionPage.qml",
-            "style": "DockStylePage.qml",
-            "palette": "PalettePage.qml",
-            "zones": "ZonesPage.qml",
-            "workspaces": "WorkspacesPage.qml",
-            "serp": "SerpBarPage.qml"
+            // Tabs compartidas de settings (host = settingsHost)
+            "s_general":  "../settings/tabs/GeneralTab.qml",
+            "s_weather":  "../settings/tabs/WeatherTab.qml",
+            "s_keyboard": "../settings/tabs/KeybindTab.qml",
+            "s_monitors": "../settings/tabs/MonitorsTab.qml",
+            "s_startup":  "../settings/tabs/StartupTab.qml",
+            "s_topbar":   "../settings/tabs/TopbarTab.qml",
+            // Páginas del editor (bar = root)
+            "d_engine":     "editor/GeneralPage.qml",
+            "d_position":   "editor/PositionPage.qml",
+            "d_style":      "editor/DockStylePage.qml",
+            "d_palette":    "editor/PalettePage.qml",
+            "d_zones":      "editor/ZonesPage.qml",
+            "d_workspaces": "editor/WorkspacesPage.qml",
+            "d_serp":       "editor/SerpBarPage.qml"
         };
         return map[id] || "";
     }
     function pageLoader(id) {
         let map = {
-            "general": generalLoader,
-            "position": positionLoader,
-            "style": styleLoader,
-            "palette": paletteLoader,
-            "zones": zonesLoader,
-            "workspaces": workspacesLoader,
-            "serp": serpLoader
+            "s_general":  sGeneralLoader,
+            "s_weather":  sWeatherLoader,
+            "s_keyboard": sKeyboardLoader,
+            "s_monitors": sMonitorsLoader,
+            "s_startup":  sStartupLoader,
+            "s_topbar":   sTopbarLoader,
+            "d_engine":     dEngineLoader,
+            "d_position":   dPositionLoader,
+            "d_style":      dStyleLoader,
+            "d_palette":    dPaletteLoader,
+            "d_zones":      dZonesLoader,
+            "d_workspaces": dWorkspacesLoader,
+            "d_serp":       dSerpLoader
         };
         return map[id] || null;
     }
@@ -471,9 +517,25 @@ Item {
         if (loader.item || String(loader.source) !== "") return;
         let file = root.pageFile(id);
         if (file === "") return;
-        loader.setSource("editor/" + file, { bar: root });
+        // s_* → tabs de settings (host) · d_* → páginas del editor (bar).
+        if (id.indexOf("s_") === 0) loader.setSource(file, { host: settingsHost });
+        else loader.setSource(file, { bar: root });
+        // La pestaña Monitors necesita el poller de hyprctl que en el popup
+        // arrancaba SettingsPopup al cargar su tab3; aquí lo arrancamos al
+        // abrir la página (si no, monitorsModel queda vacío y no hay
+        // resoluciones ni refrescos).
+        if (id === "s_monitors" && !Config.displayPoller.running) {
+            Config.displayPoller.running = true;
+        }
     }
     onCurrentPageChanged: root.ensurePage(root.currentPage)
+
+
+
+
+
+
+
 
     // ════ LIVE PALETTE EDITOR (Phase T) ════
     // Edits the ACTIVE palette file (dock/palettes/<slug>.json): validated hex
@@ -721,6 +783,132 @@ Item {
         ScriptAction { script: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh close"]) }
     }
 
+    // ════ FASE B: HOST DE LAS SETTINGS TABS ════
+    // Las tabs compartidas (settings/tabs/*.qml) esperan la API del root de
+    // SettingsPopup (host.*). Este adaptador invisible la replica desde el
+    // editor: s(), los roles de la instancia local Colors, highlightedBox,
+    // isLayoutDropdownOpen, los modelos keybinds/startup y las acciones que en
+    // el popup resolvía el host (saveAllKeybinds/saveAllStartup/appScaleStep).
+    // Los ListModel son ids: se exponen con `property alias` porque los ids no
+    // son accesibles desde otros archivos (mismo motivo que en SettingsPopup).
+    Item {
+        id: settingsHost
+        visible: false
+        width: 0
+        height: 0
+
+        function s(val) { return root.s(val); }
+
+        readonly property color base: themeColors.base
+        readonly property color mantle: themeColors.mantle
+        readonly property color crust: themeColors.crust
+        readonly property color text: themeColors.text
+        readonly property color subtext0: themeColors.subtext0
+        readonly property color subtext1: themeColors.subtext1
+        readonly property color surface0: themeColors.surface0
+        readonly property color surface1: themeColors.surface1
+        readonly property color surface2: themeColors.surface2
+        readonly property color overlay0: themeColors.overlay0
+        readonly property color overlay1: themeColors.overlay1
+        readonly property color overlay2: themeColors.overlay2
+        readonly property color mauve: themeColors.mauve
+        readonly property color blue: themeColors.blue
+        readonly property color green: themeColors.green
+        readonly property color red: themeColors.red
+        readonly property color yellow: themeColors.yellow
+        readonly property color peach: themeColors.peach
+        readonly property color sapphire: themeColors.sapphire
+        readonly property color teal: themeColors.teal
+        readonly property color pink: themeColors.pink
+
+        // Estado de la navegación del popup: las tabs lo leen Y lo escriben
+        // (hover/click sobre una fila); aquí solo se guarda el valor.
+        property int highlightedBox: -1
+        function clearHighlight() { highlightedBox = -1; }
+        property bool isLayoutDropdownOpen: false
+
+        ListModel { id: kbModelData }
+        ListModel { id: startupModelData }
+        property alias kbModel: kbModelData
+        property alias startupModel: startupModelData
+
+        // Poblar los modelos. Las señales keybindsLoaded()/startupLoaded() de
+        // Config se emiten UNA vez al arrancar el shell (antes de que exista
+        // este widget), así que además de escucharlas hay que poblar al crear
+        // el adaptador y cuando Config termine de leer (dataReady).
+        function populateKbModel() {
+            kbModelData.clear();
+            for (let i = 0; i < Config.keybindsData.length; i++) {
+                let k = Config.keybindsData[i];
+                kbModelData.append({
+                    type: k.type || "bind",
+                    mods: k.mods || "",
+                    key: k.key || "",
+                    dispatcher: k.dispatcher || "exec",
+                    command: k.command || "",
+                    isEditing: false
+                });
+            }
+        }
+        function populateStartupModel() {
+            startupModelData.clear();
+            for (let s of Config.startupData) {
+                startupModelData.append({ command: s.command || "", isEditing: false });
+            }
+        }
+
+        Component.onCompleted: {
+            populateKbModel();
+            populateStartupModel();
+        }
+
+        Connections {
+            target: Config
+            function onKeybindsLoaded() { populateKbModel(); }
+            function onKeybindsDataChanged() { populateKbModel(); }
+            function onStartupLoaded() { populateStartupModel(); }
+            function onStartupDataChanged() { populateStartupModel(); }
+            function onDataReadyChanged() {
+                if (Config.dataReady) {
+                    populateKbModel();
+                    populateStartupModel();
+                }
+            }
+        }
+
+        function saveAllKeybinds() {
+            let bindsArray = [];
+            for (let i = 0; i < kbModelData.count; i++) {
+                let item = kbModelData.get(i);
+                if (!item.key && !item.command) continue;
+                bindsArray.push({
+                    type: item.type,
+                    mods: item.mods,
+                    key: item.key,
+                    dispatcher: item.dispatcher,
+                    command: item.command,
+                    isEditing: false // CRITICAL: evita que QML pierda el rol
+                });
+            }
+            Config.saveAllKeybinds(bindsArray);
+        }
+
+        function saveAllStartup() {
+            let startupArray = [];
+            for (let i = 0; i < startupModelData.count; i++) {
+                let cmd = startupModelData.get(i).command.trim();
+                if (cmd.length > 0) startupArray.push({ command: cmd });
+            }
+            Config.saveAllStartup(startupArray);
+        }
+
+        // App scale (mismo comportamiento que el General tab del popup).
+        function appScaleStep(dir) {
+            let next = Math.max(0.75, Math.min(2.0, Config.appScale + dir * 0.25));
+            Config.appScale = Math.round(next * 100) / 100;
+        }
+    }
+
     // ════ PANEL (Fase 4: paridad visual con GuidePopup) ════
     // Fondo base + borde surface0 1 px + radio s(21), SIN márgenes externos;
     // wrapper con intro (opacity/scale, GP:292-303). Interior: Row con
@@ -784,7 +972,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: s(2)
                                 Text {
-                                    text: "Dock Editor"
+                                    text: "Settings"
                                     font.family: "Hack Nerd Font"
                                     font.pixelSize: s(15)
                                     font.weight: Font.Black
@@ -840,7 +1028,8 @@ Item {
                             height: s(44)
                             radius: s(18)
                             color: colors.mauve
-                            // y = target animado (idx*44) − scroll (GP:440-456).
+                            // y = y real del item activo (navPillTargetY, animada
+                            // 400 ms OutExpo) − scroll de la nav (GP:440-456).
                             y: colNav.y + root.navPillTargetY - navFlick.contentY
                         }
 
@@ -870,16 +1059,111 @@ Item {
                                 width: navFlick.width - s(30)
                                 spacing: 0
 
+                                // ── Grupo: Desktop ─────────────────────────────
+                                Item {
+                                    width: parent.width
+                                    height: s(30)
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: s(6)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: root.navGroups[0].label
+                                        font.family: "Hack Nerd Font"
+                                        font.weight: Font.Bold
+                                        font.pixelSize: s(10)
+                                        color: colors.subtext0
+                                    }
+                                }
                                 Repeater {
-                                    model: root.visibleNav()
+                                    model: root.groupItems(root.navGroups[0])
                                     delegate: NavItem {
+                                        id: navRowDesktop
                                         required property var modelData
+                                        readonly property string pageId: modelData.id
                                         width: colNav.width
                                         bar: root
                                         icon: modelData.icon
                                         label: modelData.label
                                         active: root.currentPage === modelData.id
                                         onActivated: root.gotoPage(modelData.id)
+                                        Component.onCompleted: { root.navItemMap[navRowDesktop.pageId] = navRowDesktop; root.syncNavPill(); }
+                                        Component.onDestruction: delete root.navItemMap[navRowDesktop.pageId]
+                                        onYChanged: if (root.currentPage === modelData.id) root.syncNavPill()
+                                    }
+                                }
+
+                                // ── Grupo: Dock / Bar (expandible) ─────────────
+                                Item {
+                                    id: dockGroupHeader
+                                    width: parent.width
+                                    height: s(30)
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: s(6)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: root.navGroups[1].label
+                                        font.family: "Hack Nerd Font"
+                                        font.weight: Font.Bold
+                                        font.pixelSize: s(10)
+                                        color: colors.subtext0
+                                    }
+                                    Text {
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: s(8)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "󰅀"
+                                        font.family: "Hack Nerd Font"
+                                        font.pixelSize: s(12)
+                                        color: colors.subtext0
+                                        rotation: root.dockGroupExpanded ? 0 : -90
+                                        Behavior on rotation { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            root.dockGroupExpanded = !root.dockGroupExpanded;
+                                            Qt.callLater(root.syncNavPill);
+                                        }
+                                    }
+                                }
+                                Item {
+                                    id: dockItemsWrap
+                                    width: parent.width
+                                    height: dockCol.height
+                                    visible: root.dockGroupExpanded
+
+                                    // Línea de rail (estilo Serpantium) para los subtabs.
+                                    Rectangle {
+                                        x: s(6)
+                                        width: s(2)
+                                        radius: s(1)
+                                        height: Math.max(0, parent.height - s(8))
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: Qt.alpha(colors.surface1, 0.5)
+                                    }
+                                    Column {
+                                        id: dockCol
+                                        x: s(14)
+                                        width: parent.width - s(14)
+                                        spacing: 0
+                                        Repeater {
+                                            model: root.groupItems(root.navGroups[1])
+                                            delegate: NavItem {
+                                                id: navRowDock
+                                                required property var modelData
+                                                readonly property string pageId: modelData.id
+                                                width: dockCol.width
+                                                bar: root
+                                                icon: modelData.icon
+                                                label: modelData.label
+                                                active: root.currentPage === modelData.id
+                                                onActivated: root.gotoPage(modelData.id)
+                                                Component.onCompleted: { root.navItemMap[navRowDock.pageId] = navRowDock; root.syncNavPill(); }
+                                                Component.onDestruction: delete root.navItemMap[navRowDock.pageId]
+                                                onYChanged: if (root.currentPage === modelData.id) root.syncNavPill()
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -935,76 +1219,165 @@ Item {
                     transform: Translate { y: s(20) * (1.0 - root.introContent) }
 
                     Loader {
-                        id: generalLoader
+                        id: dEngineLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "general"
+                        visible: root.currentPage === "d_engine"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: generalLoader.slideY }
+                        transform: Translate { y: dEngineLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
-                        id: positionLoader
+                        id: dPositionLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "position"
+                        visible: root.currentPage === "d_position"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: positionLoader.slideY }
+                        transform: Translate { y: dPositionLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
-                        id: styleLoader
+                        id: dStyleLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "style"
+                        visible: root.currentPage === "d_style"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: styleLoader.slideY }
+                        transform: Translate { y: dStyleLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
-                        id: paletteLoader
+                        id: dPaletteLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "palette"
+                        visible: root.currentPage === "d_palette"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: paletteLoader.slideY }
+                        transform: Translate { y: dPaletteLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
-                        id: zonesLoader
+                        id: dZonesLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "zones"
+                        visible: root.currentPage === "d_zones"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: zonesLoader.slideY }
+                        transform: Translate { y: dZonesLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
-                        onLoaded: { if (zonesLoader.item) root.zonesPage = zonesLoader.item; }
+                        onLoaded: { if (dZonesLoader.item) root.zonesPage = dZonesLoader.item; }
                     }
                     Loader {
-                        id: workspacesLoader
+                        id: dWorkspacesLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "workspaces"
+                        visible: root.currentPage === "d_workspaces"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: workspacesLoader.slideY }
+                        transform: Translate { y: dWorkspacesLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
-                        id: serpLoader
+                        id: dSerpLoader
                         anchors.fill: parent
-                        visible: root.currentPage === "serp"
+                        visible: root.currentPage === "d_serp"
                         opacity: visible ? 1.0 : 0.0
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
-                        transform: Translate { y: serpLoader.slideY }
+                        transform: Translate { y: dSerpLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
-                        onLoaded: { if (serpLoader.item) root.serpPage = serpLoader.item; }
+                        onLoaded: { if (dSerpLoader.item) root.serpPage = dSerpLoader.item; }
+                    }
+                    // ── Tabs compartidas de settings (host = settingsHost) ──
+                    Loader {
+                        id: sGeneralLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "s_general"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: sGeneralLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: sWeatherLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "s_weather"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: sWeatherLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: sKeyboardLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "s_keyboard"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: sKeyboardLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: sMonitorsLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "s_monitors"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: sMonitorsLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: sStartupLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "s_startup"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: sStartupLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: sTopbarLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "s_topbar"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: sTopbarLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+
+                    // ── ADD FLOTANTE (Keyboard / Startup) ───────────────────
+                    // El botón "+ Add" del popup vive en SU header (fuera de las
+                    // tabs), por eso al embeberlas aquí hay que reponerlo: añade
+                    // una fila nueva al modelo correspondiente y la deja en
+                    // edición (misma semántica que SettingsPopup.qml:1000-1010).
+                    EditorButton {
+                        z: 100
+                        compact: true
+                        bar: root
+                        label: "+ Add"
+                        visible: root.currentPage === "s_keyboard" || root.currentPage === "s_startup"
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: s(18)
+                        anchors.bottomMargin: s(18)
+                        onActivated: {
+                            if (root.currentPage === "s_startup") {
+                                settingsHost.startupModel.append({ command: "", isEditing: true });
+                                let l = root.pageLoader("s_startup");
+                                if (l && l.item && l.item.scrollToBottom) Qt.callLater(() => l.item.scrollToBottom());
+                            } else if (root.currentPage === "s_keyboard") {
+                                settingsHost.kbModel.append({ type: "bind", mods: "", key: "", dispatcher: "exec", command: "", isEditing: true });
+                                let l = root.pageLoader("s_keyboard");
+                                if (l && l.item && l.item.scrollToBottom) Qt.callLater(() => l.item.scrollToBottom());
+                            }
+                        }
                     }
                 }
             }

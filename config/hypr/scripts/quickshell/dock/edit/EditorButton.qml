@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EditorButton — botón de acción del DockEditor (Fase 4, familia GuidePopup).
+// EditorButton — botón de acción del BarEditor (Fase 4, familia GuidePopup).
 //
 // Réplica del patrón GP:970-987 (nav button): superficie alpha(surface0, 0.4)
 // + borde surface1 1 px, hover alpha(accent, 0.15) + borde del acento, press

@@ -1,6 +1,6 @@
 import QtQuick
 
-// − value + stepper del DockEditor (Fase 4: familia GuidePopup).
+// − value + stepper del BarEditor (Fase 4: familia GuidePopup).
 // Botones: alpha(surface0, 0.4) + borde surface1; hover alpha(mauve, 0.15) +
 // borde mauve; press scale 0.94 (150 ms OutQuart). API intacta: label/dec()/inc().
 Row {

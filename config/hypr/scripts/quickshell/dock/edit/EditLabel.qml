@@ -1,6 +1,6 @@
 import QtQuick
 
-// Label for the DockEditor.
+// Label for the BarEditor.
 Text {
     property var bar: null
     text: ""

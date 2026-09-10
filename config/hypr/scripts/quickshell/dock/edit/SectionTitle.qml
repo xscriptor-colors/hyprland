@@ -1,6 +1,6 @@
 import QtQuick
 
-// Título de sección del DockEditor (Fase 4: acento mauve del Guide).
+// Título de sección del BarEditor (Fase 4: acento mauve del Guide).
 Text {
     property var bar: null
     text: ""

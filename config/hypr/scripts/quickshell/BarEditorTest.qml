@@ -1,4 +1,4 @@
-// Throwaway test shell — loads the DockEditor via a Loader exactly like
+// Throwaway test shell — loads the BarEditor via a Loader exactly like
 // Main.qml does, to validate it compiles/renders without errors.
 import QtQuick
 import Quickshell
@@ -15,7 +15,7 @@ PanelWindow {
 
     Loader {
         anchors.fill: parent
-        source: "dock/DockEditor.qml"
+        source: "dock/BarEditor.qml"
         onLoaded: console.log("[EDITOR] cargado OK")
     }
 }
