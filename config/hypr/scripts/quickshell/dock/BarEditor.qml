@@ -422,6 +422,12 @@ Item {
             { id: "d_zones",      icon: "󰮯", label: "Zones",      engine: "dock" },
             { id: "d_workspaces", icon: "󰠰", label: "Workspaces" },
             { id: "d_serp",       icon: "󰹑", label: "Serp Bar",   engine: "serp" }
+        ] },
+        { id: "system", label: "System", items: [
+            { id: "d_hyprland",      icon: "󰣇", label: "Hyprland" },
+            { id: "d_idle",          icon: "󰒲", label: "Idle" },
+            { id: "d_gpu",           icon: "󰢮", label: "GPU" },
+            { id: "d_notifications", icon: "󰂚", label: "Notifications" }
         ] }
     ]
     // El grupo Dock/Bar arranca expandido; cambiar de engine NO lo colapsa.
@@ -507,7 +513,11 @@ Item {
             "d_zones":      "editor/ZonesPage.qml",
             "d_workspaces": "editor/WorkspacesPage.qml",
             "d_serp":       "editor/SerpBarPage.qml",
-            "d_launcher":   "editor/LauncherPage.qml"
+            "d_launcher":   "editor/LauncherPage.qml",
+            "d_idle":          "editor/IdlePage.qml",
+            "d_gpu":           "editor/GpuPage.qml",
+            "d_notifications": "editor/NotificationsPage.qml",
+            "d_hyprland":      "editor/HyprlandPage.qml"
         };
         return map[id] || "";
     }
@@ -526,7 +536,11 @@ Item {
             "d_zones":      dZonesLoader,
             "d_workspaces": dWorkspacesLoader,
             "d_serp":       dSerpLoader,
-            "d_launcher":   launcherLoader
+            "d_launcher":   launcherLoader,
+            "d_idle":          idleLoader,
+            "d_gpu":           gpuLoader,
+            "d_notifications": notificationsLoader,
+            "d_hyprland":      hyprlandLoader
         };
         return map[id] || null;
     }
@@ -1189,6 +1203,38 @@ Item {
                                         }
                                     }
                                 }
+                                // ── Grupo: System ──────────────────────────────
+                                Item {
+                                    width: parent.width
+                                    height: s(30)
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: s(6)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: root.navGroups[2].label
+                                        font.family: "Hack Nerd Font"
+                                        font.weight: Font.Bold
+                                        font.pixelSize: s(10)
+                                        color: colors.subtext0
+                                    }
+                                }
+                                Repeater {
+                                    model: root.groupItems(root.navGroups[2])
+                                    delegate: NavItem {
+                                        id: navRowSystem
+                                        required property var modelData
+                                        readonly property string pageId: modelData.id
+                                        width: colNav.width
+                                        bar: root
+                                        icon: modelData.icon
+                                        label: modelData.label
+                                        active: root.currentPage === modelData.id
+                                        onActivated: root.gotoPage(modelData.id)
+                                        Component.onCompleted: { root.navItemMap[navRowSystem.pageId] = navRowSystem; root.syncNavPill(); }
+                                        Component.onDestruction: delete root.navItemMap[navRowSystem.pageId]
+                                        onYChanged: if (root.currentPage === modelData.id) root.syncNavPill()
+                                    }
+                                }
                             }
                         }
                     }
@@ -1321,6 +1367,46 @@ Item {
                         property real slideY: visible ? 0 : root.s(10)
                         Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
                         transform: Translate { y: launcherLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: idleLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_idle"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: idleLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: gpuLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_gpu"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: gpuLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: notificationsLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_notifications"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: notificationsLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+                    }
+                    Loader {
+                        id: hyprlandLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_hyprland"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: hyprlandLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     // ── Tabs compartidas de settings (host = settingsHost) ──
