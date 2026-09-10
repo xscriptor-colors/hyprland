@@ -8,7 +8,7 @@
 # ║    ██║  ██║   ██║   ██║     ██║  ██║███████╗██║  ██║██║ ╚████║██████╔╝            ║
 # ║    ╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝             ║
 # ║                                                                                   ║
-# ║                Hyprland Premium Configuration Installer v2.0.0                    ║
+# ║                Hyprland Premium Configuration Installer v1.0.0                    ║
 # ║                         by xscriptor                                              ║
 # ║                                                                                   ║
 # ╚═══════════════════════════════════════════════════════════════════════════════════╝
@@ -35,7 +35,7 @@ BACKUP_DIR="$HOME/.config/hyprland-backup-$(date +%Y%m%d_%H%M%S)"
 CONFIG_DIR="$HOME/.config"
 LOG_FILE="/tmp/hyprland-install-$(date +%Y%m%d_%H%M%S).log"
 INSTALL_GPU_MODE=""
-INSTALL_VERSION="2.0.0"
+INSTALL_VERSION="1.0.0"
 
 # ┌───────────────────────────────────────────────────────────────────────────────────┐
 # │ HELPER FUNCTIONS                                                                  │
@@ -44,7 +44,7 @@ INSTALL_VERSION="2.0.0"
 print_banner() {
     echo -e "${MAGENTA}"
     echo "╔═══════════════════════════════════════════════════════════════╗"
-    echo "║     HYPRLAND PREMIUM CONFIGURATION INSTALLER v2.0.0           ║"
+    echo "║     HYPRLAND PREMIUM CONFIGURATION INSTALLER v1.0.0           ║"
     echo "║                by xscriptor                                   ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
