@@ -471,9 +471,41 @@ Item {
         return "hl.monitor({ " + parts.join(", ") + " })";
     }
 
+    // Texto de display-config para el layout indicado. `entries` = array de
+    // { m, x, y } (m = item del monitorsModel con su posición FINAL en px).
+    // Formato: desc|x|y|scale|mode|transform|vrr|bitdepth|cm|mirror|disabled
+    // (campos extra tolerantes hacia atrás: los lectores viejos usan 1-5).
+    function monDisplayConfigText(entries) {
+        let lines = [];
+        lines.push("# Monitor layout: desc|x|y|scale|mode|transform|vrr|bitdepth|cm|mirror|disabled");
+        lines.push("#   desc = hyprctl description (EDID model+serial, survives connector renames)");
+        lines.push("#   x,y  = logical position | scale = fractional scale");
+        lines.push("#   mode = exact Hyprland mode, e.g. 1920x1080@144.11Hz (empty = highest RR)");
+        lines.push("#   extra: transform | vrr(0/1/2) | bitdepth(8/10) | cm | mirror(desc) | disabled(0/1)");
+        for (let i = 0; i < entries.length; i++) {
+            let e = entries[i];
+            let m = e.m;
+            let desc = (m.description && m.description !== "") ? m.description : m.name;
+            let mode = config.monResolveMode(m, m.resW, m.resH, m.rate);
+            let mirrorDesc = "";
+            if (m.mirrorOf && m.mirrorOf !== "" && m.mirrorOf !== "none") {
+                let mm = config.monFindByName(m.mirrorOf);
+                mirrorDesc = mm ? ((mm.description && mm.description !== "") ? mm.description : mm.name) : "";
+            }
+            let vrr = (m.vrr === 2) ? 2 : (m.vrr ? 1 : 0);
+            let bitdepth = (m.bitdepth === 10) ? 10 : 8;
+            let cm = (m.cm && m.cm !== "") ? m.cm : "auto";
+            let disabled = (m.disabled === true) ? 1 : 0;
+            lines.push([desc, Math.round(e.x), Math.round(e.y), m.sysScale, mode,
+                        m.transform || 0, vrr, bitdepth, cm, mirrorDesc, disabled].join("|"));
+        }
+        return lines.join("\n") + "\n";
+    }
+
     function applyMonitors() {
         if (monitorsModel.count === 0) return;
         let cmds = [];
+        let entries = [];
         let summaryString = "";
         let jsonArr = [];
         if (monitorsModel.count === 1) {
@@ -481,6 +513,7 @@ Item {
             // Hyprland 0.55+ has no `hyprctl keyword monitor`; use the Lua API.
             let lua = config.monitorLuaFor(m, 0, 0);
             cmds.push(`hyprctl eval '${lua.replace(/'/g, "'\\''")}'`);
+            entries.push({ m: m, x: 0, y: 0 });
             jsonArr.push({ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: 0, y: 0, scale: m.sysScale, transform: m.transform, vrr: m.vrr, disabled: m.disabled === true, mirrorOf: m.mirrorOf, cm: m.cm, bitdepth: m.bitdepth });
             summaryString = m.name + " " + m.resW + "x" + m.resH + " @ " + m.rate + "Hz";
         } else {
@@ -527,12 +560,20 @@ Item {
                 // Hyprland 0.55+ has no `hyprctl keyword monitor`; use the Lua API.
                 let lua = config.monitorLuaFor(m, r.x, r.y);
                 cmds.push(`hyprctl eval '${lua.replace(/'/g, "'\\''")}'`);
+                entries.push({ m: m, x: r.x, y: r.y });
                 summaryString += r.name + " ";
                 jsonArr.push({ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: r.x, y: r.y, scale: m.sysScale, transform: m.transform, vrr: m.vrr, disabled: m.disabled === true, mirrorOf: m.mirrorOf, cm: m.cm, bitdepth: m.bitdepth });
             }
         }
         config.setSetting("monitors", jsonArr);
-        config.sh(cmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon & ; ~/.config/hypr/scripts/persist-display-config.sh > ~/.config/hypr/display-config 2>/dev/null");
+        // display-config DETERMINISTA desde el layout aplicado: no se relee el
+        // estado live (evita la carrera con restore-monitors.sh cuando los
+        // modesets multi-monitor todavía no han asentado). Atómico + bak.
+        let text = config.monDisplayConfigText(entries);
+        let writeCmd = "cat > \"$HOME/.config/hypr/display-config.tmp\" <<'XSC_DC_EOF'\n" + text + "XSC_DC_EOF\n" +
+                       "mv \"$HOME/.config/hypr/display-config.tmp\" \"$HOME/.config/hypr/display-config\" && " +
+                       "cp \"$HOME/.config/hypr/display-config\" \"$HOME/.config/hypr/display-config.bak\"";
+        config.sh(writeCmd + " ; " + cmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon &");
         Quickshell.execDetached(["notify-send", "Display Update",
             monitorsModel.count === 1 ? ("Applied: " + summaryString)
                                       : ("Applied layout for: " + summaryString.trim())]);

@@ -146,6 +146,14 @@ while true; do
         sleep 5
         continue
     fi
+    # Grace: si display-config se acaba de escribir (panel/monitor-manager/
+    # scale-menu), espera a que asienten los modesets en vez de competir.
+    now=$(date +%s)
+    mtime=$(stat -c %Y "$SRCFILE" 2>/dev/null || echo 0)
+    if [ $((now - mtime)) -lt 3 ]; then
+        sleep 2
+        continue
+    fi
     changed=0
     while IFS='|' read -r desc x y scale mode transform vrr bitdepth cm mirror disabled; do
         [ -z "$desc" ] && continue
