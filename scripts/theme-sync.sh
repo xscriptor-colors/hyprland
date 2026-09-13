@@ -355,3 +355,138 @@ require("themes").apply(vim.g.theme)
 print("nvim palettes regenerated from dock/palettes: %d → active '%s'" % (len(entries), active))
 PYEOF
 fi
+
+# ── Browsers (Brave / Brave Beta / Firefox) ───────────────────────────────────────
+# Esquema claro/oscuro según la luminancia del fondo de la paleta activa:
+#   - Brave/Beta: prefs de perfil (browser.theme.color_scheme2 1=light/2=dark,
+#     follows_system_colors=false, user_color2=acento ARGB). SOLO si el canal
+#     está cerrado: con el navegador abierto, sus prefs en memoria pisarían el
+#     cambio al salir.
+#   - Firefox: user.js (browser.theme.toolbar-theme/content-theme + ui.systemUsesDarkTheme).
+#     Se lee al arrancar, así que es seguro escribirlo en caliente; se conserva
+#     el resto del user.js del usuario.
+# Sin perfiles (p.ej. Firefox recién instalado) → se salta sin error.
+XSC_BROWSER_SCHEME=$(python3 - "$PALETTES/$SLUG.json" <<'XSC_SCHEME'
+import json, sys
+try:
+    p = json.load(open(sys.argv[1]))
+except Exception:
+    print("dark"); raise SystemExit(0)
+b = p.get("base16", {}) or {}
+bg = p.get("background") or b.get("color0") or "#000000"
+h = bg.lstrip("#")
+try:
+    r, g, bl = (int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+except Exception:
+    print("dark"); raise SystemExit(0)
+def lin(c):
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(bl)
+print("light" if L > 0.5 else "dark")
+XSC_SCHEME
+)
+if [ "$XSC_BROWSER_SCHEME" = "light" ]; then
+    XSC_SCHEME_INT=1
+else
+    XSC_SCHEME_INT=2
+fi
+XSC_ACCENT_HEX=$(jq -r '.base16.color5 // .base16.color1 // "#cba6f7"' "$PALETTES/$SLUG.json" 2>/dev/null || echo "#cba6f7")
+XSC_ACCENT_INT=$(python3 -c "print(0xFF000000 | int('$XSC_ACCENT_HEX'.lstrip('#'), 16))" 2>/dev/null || echo 0)
+# XSC_BR_BEGIN
+for XSC_BROWSER_DIR in "$HOME_DIR/.config/BraveSoftware/Brave-Browser" "$HOME_DIR/.config/BraveSoftware/Brave-Browser-Beta"; do
+    [ -d "$XSC_BROWSER_DIR" ] || continue
+    if [ "$XSC_BROWSER_DIR" = "$HOME_DIR/.config/BraveSoftware/Brave-Browser" ]; then
+        if pgrep -f "/opt/brave-bin/brave" >/dev/null 2>&1; then
+            echo "brave: abierto; prefs de tema no tocados (aplica al cerrarlo y reiniciar)"
+            continue
+        fi
+    else
+        if pgrep -f "brave-browser-beta" >/dev/null 2>&1; then
+            echo "brave-beta: abierto; prefs de tema no tocados"
+            continue
+        fi
+    fi
+    python3 - "$XSC_BROWSER_DIR" "$XSC_SCHEME_INT" "$XSC_ACCENT_INT" <<'XSC_BR'
+import json, os, glob, sys
+bdir, scheme, accent = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+changed = 0
+for pref in glob.glob(os.path.join(bdir, "*", "Preferences")):
+    base = os.path.basename(os.path.dirname(pref))
+    if not (base == "Default" or base.startswith("Profile ")):
+        continue
+    try:
+        d = json.load(open(pref, encoding="utf-8"))
+    except Exception:
+        continue
+    theme = d.setdefault("browser", {}).setdefault("theme", {})
+    theme["color_scheme2"] = scheme
+    theme["follows_system_colors"] = False
+    theme["user_color2"] = accent
+    tmp = pref + ".xsc.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(d, f, separators=(",", ":"))
+    os.replace(tmp, pref)
+    changed += 1
+print("brave theme prefs updated: %d profile(s)" % changed)
+XSC_BR
+done
+# XSC_BR_END
+
+XSC_FF_DIR="$HOME_DIR/.mozilla/firefox"
+if [ -d "$XSC_FF_DIR" ]; then
+    python3 - "$XSC_FF_DIR" "$XSC_SCHEME_INT" <<'XSC_FF'
+import configparser, glob, os, sys
+ffdir, scheme = sys.argv[1], sys.argv[2]
+profiles = []
+ini = os.path.join(ffdir, "profiles.ini")
+if os.path.isfile(ini):
+    cp = configparser.ConfigParser()
+    try:
+        cp.read(ini)
+        for sec in cp.sections():
+            if sec.startswith("Profile") and cp.has_option(sec, "Path"):
+                p = cp.get(sec, "Path")
+                if cp.has_option(sec, "IsRelative") and cp.get(sec, "IsRelative") == "1":
+                    p = os.path.join(ffdir, p)
+                profiles.append(p)
+    except Exception:
+        pass
+if not profiles:
+    profiles = [os.path.dirname(p) for p in glob.glob(os.path.join(ffdir, "*", "prefs.js"))]
+BEGIN = "// === xscriptor-colors theme-sync (managed) ==="
+END = "// === end xscriptor-colors ==="
+KEYS = ("browser.theme.toolbar-theme", "browser.theme.content-theme", "ui.systemUsesDarkTheme")
+for prof in profiles:
+    if not os.path.isdir(prof):
+        continue
+    uj = os.path.join(prof, "user.js")
+    kept, inside = [], False
+    if os.path.isfile(uj):
+        for ln in open(uj, encoding="utf-8", errors="replace"):
+            t = ln.strip()
+            if t == BEGIN:
+                inside = True
+                continue
+            if t == END:
+                inside = False
+                continue
+            if inside:
+                continue
+            if any(k in ln for k in KEYS):
+                continue
+            kept.append(ln.rstrip("\n"))
+    block = [BEGIN,
+             'user_pref("browser.theme.toolbar-theme", %s);' % scheme,
+             'user_pref("browser.theme.content-theme", %s);' % scheme,
+             'user_pref("ui.systemUsesDarkTheme", %d);' % (1 if scheme == "2" else 0),
+             END]
+    out = "\n".join(kept + [""] + block) + "\n"
+    tmp = uj + ".xsc.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(out)
+    os.replace(tmp, uj)
+    print("firefox user.js updated: %s" % prof)
+XSC_FF
+else
+    echo "firefox: sin perfiles (~/.mozilla/firefox no existe); se omite"
+fi
