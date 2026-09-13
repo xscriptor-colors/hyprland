@@ -890,6 +890,192 @@ Item {
         backupProbe.running = true;
     }
 
+    // ════ CREADOR DE PALETAS (8 colores base) ════
+    // Genera dock/palettes/<slug>.json con la estructura de las paletas
+    // existentes (base16 0-15, background/foreground, roles) + entrada en
+    // index.json, y aplica la nueva paleta (applyDock), lo que dispara el
+    // resto del sync. El draft vive en el root para sobrevivir a los cambios
+    // de página (el Loader de la página se destruye al navegar).
+    property bool paletteCreateOpen: false
+    property string paletteDraftName: ""
+    property var paletteDraftColors: ["#000000", "#fc618d", "#7bd88f", "#fce566", "#fd9353", "#948ae3", "#5ad4e6", "#f7f1ff"]
+    property string paletteCreateStatus: ""
+    readonly property var paletteBaseLabels: ["Background", "Red", "Green", "Yellow", "Blue", "Purple", "Cyan", "Foreground"]
+
+    // Slug desde el nombre: minúsculas, sin acentos, [a-z0-9-] (colapsado).
+    function slugifyPaletteName(name) {
+        let s = String(name || "").toLowerCase();
+        s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return s.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    }
+    function paletteSlugTaken(slug) {
+        for (let i = 0; i < root.palettes.length; i++) {
+            if (root.palettes[i] && root.palettes[i].slug === slug) return true;
+        }
+        return false;
+    }
+    // Siembra el draft desde los 8 primeros colores de la paleta activa.
+    function seedPaletteDraft() {
+        let seed = [];
+        for (let i = 0; i < 8; i++) seed.push(themeColors.hexOf(themeColors["color" + i]));
+        root.paletteDraftColors = seed;
+        root.paletteDraftName = "";
+        root.paletteCreateStatus = "";
+    }
+    function setPaletteDraftColor(i, hex) {
+        hex = String(hex || "").toLowerCase();
+        if (!/^#[0-9a-f]{6}$/.test(hex)) return false;
+        let arr = root.paletteDraftColors.slice();
+        arr[i] = hex;
+        root.paletteDraftColors = arr;
+        return true;
+    }
+    // Commit de un campo hex del draft (Enter / blur): válido → draft,
+    // inválido → restaura el valor vigente.
+    function commitPaletteDraftColor(field, i) {
+        let t = String(field.text || "").trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(t) && root.setPaletteDraftColor(i, t)) {
+            field.text = t.toLowerCase();
+        } else {
+            field.text = root.paletteDraftColors[i];
+        }
+    }
+    // Objeto paleta completo: color0..7 = base, color8 = muted derivado y
+    // color9..15 = duplicados de color1..7 (convención de las paletas actuales).
+    function buildPaletteObject(name, colors) {
+        let base16 = {};
+        for (let i = 0; i < 8; i++) base16["color" + i] = colors[i];
+        base16.color8 = themeColors.mix(colors[7], colors[0], 0.45);
+        for (let i = 1; i < 8; i++) base16["color" + (i + 8)] = colors[i];
+        return {
+            name: name,
+            slug: root.slugifyPaletteName(name),
+            author: "xscriptor",
+            base16: base16,
+            background: colors[0],
+            foreground: colors[7],
+            roles: { workspaceActive: themeColors.mix(colors[5], colors[7], 0.35) }
+        };
+    }
+    function createPaletteFromDraft() {
+        let name = String(root.paletteDraftName || "").trim();
+        let slug = root.slugifyPaletteName(name);
+        if (slug === "") {
+            root.paletteCreateStatus = "Enter a palette name";
+            return;
+        }
+        if (root.paletteSlugTaken(slug)) {
+            root.paletteCreateStatus = "A palette with slug '" + slug + "' already exists";
+            return;
+        }
+        for (let i = 0; i < 8; i++) {
+            if (!/^#[0-9a-f]{6}$/.test(String(root.paletteDraftColors[i]))) {
+                root.paletteCreateStatus = "Invalid color in '" + root.paletteBaseLabels[i] + "'";
+                return;
+            }
+        }
+        let pal = root.buildPaletteObject(name, root.paletteDraftColors.slice());
+        let json = JSON.stringify(pal, null, 4);
+        let entry = JSON.stringify({ slug: pal.slug, name: pal.name, colors: root.paletteDraftColors.slice() });
+        let dir = themeColors.palettesDir;
+        let file = root.paletteFilePath(pal.slug);
+        let index = dir + "/index.json";
+        let esc = (v) => String(v).replace(/'/g, "'\\''");
+        root.paletteCreateStatus = "Creating…";
+        paletteCreator.pendingSlug = pal.slug;
+        paletteCreator.command = ["bash", "-c",
+            "set -e; test ! -f '" + file + "'; "
+            + "tmp=$(mktemp '" + dir + "/palette.tmp.XXXXXX'); printf '%s\\n' '" + esc(json) + "' > \"$tmp\"; mv \"$tmp\" '" + file + "'; "
+            + "tmp2=$(mktemp '" + dir + "/index.tmp.XXXXXX'); jq --argjson e '" + esc(entry) + "' '. += [$e]' '" + index + "' > \"$tmp2\"; mv \"$tmp2\" '" + index + "'; "
+            + "echo OK"];
+        paletteCreator.running = false;
+        paletteCreator.running = true;
+    }
+
+    Process {
+        id: paletteCreator
+        property string pendingSlug: ""
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (this.text.trim() === "OK") {
+                    root.paletteCreateOpen = false;
+                    root.paletteCreateStatus = "";
+                    paletteReader.running = false;
+                    paletteReader.running = true;
+                    root.applyDock(Object.assign({}, root.dock, { palette: paletteCreator.pendingSlug }));
+                } else {
+                    root.paletteCreateStatus = "Could not create the palette (name/slug conflict?)";
+                }
+            }
+        }
+    }
+
+    // ════ ELIMINAR PALETA (activa, con confirmación) ════
+    // Borra el archivo de la paleta ACTIVA + su entrada de index.json + el
+    // snapshot de sesión. "x" está protegida: es el fallback de Colors.qml.
+    // Si la eliminada era la activa, se cambia a "x" (dispara el sync).
+    property bool paletteDeleteConfirm: false
+    property string paletteDeleteStatus: ""
+
+    function paletteDisplayName(slug) {
+        for (let i = 0; i < root.palettes.length; i++) {
+            if (root.palettes[i] && root.palettes[i].slug === slug) return root.palettes[i].name;
+        }
+        return slug;
+    }
+    function requestDeletePalette() {
+        root.paletteDeleteStatus = "";
+        root.paletteDeleteConfirm = true;
+    }
+    function cancelDeletePalette() {
+        root.paletteDeleteConfirm = false;
+        root.paletteDeleteStatus = "";
+    }
+    function deleteActivePalette() {
+        let slug = root.activeSlug();
+        if (slug === "x") {
+            root.paletteDeleteStatus = "'x' is the fallback palette and cannot be deleted";
+            return;
+        }
+        if (!root.paletteSlugTaken(slug)) {
+            root.paletteDeleteStatus = "Palette not found in index.json";
+            return;
+        }
+        root.paletteDeleteStatus = "Deleting…";
+        paletteDeleter.pendingSlug = slug;
+        let dir = themeColors.palettesDir;
+        let file = root.paletteFilePath(slug);
+        let index = dir + "/index.json";
+        let backup = root.backupFilePath(slug);
+        paletteDeleter.command = ["bash", "-c",
+            "set -e; tmp=$(mktemp '" + dir + "/index.tmp.XXXXXX'); "
+            + "jq --arg s '" + slug + "' 'map(select(.slug != $s))' '" + index + "' > \"$tmp\"; mv \"$tmp\" '" + index + "'; "
+            + "rm -f '" + file + "' '" + backup + "'; echo OK"];
+        paletteDeleter.running = false;
+        paletteDeleter.running = true;
+    }
+
+    Process {
+        id: paletteDeleter
+        property string pendingSlug: ""
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (this.text.trim() === "OK") {
+                    let wasActive = root.activeSlug() === paletteDeleter.pendingSlug;
+                    root.paletteDeleteConfirm = false;
+                    root.paletteDeleteStatus = "";
+                    paletteReader.running = false;
+                    paletteReader.running = true;
+                    if (wasActive) root.applyDock(Object.assign({}, root.dock, { palette: "x" }));
+                } else {
+                    root.paletteDeleteStatus = "Could not delete the palette";
+                }
+            }
+        }
+    }
+
     // The instance is torn down right after closing (StackView clear):
     // flush any pending palette write on destroy.
     Component.onDestruction: root.flushPaletteWrite()

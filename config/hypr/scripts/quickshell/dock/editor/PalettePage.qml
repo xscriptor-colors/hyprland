@@ -153,7 +153,7 @@ Item {
                         }
                     }
 
-                    // Fila de acciones: Edit colors / Reset
+                    // Fila de acciones: Edit colors / Reset / New palette
                     Row {
                         width: parent.width
                         spacing: bar.s(10)
@@ -176,6 +176,59 @@ Item {
                             opacity: root.bar._hasSessionBackup ? 1 : 0.45
                             onActivated: root.bar.resetActivePalette()
                         }
+                        EditorButton {
+                            bar: root.bar
+                            icon: "󰐕"
+                            label: "New palette"
+                            active: root.bar.paletteCreateOpen
+                            onActivated: {
+                                root.bar.paletteCreateOpen = !root.bar.paletteCreateOpen;
+                                if (root.bar.paletteCreateOpen) {
+                                    root.bar.seedPaletteDraft();
+                                    root.bar.cancelDeletePalette();
+                                } else {
+                                    root.bar.paletteCreateStatus = "";
+                                }
+                            }
+                        }
+                        EditorButton {
+                            bar: root.bar
+                            icon: "󰆴"
+                            label: "Delete"
+                            active: root.bar.paletteDeleteConfirm
+                            opacity: root.bar.activeSlug() === "x" ? 0.45 : 1
+                            onActivated: {
+                                if (root.bar.activeSlug() === "x") return;
+                                if (root.bar.paletteDeleteConfirm) {
+                                    root.bar.cancelDeletePalette();
+                                } else {
+                                    root.bar.paletteCreateOpen = false;
+                                    root.bar.requestDeletePalette();
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Card hero: creador de paletas (8 colores base) ──
+                    // El Loader se recrea en cada apertura, así los campos
+                    // vuelven a sembrarse desde el draft sin bindings rotos.
+                    Loader {
+                        id: createLoader
+                        width: parent.width
+                        active: root.bar.paletteCreateOpen
+                        visible: active
+                        height: item ? item.height : 0
+                        sourceComponent: createCard
+                    }
+
+                    // ── Card hero: confirmación de borrado ──
+                    Loader {
+                        id: deleteLoader
+                        width: parent.width
+                        active: root.bar.paletteDeleteConfirm
+                        visible: active
+                        height: item ? item.height : 0
+                        sourceComponent: deleteCard
                     }
 
                     EditLabel {
@@ -278,6 +331,290 @@ Item {
                                 wrapMode: Text.WordWrap
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Creador de paletas: 8 colores base + preview + name/slug ──
+    Component {
+        id: createCard
+        Rectangle {
+            width: createLoader.width
+            height: implicitHeight
+            implicitHeight: createCol.height + bar.s(30)
+            radius: bar.s(21)
+            color: Qt.alpha(bar.colors.surface0, 0.4)
+            border.width: 1
+            border.color: bar.colors.surface1
+
+            Column {
+                id: createCol
+                x: bar.s(15)
+                y: bar.s(15)
+                width: parent.width - bar.s(30)
+                spacing: bar.s(10)
+
+                RowLayout {
+                    width: parent.width
+                    spacing: bar.s(12)
+
+                    // Preview: misma card que el grid, no interactiva.
+                    Rectangle {
+                        Layout.preferredWidth: bar.s(150)
+                        Layout.preferredHeight: bar.s(45)
+                        radius: bar.s(18)
+                        color: Qt.alpha(bar.colors.surface0, 0.4)
+                        border.width: 1
+                        border.color: bar.colors.surface1
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: bar.s(10)
+                            spacing: bar.s(10)
+                            Item {
+                                Layout.preferredWidth: bar.s(24)
+                                Layout.preferredHeight: bar.s(24)
+                                Column {
+                                    anchors.centerIn: parent
+                                    spacing: bar.s(2)
+                                    Row {
+                                        spacing: bar.s(2)
+                                        Repeater {
+                                            model: [0, 1]
+                                            delegate: Rectangle { width: bar.s(9); height: bar.s(9); radius: bar.s(2); color: bar.paletteDraftColors[index] }
+                                        }
+                                    }
+                                    Row {
+                                        spacing: bar.s(2)
+                                        Repeater {
+                                            model: [0, 1]
+                                            delegate: Rectangle { width: bar.s(9); height: bar.s(9); radius: bar.s(2); color: bar.paletteDraftColors[2 + index] }
+                                        }
+                                    }
+                                }
+                            }
+                            Text {
+                                text: bar.paletteDraftName.trim() !== "" ? bar.paletteDraftName : "New palette"
+                                font.family: "Hack Nerd Font"
+                                font.weight: Font.Bold
+                                font.pixelSize: bar.s(12)
+                                color: bar.colors.text
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+
+                    // Name + slug vivo
+                    Column {
+                        Layout.fillWidth: true
+                        spacing: bar.s(4)
+                        Row {
+                            spacing: bar.s(8)
+                            Text {
+                                text: "Name"
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.family: "Hack Nerd Font"
+                                font.weight: Font.Bold
+                                font.pixelSize: bar.s(12)
+                                color: bar.colors.text
+                            }
+                            TextField {
+                                id: nameField
+                                width: bar.s(220)
+                                height: bar.s(28)
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.family: "Hack Nerd Font"
+                                font.pixelSize: bar.s(13)
+                                color: bar.colors.text
+                                selectByMouse: true
+                                maximumLength: 32
+                                placeholderText: "My palette"
+                                text: bar.paletteDraftName
+                                onTextChanged: bar.paletteDraftName = text
+                                background: Rectangle {
+                                    color: Qt.alpha(bar.colors.surface0, 0.4)
+                                    radius: bar.s(13)
+                                    border.width: 1
+                                    border.color: nameField.activeFocus ? bar.colors.mauve : bar.colors.surface1
+                                }
+                            }
+                        }
+                        Text {
+                            text: "slug: " + (bar.slugifyPaletteName(bar.paletteDraftName) !== ""
+                                              ? bar.slugifyPaletteName(bar.paletteDraftName) : "—")
+                            font.family: "Hack Nerd Font"
+                            font.pixelSize: bar.s(11)
+                            color: bar.colors.subtext0
+                        }
+                    }
+                }
+
+                // 8 slots base (3 por línea, como el editor base16)
+                Flow {
+                    id: baseFlow
+                    width: parent.width
+                    spacing: bar.s(8)
+                    Repeater {
+                        model: 8
+                        delegate: Item {
+                            required property int index
+                            width: (baseFlow.width - bar.s(16)) / 3
+                            height: bar.s(30)
+                            Row {
+                                anchors.fill: parent
+                                spacing: bar.s(6)
+                                Rectangle {
+                                    width: bar.s(18)
+                                    height: bar.s(18)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    radius: bar.s(6)
+                                    border.width: 1
+                                    border.color: bar.colors.surface2
+                                    color: bar.paletteDraftColors[index]
+                                }
+                                Text {
+                                    text: bar.paletteBaseLabels[index]
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: bar.s(72)
+                                    font.family: "Hack Nerd Font"
+                                    font.pixelSize: bar.s(12)
+                                    font.weight: Font.Bold
+                                    color: bar.colors.text
+                                    elide: Text.ElideRight
+                                }
+                                TextField {
+                                    id: baseField
+                                    width: bar.s(90)
+                                    height: bar.s(28)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    font.family: "Hack Nerd Font"
+                                    font.pixelSize: bar.s(13)
+                                    color: bar.colors.text
+                                    selectByMouse: true
+                                    maximumLength: 7
+                                    text: bar.paletteDraftColors[index]
+                                    validator: RegularExpressionValidator { regularExpression: /^#[0-9a-fA-F]{6}$/ }
+                                    background: Rectangle {
+                                        color: Qt.alpha(bar.colors.surface0, 0.4)
+                                        radius: bar.s(13)
+                                        border.width: 1
+                                        border.color: baseField.activeFocus
+                                            ? bar.colors.mauve
+                                            : (baseField.acceptableInput ? bar.colors.surface1 : bar.colors.red)
+                                    }
+                                    onEditingFinished: bar.commitPaletteDraftColor(baseField, index)
+                                    onActiveFocusChanged: {
+                                        if (!baseField.activeFocus) bar.commitPaletteDraftColor(baseField, index);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                RowLayout {
+                    width: parent.width
+                    spacing: bar.s(10)
+                    EditorButton {
+                        bar: root.bar
+                        icon: "󰄬"
+                        label: "Create"
+                        active: true
+                        onActivated: root.bar.createPaletteFromDraft()
+                    }
+                    EditorButton {
+                        bar: root.bar
+                        label: "Cancel"
+                        onActivated: {
+                            root.bar.paletteCreateOpen = false;
+                            root.bar.paletteCreateStatus = "";
+                        }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: text !== ""
+                        text: bar.paletteCreateStatus
+                        font.family: "Hack Nerd Font"
+                        font.pixelSize: bar.s(12)
+                        color: bar.colors.red
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Confirmación de borrado de la paleta activa ──
+    Component {
+        id: deleteCard
+        Rectangle {
+            width: deleteLoader.width
+            height: implicitHeight
+            implicitHeight: delCol.height + bar.s(30)
+            radius: bar.s(21)
+            color: Qt.alpha(bar.colors.surface0, 0.4)
+            border.width: 1
+            border.color: bar.colors.red
+
+            Column {
+                id: delCol
+                x: bar.s(15)
+                y: bar.s(15)
+                width: parent.width - bar.s(30)
+                spacing: bar.s(10)
+
+                Row {
+                    spacing: bar.s(8)
+                    Text {
+                        text: "󰆴"
+                        anchors.verticalCenter: parent.verticalCenter
+                        font.family: "Hack Nerd Font"
+                        font.pixelSize: bar.s(16)
+                        color: bar.colors.red
+                    }
+                    Text {
+                        text: "Delete palette '" + bar.paletteDisplayName(bar.activeSlug()) + "'?"
+                        anchors.verticalCenter: parent.verticalCenter
+                        font.family: "Hack Nerd Font"
+                        font.weight: Font.Bold
+                        font.pixelSize: bar.s(14)
+                        color: bar.colors.text
+                    }
+                }
+                EditLabel {
+                    bar: root.bar
+                    width: parent.width
+                    text: "Removes dock/palettes/" + bar.activeSlug() + ".json, its index.json entry and the session snapshot. This cannot be undone."
+                    font.pixelSize: bar.s(12)
+                    color: bar.colors.subtext0
+                    wrapMode: Text.WordWrap
+                }
+                RowLayout {
+                    width: parent.width
+                    spacing: bar.s(10)
+                    EditorButton {
+                        bar: root.bar
+                        icon: "󰆴"
+                        label: "Delete"
+                        active: true
+                        accentRole: "red"
+                        onActivated: root.bar.deleteActivePalette()
+                    }
+                    EditorButton {
+                        bar: root.bar
+                        label: "Cancel"
+                        onActivated: root.bar.cancelDeletePalette()
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: text !== ""
+                        text: bar.paletteDeleteStatus
+                        font.family: "Hack Nerd Font"
+                        font.pixelSize: bar.s(12)
+                        color: bar.colors.red
+                        elide: Text.ElideRight
                     }
                 }
             }
