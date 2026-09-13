@@ -224,6 +224,50 @@ PYEOF
     fi
 fi
 
+# ── xtop (TUI system monitor) ─────────────────────────────────────────────────────
+# Per-palette themes (~/.config/xtop/themes/<slug>.jsonc) regenerated from
+# dock/palettes (single source of truth) + active theme switched with
+# `xtop --ct <slug>` (persists; live instances follow on the next tick).
+# Custom themes whose slug is NOT a palette are left untouched. A one-time
+# snapshot of the pre-existing themes is kept in themes.bak.
+XTOP_THEMES="$HOME_DIR/.config/xtop/themes"
+if [ -d "$XTOP_THEMES" ]; then
+    [ -d "$XTOP_THEMES.bak" ] || cp -r "$XTOP_THEMES" "$XTOP_THEMES.bak" 2>/dev/null || true
+    python3 - "$PALETTES" "$XTOP_THEMES" << 'XTOP_PY'
+import json, pathlib, sys
+
+palettes_dir = pathlib.Path(sys.argv[1])
+themes_dir = pathlib.Path(sys.argv[2])
+
+slugs = []
+for pal_file in sorted(palettes_dir.glob("*.json")):
+    if pal_file.name == "index.json":
+        continue
+    pal = json.load(open(pal_file))
+    slug = pal.get("slug") or pal_file.stem
+    b = pal.get("base16", {}) or {}
+    bg = pal.get("background") or b.get("color0", "#000000")
+    fg = pal.get("foreground") or b.get("color7", "#ffffff")
+    palette = [b.get("color%d" % i, bg) for i in range(16)]
+    body = json.dumps({
+        "name": slug,
+        "background": bg,
+        "foreground": fg,
+        "palette": palette,
+    }, indent=4)
+    header = "// %s -- synced from dock/palettes/%s.json by theme-sync.sh\n" % (pal.get("name", slug), slug)
+    (themes_dir / (slug + ".jsonc")).write_text(header + body + "\n")
+    slugs.append(slug)
+
+print("xtop themes regenerated from dock/palettes: %d" % len(slugs))
+XTOP_PY
+
+    # Switch the active theme (persists; live xtop instances follow next tick).
+    if command -v xtop >/dev/null 2>&1 && [ -f "$XTOP_THEMES/$SLUG.jsonc" ]; then
+        timeout 10 xtop --ct "$SLUG" >/dev/null 2>&1 && echo "xtop theme → '$SLUG'"
+    fi
+fi
+
 # ── VS Code ───────────────────────────────────────────────────────────────────────
 # The xscriptor-themes extension ships one color theme AND one icon theme per
 # palette (id "<slug>-icons"), plus a single product icon theme ("x"). Update
