@@ -44,6 +44,10 @@ Item {
     property var dock: DockLayout.defaultDock()
     property var palettes: ([])
     property bool _dirty: false
+    // true solo tras cargar el estado real desde settings.json (dataReady):
+    // impide persistir el dock por defecto si el panel se abre durante el
+    // arranque/reload del shell (ver reload()).
+    property bool _dockReady: false
     property bool borderTargetActive: true
 
     // ════ FASE 4: INTRO/CIERRE (paridad con GuidePopup) ════
@@ -119,21 +123,33 @@ Item {
     // Serp edits share the same debounce; both keys are independent top-level
     // settings keys, so the queues never clobber each other.
     function markDirtySerp() { _serpDirty = true; saveTimer.restart(); }
+    // Un único updateJsonBulk (un jq + un mv) en vez de dos setSetting
+    // separados: dos procesos jq concurrentes sobre el mismo archivo se pisan
+    // (read-modify-write) y podían perder la clave recién escrita.
+    // Y nunca se guarda antes de haber cargado (dataReady): un panel abierto
+    // durante el arranque no puede persistir el dock por defecto.
     function flushSave() {
-        if (_dirty) {
-            _dirty = false;
-            Config.setSetting("dock", root.dock);
-        }
-        if (_serpDirty) {
-            _serpDirty = false;
-            Config.setSetting("serpbar", root.serp);
-        }
+        let patch = {};
+        if (_dirty && root._dockReady) { _dirty = false; patch.dock = root.dock; }
+        if (_serpDirty && root._dockReady) { _serpDirty = false; patch.serpbar = root.serp; }
+        if (Object.keys(patch).length > 0) Config.updateJsonBulk(patch);
     }
     function applyDock(dock) { root.dock = dock; root.markDirty(); }
+    // El panel puede crearse antes de que Config acabe de leer settings.json
+    // (p. ej. justo tras un reload del shell). reload() se pospone hasta
+    // dataReady: si no, getDock({}) devolvía el dock por defecto y el primer
+    // guardado (cambiar de paleta) lo persistía — el dock "volvía a su
+    // posición inicial".
     function reload() {
+        if (!Config.dataReady) return;
         root.dock = DockLayout.getDock(Config.rawSettings);
         root.engine = Config.rawSettings.barEngine === "serp" ? "serp" : "dock";
         root.serp = DockLayout.getSerpbar(Config.rawSettings);
+        root._dockReady = true;
+    }
+    Connections {
+        target: Config
+        function onDataReadyChanged() { if (Config.dataReady) root.reload(); }
     }
 
     // ════ ENGINE SWITCHING + SERP EDITS (Phase D4-E2) ════
