@@ -3,11 +3,14 @@ import sys, json, time, re, os
 import urllib.request, urllib.parse, http.cookiejar
 
 # Tap into QS dynamic cache variables
-QS_LOG_DIR = os.environ.get("QS_LOG_DIR", "/tmp/quickshell/logs")
-QS_RUN_WP = os.environ.get("QS_RUN_WALLPAPER_PICKER", "/tmp/quickshell/wallpaper_picker")
+# Paths: prefer the davincix ones (exported by paths.sh); the QS_* variables
+# remain as a fallback for the old layout.
+LOG_DIR = os.environ.get("DAVINCIX_LOG_DIR") or os.environ.get("QS_LOG_DIR", "/tmp/quickshell/logs")
+CONTROL_FILE = os.environ.get("DAVINCIX_CONTROL_FILE") or os.path.join(
+    os.environ.get("QS_RUN_WALLPAPER_PICKER", "/tmp/quickshell/wallpaper_picker"),
+    "ddg_search_control")
 
-LOG_FILE = os.path.join(QS_LOG_DIR, "ddg_python_scraper.log")
-CONTROL_FILE = os.path.join(QS_RUN_WP, "ddg_search_control")
+LOG_FILE = os.path.join(LOG_DIR, "ddg_python_scraper.log")
 
 def log(msg):
     try:

@@ -55,7 +55,7 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         "scale": { w: s(520, scale), h: s(560, scale), rx: Math.floor((mw/2)-(s(520, scale)/2)), ry: Math.floor((mh/2)-(s(560, scale)/2)), comp: "scale/ScalePicker.qml" },
         "window-controls": { w: s(480, scale), h: s(800, scale), rx: Math.floor((mw/2)-(s(480, scale)/2)), ry: Math.floor((mh/2)-(s(800, scale)/2)), comp: "window-controls/WindowControls.qml" },
         "bar-editor": { w: s(1120, scale), h: s(760, scale), rx: Math.floor((mw/2)-(s(1120, scale)/2)), ry: Math.floor((mh/2)-(s(760, scale)/2)), comp: "dock/BarEditor.qml" },
-        "wallpaper": { w: mw, h: s(650, scale), rx: 0, ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "wallpaper/WallpaperPicker.qml" },
+        "wallpaper": { w: mw, h: s(650, scale), rx: 0, ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "davincix/ui/DavincixPicker.qml" },
         
         // --- Top Left Edge ---
         "music":     { w: s(700, scale), h: s(650, scale), rx: s(5, scale), ry: s(60, scale), comp: "music/MusicPopup.qml" },

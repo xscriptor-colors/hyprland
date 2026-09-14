@@ -25,7 +25,7 @@ Accessible via keybinds (SUPER + letter):
 | Clipboard | `clipboard/ClipboardManager.qml` | SUPER + C | Center |
 | Calendar | `calendar/CalendarPopup.qml` | SUPER + S | Top center |
 | Music Player | `music/MusicPopup.qml` | SUPER + M | Top left |
-| Wallpaper Picker | `wallpaper/WallpaperPicker.qml` | SUPER + W | Center |
+| Davincix | `davincix/ui/DavincixPicker.qml` | SUPER + W | Center |
 | Guide/Help | `guide/GuidePopup.qml` | SUPER + H | Center |
 | Settings | `dock/BarEditor.qml` | SUPER + SHIFT + S / D | Center |
 | Display Scale | `scale/ScalePicker.qml` | SUPER + Z | Center |
@@ -36,6 +36,30 @@ Accessible via keybinds (SUPER + letter):
 | RSS Reader | `rss-reader/RssReader.qml` | SUPER + O | Center |
 | File Search | `file-search/FileSearch.qml` | SUPER + ' | Center |
 | Quick Actions | `quickactions/DrawAction.qml`, `SystemUsage.qml`, `Timer.qml` | (internal) | Varies |
+
+## Wallpaper subsystem (davincix)
+
+The wallpaper picker is the frontend of a layered subsystem under
+`davincix/`. The UI (`ui/DavincixPicker.qml`) only decides **what** to apply;
+The UI (`ui/DavincixPicker.qml`) composes its view components under
+`ui/components/` (`grid/` and `filter/`); the domain logic lives in
+`davincix/kernel/` and does not depend on Quickshell:
+
+| File | Role |
+|---|---|
+| `kernel/davincix.sh` | CLI: `set`, `fetch`, `current`, `thumbs`, `search`, `stop`, `paths` |
+| `kernel/paths.sh` | Path resolution (env overrides; same defaults as the shell cache) |
+| `kernel/util.sh` | Shared helpers (logging, media-type detection) |
+| `kernel/apply.sh` | Apply with awww/mpvpaper + transition resolution |
+| `kernel/state.sh` | Current wallpaper detection + cached current image |
+| `kernel/download.sh` | URL download (webp-aware) |
+| `kernel/thumbs.sh` | Thumbnail cache + manifest (webp conversion, video posters) |
+| `kernel/search.sh` + `kernel/ddg_links.py` | DuckDuckGo search with run/pause/stop control |
+
+Callers: `ui/DavincixPicker.qml` (`set`/`fetch`/`search`/`stop`), `qs_manager.sh`
+(`thumbs`, `current --thumb-name`), `init.sh` (random first-run) and
+`Lock.qml` / `sddm-colors.sh` (read `current_wallpaper.png`). See
+`davincix/README.md` for the full contract.
 
 ## Specialty QML Windows
 

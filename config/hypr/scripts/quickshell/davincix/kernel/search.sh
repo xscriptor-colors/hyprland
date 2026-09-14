@@ -1,34 +1,42 @@
 #!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════════════════
+# davincix · kernel — online search (DuckDuckGo)
+#
+# Orchestrates the scraper (ddg_links.py): it receives "thumb|full" pairs on
+# stdout, validates the full URL content-type, downloads the thumbnail,
+# converts it when it is webp and records it in search_map.txt (name|url).
+# It honors the run/pause/stop control file (written by the UI).
+# ═══════════════════════════════════════════════════════════════════════════
 
-QUERY="$1"
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$DIR/paths.sh"
+davincix_ensure_dirs
 
-# Import dynamic caching system
-source "$SCRIPT_DIR/../../caching.sh"
-qs_ensure_cache "wallpaper_picker"
+QUERY="${1:-}"
+if [ -z "$QUERY" ]; then
+    echo "usage: search.sh <query>" >&2
+    exit 2
+fi
 
-CACHE_DIR="$QS_CACHE_WALLPAPER_PICKER"
-SEARCH_DIR="$CACHE_DIR/search_thumbs"
-MAP_FILE="$CACHE_DIR/search_map.txt"
-CONTROL_FILE="$QS_RUN_WALLPAPER_PICKER/ddg_search_control"
-LOG_FILE="$QS_LOG_DIR/ddg_downloader.log"
+SEARCH_DIR="$DAVINCIX_SEARCH_DIR"
+MAP_FILE="$DAVINCIX_MAP_FILE"
+CONTROL_FILE="$DAVINCIX_CONTROL_FILE"
+LOG_FILE="$DAVINCIX_LOG_DIR/ddg_downloader.log"
 
 echo "=== Starting search for: $QUERY ===" > "$LOG_FILE"
 
-# 1. Guarantee directory exists
 mkdir -p "$SEARCH_DIR"
 
-# 2. The Pipe: Python provides links, OS provides backpressure
-python3 -u "$SCRIPT_DIR/quickshell/wallpaper/get_ddg_links.py" "$QUERY" | while IFS='|' read -r thumb_url full_url; do
-    
-    # 3. Safely read control file
+# The Python → shell pipe provides the links; the shell applies backpressure.
+python3 -u "$DIR/ddg_links.py" "$QUERY" | while IFS='|' read -r thumb_url full_url; do
+
     state=$(cat "$CONTROL_FILE" 2>/dev/null | tr -d '[:space:]')
-    
-    if [[ "$state" == "stop" ]]; then 
+
+    if [[ "$state" == "stop" ]]; then
         echo "Stop signal received. Exiting." >> "$LOG_FILE"
-        exit 0 
+        exit 0
     fi
-    
+
     while [[ "$state" == "pause" ]]; do
         sleep 1
         state=$(cat "$CONTROL_FILE" 2>/dev/null | tr -d '[:space:]')
@@ -36,9 +44,7 @@ python3 -u "$SCRIPT_DIR/quickshell/wallpaper/get_ddg_links.py" "$QUERY" | while 
 
     if [ -z "$thumb_url" ] || [ -z "$full_url" ]; then continue; fi
 
-    # =========================================================================
-    # PRE-FLIGHT CHECK ON THE FULL URL
-    # =========================================================================
+    # Pre-flight: the full URL must be an image (drops dead URLs/HTML).
     target_headers=$(curl -s -I -L -m 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "$full_url")
     target_type=$(echo "$target_headers" | grep -i "content-type:" | tail -n 1 | tr -d '\r')
 
@@ -46,7 +52,6 @@ python3 -u "$SCRIPT_DIR/quickshell/wallpaper/get_ddg_links.py" "$QUERY" | while 
         echo "Skip: Full URL is dead or HTML ($target_type) -> $full_url" >> "$LOG_FILE"
         continue
     fi
-    # =========================================================================
 
     uuid=$(date +%s%N)
     ext="${full_url##*.}"
@@ -66,21 +71,19 @@ python3 -u "$SCRIPT_DIR/quickshell/wallpaper/get_ddg_links.py" "$QUERY" | while 
 
     echo "Downloading Thumb: $thumb_url -> $filename" >> "$LOG_FILE"
 
-    # 4. TIMEOUT ADDED: -m 5 prevents permanent freezing on stalled connections
     curl -s -L -m 5 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "$thumb_url" -o "$tmppath"
 
-    # 5. Check state again AFTER the curl block
+    # Re-check the state after the download block.
     state=$(cat "$CONTROL_FILE" 2>/dev/null | tr -d '[:space:]')
-    if [[ "$state" == "stop" ]]; then 
+    if [[ "$state" == "stop" ]]; then
         echo "Stop signal received during download. Discarding." >> "$LOG_FILE"
         rm -f "$tmppath"
-        exit 0 
+        exit 0
     fi
 
-    # 6. Verify the thumbnail itself is valid and not corrupted
     if [ -s "$tmppath" ]; then
         actual_mime=$(file -b --mime-type "$tmppath")
-        
+
         if [[ ! "$actual_mime" =~ ^image/ ]]; then
             echo "ERROR: Thumb is not an image ($actual_mime). Discarding." >> "$LOG_FILE"
             rm -f "$tmppath"
