@@ -21,6 +21,7 @@ import Quickshell.Io
 import "../../"
 import "../../dock"
 import "lib/constants.js" as C
+import "components"
 import "components/grid"
 import "components/filter"
 import "lib/color.js" as Color
@@ -116,6 +117,38 @@ Item {
 
     function loadMonitors() {
         monitorProc.running = true;
+    }
+
+    // Import: rofi filebrowser devuelve la ruta elegida por stdout.
+    Process {
+        id: importProc
+        command: ["rofi", "-modi", "filebrowser", "-show", "filebrowser",
+                  "-filebrowser-dir", decodeURIComponent(window.homeDir.replace("file://", "")) + "/Pictures"]
+        running: false
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let path = this.text.trim();
+                if (path.length > 0) {
+                    let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+                    Quickshell.execDetached([cli, "import", path]);
+                }
+            }
+        }
+    }
+
+    // Slideshow: pregunta al kernel si el daemon está corriendo (al abrir).
+    Process {
+        id: slideshowStatusProc
+        command: []
+        running: false
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let on = this.text.trim() === "running";
+                window.slideshowOn = on;
+            }
+        }
     }
 
     function getMonitorOutputs() {
@@ -263,6 +296,104 @@ Item {
             if (srcModel.get(i, "fileName") === name) return true;
         }
         return false;
+    }
+
+    // ── View modes: setters + persistencia en settings.json ─────────────────
+    function saveViewPrefs() {
+        Config.setSetting("davincixView", {
+            orientation: window.gridOrientation,
+            shape: window.cardShape,
+            favorites: window.favoriteNames
+        });
+    }
+
+    function setOrientation(v) {
+        if (v === "horizontal" || v === "vertical") {
+            window.gridOrientation = v;
+            window.saveViewPrefs();
+        }
+    }
+
+    function setCardShape(v) {
+        if (v === "rect" || v === "circle") {
+            window.cardShape = v;
+            window.saveViewPrefs();
+        }
+    }
+
+    // ── Favorites ──────────────────────────────────────────────────────────
+    function isFavorite(name) {
+        if (!name) return false;
+        return window.favoriteNames.indexOf(String(name)) !== -1;
+    }
+
+    function toggleFavorite(name) {
+        if (!name || window.isApplying) return;
+        let s = String(name);
+        let idx = window.favoriteNames.indexOf(s);
+        if (idx !== -1) {
+            window.favoriteNames.splice(idx, 1);
+        } else {
+            window.favoriteNames.push(s);
+        }
+        window.saveViewPrefs();
+        // Re-evalúa los filtros de las tarjetas y el contador visible.
+        window.cacheVersion++;
+        window.updateVisibleCount();
+    }
+
+    // ── Slideshow ───────────────────────────────────────────────────────────
+    function refreshSlideshowState() {
+        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        slideshowStatusProc.command = [cli, "slideshow", "status"];
+        slideshowStatusProc.running = true;
+    }
+
+    function toggleSlideshow() {
+        if (window.isApplying) return;
+        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let action = window.slideshowOn ? "stop" : "start " + C.SLIDESHOW_INTERVAL;
+        Quickshell.execDetached(["bash", "-c", '"' + cli + '" slideshow ' + action]);
+        window.slideshowOn = !window.slideshowOn;
+    }
+
+    // ── Delete (with confirmation) ──────────────────────────────────────────
+    function requestDelete() {
+        if (window.isApplying || window.confirmOpen) return;
+        if (window.currentFilter === "Search") return; // resultados de búsqueda: no se borran
+        let targetModel = window.getModelForFilter(window.currentFilter);
+        if (grid.view.currentIndex < 0 || grid.view.currentIndex >= targetModel.count) return;
+        let fname = targetModel.get(grid.view.currentIndex).fileName;
+        if (!fname) return;
+        window.confirmTarget = String(fname);
+        window.confirmOpen = true;
+    }
+
+    function confirmDelete() {
+        window.confirmOpen = false;
+        let name = window.confirmTarget;
+        window.confirmTarget = "";
+        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        Quickshell.execDetached([cli, "rm", window.getCleanName(name)]);
+    }
+
+    function cancelDelete() {
+        window.confirmOpen = false;
+        window.confirmTarget = "";
+    }
+
+    // ── Import (rofi filebrowser → kernel import) ───────────────────────────
+    function requestImport() {
+        if (window.isApplying) return;
+        importProc.running = true;
+    }
+
+    // ── Search: next page of results (keeps the current cache) ──────────────
+    function loadMoreSearch() {
+        if (!window.hasSearched || window.searchQuery === "") return;
+        window.isSearchPaused = false;
+        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        Quickshell.execDetached([cli, "search", "--continue", window.searchQuery]);
     }
 
     onWidgetArgChanged: {
@@ -413,6 +544,16 @@ Item {
     property bool roundedThumbs: true
     property int thumbRadius: roundedThumbs ? window.s(12) : 0
 
+    // ── View modes (persisted via Config → settings.json, key "davincixView")
+    property string gridOrientation: "horizontal"
+    property string cardShape: "rect"
+    property bool slideshowOn: false
+    property var favoriteNames: []
+
+    // ── Delete confirmation state ────────────────────────────────────────────
+    property bool confirmOpen: false
+    property string confirmTarget: ""
+
     readonly property real itemWidth: window.s(400)
     readonly property real itemHeight: window.s(420)
     readonly property real borderWidth: window.s(3)
@@ -442,6 +583,7 @@ Item {
         if (filter === "Search") return true;
         if (filter === "All") return true;
         if (filter === "Video") return isVid;
+        if (filter === "Favorites") return window.isFavorite(String(fileName));
 
         let hexColor = window.colorMap[String(fileName)];
         if (!hexColor) return filter === "Monochrome";
@@ -683,18 +825,18 @@ Item {
 
     Shortcut {
         sequence: "Left"
-        enabled: !window.isScrollingBlocked && !window.isApplying
+        enabled: !window.isScrollingBlocked && !window.isApplying && !window.confirmOpen
         onActivated: window.stepToNextValidIndex(-1)
     }
     Shortcut {
         sequence: "Right"
-        enabled: !window.isScrollingBlocked && !window.isApplying
+        enabled: !window.isScrollingBlocked && !window.isApplying && !window.confirmOpen
         onActivated: window.stepToNextValidIndex(1)
     }
 
     Shortcut {
         sequence: "Return"
-        enabled: !window.searchInputFocused && !window.isScrollingBlocked && !window.isApplying
+        enabled: !window.searchInputFocused && !window.isScrollingBlocked && !window.isApplying && !window.confirmOpen
         onActivated: {
             let targetModel = window.getModelForFilter(window.currentFilter);
             if (grid.view.currentIndex >= 0 && grid.view.currentIndex < targetModel.count) {
@@ -707,9 +849,15 @@ Item {
         }
     }
 
-    Shortcut { sequence: "Escape"; enabled: !window.isApplying; onActivated: { if (window.currentFilter === "Search") { window.currentFilter = "All"; } } }
-    Shortcut { sequence: "Tab"; enabled: !window.isApplying; onActivated: window.cycleFilter(1) }
-    Shortcut { sequence: "Backtab"; enabled: !window.isApplying; onActivated: window.cycleFilter(-1) }
+    Shortcut {
+        sequence: "Delete"
+        enabled: !window.isApplying && !window.confirmOpen && !window.searchInputFocused
+        onActivated: window.requestDelete()
+    }
+
+    Shortcut { sequence: "Escape"; enabled: !window.isApplying && !window.confirmOpen; onActivated: { if (window.currentFilter === "Search") { window.currentFilter = "All"; } } }
+    Shortcut { sequence: "Tab"; enabled: !window.isApplying && !window.confirmOpen; onActivated: window.cycleFilter(1) }
+    Shortcut { sequence: "Backtab"; enabled: !window.isApplying && !window.confirmOpen; onActivated: window.cycleFilter(-1) }
 
     ListModel { id: localProxyModel }
     ListModel { id: searchProxyModel }
@@ -852,7 +1000,7 @@ Item {
     }
 
     function gridWheel(wheel) {
-        if (window.isScrollingBlocked || window.isApplying) {
+        if (window.isScrollingBlocked || window.isApplying || window.confirmOpen) {
             wheel.accepted = true;
             return;
         }
@@ -897,10 +1045,30 @@ Item {
         settings: searchState
     }
 
+    ConfirmDialog {
+        id: confirmDialog
+        ctx: window
+        theme: _theme
+        open: window.confirmOpen
+        title: "Delete wallpaper?"
+        message: window.confirmTarget !== "" ? window.getCleanName(window.confirmTarget) : ""
+        onConfirmed: window.confirmDelete()
+        onDismissed: window.cancelDelete()
+    }
+
     Component.onCompleted: {
         Quickshell.execDetached(["bash", "-c", "mkdir -p '" + decodeURIComponent(window.searchDir.replace("file://", "")) + "'"]);
 
         window.loadMonitors();
+
+        // Preferencias de vista + favoritos persistidos (settings.json).
+        let prefs = Config.getSetting("davincixView", {});
+        window.gridOrientation = (prefs.orientation === "vertical") ? "vertical" : "horizontal";
+        window.cardShape = (prefs.shape === "circle") ? "circle" : "rect";
+        window.favoriteNames = Array.isArray(prefs.favorites) ? prefs.favorites : [];
+
+        // Estado real del slideshow (el flag persistido puede mentir tras reboot).
+        window.refreshSlideshowState();
 
         grid.view.forceActiveFocus();
         window.processMarkers();
@@ -908,11 +1076,13 @@ Item {
     }
 
     Component.onDestruction: {
+        // Cierra la búsqueda y limpia su caché (thumbs + map + cursor).
+        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        Quickshell.execDetached([cli, "search", "--clear"]);
         if (window.hasSearched) {
-            Quickshell.execDetached(["bash", "-c", "echo 'pause' > " + paths.getRunDir("wallpaper_picker") + "/ddg_search_control"]);
-        } else {
-            let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
-            Quickshell.execDetached([cli, "stop"]);
+            window.hasSearched = false;
+            searchState.searched = false;
+            searchState.lastName = "";
         }
     }
 }

@@ -1,10 +1,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // davincix · ui/components/grid — DavincixGrid
 //
-// The horizontal thumbnail ListView (scroll, highlight range, add animations,
-// wheel handling) plus the card delegate. Wrapped in an Item so the ListView
-// can be exposed as `view` (ids do not cross file boundaries); state and
-// actions live on `ctx`.
+// The thumbnail ListView (horizontal o vertical según ctx.gridOrientation;
+// scroll, highlight range, add animations, wheel handling) plus the card
+// delegate. Wrapped in an Item so the ListView can be exposed as `view` (ids
+// do not cross file boundaries); state and actions live on `ctx`.
 // ═══════════════════════════════════════════════════════════════════════════
 import QtQuick
 
@@ -28,14 +28,18 @@ Item {
         Behavior on anchors.margins { NumberAnimation { duration: 700; easing.type: Easing.OutExpo } }
 
         spacing: 0
-        orientation: ListView.Horizontal
+        orientation: gridRoot.ctx.gridOrientation === "vertical" ? ListView.Vertical : ListView.Horizontal
         clip: false
         interactive: !gridRoot.ctx.isScrollingBlocked && !gridRoot.ctx.isApplying
         cacheBuffer: 2000
 
         highlightRangeMode: ListView.StrictlyEnforceRange
-        preferredHighlightBegin: (width / 2) - ((gridRoot.ctx.itemWidth * 1.5 + gridRoot.ctx.spacing) / 2)
-        preferredHighlightEnd: (width / 2) + ((gridRoot.ctx.itemWidth * 1.5 + gridRoot.ctx.spacing) / 2)
+        preferredHighlightBegin: gridRoot.ctx.gridOrientation === "vertical"
+            ? (listView.height / 2) - ((gridRoot.ctx.itemHeight * 1.5 + gridRoot.ctx.spacing) / 2)
+            : (listView.width / 2) - ((gridRoot.ctx.itemWidth * 1.5 + gridRoot.ctx.spacing) / 2)
+        preferredHighlightEnd: gridRoot.ctx.gridOrientation === "vertical"
+            ? (listView.height / 2) + ((gridRoot.ctx.itemHeight * 1.5 + gridRoot.ctx.spacing) / 2)
+            : (listView.width / 2) + ((gridRoot.ctx.itemWidth * 1.5 + gridRoot.ctx.spacing) / 2)
         highlightMoveDuration: gridRoot.ctx.initialFocusSet ? 500 : 0
         focus: true
 
@@ -54,8 +58,18 @@ Item {
             NumberAnimation { property: "x"; duration: 400; easing.type: Easing.OutCubic }
         }
 
-        header: Item { width: Math.max(0, (listView.width / 2) - ((gridRoot.ctx.itemWidth * 1.5) / 2)) }
-        footer: Item { width: Math.max(0, (listView.width / 2) - ((gridRoot.ctx.itemWidth * 1.5) / 2)) }
+        // header/footer: espaciador inicial/final para que el primer/último
+        // elemento pueda centrarse en el highlight. En horizontal la fórmula
+        // usa itemWidth*1.5 (la original, conservada exacta); en vertical
+        // cambia al eje alto con itemHeight*1.5.
+        header: Item {
+            width: gridRoot.ctx.gridOrientation === "vertical" ? 0 : Math.max(0, (listView.width / 2) - ((gridRoot.ctx.itemWidth * 1.5) / 2))
+            height: gridRoot.ctx.gridOrientation === "vertical" ? Math.max(0, (listView.height / 2) - ((gridRoot.ctx.itemHeight * 1.5) / 2)) : 0
+        }
+        footer: Item {
+            width: gridRoot.ctx.gridOrientation === "vertical" ? 0 : Math.max(0, (listView.width / 2) - ((gridRoot.ctx.itemWidth * 1.5) / 2))
+            height: gridRoot.ctx.gridOrientation === "vertical" ? Math.max(0, (listView.height / 2) - ((gridRoot.ctx.itemHeight * 1.5) / 2)) : 0
+        }
 
         model: gridRoot.ctx.activeModel
 
@@ -72,6 +86,7 @@ Item {
                 listView.currentIndex = index
                 gridRoot.ctx.applyWallpaper(String(fileName), String(fileName).startsWith("000_"))
             }
+            onFavoriteToggled: gridRoot.ctx.toggleFavorite(String(fileName))
         }
     }
 }

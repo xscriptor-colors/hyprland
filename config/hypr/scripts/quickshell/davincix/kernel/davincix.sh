@@ -27,7 +27,12 @@ usage: davincix.sh <command> [options]
   current          print the current wallpaper path (--thumb-name for its thumb)
   thumbs           prepare the thumbnail cache (async)
   search <query>   run a DuckDuckGo search
+  search --continue <query>  load the next page of results (keeps the cache)
+  search --clear   stop the search and drop its cache
   stop             stop the running search
+  rm <file>        move a wallpaper to the trash (and its thumbnail)
+  import <paths…>  copy files into the wallpaper dir and build thumbnails
+  slideshow start|stop|status [interval-seconds]
   paths            print the resolved paths
 EOF
     exit 2
@@ -151,18 +156,91 @@ cmd_stop() {
 }
 
 # ── search: run a DDG search (stops the previous one and clears its cache) ────
+# --continue: keeps the cache and resumes from the saved DDG cursor (load more).
+# --clear: stops the search and drops the cache (called when the picker closes).
 cmd_search() {
-    local query="${1:-}"
+    if [ "${1:-}" = "--clear" ]; then
+        cmd_stop
+        rm -rf "${DAVINCIX_SEARCH_DIR:?}"/* 2>/dev/null || true
+        rm -f "$DAVINCIX_MAP_FILE" "$DAVINCIX_NEXT_FILE" 2>/dev/null || true
+        return 0
+    fi
+
+    local continue=0 query=""
+    if [ "${1:-}" = "--continue" ]; then continue=1; shift; fi
+    query="${1:-}"
     [ -n "$query" ] || usage
 
     cmd_stop
     sleep 0.2
 
-    rm -rf "${DAVINCIX_SEARCH_DIR:?}"/* 2>/dev/null || true
-    rm -f "$DAVINCIX_MAP_FILE" 2>/dev/null || true
+    if [ "$continue" = "0" ]; then
+        rm -rf "${DAVINCIX_SEARCH_DIR:?}"/* 2>/dev/null || true
+        rm -f "$DAVINCIX_MAP_FILE" "$DAVINCIX_NEXT_FILE" 2>/dev/null || true
+    fi
 
     echo 'run' > "$DAVINCIX_CONTROL_FILE"
-    nohup bash "$DIR/search.sh" "$query" >/dev/null 2>&1 &
+    if [ "$continue" = "1" ]; then
+        nohup bash "$DIR/search.sh" "$query" --continue >/dev/null 2>&1 &
+    else
+        nohup bash "$DIR/search.sh" "$query" >/dev/null 2>&1 &
+    fi
+}
+
+# ── rm: move a wallpaper to the trash (and drop its thumbnail + manifest) ─────
+cmd_rm() {
+    local name="${1:-}"
+    [ -n "$name" ] || usage
+    name="$(basename "$name")"
+
+    local target="$DAVINCIX_WALLPAPER_DIR/$name"
+    if [ ! -f "$target" ]; then
+        notify-send "Wallpaper Error" "Not found: $name" -u critical -t 5000
+        exit 1
+    fi
+
+    # Papelera vía gio (gvfs); fallback: borrado directo.
+    if ! gio trash "$target" 2>/dev/null; then
+        rm -f "$target"
+    fi
+
+    rm -f "$DAVINCIX_THUMB_DIR/$name" "$DAVINCIX_THUMB_DIR/000_$name"
+    sed -i "/^${name}$/d;/^000_${name}$/d" "$DAVINCIX_MANIFEST" 2>/dev/null || true
+
+    notify-send "Wallpaper" "Moved to trash: $name" -t 2000
+}
+
+# ── import: copy files into the wallpaper dir and refresh thumbnails ──────────
+cmd_import() {
+    local imported=0
+    while [ $# -gt 0 ]; do
+        local src="$1"; shift
+        [ -f "$src" ] || continue
+
+        local base dest candidate=0
+        base="$(basename "$src")"
+        dest="$DAVINCIX_WALLPAPER_DIR/$base"
+        while [ -e "$dest" ]; do
+            candidate=$((candidate + 1))
+            dest="$DAVINCIX_WALLPAPER_DIR/${base%.*}-${candidate}.${base##*.}"
+        done
+
+        if cp "$src" "$dest"; then
+            imported=$((imported + 1))
+        fi
+    done
+
+    [ "$imported" -gt 0 ] || { notify-send "Wallpaper Error" "No files imported" -u critical -t 5000; exit 1; }
+
+    source "$DIR/thumbs.sh"
+    davincix_thumbs_prep
+
+    notify-send "Wallpaper" "Imported ${imported} file(s)" -t 2000
+}
+
+# ── slideshow: start/stop/status of the rotation daemon ───────────────────────
+cmd_slideshow() {
+    bash "$DIR/slideshow.sh" "$@"
 }
 
 # ── paths: print the resolved paths (debug) ───────────────────────────────────
@@ -185,6 +263,9 @@ case "$cmd" in
     thumbs) cmd_thumbs "$@" ;;
     search) cmd_search "$@" ;;
     stop) cmd_stop "$@" ;;
+    rm) cmd_rm "$@" ;;
+    import) cmd_import "$@" ;;
+    slideshow) cmd_slideshow "$@" ;;
     paths) cmd_paths "$@" ;;
     *) usage ;;
 esac

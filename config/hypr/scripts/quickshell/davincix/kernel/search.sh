@@ -14,21 +14,26 @@ davincix_ensure_dirs
 
 QUERY="${1:-}"
 if [ -z "$QUERY" ]; then
-    echo "usage: search.sh <query>" >&2
+    echo "usage: search.sh <query> [--continue]" >&2
     exit 2
 fi
+
+CONTINUE=0
+[ "${2:-}" = "--continue" ] && CONTINUE=1
 
 SEARCH_DIR="$DAVINCIX_SEARCH_DIR"
 MAP_FILE="$DAVINCIX_MAP_FILE"
 CONTROL_FILE="$DAVINCIX_CONTROL_FILE"
 LOG_FILE="$DAVINCIX_LOG_DIR/ddg_downloader.log"
 
-echo "=== Starting search for: $QUERY ===" > "$LOG_FILE"
+echo "=== Starting search for: $QUERY (continue=$CONTINUE) ===" > "$LOG_FILE"
 
 mkdir -p "$SEARCH_DIR"
 
 # The Python → shell pipe provides the links; the shell applies backpressure.
-python3 -u "$DIR/ddg_links.py" "$QUERY" | while IFS='|' read -r thumb_url full_url; do
+python3 -u "$DIR/ddg_links.py" "$QUERY" \
+    $([ "$CONTINUE" = "1" ] && echo "--continue") \
+    --next-file "$DAVINCIX_NEXT_FILE" | while IFS='|' read -r thumb_url full_url; do
 
     state=$(cat "$CONTROL_FILE" 2>/dev/null | tr -d '[:space:]')
 

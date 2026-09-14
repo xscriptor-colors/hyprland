@@ -183,6 +183,116 @@ Rectangle {
                 }
             }
 
+            // Grid orientation: horizontal ⇄ vertical (persisted).
+            Rectangle {
+                width: ctx.s(36)
+                height: ctx.s(36)
+                radius: ctx.s(13)
+                anchors.verticalCenter: parent.verticalCenter
+                color: orientMouse.containsMouse ? theme.surface1 : theme.surface0
+                border.color: theme.surface1
+                border.width: 1
+                Behavior on color { ColorAnimation { duration: 150 } }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: ctx.gridOrientation === "vertical" ? "\uF07D" : "\uF07E"  // fa-arrows-v / fa-arrows-h
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: ctx.s(14)
+                    color: theme.text
+                }
+                MouseArea {
+                    id: orientMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ctx.setOrientation(ctx.gridOrientation === "vertical" ? "horizontal" : "vertical")
+                }
+            }
+
+            // Card shape: rect / circle (persisted).
+            Rectangle {
+                width: ctx.s(36)
+                height: ctx.s(36)
+                radius: ctx.s(13)
+                anchors.verticalCenter: parent.verticalCenter
+                color: shapeMouse.containsMouse ? theme.surface1 : theme.surface0
+                border.color: theme.surface1
+                border.width: 1
+                Behavior on color { ColorAnimation { duration: 150 } }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: ctx.cardShape === "circle" ? "\uF10C" : "\uF096"  // fa-circle-o / fa-square-o
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: ctx.s(14)
+                    color: theme.text
+                }
+                MouseArea {
+                    id: shapeMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ctx.setCardShape(ctx.cardShape === "circle" ? "rect" : "circle")
+                }
+            }
+
+            // Slideshow: rotates the wallpaper every N minutes.
+            Rectangle {
+                width: ctx.s(36)
+                height: ctx.s(36)
+                radius: ctx.s(13)
+                anchors.verticalCenter: parent.verticalCenter
+                color: ctx.slideshowOn
+                    ? Qt.alpha(theme.mauve, 0.35)
+                    : (slideMouse.containsMouse ? theme.surface1 : theme.surface0)
+                border.color: ctx.slideshowOn ? theme.mauve : theme.surface1
+                border.width: ctx.slideshowOn ? ctx.s(2) : 1
+                Behavior on color { ColorAnimation { duration: 150 } }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "\uF01E"  // fa-repeat
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: ctx.s(14)
+                    color: ctx.slideshowOn ? theme.mauve : theme.text
+                }
+                MouseArea {
+                    id: slideMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ctx.toggleSlideshow()
+                }
+            }
+
+            // Import a wallpaper from disk (rofi file browser).
+            Rectangle {
+                width: ctx.s(36)
+                height: ctx.s(36)
+                radius: ctx.s(13)
+                anchors.verticalCenter: parent.verticalCenter
+                color: importMouse.containsMouse ? theme.surface1 : theme.surface0
+                border.color: theme.surface1
+                border.width: 1
+                Behavior on color { ColorAnimation { duration: 150 } }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "\uF019"  // fa-download
+                    font.family: "Hack Nerd Font"
+                    font.pixelSize: ctx.s(14)
+                    color: theme.text
+                }
+                MouseArea {
+                    id: importMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: ctx.requestImport()
+                }
+            }
+
             // Active palette preview (base + accent swatches).
             Rectangle {
                 width: ctx.s(58)

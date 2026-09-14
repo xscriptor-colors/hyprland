@@ -14,18 +14,20 @@ davincix/
 │   ├── DavincixPicker.qml       UI root: state + logic (filters, focus, search)
 │   ├── lib/                     pure helpers (constants.js, color.js)
 │   └── components/
+│       ├── ConfirmDialog.qml    delete confirmation overlay
 │       ├── grid/                DavincixGrid (list) + DavincixCard (item)
 │       └── filter/              DavincixFilterBar + DavincixMonitors + DavincixSearch
 └── kernel/                      core: no shell dependencies
-    ├── davincix.sh              entry CLI (set/fetch/current/thumbs/search/stop/paths)
+    ├── davincix.sh              entry CLI (set/fetch/current/thumbs/search/stop/rm/import/slideshow)
     ├── paths.sh                 path resolution + environment overrides
     ├── util.sh                  shared helpers (logging, media-type detection)
     ├── apply.sh                 apply with awww/mpvpaper + transitions
     ├── state.sh                 current wallpaper + cached current image
     ├── download.sh              URL download (webp-aware)
     ├── thumbs.sh                thumbnail cache + manifest (webp, video posters)
-    ├── search.sh                DuckDuckGo search (run/pause/stop control)
-    └── ddg_links.py             link scraper (stdlib only)
+    ├── search.sh                DuckDuckGo search (run/pause/stop, continue)
+    ├── slideshow.sh             rotation daemon (PID + enabled flag)
+    └── ddg_links.py             link scraper (stdlib only, cursor persistence)
 ```
 
 > **Registration note:** Quickshell's qmlscanner only synthesizes a `qmldir`
@@ -46,7 +48,12 @@ kernel/davincix.sh fetch --name <n> --map <f> --dest <f> \
                    [--thumb-in <f>] [--thumb-out <f>] [--monitors ...] [--transition ...]
 kernel/davincix.sh thumbs                         # prepare thumbnails (async)
 kernel/davincix.sh search <query>                 # DuckDuckGo search
+kernel/davincix.sh search --continue <query>      # next page (keeps the cache)
+kernel/davincix.sh search --clear                 # stop + drop the search cache
 kernel/davincix.sh stop                           # stop the running search
+kernel/davincix.sh rm <file>                      # trash a wallpaper (+ thumbnail)
+kernel/davincix.sh import <paths…>                # copy into the dir + thumbs
+kernel/davincix.sh slideshow start|stop|status [interval]
 ```
 
 ## Paths and state (contracts)
@@ -70,12 +77,25 @@ Files that are contracts between layers/components:
 
 ## Who calls what
 
-- `ui/DavincixPicker.qml` → `kernel/davincix.sh set|fetch|search|stop`
+- `ui/DavincixPicker.qml` → `kernel/davincix.sh set|fetch|search|stop|rm|import|slideshow`
   (array exec, no shell).
 - `qs_manager.sh` → `davincix.sh thumbs` (background prep) and
   `current --thumb-name` (highlight the current wallpaper when opening the picker).
 - `init.sh` → `davincix.sh set <random> --transition any` on first run.
 - `Lock.qml` / `sddm-colors.sh` → read `current_wallpaper.png`.
+
+## UI preferences (persisted)
+
+- `settings.json` key `davincixView` (via `Config.setSetting`, the shell's
+  standard mechanism): `orientation` (horizontal/vertical), `shape`
+  (rect/circle), `favorites` (array of shown names).
+- Search state (query, searched, last name) lives in a `Settings` object with
+  `category: "QS_Davincix"` — same pattern as the other shell widgets
+  (its QSettings init warning is shell-wide and harmless).
+
+The slideshow daemon keeps a PID file and an enabled flag; resuming it after a
+reboot requires an autostart hook (e.g. `davincix.sh slideshow start`), which is
+out of this repo's kernel (see the shell's autostart).
 
 ## Testing
 

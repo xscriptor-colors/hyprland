@@ -102,6 +102,40 @@ Row {
         }
     }
 
+    // Load more: siguiente página de resultados (solo con búsqueda pausada).
+    Rectangle {
+        id: loadMoreBtn
+        visible: ctx.currentFilter === "Search" && ctx.hasSearched && ctx.isSearchPaused && ctx.searchProxyModel.count > 0
+        width: visible ? ctx.s(44) : 0
+        height: ctx.s(44)
+        radius: ctx.s(13)
+        anchors.verticalCenter: parent.verticalCenter
+
+        color: lmMouse.containsMouse ? theme.surface1 : "transparent"
+        border.color: theme.surface1
+        border.width: 1
+
+        Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.OutBack; easing.overshoot: 0.5 } }
+        Behavior on color { ColorAnimation { duration: 300 } }
+
+        Text {
+            anchors.centerIn: parent
+            text: "\uF055"  // fa-plus-circle
+            font.family: "Hack Nerd Font"
+            font.pixelSize: ctx.s(16)
+            color: lmMouse.containsMouse ? theme.text : Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7)
+        }
+
+        MouseArea {
+            id: lmMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: !ctx.isApplying
+            cursorShape: Qt.PointingHandCursor
+            onClicked: ctx.loadMoreSearch()
+        }
+    }
+
     Rectangle {
         id: searchBox
         height: ctx.s(44)
