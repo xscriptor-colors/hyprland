@@ -7,6 +7,7 @@
 // picker state from `ctx`; it emits `clicked()` and `favoriteToggled()`.
 // ═══════════════════════════════════════════════════════════════════════════
 import QtQuick
+import QtQuick.Effects
 import QtMultimedia
 
 Item {
@@ -32,18 +33,22 @@ Item {
 
     // ═══════════════════════════════════════════════════════════════════════
     // Modos de vista del picker (ctx.gridOrientation / ctx.cardShape).
-    // effSkew anula el shear en modo circle para que el diámetro quede como
-    // un círculo perfecto (radius = width/2 sobre un cuadrado).
+    //   rect   → diseño original (shear diagonal, fondo estirado)
+    //   square → tarjeta cuadrada limpia, sin shear, sin fondo
+    //   circle → thumbnail circular con entorno TRANSPARENTE (máscara)
+    // effSkew anula el shear en square/circle para que la geometría sea recta.
     // ═══════════════════════════════════════════════════════════════════════
     readonly property bool isVertical: ctx.gridOrientation === "vertical"
     readonly property bool isCircle: ctx.cardShape === "circle"
-    readonly property real effSkew: isCircle ? 0 : ctx.skewFactor
+    readonly property bool isSquare: ctx.cardShape === "square"
+    readonly property bool isFlat: isCircle || isSquare
+    readonly property real effSkew: isFlat ? 0 : ctx.skewFactor
     readonly property bool isFavorite: ctx.isFavorite(safeFileName)
 
     // Tamaño objetivo según el modo de vista. Las ramas rect+horizontal son
     // las fórmulas originales, sin tocar.
     readonly property real targetWidth: {
-        if (isCircle) {
+        if (isFlat) {
             return isVisuallyEnlarged ? ctx.itemHeight * 1.25 : ctx.itemHeight * 0.6;
         }
         if (isVertical) {
@@ -53,8 +58,8 @@ Item {
     }
 
     readonly property real targetHeight: {
-        if (isCircle) {
-            return targetWidth;   // cuadrado → círculo perfecto
+        if (isFlat) {
+            return targetWidth;   // cuadrado → círculo perfecto en circle
         }
         if (isVertical) {
             return isVisuallyEnlarged ? ctx.itemHeight * 1.5 : ctx.itemHeight * 0.5;
@@ -124,18 +129,27 @@ Item {
             source: fileUrl
             sourceSize: Qt.size(1, 1)
             fillMode: Image.Stretch
-            visible: true
+            // Fondo estirado solo en modo rect; en square/circle el entorno
+            // de la tarjeta queda TRANSPARENTE (sin cuadrado de fondo).
+            visible: !cardRoot.isFlat
             asynchronous: true
         }
 
         Rectangle {
+            id: cover
             anchors.fill: parent
             anchors.margins: ctx.borderWidth
-            color: theme.base
+            color: cardRoot.isFlat ? "transparent" : theme.base
             radius: cardRoot.isCircle ? (width / 2) : ctx.thumbRadius
+            border.color: cardRoot.isFlat ? theme.surface1 : "transparent"
+            border.width: cardRoot.isFlat ? 1 : 0
             clip: true
 
+            // `clip` recorta solo al rectángulo límite; el recorte circular
+            // se hace con MultiEffect + máscara (mismo patrón que
+            // ImageFaceRound/MusicPopup del shell).
             Image {
+                id: coverImage
                 anchors.centerIn: parent
                 anchors.horizontalCenterOffset: cardRoot.effSkew !== 0 ? ctx.s(-50) : 0
                 width: cardRoot.effSkew !== 0
@@ -145,11 +159,33 @@ Item {
                 fillMode: Image.PreserveAspectCrop
                 source: fileUrl
                 asynchronous: true
+                visible: !cardRoot.isCircle   // en circle lo pinta el MultiEffect
 
                 transform: Matrix4x4 {
                     property real s: -cardRoot.effSkew
                     matrix: Qt.matrix4x4(1, s, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
                 }
+            }
+
+            // Máscara circular (textura blanca, oculta).
+            Rectangle {
+                id: circleMask
+                anchors.fill: coverImage
+                radius: width / 2
+                color: "white"
+                visible: false
+                layer.enabled: cardRoot.isCircle
+                layer.smooth: true
+            }
+
+            MultiEffect {
+                id: imageCircleEffect
+                anchors.fill: coverImage
+                source: coverImage
+                maskEnabled: cardRoot.isCircle
+                maskSource: circleMask
+                autoPaddingEnabled: false
+                visible: cardRoot.isCircle
             }
 
             MediaPlayer {
@@ -169,12 +205,22 @@ Item {
                     : parent.width
                 height: cardRoot.effSkew !== 0 ? ctx.itemHeight + ctx.s(30) : parent.height
                 fillMode: VideoOutput.PreserveAspectCrop
-                visible: cardRoot.isPlayingVideo && previewPlayer.playbackState === MediaPlayer.PlayingState
+                visible: !cardRoot.isCircle && cardRoot.isPlayingVideo && previewPlayer.playbackState === MediaPlayer.PlayingState
 
                 transform: Matrix4x4 {
                     property real s: -cardRoot.effSkew
                     matrix: Qt.matrix4x4(1, s, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
                 }
+            }
+
+            MultiEffect {
+                id: videoCircleEffect
+                anchors.fill: previewOutput
+                source: previewOutput
+                maskEnabled: cardRoot.isCircle
+                maskSource: circleMask
+                autoPaddingEnabled: false
+                visible: cardRoot.isCircle && cardRoot.isPlayingVideo && previewPlayer.playbackState === MediaPlayer.PlayingState
             }
 
             Rectangle {

@@ -27,5 +27,5 @@ var FILTER_ORDER = ["All", "Video", "Favorites", "Red", "Orange", "Yellow", "Gre
 
 // Modos de vista + slideshow.
 var ORIENTATIONS = ["horizontal", "vertical"];
-var SHAPES = ["rect", "circle"];
+var SHAPES = ["rect", "square", "circle"];
 var SLIDESHOW_INTERVAL = 300;

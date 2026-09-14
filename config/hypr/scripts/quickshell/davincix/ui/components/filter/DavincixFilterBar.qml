@@ -210,7 +210,7 @@ Rectangle {
                 }
             }
 
-            // Card shape: rect / circle (persisted).
+            // Card shape: rect / square / circle (persisted).
             Rectangle {
                 width: ctx.s(36)
                 height: ctx.s(36)
@@ -223,7 +223,7 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: ctx.cardShape === "circle" ? "\uF10C" : "\uF096"  // fa-circle-o / fa-square-o
+                    text: ctx.cardShape === "circle" ? "◯" : (ctx.cardShape === "square" ? "◻" : "▭")
                     font.family: "Hack Nerd Font"
                     font.pixelSize: ctx.s(14)
                     color: theme.text
@@ -233,7 +233,10 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: ctx.setCardShape(ctx.cardShape === "circle" ? "rect" : "circle")
+                    onClicked: {
+                        let i = ctx.shapeOrder.indexOf(ctx.cardShape);
+                        ctx.setCardShape(ctx.shapeOrder[(i + 1) % ctx.shapeOrder.length]);
+                    }
                 }
             }
 
@@ -263,33 +266,6 @@ Rectangle {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: ctx.toggleSlideshow()
-                }
-            }
-
-            // Import a wallpaper from disk (rofi file browser).
-            Rectangle {
-                width: ctx.s(36)
-                height: ctx.s(36)
-                radius: ctx.s(13)
-                anchors.verticalCenter: parent.verticalCenter
-                color: importMouse.containsMouse ? theme.surface1 : theme.surface0
-                border.color: theme.surface1
-                border.width: 1
-                Behavior on color { ColorAnimation { duration: 150 } }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "\uF019"  // fa-download
-                    font.family: "Hack Nerd Font"
-                    font.pixelSize: ctx.s(14)
-                    color: theme.text
-                }
-                MouseArea {
-                    id: importMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: ctx.requestImport()
                 }
             }
 

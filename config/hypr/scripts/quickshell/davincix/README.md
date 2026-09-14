@@ -77,8 +77,9 @@ Files that are contracts between layers/components:
 
 ## Who calls what
 
-- `ui/DavincixPicker.qml` → `kernel/davincix.sh set|fetch|search|stop|rm|import|slideshow`
-  (array exec, no shell).
+- `ui/DavincixPicker.qml` → `kernel/davincix.sh set|fetch|search|stop|rm|slideshow`
+  (array exec, no shell). `import` queda como utilidad de CLI (sin botón en la
+  UI para no depender de herramientas externas de selección de archivos).
 - `qs_manager.sh` → `davincix.sh thumbs` (background prep) and
   `current --thumb-name` (highlight the current wallpaper when opening the picker).
 - `init.sh` → `davincix.sh set <random> --transition any` on first run.

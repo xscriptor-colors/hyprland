@@ -119,24 +119,6 @@ Item {
         monitorProc.running = true;
     }
 
-    // Import: rofi filebrowser devuelve la ruta elegida por stdout.
-    Process {
-        id: importProc
-        command: ["rofi", "-modi", "filebrowser", "-show", "filebrowser",
-                  "-filebrowser-dir", decodeURIComponent(window.homeDir.replace("file://", "")) + "/Pictures"]
-        running: false
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let path = this.text.trim();
-                if (path.length > 0) {
-                    let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
-                    Quickshell.execDetached([cli, "import", path]);
-                }
-            }
-        }
-    }
-
     // Slideshow: pregunta al kernel si el daemon está corriendo (al abrir).
     Process {
         id: slideshowStatusProc
@@ -315,7 +297,7 @@ Item {
     }
 
     function setCardShape(v) {
-        if (v === "rect" || v === "circle") {
+        if (C.SHAPES.indexOf(v) !== -1) {
             window.cardShape = v;
             window.saveViewPrefs();
         }
@@ -382,11 +364,9 @@ Item {
         window.confirmTarget = "";
     }
 
-    // ── Import (rofi filebrowser → kernel import) ───────────────────────────
-    function requestImport() {
-        if (window.isApplying) return;
-        importProc.running = true;
-    }
+    // ── Import: disponible solo como CLI (davincix.sh import); la UI no lo
+    // expone para no depender de herramientas externas (rofi/zenity) que
+    // rompen la estética del shell.
 
     // ── Search: next page of results (keeps the current cache) ──────────────
     function loadMoreSearch() {
@@ -547,6 +527,7 @@ Item {
     // ── View modes (persisted via Config → settings.json, key "davincixView")
     property string gridOrientation: "horizontal"
     property string cardShape: "rect"
+    readonly property var shapeOrder: C.SHAPES
     property bool slideshowOn: false
     property var favoriteNames: []
 
@@ -1064,7 +1045,7 @@ Item {
         // Preferencias de vista + favoritos persistidos (settings.json).
         let prefs = Config.getSetting("davincixView", {});
         window.gridOrientation = (prefs.orientation === "vertical") ? "vertical" : "horizontal";
-        window.cardShape = (prefs.shape === "circle") ? "circle" : "rect";
+        window.cardShape = (C.SHAPES.indexOf(prefs.shape) !== -1) ? prefs.shape : "rect";
         window.favoriteNames = Array.isArray(prefs.favorites) ? prefs.favorites : [];
 
         // Estado real del slideshow (el flag persistido puede mentir tras reboot).
