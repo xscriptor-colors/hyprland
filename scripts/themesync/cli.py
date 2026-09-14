@@ -13,6 +13,7 @@ import argparse
 import os
 from pathlib import Path
 
+from . import __version__
 from .core import Env, active_slug, load_json, load_palettes
 from .runner import listing, run
 
@@ -43,6 +44,8 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="theme-sync",
         description="Sync applications with the active palette (dock/palettes).")
+    parser.add_argument("--version", action="version",
+                        version="themesync %s" % __version__)
     parser.add_argument("--palettes", help="palettes directory")
     parser.add_argument("--settings", help="path to settings.json")
     parser.add_argument("--targets", help="comma-separated list (e.g. kitty,xfetch)")
