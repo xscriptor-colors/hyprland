@@ -1,12 +1,12 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# gtk — gtk.css de GTK3/GTK4 + esquema del sistema (gsettings).
+# gtk — GTK3/GTK4 gtk.css + system scheme (gsettings).
 #
-# Escribe overrides @define-color de la paleta en ~/.config/gtk-3.0/gtk.css y
-# gtk-4.0/gtk.css (nombres de adw-gtk3/Adwaita/libadwaita) y ajusta el esquema
-# del sistema (color-scheme y gtk-theme adw-gtk3[-dark]) para que GTK3,
-# libadwaita, los diálogos del portal y los navegadores en modo sistema sigan
-# la paleta. GTK3 se tiñe entero; GTK4/libadwaita respeta claro/oscuro y los
-# @define-color que use. Las apps ya abiertas necesitan reinicio.
+# Writes @define-color overrides for the active palette into
+# ~/.config/gtk-3.0/gtk.css and gtk-4.0/gtk.css (adw-gtk3/Adwaita/libadwaita
+# names) and adjusts the system scheme (color-scheme and gtk-theme
+# adw-gtk3[-dark]) so GTK3, libadwaita, portal dialogs and browsers in system
+# mode follow the palette. GTK3 is fully recolored; GTK4/libadwaita respects
+# light/dark and the @define-color names it uses. Open apps need a restart.
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from pathlib import Path
 from ..core import best_fg, mix, palette_bg_fg, palette_hex, read_text
 
 NAME = "gtk"
-DESCRIPTION = "gtk.css (GTK3/4) + esquema del sistema (gsettings)"
+DESCRIPTION = "gtk.css (GTK3/4) + system scheme (gsettings)"
 
 BEGIN = "/* === xscriptor-colors theme-sync (managed) === */"
 END = "/* === end xscriptor-colors === */"
@@ -26,7 +26,7 @@ def available(env) -> bool:
 
 
 def _defs(env) -> list:
-    """Lista (nombre, hex) de @define-color para la paleta activa."""
+    """(name, hex) list of @define-color values for the active palette."""
     pal = env.palette
     bg, fg = palette_bg_fg(pal)
     c5 = palette_hex(pal, "color5", fg)
@@ -83,7 +83,7 @@ def apply(env) -> list:
     block += ["@define-color %s %s;" % (name, val) for name, val in _defs(env)]
     block.append(END)
 
-    # ── 1) gtk.css de GTK3 y GTK4 (bloque gestionado) ──
+    # ── 1) gtk.css for GTK3 and GTK4 (managed block) ──
     for gtk_dir in ("gtk-3.0", "gtk-4.0"):
         d = env.home / ".config" / gtk_dir
         env.mkdir(d)
@@ -106,7 +106,7 @@ def apply(env) -> list:
         env.write(css, text)
     out.append("gtk colors → '%s' (gtk-3.0 + gtk-4.0 gtk.css)" % env.slug)
 
-    # ── 2) Esquema del sistema (libadwaita, portal, navegadores en modo sistema) ──
+    # ── 2) System scheme (libadwaita, portal, browsers in system mode) ──
     gsettings = env.binary("gsettings")
     if gsettings:
         dark = not env.light
@@ -114,7 +114,7 @@ def apply(env) -> list:
         scheme = "prefer-dark" if dark else "prefer-light"
         if Path("/usr/share/themes/" + theme).is_dir():
             env.run([gsettings, "set", "org.gnome.desktop.interface", "gtk-theme", theme])
-        # prefer-light explícito (portal=2); fallback a 'default' en esquemas viejos.
+        # Explicit prefer-light (portal=2); fall back to 'default' on old schemas.
         if not env.run([gsettings, "set", "org.gnome.desktop.interface", "color-scheme", scheme]):
             scheme = "default"
             env.run([gsettings, "set", "org.gnome.desktop.interface", "color-scheme", scheme])

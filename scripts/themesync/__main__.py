@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# __main__ — permite `python3 -m themesync` (lo usa el wrapper theme-sync.sh).
+# __main__ — enables `python3 -m themesync` (used by the theme-sync.sh wrapper).
 # ═══════════════════════════════════════════════════════════════════════════
 import sys
 

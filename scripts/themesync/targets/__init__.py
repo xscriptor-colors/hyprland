@@ -1,15 +1,15 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# targets — registro de destinos de theming.
+# targets — theming target registry.
 #
-# Contrato de un target (módulo de este paquete):
-#   NAME         str         nombre corto (para --targets)
-#   DESCRIPTION  str         descripción de una línea (para --list)
-#   available(env) -> bool   ¿procede ejecutarlo? (app/directorio presente)
-#   apply(env) -> list[str]  ejecuta y devuelve las líneas de log
+# Contract for a target (a module in this package):
+#   NAME         str         short name (for --targets)
+#   DESCRIPTION  str         one-line description (for --list)
+#   available(env) -> bool   should it run? (app/directory present)
+#   apply(env) -> list[str]  run it and return the log lines
 #
-# El orden de TARGETS es el orden de ejecución. No hay estado compartido
-# entre targets: gtk calcula claro/oscuro desde la paleta (env.light), no
-# desde el resultado de browsers.
+# TARGETS order is the execution order. There is no shared state between
+# targets: gtk computes light/dark from the palette (env.light), not from the
+# browsers result.
 # ═══════════════════════════════════════════════════════════════════════════
 from . import (
     browsers,

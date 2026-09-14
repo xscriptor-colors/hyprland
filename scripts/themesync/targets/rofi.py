@@ -1,18 +1,18 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # rofi — colors.rasi + config.rasi.
 #
-# colors.rasi lo importan launcher.rasi (emoji picker SUPER+., drun,
-# scale-menu) y selector.rasi; se regenera con la paleta activa. Además se
-# genera config.rasi (solo colores, importa colors.rasi) para que las
-# llamadas `rofi -dmenu` sin -theme (gpu-mode.sh, monitor-manager.sh) sigan
-# la paleta sin cambiar su layout. Solo se escriben esos dos archivos.
+# colors.rasi is imported by launcher.rasi (emoji picker SUPER+., drun,
+# scale-menu) and selector.rasi; it is regenerated from the active palette.
+# config.rasi (colors only, imports colors.rasi) is also generated so bare
+# `rofi -dmenu` calls without -theme (gpu-mode.sh, monitor-manager.sh) follow
+# the palette without changing their layout. Only these two files are written.
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
 from ..core import mix, palette_bg_fg, palette_hex
 
 NAME = "rofi"
-DESCRIPTION = "colors.rasi + config.rasi (dmenu incluido)"
+DESCRIPTION = "colors.rasi + config.rasi (dmenu included)"
 
 ROFI_REL = ".config/rofi"
 

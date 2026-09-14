@@ -1,18 +1,17 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# vscode — colorTheme + iconTheme en cada variante instalada.
+# vscode — colorTheme + iconTheme in every installed variant.
 #
-# La extensión xscriptor-themes publica un tema de color Y uno de iconos por
-# paleta (id "<slug>-icons"). Se actualizan workbench.colorTheme y
-# workbench.iconTheme en el settings.json de Code y Code - Insiders; VS Code
-# los aplica en vivo. El nombre del tema de color es el slug capitalizado
-# (x → "X", bogota → "Bogotá").
+# The xscriptor-themes extension ships one color theme AND one icon theme per
+# palette (id "<slug>-icons"). workbench.colorTheme and workbench.iconTheme are
+# updated in the settings.json of Code and Code - Insiders; VS Code applies them
+# live. The color theme name is the capitalized slug (x → "X", bogota → "Bogotá").
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
 import re
 
 NAME = "vscode"
-DESCRIPTION = "colorTheme + iconTheme en Code / Code - Insiders"
+DESCRIPTION = "colorTheme + iconTheme in Code / Code - Insiders"
 
 VARIANTS = (
     ".config/Code/User/settings.json",
@@ -21,7 +20,7 @@ VARIANTS = (
 
 
 def available(env) -> bool:
-    # Siempre: si no hay ninguna variante, apply() no hace nada.
+    # Always: if no variant is installed, apply() does nothing.
     return True
 
 
@@ -34,7 +33,7 @@ def _theme_name(slug: str) -> str:
 
 
 def _set_key(text: str, key: str, value: str) -> str:
-    """Fija una clave JSON de primer nivel (reemplaza o inserta tras la '{')."""
+    """Set a top-level JSON key (replace it or insert after the first '{')."""
     pat = re.compile(r'"%s":[^,}]*' % re.escape(key))
     if pat.search(text):
         return pat.sub('"%s": "%s"' % (key, value), text, count=1)

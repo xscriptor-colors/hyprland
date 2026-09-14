@@ -1,11 +1,11 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# kitty — temas por paleta + include y borde activo en kitty.conf.
+# kitty — per-palette themes + include and active border in kitty.conf.
 #
-# Genera ~/.config/kitty/themes/<slug>.conf para TODAS las paletas y apunta
-# kitty.conf al tema activo (`include themes/<slug>.conf`) + el borde activo
-# con el acento. De kitty.conf solo se tocan esas dos cosas (y el include
-# legado `current-theme.conf`): shaders, fuentes, binds y demás quedan
-# intactos. Kitty recarga al vuelo al cambiar el archivo.
+# Generates ~/.config/kitty/themes/<slug>.conf for EVERY palette and points
+# kitty.conf at the active one (`include themes/<slug>.conf`) plus the active
+# border with the accent. Only those two things (and the legacy
+# `current-theme.conf` include) are touched in kitty.conf: shaders, fonts,
+# binds and everything else stay untouched. Kitty hot-reloads on file change.
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
@@ -14,11 +14,11 @@ import re
 from ..core import palette_bg_fg, palette_hex
 
 NAME = "kitty"
-DESCRIPTION = "temas por paleta + include y borde activo en kitty.conf"
+DESCRIPTION = "per-palette themes + include and active border in kitty.conf"
 
 
 def available(env) -> bool:
-    # Siempre: los temas se generan aunque kitty.conf no exista todavía.
+    # Always: themes are generated even if kitty.conf does not exist yet.
     return True
 
 
@@ -27,7 +27,7 @@ def apply(env) -> list:
     themes = env.home / ".config/kitty/themes"
     env.mkdir(themes)
 
-    # ── 1) Regenerar TODOS los temas desde dock/palettes ──
+    # ── 1) Regenerate EVERY theme from dock/palettes ──
     slugs = []
     for pal in env.palettes:
         slug = pal.get("slug") or "?"
@@ -42,19 +42,19 @@ def apply(env) -> list:
         env.write(themes / (slug + ".conf"), "\n".join(lines) + "\n")
         slugs.append(slug)
 
-    # Temas huérfanos (paletas borradas): fuera.
+    # Orphan themes (deleted palettes): remove them.
     for stale in themes.glob("*.conf"):
         if stale.stem not in slugs:
             env.unlink(stale)
     out.append("kitty themes regenerated from dock/palettes: %d" % len(slugs))
 
-    # ── 2) Apuntar kitty.conf al tema activo + borde ──
+    # ── 2) Point kitty.conf at the active theme + border ──
     conf = env.home / ".config/kitty/kitty.conf"
     if not conf.is_file():
         return out
 
     lines = conf.read_text(encoding="utf-8", errors="replace").splitlines()
-    # Include legado del instalador antiguo.
+    # Legacy include from the old installer.
     lines = [ln for ln in lines if not re.match(r"^include\s+current-theme\.conf", ln)]
 
     replaced = False

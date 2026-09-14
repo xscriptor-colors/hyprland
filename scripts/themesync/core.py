@@ -1,11 +1,10 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# core — utilidades compartidas por todos los targets.
+# core — shared utilities for every target.
 #
-# Aquí vive lo común: carga de paletas y settings, operaciones de color
-# (rgb/mix/luminancia/contraste), escritura atómica, bloques gestionados con
-# marcadores y resolución de binarios. El fallback a ~/.local/bin es
-# imprescindible: el hook de paleta corre desde Quickshell, cuyo PATH no
-# incluye ese directorio (xfetch vive ahí y ya nos mordió una vez).
+# Palette/settings loading, color math (rgb/mix/luminance/contrast), atomic
+# writes, marker-based managed blocks and binary resolution. The ~/.local/bin
+# fallback is essential: the palette hook runs from Quickshell, whose PATH does
+# not include that directory (xfetch lives there and it bit us once).
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
@@ -18,11 +17,14 @@ from pathlib import Path
 
 DEFAULT_SLUG = "x"
 
+# Metadata files inside the palettes directory (they are not palettes).
+METADATA_FILES = ("index.json", "schema.json")
+
 
 # ── Color ─────────────────────────────────────────────────────────────────────
 
 def rgb(c: str) -> tuple[int, int, int]:
-    """Normaliza '#rrggbb' (o '#rrggbbaa') a (r, g, b) 0..255."""
+    """Normalize '#rrggbb' (or '#rrggbbaa') to (r, g, b) 0..255."""
     h = str(c or "").lstrip("#")
     if len(h) >= 6:
         h = h[:6]
@@ -34,13 +36,13 @@ def rgb(c: str) -> tuple[int, int, int]:
 
 
 def hexstr(r: float, g: float, b: float) -> str:
-    """(r, g, b) → '#rrggbb' con clamp a 0..255."""
+    """(r, g, b) → '#rrggbb', clamped to 0..255."""
     clamp = lambda v: max(0, min(255, round(v)))
     return "#%02x%02x%02x" % (clamp(r), clamp(g), clamp(b))
 
 
 def mix(a: str, b: str, t: float) -> str:
-    """Mezcla a → b por t (0..1). Devuelve '#rrggbb'."""
+    """Blend a → b by t (0..1). Returns '#rrggbb'."""
     ca, cb = rgb(a), rgb(b)
     return hexstr(ca[0] + (cb[0] - ca[0]) * t,
                   ca[1] + (cb[1] - ca[1]) * t,
@@ -48,7 +50,7 @@ def mix(a: str, b: str, t: float) -> str:
 
 
 def luminance(c: str) -> float:
-    """Luminancia relativa (WCAG) de un hex."""
+    """WCAG relative luminance of a hex color."""
     def lin(v: float) -> float:
         v /= 255.0
         return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
@@ -57,26 +59,26 @@ def luminance(c: str) -> float:
 
 
 def contrast(a: str, b: str) -> float:
-    """Ratio de contraste WCAG entre dos hex."""
+    """WCAG contrast ratio between two hex colors."""
     la, lb = luminance(a), luminance(b)
     hi, lo = max(la, lb), min(la, lb)
     return (hi + 0.05) / (lo + 0.05)
 
 
 def argb(c: str) -> str:
-    """'#rrggbb' → '#ffrrggbb' (formato de color scheme de qt6ct/qt5ct)."""
+    """'#rrggbb' → '#ffrrggbb' (qt6ct/qt5ct color scheme format)."""
     return "#ff" + str(c).lstrip("#").lower()
 
 
 def best_fg(accent: str, fg: str, bg: str) -> str:
-    """De fg/bg, el que más contrasta con accent (texto sobre el acento)."""
+    """Of fg/bg, whichever contrasts most with accent (text over the accent)."""
     return fg if contrast(accent, fg) >= contrast(accent, bg) else bg
 
 
-# ── Paletas y settings ────────────────────────────────────────────────────────
+# ── Palettes and settings ─────────────────────────────────────────────────────
 
 def load_json(path: Path, default=None):
-    """JSON tolerante a fallos (JSONC con // no se intenta: solo JSON estricto)."""
+    """Failure-tolerant JSON load (strict JSON only; JSONC is not attempted)."""
     try:
         with open(path, encoding="utf-8") as f:
             return json.load(f)
@@ -85,10 +87,14 @@ def load_json(path: Path, default=None):
 
 
 def load_palettes(palettes_dir: Path) -> list:
-    """Todas las paletas (sin index.json), ordenadas por nombre de archivo."""
+    """All palettes, sorted by file name.
+
+    Metadata files in the directory are skipped (index.json = panel card model,
+    schema.json = format contract): only files with palette data count.
+    """
     out = []
     for pf in sorted(Path(palettes_dir).glob("*.json")):
-        if pf.name == "index.json":
+        if pf.name in METADATA_FILES:
             continue
         pal = load_json(pf)
         if isinstance(pal, dict):
@@ -98,14 +104,14 @@ def load_palettes(palettes_dir: Path) -> list:
 
 
 def active_slug(settings: dict) -> str:
-    """Slug de la paleta activa en settings.json (dock.palette); 'x' si falta."""
+    """Active palette slug from settings.json (dock.palette); 'x' if missing."""
     dock = settings.get("dock") if isinstance(settings, dict) else None
     slug = dock.get("palette") if isinstance(dock, dict) else None
     return str(slug) if slug else DEFAULT_SLUG
 
 
 def palette_bg_fg(pal: dict) -> tuple[str, str]:
-    """(background, foreground) de una paleta con fallback a base16 0/7."""
+    """(background, foreground) with fallback to base16 color0/color7."""
     b = pal.get("base16") or {}
     bg = pal.get("background") or b.get("color0") or "#000000"
     fg = pal.get("foreground") or b.get("color7") or "#ffffff"
@@ -113,7 +119,7 @@ def palette_bg_fg(pal: dict) -> tuple[str, str]:
 
 
 def palette_hex(pal: dict, key: str, fallback: str = "#000000") -> str:
-    """Color de paleta por clave: 'background'/'foreground' o 'colorN'."""
+    """Palette color by key: 'background'/'foreground' or 'colorN'."""
     b = pal.get("base16") or {}
     if key == "background":
         return pal.get("background") or b.get("color0") or fallback
@@ -122,10 +128,10 @@ def palette_hex(pal: dict, key: str, fallback: str = "#000000") -> str:
     return b.get(key) or fallback
 
 
-# ── Ficheros ──────────────────────────────────────────────────────────────────
+# ── Files ─────────────────────────────────────────────────────────────────────
 
 def read_text(path: Path) -> str:
-    """Lectura tolerante (utf-8 con reemplazo); '' si no existe."""
+    """Failure-tolerant read (utf-8 with replacement); '' if missing."""
     try:
         return Path(path).read_text(encoding="utf-8", errors="replace")
     except Exception:
@@ -133,7 +139,7 @@ def read_text(path: Path) -> str:
 
 
 def atomic_write(path: Path, text: str) -> None:
-    """Escritura atómica (tmp + rename) creando el directorio padre."""
+    """Atomic write (tmp + rename), creating the parent directory."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".xsc.tmp")
@@ -143,10 +149,10 @@ def atomic_write(path: Path, text: str) -> None:
 
 
 def strip_block(lines: list, begin: str, end: str) -> tuple[list, bool]:
-    """Quita las líneas del bloque gestionado [begin..end].
+    """Drop the lines of the managed block [begin..end].
 
-    Devuelve (líneas_restantes, había_bloque). Compara por strip() para
-    tolerar indentación.
+    Returns (remaining_lines, had_block). Compares with strip() so indentation
+    is tolerated.
     """
     kept, inside, found = [], False, False
     for ln in lines:
@@ -163,10 +169,10 @@ def strip_block(lines: list, begin: str, end: str) -> tuple[list, bool]:
     return kept, found
 
 
-# ── Binarios ──────────────────────────────────────────────────────────────────
+# ── Binaries ──────────────────────────────────────────────────────────────────
 
 def find_binary(name: str, home: Path | None = None) -> str | None:
-    """PATH primero; fallback a ~/.local/bin (ausente en el PATH de Quickshell)."""
+    """PATH first; fallback to ~/.local/bin (missing from Quickshell's PATH)."""
     found = shutil.which(name)
     if found:
         return found
@@ -177,11 +183,11 @@ def find_binary(name: str, home: Path | None = None) -> str | None:
     return None
 
 
-# ── Contexto de ejecución ─────────────────────────────────────────────────────
+# ── Execution context ─────────────────────────────────────────────────────────
 
 @dataclass
 class Env:
-    """Contexto que recibe cada target: rutas, paleta activa y helpers."""
+    """Context every target receives: paths, active palette and helpers."""
     home: Path
     palettes_dir: Path
     settings_path: Path
@@ -191,27 +197,27 @@ class Env:
     dry_run: bool = False
     log: list = field(default_factory=list)
 
-    # -- estado ---------------------------------------------------------------
+    # -- state ----------------------------------------------------------------
     @property
     def light(self) -> bool:
-        """¿La paleta activa tiene fondo claro? (luminancia > 0.5)"""
+        """Does the active palette have a light background? (luminance > 0.5)"""
         bg, _ = palette_bg_fg(self.palette)
         return luminance(bg) > 0.5
 
     @property
     def scheme_int(self) -> int:
-        """1 = claro, 2 = oscuro (browser.theme.color_scheme2)."""
+        """1 = light, 2 = dark (browser.theme.color_scheme2)."""
         return 1 if self.light else 2
 
     def note(self, msg: str) -> None:
         self.log.append(msg)
 
-    # -- ficheros -------------------------------------------------------------
+    # -- files ----------------------------------------------------------------
     def write(self, path, text: str) -> None:
-        """Escritura respetando dry-run."""
+        """Write honoring dry-run."""
         path = Path(path)
         if self.dry_run:
-            self.note("[dry-run] escribiría %s (%d bytes)" % (path, len(text)))
+            self.note("[dry-run] would write %s (%d bytes)" % (path, len(text)))
             return
         atomic_write(path, text)
 
@@ -228,7 +234,7 @@ class Env:
             pass
 
     def copytree_once(self, src, dst) -> None:
-        """Copia recursiva solo si dst no existe (snapshot único, tipo .bak)."""
+        """Recursive copy only if dst does not exist (one-time .bak snapshot)."""
         src, dst = Path(src), Path(dst)
         if dst.exists() or self.dry_run:
             return
@@ -237,12 +243,12 @@ class Env:
         except Exception:
             pass
 
-    # -- procesos -------------------------------------------------------------
+    # -- processes ------------------------------------------------------------
     def binary(self, name: str) -> str | None:
         return find_binary(name, self.home)
 
     def pgrep(self, pattern: str) -> bool:
-        """¿Hay algún proceso que case con pattern? (guards de navegador)."""
+        """Is any process matching pattern running? (browser guards)"""
         try:
             return subprocess.run(["pgrep", "-f", pattern],
                                   stdout=subprocess.DEVNULL,
@@ -251,9 +257,9 @@ class Env:
             return False
 
     def run(self, cmd, timeout: int = 10) -> bool:
-        """Ejecuta un binario externo; True si termina con código 0."""
+        """Run an external binary; True if it exits with code 0."""
         if self.dry_run:
-            self.note("[dry-run] ejecutaría: %s" % " ".join(str(c) for c in cmd))
+            self.note("[dry-run] would run: %s" % " ".join(str(c) for c in cmd))
             return True
         try:
             return subprocess.run(cmd, stdout=subprocess.DEVNULL,
@@ -263,7 +269,7 @@ class Env:
             return False
 
     def capture(self, cmd, timeout: int = 10) -> str:
-        """Ejecuta y devuelve stdout ('' si falla)."""
+        """Run and return stdout ('' on failure)."""
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
             return r.stdout or ""

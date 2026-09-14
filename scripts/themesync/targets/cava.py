@@ -1,18 +1,18 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# cava — bloque [color] gestionado en la config standalone.
+# cava — managed [color] block in the standalone config.
 #
-# El visualizador de la barra (Cava.qml) lanza cava con config inline y pinta
-# las barras con la paleta, así que esto solo afecta a `cava` standalone en
-# terminal. Se crea ~/.config/cava/config desde config_base si no existe y se
-# gestiona SOLO el bloque [color] marcado; un [color] propio del usuario se
-# respeta intacto (y se avisa).
+# The bar visualizer (Cava.qml) spawns cava with an inline config and paints
+# the bars from the palette, so this only affects standalone `cava` in a
+# terminal. ~/.config/cava/config is created from config_base when missing and
+# ONLY the marked [color] block is managed; a user-owned [color] section is
+# preserved untouched (and reported).
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
 from ..core import palette_bg_fg, palette_hex, read_text, strip_block
 
 NAME = "cava"
-DESCRIPTION = "bloque [color] con gradiente de la paleta"
+DESCRIPTION = "managed [color] block with a palette gradient"
 
 CAVA_REL = ".config/cava"
 BEGIN = "# === xscriptor-colors theme-sync (managed) ==="
@@ -49,13 +49,13 @@ def apply(env) -> list:
     if cfg.exists():
         kept, _ = strip_block(read_text(cfg).splitlines(), BEGIN, END)
         if any(ln.strip() == "[color]" for ln in kept):
-            # El usuario gestiona sus propios colores: no se toca.
-            return ["cava: [color] propio detectado; no se toca"]
+            # The user manages their own colors: leave it alone.
+            return ["cava: custom [color] section detected; left untouched"]
         text = "\n".join(kept).rstrip("\n") + "\n\n" + block + "\n"
     elif base.exists():
         text = read_text(base).rstrip("\n") + "\n\n" + block + "\n"
     else:
-        return ["cava: sin config ni config_base; se omite"]
+        return ["cava: no config or config_base; skipped"]
 
     env.write(cfg, text)
     return ["cava colors → '%s' (~/.config/cava/config)" % env.slug]

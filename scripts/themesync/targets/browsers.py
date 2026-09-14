@@ -1,14 +1,14 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# browsers — esquema claro/oscuro en Brave/Beta y Firefox.
+# browsers — light/dark scheme in Brave/Beta and Firefox.
 #
-# - Brave/Beta: prefs del perfil (browser.theme.color_scheme2 1=claro/2=oscuro,
-#   follows_system_colors=false, user_color2=acento ARGB). SOLO si el canal
-#   está cerrado: con el navegador abierto sus prefs en memoria pisarían el
-#   cambio al salir.
-# - Firefox: user.js con bloque gestionado (toolbar-theme/content-theme +
-#   ui.systemUsesDarkTheme). Se lee al arrancar, así que es seguro en
-#   caliente; el resto del user.js del usuario se conserva.
-# Sin perfiles (Firefox recién instalado) → se salta sin error.
+# - Brave/Beta: profile prefs (browser.theme.color_scheme2 1=light/2=dark,
+#   follows_system_colors=false, user_color2=accent ARGB). ONLY when the channel
+#   is closed: with the browser running, its in-memory prefs would overwrite the
+#   change on exit.
+# - Firefox: user.js with a managed block (toolbar-theme/content-theme +
+#   ui.systemUsesDarkTheme). It is read at startup, so writing it live is safe;
+#   the rest of the user's user.js is preserved.
+# No profiles (fresh Firefox install) → skipped without error.
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
@@ -20,9 +20,9 @@ import os
 from ..core import load_json, palette_hex
 
 NAME = "browsers"
-DESCRIPTION = "esquema claro/oscuro en Brave/Beta (prefs) y Firefox (user.js)"
+DESCRIPTION = "light/dark scheme in Brave/Beta (prefs) and Firefox (user.js)"
 
-# (directorio del canal, patrón pgrep, etiqueta)
+# (channel directory, pgrep pattern, label)
 BRAVE_DIRS = (
     (".config/BraveSoftware/Brave-Browser", "/opt/brave-bin/brave", "brave"),
     (".config/BraveSoftware/Brave-Browser-Beta", "brave-browser-beta", "brave-beta"),
@@ -36,7 +36,7 @@ FF_KEYS = ("browser.theme.toolbar-theme", "browser.theme.content-theme",
 
 
 def available(env) -> bool:
-    # Siempre: los mensajes de "sin perfiles / abierto" son informativos.
+    # Always: the "no profiles / running" messages are informational.
     return True
 
 
@@ -64,10 +64,10 @@ def _brave(env, scheme: int, accent: int) -> list:
             continue
         if env.pgrep(pattern):
             if label == "brave":
-                out.append("brave: abierto; prefs de tema no tocados "
-                           "(aplica al cerrarlo y reiniciar)")
+                out.append("brave: running; theme prefs untouched "
+                           "(applies after closing and reopening)")
             else:
-                out.append("brave-beta: abierto; prefs de tema no tocados")
+                out.append("brave-beta: running; theme prefs untouched")
             continue
 
         changed = 0
@@ -97,7 +97,7 @@ def _brave(env, scheme: int, accent: int) -> list:
 # ── Firefox ───────────────────────────────────────────────────────────────────
 
 def _firefox_profiles(ffdir) -> list:
-    """Perfiles desde profiles.ini; fallback a los que tengan prefs.js."""
+    """Profiles from profiles.ini; fallback to any directory with prefs.js."""
     profiles = []
     ini = os.path.join(str(ffdir), "profiles.ini")
     if os.path.isfile(ini):
@@ -121,14 +121,14 @@ def _firefox(env, scheme: int) -> list:
     out = []
     ffdir = env.home / FIREFOX_REL
     if not ffdir.is_dir():
-        return ["firefox: sin perfiles (~/.mozilla/firefox no existe); se omite"]
+        return ["firefox: no profiles (~/.mozilla/firefox does not exist); skipped"]
 
     for prof in _firefox_profiles(ffdir):
         if not os.path.isdir(prof):
             continue
         uj = os.path.join(prof, "user.js")
 
-        # Conservar todo el user.js salvo nuestro bloque y claves gestionadas.
+        # Keep the whole user.js except our block and managed keys.
         kept, inside = [], False
         if os.path.isfile(uj):
             for ln in open(uj, encoding="utf-8", errors="replace"):

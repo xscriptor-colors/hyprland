@@ -1,12 +1,11 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# qt — color schemes de qt6ct/qt5ct + config activa.
+# qt — qt6ct/qt5ct color schemes + active config.
 #
-# Genera un color scheme por paleta en ~/.config/{qt6ct,qt5ct}/colors/<slug>.conf
-# con los 22 roles en el orden del enum QPalette::ColorRole (incluidos NoRole y
-# Accent; Qt5 lee los 21 primeros) y activa el de la paleta en
+# Generates one color scheme per palette in ~/.config/{qt6ct,qt5ct}/colors/<slug>.conf
+# with the 22 roles in QPalette::ColorRole enum order (including NoRole and
+# Accent; Qt5 reads the first 21) and activates the current palette's scheme in
 # qt6ct.conf/qt5ct.conf ([Appearance] color_scheme_path + custom_palette +
-# style=Fusion), conservando el resto de claves. Las apps Qt requieren
-# reinicio para verlo.
+# style=Fusion), preserving the rest of the keys. Qt apps need a restart.
 # ═══════════════════════════════════════════════════════════════════════════
 from __future__ import annotations
 
@@ -15,10 +14,10 @@ from pathlib import Path
 from ..core import argb, best_fg, mix, palette_bg_fg, palette_hex, read_text
 
 NAME = "qt"
-DESCRIPTION = "color schemes de qt6ct/qt5ct + config activa"
+DESCRIPTION = "qt6ct/qt5ct color schemes + active config"
 
 QT_DIRS = (".config/qt6ct", ".config/qt5ct")
-# Roles que se atenúan en inactive/disabled (texto y acentos).
+# Roles dimmed in the inactive/disabled groups (text and accents).
 TEXT_ROLES = {0, 6, 7, 8, 13, 14, 15, 19, 20}
 
 
@@ -27,7 +26,7 @@ def available(env) -> bool:
 
 
 def _scheme(bg: str, fg: str, b: dict):
-    """22 roles activos (orden del enum) + variantes inactive/disabled."""
+    """22 active roles (enum order) + inactive/disabled variants."""
     c5 = b.get("color5") or fg
     accent_fg = best_fg(c5, fg, bg)
     active = [
@@ -61,7 +60,7 @@ def _scheme(bg: str, fg: str, b: dict):
 
 
 def _update_conf(env, conf, scheme_path: str) -> None:
-    """Fija las claves de [Appearance] sin tocar el resto del archivo."""
+    """Set the [Appearance] keys without touching the rest of the file."""
     lines = read_text(conf).splitlines() if conf.is_file() else []
     if "[Appearance]" not in lines:
         lines.append("[Appearance]")
@@ -90,7 +89,7 @@ def apply(env) -> list:
         colors = base / "colors"
         env.mkdir(colors)
 
-        # ── 1) Color scheme por paleta ──
+        # ── 1) One color scheme per palette ──
         slugs = []
         for pal in env.palettes:
             slug = pal.get("slug") or "?"
@@ -110,7 +109,7 @@ def apply(env) -> list:
                 env.unlink(stale)
         out.append("Qt color schemes regenerated: %d (%s)" % (len(slugs), name))
 
-        # ── 2) Activar el de la paleta en curso ──
+        # ── 2) Activate the current palette's scheme ──
         scheme_path = colors / (env.slug + ".conf")
         if scheme_path.is_file():
             conf = base / (name + ".conf")
