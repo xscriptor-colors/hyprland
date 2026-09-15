@@ -105,7 +105,7 @@ Row {
     // Load more: siguiente página de resultados (solo con búsqueda pausada).
     Rectangle {
         id: loadMoreBtn
-        visible: ctx.currentFilter === "Search" && ctx.hasSearched && ctx.isSearchPaused && ctx.searchProxyModel.count > 0
+        visible: ctx.currentFilter === "Search" && ctx.hasSearched && ctx.isSearchPaused && ctx.searchResultCount > 0
         width: visible ? ctx.s(44) : 0
         height: ctx.s(44)
         radius: ctx.s(13)

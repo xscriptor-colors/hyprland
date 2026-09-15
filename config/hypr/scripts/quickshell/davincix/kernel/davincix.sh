@@ -8,6 +8,8 @@
 # ═══════════════════════════════════════════════════════════════════════════
 set -uo pipefail
 
+DAVINCIX_VERSION="0.1.0"
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$DIR/paths.sh"
 source "$DIR/util.sh"
@@ -34,6 +36,7 @@ usage: davincix.sh <command> [options]
   import <paths…>  copy files into the wallpaper dir and build thumbnails
   slideshow start|stop|status [interval-seconds]
   paths            print the resolved paths
+  --version        print the version
 EOF
     exit 2
 }
@@ -267,5 +270,6 @@ case "$cmd" in
     import) cmd_import "$@" ;;
     slideshow) cmd_slideshow "$@" ;;
     paths) cmd_paths "$@" ;;
+    --version|-v|version) echo "davincix $DAVINCIX_VERSION" ;;
     *) usage ;;
 esac

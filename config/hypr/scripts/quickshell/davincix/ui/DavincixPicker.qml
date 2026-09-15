@@ -41,6 +41,15 @@ Item {
         return scaler.s(val);
     }
 
+    // Resuelve el CLI del kernel: la UI vive en el shell y el kernel en su
+    // propio repo. Orden: override por entorno → hermano kernel/ junto a ui/.
+    function cliPath() {
+        let override = Quickshell.env("DAVINCIX_CLI");
+        if (override && override !== "") return override;
+
+        return decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+    }
+
     Colors { id: _theme }
 
     property string widgetArg: ""
@@ -161,7 +170,7 @@ Item {
         applyUnlockTimer.restart();
         window.targetWallName = safeFileName;
 
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         let transition = window.transition;
 
         if (window.currentFilter === "Search" && window.hasSearched) {
@@ -326,14 +335,14 @@ Item {
 
     // ── Slideshow ───────────────────────────────────────────────────────────
     function refreshSlideshowState() {
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         slideshowStatusProc.command = [cli, "slideshow", "status"];
         slideshowStatusProc.running = true;
     }
 
     function toggleSlideshow() {
         if (window.isApplying) return;
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         let action = window.slideshowOn ? "stop" : "start " + C.SLIDESHOW_INTERVAL;
         Quickshell.execDetached(["bash", "-c", '"' + cli + '" slideshow ' + action]);
         window.slideshowOn = !window.slideshowOn;
@@ -355,7 +364,7 @@ Item {
         window.confirmOpen = false;
         let name = window.confirmTarget;
         window.confirmTarget = "";
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         Quickshell.execDetached([cli, "rm", window.getCleanName(name)]);
     }
 
@@ -372,7 +381,7 @@ Item {
     function loadMoreSearch() {
         if (!window.hasSearched || window.searchQuery === "") return;
         window.isSearchPaused = false;
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         Quickshell.execDetached([cli, "search", "--continue", window.searchQuery]);
     }
 
@@ -509,7 +518,7 @@ Item {
         window.searchQuery = query;
 
         // The CLI stops the previous search, clears its cache and starts the new one.
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         Quickshell.execDetached([cli, "search", window.searchQuery]);
     }
 
@@ -845,6 +854,9 @@ Item {
 
     readonly property var activeModel: window.currentFilter === "Search" ? searchProxyModel : localProxyModel
 
+    // Expuesto para componentes de otros archivos (los ids no cruzan archivos).
+    readonly property int searchResultCount: searchProxyModel.count
+
     FolderListModel {
         id: localFolderModel
         folder: window.thumbDir
@@ -1058,7 +1070,7 @@ Item {
 
     Component.onDestruction: {
         // Cierra la búsqueda y limpia su caché (thumbs + map + cursor).
-        let cli = decodeURIComponent(Qt.resolvedUrl("../kernel/davincix.sh").toString().replace(/^file:\/\//, ""));
+        let cli = window.cliPath();
         Quickshell.execDetached([cli, "search", "--clear"]);
         if (window.hasSearched) {
             window.hasSearched = false;

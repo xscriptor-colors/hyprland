@@ -107,9 +107,16 @@ bash kernel/davincix.sh set ~/.config/hypr/wallpapers/7.png --dry-run   # does n
 bash kernel/davincix.sh thumbs                                          # thumbnails only
 ```
 
-## Future extraction
+## Version and split plan
 
-This subsystem is the candidate for its own repo (`davincix`): `kernel/` no
-longer depends on the shell and `ui/` would stay in the shell as a frontend
-(or move along as a Quickshell app). Comments and messages are already in
-English (same pattern as `theme-sync`).
+Version **0.1.0**.
+
+The `kernel/` is the candidate for its own repo (planned home: `equisdots`):
+it has no shell dependency and ships its own README. The `ui/` stays in the
+dottes shell and finds the CLI through `$DAVINCIX_CLI` or the sibling
+`../kernel/davincix.sh` (see `ui/DavincixPicker.qml` → `cliPath()`). The
+recommended layout for a separate kernel repo is a symlink:
+
+```bash
+ln -s ~/davincix ~/.config/hypr/scripts/quickshell/davincix/kernel
+```
