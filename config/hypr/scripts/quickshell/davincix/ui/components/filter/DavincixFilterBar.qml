@@ -126,7 +126,7 @@ Rectangle {
             spacing: ctx.s(6)
             anchors.verticalCenter: parent.verticalCenter
 
-            // Transition selector — click to cycle through awww transitions.
+            // Transition selector — click to cycle through xwww transitions.
             Rectangle {
                 id: transBtn
                 width: transLabel.implicitWidth + ctx.s(30)

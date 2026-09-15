@@ -139,7 +139,7 @@ Row {
     Rectangle {
         id: searchBox
         height: ctx.s(44)
-        width: ctx.currentFilter === "Search" ? ctx.s(360) : ctx.s(44)
+        width: ctx.currentFilter === "Search" ? ctx.s(440) : ctx.s(44)
         radius: ctx.s(13)
         clip: true
         anchors.verticalCenter: parent.verticalCenter
@@ -160,7 +160,7 @@ Row {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 if (ctx.currentFilter !== "Search") {
-                    ctx.currentFilter = "Search";
+                    ctx.openSearch("image");
                 } else {
                     ctx.currentFilter = "All";
                 }
@@ -198,9 +198,72 @@ Row {
             }
         }
 
+        // Fuente de búsqueda: segmented compacto (mismo lenguaje visual que
+        // los chips de filtros: surface2 activo + borde theme.text).
+        Item {
+            id: sourceWrap
+            anchors.left: searchIcon.right
+            anchors.verticalCenter: parent.verticalCenter
+            visible: ctx.currentFilter === "Search"
+            width: visible ? sourceRow.implicitWidth + ctx.s(6) : 0
+            height: ctx.s(26)
+            clip: true
+
+            Row {
+                id: sourceRow
+                anchors.left: parent.left
+                anchors.leftMargin: ctx.s(6)
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: ctx.s(4)
+
+                Repeater {
+                    model: ctx.activeSearchSources
+
+                    delegate: Rectangle {
+                        width: sourceLabel.implicitWidth + ctx.s(14)
+                        height: ctx.s(26)
+                        radius: ctx.s(9)
+
+                        color: ctx.searchSource === modelData.id
+                            ? theme.surface2
+                            : (sourceMouse.containsMouse ? theme.surface1 : "transparent")
+                        border.color: ctx.searchSource === modelData.id
+                            ? theme.text
+                            : theme.surface1
+                        border.width: 1
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+
+                        Text {
+                            id: sourceLabel
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            font.family: "Hack Nerd Font"
+                            font.pixelSize: ctx.s(11)
+                            font.bold: ctx.searchSource === modelData.id
+                            color: ctx.searchSource === modelData.id
+                                ? theme.text
+                                : Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7)
+                        }
+
+                        MouseArea {
+                            id: sourceMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            enabled: !ctx.isApplying
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: ctx.searchSource = modelData.id
+                        }
+                    }
+                }
+            }
+        }
+
         TextInput {
             id: searchInput
-            anchors.left: searchIcon.right
+            anchors.left: sourceWrap.right
+            anchors.leftMargin: ctx.s(6)
             anchors.right: submitBtn.left
             anchors.rightMargin: ctx.s(8)
             anchors.verticalCenter: parent.verticalCenter
@@ -278,6 +341,125 @@ Row {
                     c.stroke();
                 }
             }
+        }
+    }
+
+    // Búsqueda de vídeo (fondos animados): lupa + play para diferenciarla.
+    Rectangle {
+        id: videoSearchBtn
+        width: ctx.s(44)
+        height: ctx.s(44)
+        radius: ctx.s(13)
+        anchors.verticalCenter: parent.verticalCenter
+        property bool active: ctx.currentFilter === "Search" && ctx.searchKind === "video"
+
+        color: active ? theme.surface2 : (vsMouse.containsMouse ? theme.surface1 : "transparent")
+        border.color: active ? theme.text : theme.surface1
+        border.width: active ? ctx.s(2) : 1
+
+        Behavior on color { ColorAnimation { duration: 300 } }
+        Behavior on border.color { ColorAnimation { duration: 300 } }
+
+        MouseArea {
+            id: vsMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: !ctx.isApplying
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (ctx.currentFilter === "Search" && ctx.searchKind === "video") {
+                    ctx.currentFilter = "All";
+                } else {
+                    ctx.openSearch("video");
+                }
+            }
+        }
+
+        // Lupa (mismo trazo que el icono de búsqueda, desplazada arriba-izq).
+        Canvas {
+            width: ctx.s(44)
+            height: ctx.s(44)
+            anchors.centerIn: parent
+            property string activeColor: videoSearchBtn.active ? theme.text
+                : (vsMouse.containsMouse ? theme.text
+                   : Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7))
+            onActiveColorChanged: requestPaint()
+            property real scaleTrigger: ctx.s(1)
+            onScaleTriggerChanged: requestPaint()
+
+            onPaint: {
+                var c = getContext("2d");
+                c.reset();
+                c.lineWidth = ctx.s(3);
+                c.strokeStyle = activeColor;
+                c.beginPath();
+                c.arc(ctx.s(16), ctx.s(16), ctx.s(6), 0, Math.PI * 2);
+                c.stroke();
+                c.beginPath();
+                c.moveTo(ctx.s(21), ctx.s(21));
+                c.lineTo(ctx.s(28), ctx.s(28));
+                c.stroke();
+            }
+        }
+
+        // Play mini en la esquina inferior derecha (siempre en acento).
+        Canvas {
+            width: ctx.s(16)
+            height: ctx.s(16)
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: ctx.s(3)
+            property string activeColor: theme.mauve
+            onActiveColorChanged: requestPaint()
+            property real scaleTrigger: ctx.s(1)
+            onScaleTriggerChanged: requestPaint()
+
+            onPaint: {
+                var c = getContext("2d");
+                c.reset();
+                c.fillStyle = activeColor;
+                c.beginPath();
+                c.moveTo(ctx.s(3), ctx.s(2));
+                c.lineTo(ctx.s(14), ctx.s(8));
+                c.lineTo(ctx.s(3), ctx.s(14));
+                c.closePath();
+                c.fill();
+            }
+        }
+    }
+
+    // API keys de proveedores (tuerca): despliega el panel de keys.
+    Rectangle {
+        id: keysBtn
+        width: ctx.s(44)
+        height: ctx.s(44)
+        radius: ctx.s(13)
+        anchors.verticalCenter: parent.verticalCenter
+
+        color: ctx.keysPanelOpen ? theme.surface2 : (kMouse.containsMouse ? theme.surface1 : "transparent")
+        border.color: ctx.keysPanelOpen ? theme.text : theme.surface1
+        border.width: ctx.keysPanelOpen ? ctx.s(2) : 1
+
+        Behavior on color { ColorAnimation { duration: 250 } }
+        Behavior on border.color { ColorAnimation { duration: 250 } }
+
+        Text {
+            anchors.centerIn: parent
+            text: "\uF013"  // fa-cog
+            font.family: "Hack Nerd Font"
+            font.pixelSize: ctx.s(15)
+            color: (kMouse.containsMouse || ctx.keysPanelOpen)
+                ? theme.text
+                : Qt.rgba(theme.text.r, theme.text.g, theme.text.b, 0.7)
+        }
+
+        MouseArea {
+            id: kMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: !ctx.isApplying
+            cursorShape: Qt.PointingHandCursor
+            onClicked: ctx.toggleKeysPanel()
         }
     }
 }

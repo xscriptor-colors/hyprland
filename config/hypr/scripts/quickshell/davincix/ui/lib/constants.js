@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // davincix · ui/lib — constants
 //
-// Pure data shared by the picker UI: filter definitions, awww transitions and
+// Pure data shared by the picker UI: filter definitions, xwww transitions and
 // the filter cycling order. No QML context, no side effects.
 // ═══════════════════════════════════════════════════════════════════════════
 .pragma library
@@ -21,7 +21,7 @@ var FILTERS = [
     { name: "Search", hex: "", label: "Search" }
 ];
 
-var TRANSITIONS = ["simple", "fade", "left", "right", "top", "bottom", "wipe", "grow", "center", "outer", "random", "wave"];
+var TRANSITIONS = ["simple", "fade", "left", "right", "top", "bottom", "wipe", "grow", "center", "outer", "random", "wave", "glitch", "decrypt", "dissolve", "clock", "zoom"];
 
 var FILTER_ORDER = ["All", "Video", "Favorites", "Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Pink", "Monochrome"];
 
@@ -29,3 +29,11 @@ var FILTER_ORDER = ["All", "Video", "Favorites", "Red", "Orange", "Yellow", "Gre
 var ORIENTATIONS = ["horizontal", "vertical"];
 var SHAPES = ["rect", "square", "circle"];
 var SLIDESHOW_INTERVAL = 300;
+
+// Fuentes de búsqueda (proveedor del kernel + etiqueta + tipo).
+var SEARCH_SOURCES = [
+    { id: "ddg", label: "DDG", kind: "image" },
+    { id: "wallhaven", label: "WH", kind: "image" },
+    { id: "pexels", label: "PEX", kind: "video" },
+    { id: "pixabay", label: "PIX", kind: "video" }
+];

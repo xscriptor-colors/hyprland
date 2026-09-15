@@ -2,19 +2,19 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # davincix · kernel — apply
 #
-# Applies wallpapers: awww for still images (with transitions) and mpvpaper
-# for video. Starts awww-daemon when missing and resolves "random"
+# Applies wallpapers: xwww for still images (with transitions) and mpvpaper
+# for video. Starts xwww-daemon when missing and resolves "random"
 # transitions. No UI, no search, no download logic here.
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Valid awww transitions (davincix_resolve_transition picks one for "random").
-DAVINCIX_TRANSITIONS=(simple fade left right top bottom wipe grow center outer wave)
+# Valid xwww transitions (davincix_resolve_transition picks one for "random").
+DAVINCIX_TRANSITIONS=(simple fade left right top bottom wipe grow center outer wave glitch decrypt dissolve clock zoom)
 
-# Start awww-daemon if it is not alive.
-davincix_ensure_awww() {
-    pgrep -x awww-daemon >/dev/null 2>&1 && return 0
-    if ! awww-daemon >/dev/null 2>&1; then
-        notify-send "Wallpaper Error" "Failed to start awww-daemon" -u critical -t 5000
+# Start xwww-daemon if it is not alive.
+davincix_ensure_xwww() {
+    pgrep -x xwww-daemon >/dev/null 2>&1 && return 0
+    if ! xwww-daemon >/dev/null 2>&1; then
+        notify-send "Wallpaper Error" "Failed to start xwww-daemon" -u critical -t 5000
         return 1
     fi
     sleep 0.5
@@ -36,15 +36,15 @@ davincix_set_image() {
     local t
     t="$(davincix_resolve_transition "$transition")"
 
-    davincix_ensure_awww || return 1
+    davincix_ensure_xwww || return 1
     pkill mpvpaper 2>/dev/null || true
     davincix_log "APPLY IMAGE: $file → $monitors (${t})"
 
     if [ "$monitors" = "all" ]; then
-        awww img "$file" --transition-type "$t" --transition-pos 0.5,0.5 \
+        xwww img "$file" --transition-type "$t" --transition-pos 0.5,0.5 \
             --transition-fps 144 --transition-duration 1 >> "$DAVINCIX_LOG_FILE" 2>&1 &
     else
-        awww img -o "$monitors" "$file" --transition-type "$t" --transition-pos 0.5,0.5 \
+        xwww img -o "$monitors" "$file" --transition-type "$t" --transition-pos 0.5,0.5 \
             --transition-fps 144 --transition-duration 1 >> "$DAVINCIX_LOG_FILE" 2>&1 &
     fi
 }

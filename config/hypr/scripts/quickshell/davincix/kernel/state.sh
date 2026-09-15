@@ -2,7 +2,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # davincix · kernel — state
 #
-# Detects the current wallpaper (mpvpaper or awww) and keeps the cached copy
+# Detects the current wallpaper (mpvpaper or xwww) and keeps the cached copy
 # that the lock screen and SDDM read (current_wallpaper.png).
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -11,8 +11,8 @@ davincix_current() {
     local src=""
     if pgrep -a mpvpaper >/dev/null 2>&1; then
         src="$(pgrep -a mpvpaper | grep -o "$DAVINCIX_WALLPAPER_DIR/[^' ]*" | head -n1)"
-    elif command -v awww >/dev/null 2>&1; then
-        src="$(awww query 2>/dev/null | grep -o "$DAVINCIX_WALLPAPER_DIR/[^ ]*" | head -n1)"
+    elif command -v xwww >/dev/null 2>&1; then
+        src="$(xwww query 2>/dev/null | grep -o "$DAVINCIX_WALLPAPER_DIR/[^ ]*" | head -n1)"
     fi
     printf '%s' "$src"
 }

@@ -21,13 +21,13 @@ davincix/
     ├── davincix.sh              entry CLI (set/fetch/current/thumbs/search/stop/rm/import/slideshow)
     ├── paths.sh                 path resolution + environment overrides
     ├── util.sh                  shared helpers (logging, media-type detection)
-    ├── apply.sh                 apply with awww/mpvpaper + transitions
+    ├── apply.sh                 apply with xwww/mpvpaper + transitions
     ├── state.sh                 current wallpaper + cached current image
     ├── download.sh              URL download (webp-aware)
     ├── thumbs.sh                thumbnail cache + manifest (webp, video posters)
-    ├── search.sh                DuckDuckGo search (run/pause/stop, continue)
+    ├── search.sh                source search (run/pause/stop, continue, --source)
     ├── slideshow.sh             rotation daemon (PID + enabled flag)
-    └── ddg_links.py             link scraper (stdlib only, cursor persistence)
+    └── providers/               one scraper per source (ddg | wallhaven | pexels | pixabay)
 ```
 
 > **Registration note:** Quickshell's qmlscanner only synthesizes a `qmldir`
@@ -47,13 +47,14 @@ kernel/davincix.sh set <file|url> [--video] [--monitors all|A,B] \
 kernel/davincix.sh fetch --name <n> --map <f> --dest <f> \
                    [--thumb-in <f>] [--thumb-out <f>] [--monitors ...] [--transition ...]
 kernel/davincix.sh thumbs                         # prepare thumbnails (async)
-kernel/davincix.sh search <query>                 # DuckDuckGo search
+kernel/davincix.sh search <query> [--source SRC]   # SRC: ddg|wallhaven|pexels|pixabay
 kernel/davincix.sh search --continue <query>      # next page (keeps the cache)
 kernel/davincix.sh search --clear                 # stop + drop the search cache
 kernel/davincix.sh stop                           # stop the running search
 kernel/davincix.sh rm <file>                      # trash a wallpaper (+ thumbnail)
 kernel/davincix.sh import <paths…>                # copy into the dir + thumbs
 kernel/davincix.sh slideshow start|stop|status [interval]
+kernel/davincix.sh keys [list | set NAME VALUE]   # provider API keys (keys.conf)
 ```
 
 ## Paths and state (contracts)

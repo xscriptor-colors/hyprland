@@ -10,7 +10,7 @@ Version: **0.1.0**
 
 | Role | Tool |
 |---|---|
-| Apply still images | `awww` (awww-daemon) |
+| Apply still images | `xwww` (xwww-daemon) |
 | Apply videos | `mpvpaper` |
 | Thumbnails / webp / color helpers | ImageMagick (`magick`) |
 | Video posters | `ffmpeg` + `ffprobe` |
@@ -47,13 +47,14 @@ kernel/davincix.sh fetch --name <n> --map <f> --dest <f> \
                    [--thumb-in <f>] [--thumb-out <f>] [--monitors ...] [--transition ...]
 kernel/davincix.sh current [--thumb-name]
 kernel/davincix.sh thumbs
-kernel/davincix.sh search <query>
+kernel/davincix.sh search <query> [--source ddg|wallhaven]
 kernel/davincix.sh search --continue <query>   # next page (keeps the cache)
 kernel/davincix.sh search --clear              # stop + drop the cache
 kernel/davincix.sh stop
 kernel/davincix.sh rm <file>
 kernel/davincix.sh import <paths…>
 kernel/davincix.sh slideshow start|stop|status [interval]
+kernel/davincix.sh keys [list | set NAME VALUE]   # provider API keys (keys.conf)
 kernel/davincix.sh paths
 kernel/davincix.sh --version
 ```
@@ -73,7 +74,8 @@ kernel/davincix.sh --version
 
 - `current_wallpaper.png` — current wallpaper cache (lock screens, theme tools).
 - `ddg_search_control` — `run|pause|stop`; written by the UI.
-- `ddg_next_url` — DuckDuckGo pagination cursor (`search --continue`).
+- `search_cursors/<source>` — per-provider pagination cursor (`search --continue`).
+- `search_source` — active search provider (persisted per fresh search).
 - `thumbs/.manifest` + `thumbs/.source_dir` — thumbnail cache index.
 - `search_map.txt` — `name|url` for search results.
 - `slideshow.pid` + `slideshow_enabled` — slideshow daemon state.
@@ -97,7 +99,26 @@ bash kernel/davincix.sh thumbs
 
 ## Search notes
 
-The DuckDuckGo scraper (`ddg_links.py`, stdlib only) uses the public JSON
-endpoint and the VQD token dance; DDG can change it at any time. Results are
-filtered to >= 1920x1080 and validated (`content-type` + mime) before being
-kept.
+Search providers live in `kernel/providers/` (one script per source) and are
+plain "thumb|full" emitters consumed by `search.sh`:
+
+- `ddg.py` — DuckDuckGo (stdlib only; JSON endpoint + VQD token dance; DDG can
+  change it at any time).
+- `wallhaven.py` — Wallhaven public API (no key needed for SFW), native
+  resolution filter and page-number pagination.
+- `pexels.py` — Pexels videos API (stock clips; responds without a key today,
+  sends `PEXELS_KEY` when present). thumb = preview image, full = best mp4
+  >= 1920x1080.
+- `pixabay.py` — Pixabay videos API (needs `PIXABAY_KEY`; free). thumb = Vimeo
+  preview, full = best variant >= 1920x1080.
+
+API keys live in `$DAVINCIX_STATE_DIR/keys.conf` (sourced by `search.sh`) or the
+environment: `PEXELS_KEY`, `PIXABAY_KEY`.
+
+Video results keep an image thumbnail in the cache and the map stores the video
+URL; `fetch` saves the local file with its real container extension
+(`.mp4`/`.webm`), applies it with mpvpaper and the thumbnail prep builds the
+`000_` poster.
+
+Results are filtered to >= 1920x1080 and validated (`content-type` + mime)
+before being kept.

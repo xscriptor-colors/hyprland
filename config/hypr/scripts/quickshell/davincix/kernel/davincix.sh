@@ -10,6 +10,13 @@ set -uo pipefail
 
 DAVINCIX_VERSION="0.1.0"
 
+# Proveedores que piden API key: NAME|label|where (fuente única para el CLI y
+# para el panel de la UI vía `keys list`).
+DAVINCIX_KEYED_KEYS=(
+    "PEXELS_KEY|Pexels|pexels.com/api"
+    "PIXABAY_KEY|Pixabay|pixabay.com/api/docs"
+)
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$DIR/paths.sh"
 source "$DIR/util.sh"
@@ -28,13 +35,16 @@ usage: davincix.sh <command> [options]
                    --dest, --thumb-in, --thumb-out, --monitors, --transition)
   current          print the current wallpaper path (--thumb-name for its thumb)
   thumbs           prepare the thumbnail cache (async)
-  search <query>   run a DuckDuckGo search
-  search --continue <query>  load the next page of results (keeps the cache)
+  search <query>   run a DuckDuckGo search (--source ddg|wallhaven)
+  search --continue <query>  next page (keeps the cache; --source optional)
   search --clear   stop the search and drop its cache
   stop             stop the running search
   rm <file>        move a wallpaper to the trash (and its thumbnail)
   import <paths…>  copy files into the wallpaper dir and build thumbnails
   slideshow start|stop|status [interval-seconds]
+  keys             show provider API key status (keys.conf)
+  keys list        machine-readable key status (UI panel)
+  keys set <NAME> <VALUE>  save a provider API key
   paths            print the resolved paths
   --version        print the version
 EOF
@@ -119,21 +129,45 @@ cmd_fetch() {
         exit 1
     fi
 
+    # Vídeo: el map guarda el preview (.jpg como nombre), pero el archivo
+    # local debe llevar la extensión real del contenedor para que
+    # davincix_is_video/mpvpaper lo detecten.
+    local video=0 vext
+    if davincix_is_video "$url"; then
+        video=1
+        vext="${url%%\?*}"
+        vext="${vext##*.}"
+        vext="$(printf '%s' "$vext" | tr '[:upper:]' '[:lower:]')"
+        case "$vext" in
+            mp4|webm|mov|mkv) ;;
+            *) vext="mp4" ;;
+        esac
+        dest="${dest%.*}.$vext"
+    fi
+
     mkdir -p "$(dirname "$dest")"
     if ! davincix_download "$url" "$dest"; then
         notify-send "Wallpaper Error" "Download failed" -u critical -t 5000
         exit 1
     fi
 
-    # Final thumbnail: copy of the temporary one plus a resize.
-    if [ -n "$thumb_out" ]; then
+    if [ "$video" = "1" ]; then
+        # El póster 000_ lo genera la preparación de miniaturas (async).
+        source "$DIR/thumbs.sh"
+        davincix_thumbs_prep
+    elif [ -n "$thumb_out" ]; then
+        # Final thumbnail: copy of the temporary one plus a resize.
         mkdir -p "$(dirname "$thumb_out")"
         if [ -n "$thumb_in" ] && [ -f "$thumb_in" ]; then cp "$thumb_in" "$thumb_out"; fi
         magick "$dest" -resize x420 -quality 70 "$thumb_out" 2>/dev/null || true
     fi
 
     davincix_cache_current "$dest"
-    davincix_set_image "$dest" "$monitors" "$transition"
+    if [ "$video" = "1" ]; then
+        davincix_set_video "$dest" "$monitors"
+    else
+        davincix_set_image "$dest" "$monitors" "$transition"
+    fi
 }
 
 # ── current ───────────────────────────────────────────────────────────────────
@@ -154,40 +188,51 @@ cmd_thumbs() {
 # ── stop: stop the running search ─────────────────────────────────────────────
 cmd_stop() {
     echo 'stop' > "$DAVINCIX_CONTROL_FILE"
+    pkill -f "$DIR/providers/" 2>/dev/null || true
     pkill -f "$DIR/search.sh" 2>/dev/null || true
-    pkill -f "$DIR/ddg_links.py" 2>/dev/null || true
 }
 
-# ── search: run a DDG search (stops the previous one and clears its cache) ────
-# --continue: keeps the cache and resumes from the saved DDG cursor (load more).
+# ── search: run a source search (stops the previous one and clears its cache) ─
+# --continue: keeps the cache and resumes from the source cursor (load more).
+# --source: ddg (default) | wallhaven.
 # --clear: stops the search and drops the cache (called when the picker closes).
 cmd_search() {
     if [ "${1:-}" = "--clear" ]; then
         cmd_stop
         rm -rf "${DAVINCIX_SEARCH_DIR:?}"/* 2>/dev/null || true
-        rm -f "$DAVINCIX_MAP_FILE" "$DAVINCIX_NEXT_FILE" 2>/dev/null || true
+        rm -f "$DAVINCIX_MAP_FILE" "$DAVINCIX_SOURCE_FILE" 2>/dev/null || true
+        rm -rf "$DAVINCIX_CURSOR_DIR" 2>/dev/null || true
         return 0
     fi
 
-    local continue=0 query=""
-    if [ "${1:-}" = "--continue" ]; then continue=1; shift; fi
-    query="${1:-}"
+    local continue=0 source="" query=""
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --continue) continue=1; shift ;;
+            --source) source="${2:-}"; shift 2 ;;
+            *) query="$1"; shift ;;
+        esac
+    done
     [ -n "$query" ] || usage
 
     cmd_stop
     sleep 0.2
 
-    if [ "$continue" = "0" ]; then
+    if [ "$continue" = "1" ]; then
+        [ -n "$source" ] || source="$(cat "$DAVINCIX_SOURCE_FILE" 2>/dev/null)"
+        [ -n "$source" ] || source="ddg"
+    else
+        [ -n "$source" ] || source="ddg"
         rm -rf "${DAVINCIX_SEARCH_DIR:?}"/* 2>/dev/null || true
-        rm -f "$DAVINCIX_MAP_FILE" "$DAVINCIX_NEXT_FILE" 2>/dev/null || true
+        rm -f "$DAVINCIX_MAP_FILE" 2>/dev/null || true
+        rm -rf "$DAVINCIX_CURSOR_DIR" 2>/dev/null || true
+        echo "$source" > "$DAVINCIX_SOURCE_FILE"
     fi
 
     echo 'run' > "$DAVINCIX_CONTROL_FILE"
-    if [ "$continue" = "1" ]; then
-        nohup bash "$DIR/search.sh" "$query" --continue >/dev/null 2>&1 &
-    else
-        nohup bash "$DIR/search.sh" "$query" >/dev/null 2>&1 &
-    fi
+    local args=( "$query" --source "$source" )
+    [ "$continue" = "1" ] && args+=( --continue )
+    nohup bash "$DIR/search.sh" "${args[@]}" >/dev/null 2>&1 &
 }
 
 # ── rm: move a wallpaper to the trash (and drop its thumbnail + manifest) ─────
@@ -246,6 +291,67 @@ cmd_slideshow() {
     bash "$DIR/slideshow.sh" "$@"
 }
 
+# ── keys: provider API keys (free) stored in keys.conf ────────────────────────
+#   keys         → human status
+#   keys list    → machine status: NAME|label|where|0/1 (consumed by the UI)
+#   keys set NAME VALUE
+cmd_keys() {
+    local action="${1:-}" name="${2:-}" value="${3:-}"
+    local conf="$DAVINCIX_STATE_DIR/keys.conf"
+
+    key_value() {
+        local k="$1" v=""
+        [ -f "$conf" ] && v="$(grep "^${k}=" "$conf" 2>/dev/null | head -n1 | cut -d= -f2-)"
+        [ -n "$v" ] || v="${!k:-}"
+        printf '%s' "$v"
+    }
+
+    if [ "$action" = "set" ]; then
+        [ -n "$name" ] && [ -n "$value" ] || usage
+        local entry known=0
+        for entry in "${DAVINCIX_KEYED_KEYS[@]}"; do
+            [ "${entry%%|*}" = "$name" ] && known=1
+        done
+        if [ "$known" != "1" ]; then
+            echo "davincix: unknown key: $name" >&2
+            exit 2
+        fi
+        touch "$conf" && chmod 600 "$conf"
+        if grep -q "^${name}=" "$conf" 2>/dev/null; then
+            sed -i "s|^${name}=.*|${name}=${value}|" "$conf"
+        else
+            echo "${name}=${value}" >> "$conf"
+        fi
+        echo "saved ${name} in ${conf}"
+        return 0
+    fi
+
+    if [ "$action" = "list" ]; then
+        local entry label where
+        for entry in "${DAVINCIX_KEYED_KEYS[@]}"; do
+            IFS='|' read -r name label where <<< "$entry"
+            if [ -n "$(key_value "$name")" ]; then
+                printf '%s|%s|%s|1\n' "$name" "$label" "$where"
+            else
+                printf '%s|%s|%s|0\n' "$name" "$label" "$where"
+            fi
+        done
+        return 0
+    fi
+
+    printf 'keys file: %s\n' "$conf"
+    local label where v
+    for entry in "${DAVINCIX_KEYED_KEYS[@]}"; do
+        IFS='|' read -r name label where <<< "$entry"
+        v="$(key_value "$name")"
+        if [ -n "$v" ]; then
+            printf '%-12s = %s...%s (set)\n' "$name" "${v:0:4}" "${v: -4}"
+        else
+            printf '%-12s = (not set) — free at %s\n' "$name" "$where"
+        fi
+    done
+}
+
 # ── paths: print the resolved paths (debug) ───────────────────────────────────
 cmd_paths() {
     printf 'wallpaper_dir = %s\n' "$DAVINCIX_WALLPAPER_DIR"
@@ -269,6 +375,7 @@ case "$cmd" in
     rm) cmd_rm "$@" ;;
     import) cmd_import "$@" ;;
     slideshow) cmd_slideshow "$@" ;;
+    keys) cmd_keys "$@" ;;
     paths) cmd_paths "$@" ;;
     --version|-v|version) echo "davincix $DAVINCIX_VERSION" ;;
     *) usage ;;

@@ -28,7 +28,10 @@ Item {
     readonly property bool isCurrent: ListView.isCurrentItem && !ctx.isScrollingBlocked
     readonly property bool isFakeSelected: ctx.isScrollingBlocked && index === 0
     readonly property bool isVisuallyEnlarged: isCurrent || isFakeSelected
-    readonly property bool isVideo: safeFileName.startsWith("000_")
+    readonly property bool isLocalVideo: safeFileName.startsWith("000_")
+    // Vídeo local o resultado de una búsqueda de vídeo (badge; el preview
+    // MediaPlayer solo corre para vídeos locales).
+    readonly property bool isVideo: isLocalVideo || (ctx.currentFilter === "Search" && ctx.searchKind === "video")
     readonly property bool matchesFilter: ctx.checkItemMatchesFilter(safeFileName, isVideo, ctx.cacheVersion, ctx.currentFilter)
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -72,9 +75,9 @@ Item {
     Timer {
         id: videoPlayTimer
         interval: 250
-        running: cardRoot.isVisuallyEnlarged && cardRoot.isVideo && !ctx.isScrollingBlocked && !ctx.isFilterAnimating && !ctx.isItemAnimating
+        running: cardRoot.isVisuallyEnlarged && cardRoot.isLocalVideo && !ctx.isScrollingBlocked && !ctx.isFilterAnimating && !ctx.isItemAnimating
         onTriggered: {
-            if (cardRoot.isVisuallyEnlarged && cardRoot.isVideo) {
+            if (cardRoot.isVisuallyEnlarged && cardRoot.isLocalVideo) {
                 cardRoot.isPlayingVideo = true;
                 previewPlayer.play();
             }

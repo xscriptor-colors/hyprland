@@ -573,7 +573,7 @@ Item {
         let writeCmd = "cat > \"$HOME/.config/hypr/display-config.tmp\" <<'XSC_DC_EOF'\n" + text + "XSC_DC_EOF\n" +
                        "mv \"$HOME/.config/hypr/display-config.tmp\" \"$HOME/.config/hypr/display-config\" && " +
                        "cp \"$HOME/.config/hypr/display-config\" \"$HOME/.config/hypr/display-config.bak\"";
-        config.sh(writeCmd + " ; " + cmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon &");
+        config.sh(writeCmd + " ; " + cmds.join(" ; ") + " ; pkill xwww-daemon 2>/dev/null || true; xwww-daemon &");
         Quickshell.execDetached(["notify-send", "Display Update",
             monitorsModel.count === 1 ? ("Applied: " + summaryString)
                                       : ("Applied layout for: " + summaryString.trim())]);

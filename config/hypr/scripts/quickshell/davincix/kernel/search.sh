@@ -2,7 +2,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # davincix · kernel — online search (DuckDuckGo)
 #
-# Orchestrates the scraper (ddg_links.py): it receives "thumb|full" pairs on
+# Orchestrates the providers (providers/<source>.py): it receives "thumb|full" pairs on
 # stdout, validates the full URL content-type, downloads the thumbnail,
 # converts it when it is webp and records it in search_map.txt (name|url).
 # It honors the run/pause/stop control file (written by the UI).
@@ -14,26 +14,49 @@ davincix_ensure_dirs
 
 QUERY="${1:-}"
 if [ -z "$QUERY" ]; then
-    echo "usage: search.sh <query> [--continue]" >&2
+    echo "usage: search.sh <query> [--continue] [--source ddg|wallhaven]" >&2
+    exit 2
+fi
+shift
+
+CONTINUE=0
+SOURCE="ddg"
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --continue) CONTINUE=1; shift ;;
+        --source) SOURCE="${2:-ddg}"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+
+PROVIDER="$DIR/providers/$SOURCE.py"
+if [ ! -f "$PROVIDER" ]; then
+    echo "unknown search provider: $SOURCE" >&2
     exit 2
 fi
 
-CONTINUE=0
-[ "${2:-}" = "--continue" ] && CONTINUE=1
+# API keys para proveedores que las necesitan (Pexels, Pixabay...).
+KEYS_FILE="$DAVINCIX_STATE_DIR/keys.conf"
+if [ -f "$KEYS_FILE" ]; then
+    set -a
+    . "$KEYS_FILE"
+    set +a
+fi
 
 SEARCH_DIR="$DAVINCIX_SEARCH_DIR"
 MAP_FILE="$DAVINCIX_MAP_FILE"
 CONTROL_FILE="$DAVINCIX_CONTROL_FILE"
-LOG_FILE="$DAVINCIX_LOG_DIR/ddg_downloader.log"
+CURSOR_FILE="$DAVINCIX_CURSOR_DIR/$SOURCE"
+LOG_FILE="$DAVINCIX_LOG_DIR/search_downloader.log"
 
-echo "=== Starting search for: $QUERY (continue=$CONTINUE) ===" > "$LOG_FILE"
+echo "=== Starting $SOURCE search for: $QUERY (continue=$CONTINUE) ===" > "$LOG_FILE"
 
-mkdir -p "$SEARCH_DIR"
+mkdir -p "$SEARCH_DIR" "$DAVINCIX_CURSOR_DIR"
 
-# The Python → shell pipe provides the links; the shell applies backpressure.
-python3 -u "$DIR/ddg_links.py" "$QUERY" \
+# The provider → shell pipe delivers the links; the shell applies backpressure.
+python3 -u "$PROVIDER" "$QUERY" \
     $([ "$CONTINUE" = "1" ] && echo "--continue") \
-    --next-file "$DAVINCIX_NEXT_FILE" | while IFS='|' read -r thumb_url full_url; do
+    --cursor-file "$CURSOR_FILE" | while IFS='|' read -r thumb_url full_url; do
 
     state=$(cat "$CONTROL_FILE" 2>/dev/null | tr -d '[:space:]')
 
@@ -53,13 +76,16 @@ python3 -u "$DIR/ddg_links.py" "$QUERY" \
     target_headers=$(curl -s -I -L -m 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "$full_url")
     target_type=$(echo "$target_headers" | grep -i "content-type:" | tail -n 1 | tr -d '\r')
 
-    if [[ ! "$target_type" =~ "image/" ]]; then
+    # Se aceptan imágenes y vídeos: para vídeo, el archivo guardado es el
+    # preview (miniatura) y el contenedor se resuelve al aplicar (fetch).
+    if [[ ! "$target_type" =~ (image|video)/ ]]; then
         echo "Skip: Full URL is dead or HTML ($target_type) -> $full_url" >> "$LOG_FILE"
         continue
     fi
 
     uuid=$(date +%s%N)
-    ext="${full_url##*.}"
+    # El archivo almacenado es siempre una imagen: la extensión sale del thumb.
+    ext="${thumb_url##*.}"
     ext="${ext%%\?*}"
     ext=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
     if [[ ! "$ext" =~ ^(jpg|jpeg|png|webp|gif)$ ]]; then ext="jpg"; fi
@@ -70,7 +96,7 @@ python3 -u "$DIR/ddg_links.py" "$QUERY" \
         ext="jpg"
     fi
 
-    filename="ddg_${uuid}.${ext}"
+    filename="web_${uuid}.${ext}"
     filepath="$SEARCH_DIR/$filename"
     tmppath="${filepath}.tmp"
 

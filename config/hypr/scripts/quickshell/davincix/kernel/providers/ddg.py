@@ -12,7 +12,7 @@ CONTROL_FILE = os.environ.get("DAVINCIX_CONTROL_FILE") or os.path.join(
 
 LOG_FILE = os.path.join(LOG_DIR, "ddg_python_scraper.log")
 
-NEXT_FILE = None  # donde persiste el cursor "next" (load more)
+CURSOR_FILE = None  # cursor persistente (URL "next" para load more)
 
 
 def log(msg):
@@ -32,10 +32,10 @@ def get_state():
 
 
 def save_cursor(url):
-    if not NEXT_FILE or not url:
+    if not CURSOR_FILE or not url:
         return
     try:
-        with open(NEXT_FILE, "w") as f:
+        with open(CURSOR_FILE, "w") as f:
             f.write(url)
     except:
         pass
@@ -43,23 +43,23 @@ def save_cursor(url):
 
 def load_cursor():
     try:
-        with open(NEXT_FILE, "r") as f:
+        with open(CURSOR_FILE, "r") as f:
             return f.read().strip() or None
     except:
         return None
 
 def main():
-    global NEXT_FILE
+    global CURSOR_FILE
     log("=== NEW SEARCH STARTING (Safe Search: OFF) ===")
     if len(sys.argv) < 2:
         log("ERROR: No query provided.")
         return
 
     continue_mode = "--continue" in sys.argv
-    if "--next-file" in sys.argv:
-        NEXT_FILE = sys.argv[sys.argv.index("--next-file") + 1]
-        sys.argv.remove(NEXT_FILE)
-        sys.argv.remove("--next-file")
+    if "--cursor-file" in sys.argv:
+        CURSOR_FILE = sys.argv[sys.argv.index("--cursor-file") + 1]
+        sys.argv.remove(CURSOR_FILE)
+        sys.argv.remove("--cursor-file")
     if continue_mode:
         sys.argv.remove("--continue")
 
