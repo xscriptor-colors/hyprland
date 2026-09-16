@@ -29,6 +29,9 @@ Item {
 
     readonly property bool isHorizontal: bar.orientation === "horizontal"
     readonly property bool unified: zoneData.unify === true
+    // Block fill mode ("default" | "on" | "off"), part of the island fill API
+    // in DockLayout.js. Islands without their own value inherit it.
+    readonly property string zoneFillMode: DockLayout.normalizeFillMode(zoneRoot.zoneData.fill)
 
     // Zone marker used by the dock's drag manager to find zone delegates.
     property bool isDockZone: true
@@ -130,7 +133,7 @@ Item {
     // --- unified pill behind the whole zone ---------------------------------
     Rectangle {
         id: unifyPill
-        visible: zoneRoot.unified
+        visible: zoneRoot.unified && zoneRoot.zoneFillMode !== "off"
         anchors.fill: parent
         radius: isHorizontal ? bar.pillRadius(bar.pillHeight) : bar.pillRadius(bar.pillWidth)
         color: colors.surface0
@@ -187,7 +190,8 @@ Item {
                         "slotIndex": slotWrap.index,
                         "effectiveBorderWidth": Qt.binding(() => zoneRoot.unified ? 0 : (zoneRoot.zoneData.borderWidth || 0)),
                         "effectiveBorderColor": Qt.binding(() => zoneRoot.unified ? "surface1" : (zoneRoot.zoneData.borderColor || "surface1")),
-                        "unified": Qt.binding(() => zoneRoot.unified)
+                        "unified": Qt.binding(() => zoneRoot.unified),
+                        "fillMode": zoneRoot.zoneFillMode
                     });
                 }
             }

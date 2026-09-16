@@ -21,9 +21,18 @@ ModulePill {
 
     // Active-workspace fill color: per-palette "workspaceActive" when the
     // palette sets it (alpha > 0), otherwise the standard mauve.
-    readonly property color wsActiveFill: (colors.workspaceActive !== undefined && colors.workspaceActive.a > 0)
-        ? colors.workspaceActive : colors.mauve
-    readonly property color wsActiveText: colors.crust
+    readonly property color wsActiveFill: {
+        let v = (mod.moduleCfg.colors !== undefined) ? mod.moduleCfg.colors["active"] : "";
+        if (v !== undefined && v !== "") return (colors[v] !== undefined) ? colors[v] : v;
+        return (colors.workspaceActive !== undefined && colors.workspaceActive.a > 0) ? colors.workspaceActive : colors.mauve;
+    }
+    readonly property color wsActiveText: mod.slotColor("activeText", "crust")
+    // Per-workspace fill/marker color slots (personalization; role or #hex).
+    readonly property color slotOccupied: mod.slotColor("occupied", "color5")
+    readonly property color slotEmpty: mod.slotColor("empty", "base")
+    readonly property color slotHover: mod.slotColor("hover", "surface1")
+    readonly property color slotMarker: mod.slotColor("marker", "text")
+    readonly property color slotMarkerEmpty: mod.slotColor("markerEmpty", "overlay0")
     // How EMPTY workspaces render: "number" | "dot" | "letter" (dock config).
     readonly property string marker: bar.workspacesMarker || "number"
     // Custom character for marker === "custom" (user glyph, e.g. Japanese).
@@ -136,11 +145,11 @@ ModulePill {
 
             color: stateLabel === "active" ? "transparent"
                 : (bar.topbarPillBg
-                    ? (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, bar.topbarPillSolid ? 1.0 : 0.6)
-                        : (stateLabel === "occupied" ? Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, bar.topbarPillSolid ? 1.0 : 0.4)
-                            : Qt.rgba(colors.base.r, colors.base.g, colors.base.b, bar.topbarPillSolid ? 1.0 : 0.4)))
-                    : (isHovered ? Qt.rgba(colors.surface1.r, colors.surface1.g, colors.surface1.b, 0.2)
-                        : Qt.rgba(colors.surface0.r, colors.surface0.g, colors.surface0.b, 0.3)))
+                    ? (isHovered ? Qt.rgba(mod.slotHover.r, mod.slotHover.g, mod.slotHover.b, bar.topbarPillSolid ? 1.0 : 0.6)
+                        : (stateLabel === "occupied" ? Qt.rgba(mod.slotOccupied.r, mod.slotOccupied.g, mod.slotOccupied.b, bar.topbarPillSolid ? 1.0 : 0.4)
+                            : Qt.rgba(mod.slotEmpty.r, mod.slotEmpty.g, mod.slotEmpty.b, bar.topbarPillSolid ? 1.0 : 0.4)))
+                    : (isHovered ? Qt.rgba(mod.slotHover.r, mod.slotHover.g, mod.slotHover.b, 0.2)
+                        : Qt.rgba(mod.slotOccupied.r, mod.slotOccupied.g, mod.slotOccupied.b, 0.3)))
 
             scale: isHovered && stateLabel !== "active" ? 1.08 : 1.0
             Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
@@ -156,7 +165,7 @@ ModulePill {
                     visible: mod.compact || wsPill.appIconList.length === 0
 
                     readonly property color markerColor: index === bar.wsModel.activeIndex ? mod.wsActiveText
-                        : (wsPill.isHovered ? colors.text : (wsPill.stateLabel === "occupied" ? colors.text : colors.overlay0))
+                        : (wsPill.isHovered ? mod.slotMarker : (wsPill.stateLabel === "occupied" ? mod.slotMarker : mod.slotMarkerEmpty))
 
                     // number / letter / custom-character marker
                     Text {
@@ -195,7 +204,7 @@ ModulePill {
                             text: modelData
                             font.family: bar.fontFamily
                             font.pixelSize: bar.s(12)
-                            color: wsPill.wsIndex === bar.wsModel.activeIndex ? mod.wsActiveText : (wsPill.isHovered ? colors.text : colors.text)
+                            color: wsPill.wsIndex === bar.wsModel.activeIndex ? mod.wsActiveText : mod.slotMarker
                         }
                     }
                     Text {
@@ -203,7 +212,7 @@ ModulePill {
                         font.family: bar.fontFamily
                         font.pixelSize: bar.s(10)
                         font.weight: Font.Black
-                        color: index === bar.wsModel.activeIndex ? mod.wsActiveText : colors.overlay0
+                        color: index === bar.wsModel.activeIndex ? mod.wsActiveText : mod.slotMarkerEmpty
                         visible: wsPill.hasManyIcons
                     }
                 }

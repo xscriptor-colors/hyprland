@@ -552,9 +552,9 @@ Item {
     // El panel se ensancha SOLO en la página Guide (el popup embebido está
     // diseñado a 1160px); Main sigue estos targets en vivo y anima el morph
     // al cambiar de página (y vuelve a 1120 en el resto).
-    property real targetMasterWidth: root.currentPage === "d_guide"
-        ? Math.min(root.s(1440), Screen.width - root.s(40))
-        : root.s(1120)
+    // Panel width: doubled (2 x 1120) with a screen margin cap so it always
+    // fits; Main follows this target live and animates the morph.
+    property real targetMasterWidth: Math.min(root.s(1800), Screen.width - root.s(40))
     property real targetMasterHeight: root.s(760)
     property var navGroups: [
         { id: "desktop", label: "Desktop", items: [
@@ -571,6 +571,7 @@ Item {
             { id: "d_style",      icon: "󰏘", label: "Style",      engine: "dock" },
             { id: "d_palette",    icon: "✦", label: "Palette" },
             { id: "d_zones",      icon: "󰮯", label: "Zones",      engine: "dock" },
+            { id: "d_modules",    icon: "󰍜", label: "Modules" },
             { id: "d_workspaces", icon: "󰠰", label: "Workspaces" },
             { id: "d_serp",       icon: "󰹑", label: "Serp Bar",   engine: "serp" }
         ] },
@@ -664,6 +665,7 @@ Item {
             "d_style":      "editor/DockStylePage.qml",
             "d_palette":    "editor/PalettePage.qml",
             "d_zones":      "editor/ZonesPage.qml",
+            "d_modules":    "editor/ModulesPage.qml",
             "d_workspaces": "editor/WorkspacesPage.qml",
             "d_serp":       "editor/SerpBarPage.qml",
             "d_launcher":   "editor/LauncherPage.qml",
@@ -689,6 +691,7 @@ Item {
             "d_style":      dStyleLoader,
             "d_palette":    dPaletteLoader,
             "d_zones":      dZonesLoader,
+            "d_modules":    dModulesLoader,
             "d_workspaces": dWorkspacesLoader,
             "d_serp":       dSerpLoader,
             "d_launcher":   launcherLoader,
@@ -1708,6 +1711,16 @@ Item {
                         transform: Translate { y: dZonesLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                         onLoaded: { if (dZonesLoader.item) root.zonesPage = dZonesLoader.item; }
+                    }
+                    Loader {
+                        id: dModulesLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_modules"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: dModulesLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
                         id: dWorkspacesLoader

@@ -132,7 +132,10 @@ Variants {
             // color instead of filling an island (no double fill on a strip).
             property bool accentTintMode: false
             // Clock format used while the serp engine is active (serpbar.timeFormat).
-            property string serpTimeFormat: "" 
+            property string serpTimeFormat: ""
+            // Zones-engine clock format (dock.timeFormat); the classic engine uses serpTimeFormat.
+            property string timeFormat: "HH:mm:ss"
+            property string dateFormat: "dddd, MMMM dd" 
             // Tracks the last applied orientation: an axis change (horizontal ↔
             // vertical) remounts the zones in-process (Phase D3) so every module
             // re-reads bar.orientation at creation — no full shell reload.
@@ -495,6 +498,8 @@ Variants {
                 dockWindow.borderWidth = dockConfig.borderWidth;
                 dockWindow.borderColor = dockConfig.borderColor;
                 dockWindow.fontFamily = dockConfig.font || "Hack Nerd Font";
+                dockWindow.timeFormat = (typeof dockConfig.timeFormat === "string" && dockConfig.timeFormat !== "") ? dockConfig.timeFormat : "HH:mm:ss";
+                dockWindow.dateFormat = (typeof dockConfig.dateFormat === "string" && dockConfig.dateFormat !== "") ? dockConfig.dateFormat : "dddd, MMMM dd";
                 dockWindow.zones = dockConfig.zones;
                 applyPosition();
             }
@@ -517,6 +522,11 @@ Variants {
             property int pillHeight: orientation === "horizontal" ? barHeight - s(12) : barWidth - s(8)
             property int pillWidth: orientation === "horizontal" ? barHeight - s(12) : barWidth - s(8)
             function pillRadius(h) { return Math.round(h * 0.5 * roundness); }
+
+            // Personalization API for modules (see the module personalization
+            // API in DockLayout.js): bar-wide icon color + per-module config.
+            readonly property string iconColor: (dockConfig.iconColor !== undefined && dockConfig.iconColor !== null) ? dockConfig.iconColor : ""
+            function moduleConfig(id) { return DockLayout.moduleConfig(dockConfig, id); }
 
             implicitHeight: orientation === "horizontal" ? barHeight : (dockWindow.screen ? dockWindow.screen.height : 1080)
             implicitWidth: orientation === "horizontal" ? (dockWindow.screen ? dockWindow.screen.width : 1920) : barWidth
@@ -1174,9 +1184,9 @@ Variants {
                 interval: 1000; running: true; repeat: true; triggeredOnStart: true
                 onTriggered: {
                     let d = new Date();
-                    let fmt = dockWindow.serpMode && dockWindow.serpTimeFormat !== "" ? dockWindow.serpTimeFormat : "HH:mm:ss";
+                    let fmt = dockWindow.serpMode && dockWindow.serpTimeFormat !== "" ? dockWindow.serpTimeFormat : dockWindow.timeFormat;
                     dockWindow.timeStr = Qt.formatDateTime(d, fmt);
-                    dockWindow.fullDateStr = Qt.formatDateTime(d, "dddd, MMMM dd");
+                    dockWindow.fullDateStr = Qt.formatDateTime(d, dockWindow.dateFormat);
                     if (dockWindow.typeInIndex >= dockWindow.fullDateStr.length) {
                         dockWindow.typeInIndex = dockWindow.fullDateStr.length;
                     }

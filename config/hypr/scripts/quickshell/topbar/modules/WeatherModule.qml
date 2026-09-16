@@ -16,6 +16,7 @@ import "../../dock"
 
 ModulePill {
     id: mod
+    moduleId: "weather"
 
     accentRole: "yellow"
     accentActive: true
@@ -39,7 +40,7 @@ ModulePill {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.weatherIcon
+            text: mod.glyph(bar.weatherIcon)
             font.family: bar.fontFamily
             font.pixelSize: bar.s(18)
             color: mod.contentColor
@@ -62,7 +63,7 @@ ModulePill {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: bar.weatherIcon
+            text: mod.glyph(bar.weatherIcon)
             font.family: bar.fontFamily
             font.pixelSize: bar.s(20)
             color: mod.contentColor

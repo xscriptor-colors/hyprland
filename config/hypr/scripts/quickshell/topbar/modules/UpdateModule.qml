@@ -5,6 +5,7 @@ import "../../dock"
 // Update indicator — green accent island + pulse ring while an update is pending.
 ModulePill {
     id: mod
+    moduleId: "update"
 
     padH: bar.s(6)
     accentRole: "green"
@@ -19,7 +20,7 @@ ModulePill {
     }
 
     Text {
-        text: "󰚰"
+        text: mod.glyph("󰚰")
         font.family: bar.fontFamily
         font.pixelSize: bar.s(22)
         color: mod.contentColor

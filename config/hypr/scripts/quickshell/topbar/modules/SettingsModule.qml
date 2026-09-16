@@ -5,6 +5,7 @@ import "../../dock"
 // CUSTOMIZATION HOOK: icon/action/accent overridable from the mega menu.
 ModulePill {
     id: mod
+    moduleId: "settings"
 
     padH: bar.s(6)
     idleRole: "text"
@@ -13,7 +14,7 @@ ModulePill {
     onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle bar-editor"])
 
     Text {
-        text: "󰕙"
+        text: mod.glyph("󰒓")
         font.family: bar.fontFamily
         font.pixelSize: bar.s(22)
         color: mod.contentColor

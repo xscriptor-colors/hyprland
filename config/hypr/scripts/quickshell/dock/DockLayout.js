@@ -107,9 +107,167 @@ function cloneModules(list) {
     if (!isList(list)) return out;
     for (let i = 0; i < list.length; i++) {
         let e = list[i];
-        if (typeof e === "string") out.push({ id: e, enabled: true });
-        else if (e && e.id) out.push({ id: e.id, enabled: e.enabled !== false });
+        if (typeof e === "string") {
+            out.push({ id: e, enabled: true });
+            continue;
+        }
+        if (!e || !e.id) continue;
+        out.push({ id: e.id, enabled: e.enabled !== false });
     }
+    return out;
+}
+
+// --- island fill API ---------------------------------------------------------
+// Per-island and per-block fill control (personalization API). Values are
+// canonical strings:
+//   "default" -> inherit (zone value, then the bar-wide pill settings)
+//   "on"      -> force the pill fill (ignores unified/barBg/pillBg defaults)
+//   "off"     -> force a transparent island
+// Booleans are accepted for convenience (true -> "on", false -> "off").
+function normalizeFillMode(v) {
+    if (v === true || v === "on" || v === "filled") return "on";
+    if (v === false || v === "off" || v === "none") return "off";
+    return "default";
+}
+
+// Set the fill for a whole block (zone); islands without their own value
+// inherit it.
+function setZoneFill(dock, zoneId, mode) {
+    let out = cloneDock(dock);
+    let zi = zoneIndex(out, zoneId);
+    if (zi === -1) return out;
+    out.zones[zi].fill = normalizeFillMode(mode);
+    return out;
+}
+
+// Clock format for the zones engine (Qt.formatDateTime pattern). The classic
+// engine keeps its own classicbar.timeFormat.
+function setTimeFormat(dock, fmt) {
+    let out = cloneDock(dock);
+    out.timeFormat = (typeof fmt === "string" && fmt.trim() !== "") ? fmt.trim() : "HH:mm:ss";
+    return out;
+}
+
+// Date format for the zones engine (Qt.formatDateTime pattern).
+function setDateFormat(dock, fmt) {
+    let out = cloneDock(dock);
+    out.dateFormat = (typeof fmt === "string" && fmt.trim() !== "") ? fmt.trim() : "dddd, MMMM dd";
+    return out;
+}
+
+// Workspaces module: empty-workspace marker style + custom character.
+function setWorkspacesMarker(dock, mode) {
+    let out = cloneDock(dock);
+    out.workspacesMarker = ["number", "dot", "letter", "custom"].indexOf(mode) !== -1 ? mode : "number";
+    return out;
+}
+function setWorkspacesMarkerText(dock, ch) {
+    let out = cloneDock(dock);
+    out.workspacesMarkerText = (typeof ch === "string") ? ch.slice(0, 4) : "";
+    return out;
+}
+
+// --- module personalization API ----------------------------------------------
+// Per-module customization, keyed by module id. User values live in the bar
+// config under "modules"; every field is optional:
+//   "icon":   glyph override for components that call mod.glyph(...)
+//   "color":  content color (a colors.* role name or a #hex string)
+//   "fill":   per-island fill ("default" | "on" | "off")
+//   "accent": accent role override (turns the island into an accent island)
+// The bar-wide "iconColor" sets the default content color for every module.
+// Islands that ship with a background by default (palette role fill); the user
+// can still force "None" per module.
+var DEFAULT_FILLED_MODULES = ["battery", "settings", "search", "time", "help"];
+
+// Accent islands by default: their pill is filled with the palette role, so
+// they recolor with the palette (like wifi/bluetooth). Overridable per module.
+var DEFAULT_MODULE_ACCENTS = {
+    "help":       "peach",
+    "search":     "sapphire",
+    "settings":   "mauve",
+    "update":     "green",
+    "time":       "teal",
+    "date":       "blue",
+    "media":      "pink",
+    "tray":       "sapphire",
+    "keyboard":   "color5",
+    "wifi":       "color6",
+    "bluetooth":  "color4",
+    "sysmon":     "color1",
+    "volume":     "color3",
+    "battery":    "green",
+    "recording":  "red",
+    "weather":    "yellow",
+    "focus":      "peach"
+    // workspaces keeps its own palette look (bgRole crust + workspaceActive).
+};
+
+function defaultModuleConfig(id) {
+    return {
+        icon: "", color: "",
+        accent: DEFAULT_MODULE_ACCENTS[id] !== undefined ? DEFAULT_MODULE_ACCENTS[id] : "",
+        fill: (DEFAULT_FILLED_MODULES.indexOf(id) !== -1) ? "on" : "default",
+        colors: {},       // per-slot color overrides (role name or #hex)
+        size: 0,          // font px override (0 = module default)
+        effect: "",       // per-module view effect ("typewriter" for the clock)
+        cursor: true      // blinking cursor for the typewriter effect
+    };
+}
+
+function normalizeModuleConfig(v, id) {
+    let out = defaultModuleConfig(id);
+    if (!v || typeof v !== "object") return out;
+    if (typeof v.icon === "string") out.icon = v.icon;
+    if (typeof v.color === "string") out.color = v.color;
+    if (v.fill !== undefined) {
+        // An explicit "default" returns to the module's built-in default
+        // (filled for DEFAULT_FILLED_MODULES, bar-wide behavior otherwise).
+        let mode = normalizeFillMode(v.fill);
+        out.fill = (mode === "default") ? out.fill : mode;
+    }
+    if (typeof v.accent === "string") out.accent = v.accent;  // "" clears the default accent
+    if (v.colors && typeof v.colors === "object" && !Array.isArray(v.colors)) {
+        for (let slot in v.colors) {
+            if (typeof v.colors[slot] === "string") out.colors[slot] = v.colors[slot];
+        }
+    }
+    if (typeof v.size === "number" && v.size >= 0) out.size = Math.round(v.size);
+    if (typeof v.effect === "string") out.effect = v.effect;
+    if (v.cursor !== undefined) out.cursor = v.cursor === true;
+    return out;
+}
+
+// Effective per-module config (defaults + user values).
+function moduleConfig(dock, id) {
+    if (!dock || !dock.modules || typeof dock.modules !== "object") return defaultModuleConfig(id);
+    return normalizeModuleConfig(dock.modules[id], id);
+}
+
+function setModuleValue(dock, id, key, value) {
+    let out = cloneDock(dock);
+    if (!out.modules || typeof out.modules !== "object") out.modules = {};
+    let cfg = normalizeModuleConfig(out.modules[id], id);
+    cfg[key] = (key === "fill") ? normalizeFillMode(value) : value;
+    out.modules[id] = cfg;
+    return out;
+}
+function setModuleIcon(dock, id, glyph)  { return setModuleValue(dock, id, "icon", glyph); }
+function setModuleColor(dock, id, color) { return setModuleValue(dock, id, "color", color); }
+function setModuleFill(dock, id, mode)   { return setModuleValue(dock, id, "fill", mode); }
+function setModuleAccent(dock, id, role) { return setModuleValue(dock, id, "accent", role); }
+function setGlobalIconColor(dock, color) { let out = cloneDock(dock); out.iconColor = color; return out; }
+function setModuleSize(dock, id, px)   { return setModuleValue(dock, id, "size", px); }
+function setModuleEffect(dock, id, v) { return setModuleValue(dock, id, "effect", v); }
+function setModuleCursor(dock, id, v) { return setModuleValue(dock, id, "cursor", v); }
+// Per-slot color override (workspaces: active/activeText/occupied/empty/hover/
+// marker/markerEmpty). Empty value removes the override.
+function setModuleColorSlot(dock, id, slot, value) {
+    let out = cloneDock(dock);
+    if (!out.modules || typeof out.modules !== "object") out.modules = {};
+    let cfg = normalizeModuleConfig(out.modules[id], id);
+    if (typeof value === "string" && value !== "") cfg.colors[slot] = value;
+    else delete cfg.colors[slot];
+    out.modules[id] = cfg;
     return out;
 }
 
@@ -173,6 +331,9 @@ function defaultDock() {
         borderActive: "",
         borderInactive: "",
         font: "Hack Nerd Font",
+        timeFormat: "HH:mm:ss",
+        dateFormat: "dddd, MMMM dd",
+        modules: {},
         // How EMPTY workspaces render in the Workspaces module:
         // "number" (default), "dot", "letter" or "custom" (the character set in
         // workspacesMarkerText, e.g. a Japanese glyph). Occupied workspaces
@@ -215,6 +376,11 @@ function normalizeDock(raw) {
         borderActive: (typeof raw.borderActive === "string") ? raw.borderActive : def.borderActive,
         borderInactive: (typeof raw.borderInactive === "string") ? raw.borderInactive : def.borderInactive,
         font: (typeof raw.font === "string" && raw.font.trim() !== "") ? raw.font : def.font,
+        timeFormat: (typeof raw.timeFormat === "string" && raw.timeFormat.trim() !== "") ? raw.timeFormat : def.timeFormat,
+        dateFormat: (typeof raw.dateFormat === "string" && raw.dateFormat.trim() !== "") ? raw.dateFormat : def.dateFormat,
+        // Per-module personalization map (see moduleConfig): kept verbatim;
+        // entries are normalized on read.
+        modules: (raw.modules && typeof raw.modules === "object" && !Array.isArray(raw.modules)) ? raw.modules : def.modules,
         zones: []
     };
 

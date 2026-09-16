@@ -20,6 +20,8 @@ Rectangle {
     property int fieldWidth: 240
     property int maxLength: 32767
     property bool previewFont: false
+    property string placeholder: ""
+    property color swatch: "transparent"   // small colour dot before the label (a = 0 hides it)
     signal edited(string text)
 
     height: bar ? bar.s(44) : 44
@@ -33,6 +35,16 @@ Rectangle {
         anchors.leftMargin: bar ? bar.s(15) : 15
         anchors.rightMargin: bar ? bar.s(10) : 10
         spacing: bar ? bar.s(10) : 10
+        Rectangle {
+            Layout.alignment: Qt.AlignVCenter
+            visible: fld.swatch.a > 0
+            width: bar ? bar.s(10) : 10
+            height: bar ? bar.s(10) : 10
+            radius: bar ? bar.s(3) : 3
+            color: fld.swatch
+            border.width: 1
+            border.color: bar ? bar.colors.surface1 : "transparent"
+        }
         Text {
             text: fld.label
             font.family: "Hack Nerd Font"
@@ -47,6 +59,8 @@ Rectangle {
             Layout.preferredHeight: bar ? bar.s(30) : 30
             Layout.alignment: Qt.AlignVCenter
             text: fld.value
+            placeholderText: fld.placeholder
+            placeholderTextColor: bar ? Qt.alpha(bar.colors.subtext0, 0.55) : "transparent"
             font.family: fld.previewFont && field.text !== "" ? field.text : "Hack Nerd Font"
             font.pixelSize: bar ? bar.s(13) : 13
             color: bar ? bar.colors.text : "transparent"

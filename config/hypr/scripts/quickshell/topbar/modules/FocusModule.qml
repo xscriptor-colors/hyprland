@@ -14,6 +14,7 @@ import "../../dock"
 
 ModulePill {
     id: mod
+    moduleId: "focus"
 
     showState: bar.hasFocus
 
@@ -26,7 +27,7 @@ ModulePill {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.focusIcon
+            text: mod.glyph(bar.focusIcon)
             font.family: bar.fontFamily
             font.pixelSize: bar.s(18)
             color: mod.contentColor
@@ -46,7 +47,7 @@ ModulePill {
     // --- compact: icon only ----------------------------------------------------
     Text {
         visible: mod.compact
-        text: bar.focusIcon
+        text: mod.glyph(bar.focusIcon)
         font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor

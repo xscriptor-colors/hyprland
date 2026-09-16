@@ -5,6 +5,7 @@ import "../../dock"
 // Recording indicator — red accent island + blinking icon while recording.
 ModulePill {
     id: mod
+    moduleId: "recording"
 
     padH: bar.s(6)
     accentRole: "red"
@@ -18,7 +19,7 @@ ModulePill {
     }
 
     Text {
-        text: ""
+        text: mod.glyph("")
         font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor
