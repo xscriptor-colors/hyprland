@@ -6,6 +6,7 @@ import "../../dock"
 // the mouse wheel adjusts the volume directly. Compact (vertical): icon only.
 ModulePill {
     id: mod
+    moduleId: "volume"
 
     accentRole: "color3"
     accentActive: bar.isSoundActive
@@ -20,7 +21,7 @@ ModulePill {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.volIcon
+            text: mod.glyph(bar.volIcon)
             font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: mod.contentColor
@@ -37,7 +38,7 @@ ModulePill {
 
     Text {
         visible: mod.compact
-        text: bar.volIcon
+        text: mod.glyph(bar.volIcon)
         font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor

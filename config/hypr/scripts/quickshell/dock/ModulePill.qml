@@ -35,6 +35,26 @@ Item {
     readonly property bool horizontal: bar.orientation === undefined || bar.orientation === "horizontal"
     readonly property bool compact: !horizontal
 
+    // --- module personalization ------------------------------------------------
+    // Per-module customization from the bar config: icon glyph, content color,
+    // fill and accent (see the module personalization API in DockLayout.js).
+    property string moduleId: ""
+    readonly property var moduleCfg: (bar && bar.moduleConfig)
+        ? bar.moduleConfig(moduleId)
+        : ({ icon: "", color: "", fill: "default", accent: "" })
+    readonly property string effectiveAccentRole: root.moduleCfg.accent !== "" ? root.moduleCfg.accent : root.accentRole
+
+    // Glyph override for modules with a fixed icon: text: mod.glyph("<default>").
+    function glyph(def) { return root.moduleCfg.icon !== "" ? root.moduleCfg.icon : def; }
+
+    // Per-module color slot override (a colors.* role name or a #hex string);
+    // falls back to `fallbackRole` when the slot is unset. Returns a color.
+    function slotColor(slot, fallbackRole) {
+        let v = (root.moduleCfg.colors !== undefined) ? root.moduleCfg.colors[slot] : "";
+        if (v === undefined || v === "") v = fallbackRole;
+        return colors[v] !== undefined ? colors[v] : v;
+    }
+
     // --- visuals -------------------------------------------------------------
     // accentRole: a colors.* role. When accentActive, the pill becomes a solid
     // accent island and content is drawn in colors.base (wifi/bt/vol/batt style).
@@ -56,9 +76,12 @@ Item {
     // fill is disabled — colored icon on the strip, no double fill.
     readonly property bool accentTint: bar && bar.accentTintMode === true
     readonly property color contentColor: {
-        if (accentVisible) return colors.base;
-        if (root.accentTint && accentRole !== "") {
-            return root.hasAccentColor ? root.accentColor : (colors[accentRole] || colors.text);
+        let custom = root.moduleCfg.color !== "" ? root.moduleCfg.color
+            : (bar.iconColor !== undefined && bar.iconColor !== null ? bar.iconColor : "");
+        if (custom !== "") return colors[custom] !== undefined ? colors[custom] : custom;
+        if (accentVisible || (root.fillForced && root.accentActive && root.effectiveAccentRole !== "")) return colors.base;
+        if (root.accentTint && root.effectiveAccentRole !== "") {
+            return root.hasAccentColor ? root.accentColor : (colors[root.effectiveAccentRole] || colors.text);
         }
         if (hovered) return colors[hoverRole !== "" ? hoverRole : idleRole] || colors.text;
         return colors[idleRole] || colors.text;
@@ -71,10 +94,19 @@ Item {
     property bool fullHeight: false        // use bar.barHeight instead of pillHeight
     property bool showState: true          // collapse the pill when false
     property bool noFill: false            // force transparent background (media/tray)
+    // Per-island fill override from the layout ("default" | "on" | "off").
+    // "on" forces the pill fill (even under unified/barBg/pillBg defaults);
+    // "off" forces a transparent island. See the island fill API in
+    // DockLayout.js.
+    property string fillMode: "default"
+    readonly property string resolvedFillMode: (root.moduleCfg.fill !== undefined && root.moduleCfg.fill !== "default")
+        ? root.moduleCfg.fill : root.fillMode
+    readonly property bool fillForced: root.resolvedFillMode === "on"
+    readonly property bool fillSuppressed: root.resolvedFillMode === "off"
     property int padH: bar.s(12)
     property int padV: bar.s(8)
 
-    readonly property bool accentVisible: accentRole !== "" && accentActive && bar.topbarPillBg
+    readonly property bool accentVisible: root.effectiveAccentRole !== "" && accentActive && bar.topbarPillBg
     readonly property bool hovered: pillMouse.containsMouse
     // While the dock is reordering islands live (bar.dragBusy), suppress every
     // pill transition so model rewrites never cascade into flicker/entrance
@@ -108,8 +140,16 @@ Item {
 
         // background
         readonly property color idleBg: {
-            if (root.noFill || root.unified || !bar.topbarPillBg) return "transparent";
-            if (accentVisible) return root.hasAccentColor ? root.accentColor : (colors[root.accentRole] || colors.surface1);
+            if (root.fillSuppressed || root.noFill) return "transparent";
+            if (root.fillForced) {
+                if (root.accentActive && root.effectiveAccentRole !== "") {
+                    return root.hasAccentColor ? root.accentColor : (colors[root.effectiveAccentRole] || colors.surface1);
+                }
+                let c = colors[root.bgRole] || colors.surface0;
+                return Qt.rgba(c.r, c.g, c.b, bar.topbarPillSolid ? 1.0 : (root.bgRole === "surface0" ? 0.4 : 0.6));
+            }
+            if (root.unified || !bar.topbarPillBg) return "transparent";
+            if (accentVisible) return root.hasAccentColor ? root.accentColor : (colors[root.effectiveAccentRole] || colors.surface1);
             // barBg: standard islands become transparent and float on the bar strip.
             if (bar.barBg) return "transparent";
             let role = root.bgRole;
@@ -117,8 +157,16 @@ Item {
             return Qt.rgba(c.r, c.g, c.b, bar.topbarPillSolid ? 1.0 : (role === "surface0" ? 0.4 : 0.6));
         }
         readonly property color hoverBg: {
-            if (root.noFill || root.unified || !bar.topbarPillBg) return "transparent";
-            if (accentVisible) return root.hasAccentColor ? root.accentColor : (colors[root.accentRole] || colors.surface1);
+            if (root.fillSuppressed || root.noFill) return "transparent";
+            if (root.fillForced) {
+                if (root.accentActive && root.effectiveAccentRole !== "") {
+                    return root.hasAccentColor ? root.accentColor : (colors[root.effectiveAccentRole] || colors.surface1);
+                }
+                let c = colors[root.bgHoverRole] || colors.surface1;
+                return Qt.rgba(c.r, c.g, c.b, bar.topbarPillSolid ? 1.0 : (root.bgHoverRole === "surface1" ? 0.6 : 0.9));
+            }
+            if (root.unified || !bar.topbarPillBg) return "transparent";
+            if (accentVisible) return root.hasAccentColor ? root.accentColor : (colors[root.effectiveAccentRole] || colors.surface1);
             if (bar.barBg) {
                 // subtle hover highlight floating on the bar strip
                 let c = colors.surface1;
@@ -131,7 +179,7 @@ Item {
         color: isHovered ? hoverBg : idleBg
         Behavior on color { ColorAnimation { duration: 200 } }
 
-        radius: root.unified ? 0 : (root.horizontal
+        radius: (root.unified && !root.fillForced) ? 0 : (root.horizontal
             ? bar.pillRadius(root.fullHeight ? bar.barHeight : bar.pillHeight)
             : bar.pillRadius(bar.pillWidth))
         border.width: root.unified ? 0 : root.effectiveBorderWidth
@@ -219,7 +267,7 @@ Item {
             id: pulseRing
             anchors.fill: parent
             radius: parent.radius
-            color: root.hasAccentColor ? root.accentColor : (colors[root.accentRole] || colors.surface1)
+            color: root.hasAccentColor ? root.accentColor : (colors[root.effectiveAccentRole] || colors.surface1)
             visible: root.pulse && root.accentVisible && !pillMouse.containsMouse
             z: -1
 

@@ -5,6 +5,7 @@ import "../../dock"
 // Keyboard layout — purple accent island. Compact (vertical dock): icon only.
 ModulePill {
     id: mod
+    moduleId: "keyboard"
 
     accentRole: "color5"
     accentActive: true
@@ -17,7 +18,7 @@ ModulePill {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "󰌌"
+            text: mod.glyph("󰌌")
             font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: mod.contentColor
@@ -35,7 +36,7 @@ ModulePill {
     // Compact: icon only.
     Text {
         visible: mod.compact
-        text: "󰌌"
+        text: mod.glyph("󰌌")
         font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor

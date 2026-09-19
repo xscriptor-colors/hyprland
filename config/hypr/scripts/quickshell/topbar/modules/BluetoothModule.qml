@@ -6,6 +6,7 @@ import "../../dock"
 // Compact (vertical): icon only.
 ModulePill {
     id: mod
+    moduleId: "bluetooth"
 
     accentRole: "color4"
     accentActive: bar.isBtOn
@@ -19,7 +20,7 @@ ModulePill {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.btIcon
+            text: mod.glyph(bar.btIcon)
             font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: mod.contentColor
@@ -37,7 +38,7 @@ ModulePill {
 
     Text {
         visible: mod.compact
-        text: bar.btIcon
+        text: mod.glyph(bar.btIcon)
         font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor

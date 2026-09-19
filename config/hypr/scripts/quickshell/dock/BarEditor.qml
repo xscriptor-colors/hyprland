@@ -44,6 +44,10 @@ Item {
     property var dock: DockLayout.defaultDock()
     property var palettes: ([])
     property bool _dirty: false
+    // true solo tras cargar el estado real desde settings.json (dataReady):
+    // impide persistir el dock por defecto si el panel se abre durante el
+    // arranque/reload del shell (ver reload()).
+    property bool _dockReady: false
     property bool borderTargetActive: true
 
     // ════ FASE 4: INTRO/CIERRE (paridad con GuidePopup) ════
@@ -119,21 +123,33 @@ Item {
     // Serp edits share the same debounce; both keys are independent top-level
     // settings keys, so the queues never clobber each other.
     function markDirtySerp() { _serpDirty = true; saveTimer.restart(); }
+    // Un único updateJsonBulk (un jq + un mv) en vez de dos setSetting
+    // separados: dos procesos jq concurrentes sobre el mismo archivo se pisan
+    // (read-modify-write) y podían perder la clave recién escrita.
+    // Y nunca se guarda antes de haber cargado (dataReady): un panel abierto
+    // durante el arranque no puede persistir el dock por defecto.
     function flushSave() {
-        if (_dirty) {
-            _dirty = false;
-            Config.setSetting("dock", root.dock);
-        }
-        if (_serpDirty) {
-            _serpDirty = false;
-            Config.setSetting("serpbar", root.serp);
-        }
+        let patch = {};
+        if (_dirty && root._dockReady) { _dirty = false; patch.dock = root.dock; }
+        if (_serpDirty && root._dockReady) { _serpDirty = false; patch.serpbar = root.serp; }
+        if (Object.keys(patch).length > 0) Config.updateJsonBulk(patch);
     }
     function applyDock(dock) { root.dock = dock; root.markDirty(); }
+    // El panel puede crearse antes de que Config acabe de leer settings.json
+    // (p. ej. justo tras un reload del shell). reload() se pospone hasta
+    // dataReady: si no, getDock({}) devolvía el dock por defecto y el primer
+    // guardado (cambiar de paleta) lo persistía — el dock "volvía a su
+    // posición inicial".
     function reload() {
+        if (!Config.dataReady) return;
         root.dock = DockLayout.getDock(Config.rawSettings);
         root.engine = Config.rawSettings.barEngine === "serp" ? "serp" : "dock";
         root.serp = DockLayout.getSerpbar(Config.rawSettings);
+        root._dockReady = true;
+    }
+    Connections {
+        target: Config
+        function onDataReadyChanged() { if (Config.dataReady) root.reload(); }
     }
 
     // ════ ENGINE SWITCHING + SERP EDITS (Phase D4-E2) ════
@@ -536,9 +552,9 @@ Item {
     // El panel se ensancha SOLO en la página Guide (el popup embebido está
     // diseñado a 1160px); Main sigue estos targets en vivo y anima el morph
     // al cambiar de página (y vuelve a 1120 en el resto).
-    property real targetMasterWidth: root.currentPage === "d_guide"
-        ? Math.min(root.s(1440), Screen.width - root.s(40))
-        : root.s(1120)
+    // Panel width: doubled (2 x 1120) with a screen margin cap so it always
+    // fits; Main follows this target live and animates the morph.
+    property real targetMasterWidth: Math.min(root.s(1800), Screen.width - root.s(40))
     property real targetMasterHeight: root.s(760)
     property var navGroups: [
         { id: "desktop", label: "Desktop", items: [
@@ -555,6 +571,7 @@ Item {
             { id: "d_style",      icon: "󰏘", label: "Style",      engine: "dock" },
             { id: "d_palette",    icon: "✦", label: "Palette" },
             { id: "d_zones",      icon: "󰮯", label: "Zones",      engine: "dock" },
+            { id: "d_modules",    icon: "󰍜", label: "Modules" },
             { id: "d_workspaces", icon: "󰠰", label: "Workspaces" },
             { id: "d_serp",       icon: "󰹑", label: "Serp Bar",   engine: "serp" }
         ] },
@@ -648,6 +665,7 @@ Item {
             "d_style":      "editor/DockStylePage.qml",
             "d_palette":    "editor/PalettePage.qml",
             "d_zones":      "editor/ZonesPage.qml",
+            "d_modules":    "editor/ModulesPage.qml",
             "d_workspaces": "editor/WorkspacesPage.qml",
             "d_serp":       "editor/SerpBarPage.qml",
             "d_launcher":   "editor/LauncherPage.qml",
@@ -673,6 +691,7 @@ Item {
             "d_style":      dStyleLoader,
             "d_palette":    dPaletteLoader,
             "d_zones":      dZonesLoader,
+            "d_modules":    dModulesLoader,
             "d_workspaces": dWorkspacesLoader,
             "d_serp":       dSerpLoader,
             "d_launcher":   launcherLoader,
@@ -888,6 +907,192 @@ Item {
         backupProbe.command = ["bash", "-c", "cat '" + root.backupFilePath(root.activeSlug()) + "' 2>/dev/null | head -c 1"];
         backupProbe.running = false;
         backupProbe.running = true;
+    }
+
+    // ════ CREADOR DE PALETAS (8 colores base) ════
+    // Genera dock/palettes/<slug>.json con la estructura de las paletas
+    // existentes (base16 0-15, background/foreground, roles) + entrada en
+    // index.json, y aplica la nueva paleta (applyDock), lo que dispara el
+    // resto del sync. El draft vive en el root para sobrevivir a los cambios
+    // de página (el Loader de la página se destruye al navegar).
+    property bool paletteCreateOpen: false
+    property string paletteDraftName: ""
+    property var paletteDraftColors: ["#000000", "#fc618d", "#7bd88f", "#fce566", "#fd9353", "#948ae3", "#5ad4e6", "#f7f1ff"]
+    property string paletteCreateStatus: ""
+    readonly property var paletteBaseLabels: ["Background", "Red", "Green", "Yellow", "Blue", "Purple", "Cyan", "Foreground"]
+
+    // Slug desde el nombre: minúsculas, sin acentos, [a-z0-9-] (colapsado).
+    function slugifyPaletteName(name) {
+        let s = String(name || "").toLowerCase();
+        s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return s.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    }
+    function paletteSlugTaken(slug) {
+        for (let i = 0; i < root.palettes.length; i++) {
+            if (root.palettes[i] && root.palettes[i].slug === slug) return true;
+        }
+        return false;
+    }
+    // Siembra el draft desde los 8 primeros colores de la paleta activa.
+    function seedPaletteDraft() {
+        let seed = [];
+        for (let i = 0; i < 8; i++) seed.push(themeColors.hexOf(themeColors["color" + i]));
+        root.paletteDraftColors = seed;
+        root.paletteDraftName = "";
+        root.paletteCreateStatus = "";
+    }
+    function setPaletteDraftColor(i, hex) {
+        hex = String(hex || "").toLowerCase();
+        if (!/^#[0-9a-f]{6}$/.test(hex)) return false;
+        let arr = root.paletteDraftColors.slice();
+        arr[i] = hex;
+        root.paletteDraftColors = arr;
+        return true;
+    }
+    // Commit de un campo hex del draft (Enter / blur): válido → draft,
+    // inválido → restaura el valor vigente.
+    function commitPaletteDraftColor(field, i) {
+        let t = String(field.text || "").trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(t) && root.setPaletteDraftColor(i, t)) {
+            field.text = t.toLowerCase();
+        } else {
+            field.text = root.paletteDraftColors[i];
+        }
+    }
+    // Objeto paleta completo: color0..7 = base, color8 = muted derivado y
+    // color9..15 = duplicados de color1..7 (convención de las paletas actuales).
+    function buildPaletteObject(name, colors) {
+        let base16 = {};
+        for (let i = 0; i < 8; i++) base16["color" + i] = colors[i];
+        base16.color8 = themeColors.mix(colors[7], colors[0], 0.45);
+        for (let i = 1; i < 8; i++) base16["color" + (i + 8)] = colors[i];
+        return {
+            name: name,
+            slug: root.slugifyPaletteName(name),
+            author: "xscriptor",
+            base16: base16,
+            background: colors[0],
+            foreground: colors[7],
+            roles: { workspaceActive: themeColors.mix(colors[5], colors[7], 0.35) }
+        };
+    }
+    function createPaletteFromDraft() {
+        let name = String(root.paletteDraftName || "").trim();
+        let slug = root.slugifyPaletteName(name);
+        if (slug === "") {
+            root.paletteCreateStatus = "Enter a palette name";
+            return;
+        }
+        if (root.paletteSlugTaken(slug)) {
+            root.paletteCreateStatus = "A palette with slug '" + slug + "' already exists";
+            return;
+        }
+        for (let i = 0; i < 8; i++) {
+            if (!/^#[0-9a-f]{6}$/.test(String(root.paletteDraftColors[i]))) {
+                root.paletteCreateStatus = "Invalid color in '" + root.paletteBaseLabels[i] + "'";
+                return;
+            }
+        }
+        let pal = root.buildPaletteObject(name, root.paletteDraftColors.slice());
+        let json = JSON.stringify(pal, null, 4);
+        let entry = JSON.stringify({ slug: pal.slug, name: pal.name, colors: root.paletteDraftColors.slice() });
+        let dir = themeColors.palettesDir;
+        let file = root.paletteFilePath(pal.slug);
+        let index = dir + "/index.json";
+        let esc = (v) => String(v).replace(/'/g, "'\\''");
+        root.paletteCreateStatus = "Creating…";
+        paletteCreator.pendingSlug = pal.slug;
+        paletteCreator.command = ["bash", "-c",
+            "set -e; test ! -f '" + file + "'; "
+            + "tmp=$(mktemp '" + dir + "/palette.tmp.XXXXXX'); printf '%s\\n' '" + esc(json) + "' > \"$tmp\"; mv \"$tmp\" '" + file + "'; "
+            + "tmp2=$(mktemp '" + dir + "/index.tmp.XXXXXX'); jq --argjson e '" + esc(entry) + "' '. += [$e]' '" + index + "' > \"$tmp2\"; mv \"$tmp2\" '" + index + "'; "
+            + "echo OK"];
+        paletteCreator.running = false;
+        paletteCreator.running = true;
+    }
+
+    Process {
+        id: paletteCreator
+        property string pendingSlug: ""
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (this.text.trim() === "OK") {
+                    root.paletteCreateOpen = false;
+                    root.paletteCreateStatus = "";
+                    paletteReader.running = false;
+                    paletteReader.running = true;
+                    root.applyDock(Object.assign({}, root.dock, { palette: paletteCreator.pendingSlug }));
+                } else {
+                    root.paletteCreateStatus = "Could not create the palette (name/slug conflict?)";
+                }
+            }
+        }
+    }
+
+    // ════ ELIMINAR PALETA (activa, con confirmación) ════
+    // Borra el archivo de la paleta ACTIVA + su entrada de index.json + el
+    // snapshot de sesión. "x" está protegida: es el fallback de Colors.qml.
+    // Si la eliminada era la activa, se cambia a "x" (dispara el sync).
+    property bool paletteDeleteConfirm: false
+    property string paletteDeleteStatus: ""
+
+    function paletteDisplayName(slug) {
+        for (let i = 0; i < root.palettes.length; i++) {
+            if (root.palettes[i] && root.palettes[i].slug === slug) return root.palettes[i].name;
+        }
+        return slug;
+    }
+    function requestDeletePalette() {
+        root.paletteDeleteStatus = "";
+        root.paletteDeleteConfirm = true;
+    }
+    function cancelDeletePalette() {
+        root.paletteDeleteConfirm = false;
+        root.paletteDeleteStatus = "";
+    }
+    function deleteActivePalette() {
+        let slug = root.activeSlug();
+        if (slug === "x") {
+            root.paletteDeleteStatus = "'x' is the fallback palette and cannot be deleted";
+            return;
+        }
+        if (!root.paletteSlugTaken(slug)) {
+            root.paletteDeleteStatus = "Palette not found in index.json";
+            return;
+        }
+        root.paletteDeleteStatus = "Deleting…";
+        paletteDeleter.pendingSlug = slug;
+        let dir = themeColors.palettesDir;
+        let file = root.paletteFilePath(slug);
+        let index = dir + "/index.json";
+        let backup = root.backupFilePath(slug);
+        paletteDeleter.command = ["bash", "-c",
+            "set -e; tmp=$(mktemp '" + dir + "/index.tmp.XXXXXX'); "
+            + "jq --arg s '" + slug + "' 'map(select(.slug != $s))' '" + index + "' > \"$tmp\"; mv \"$tmp\" '" + index + "'; "
+            + "rm -f '" + file + "' '" + backup + "'; echo OK"];
+        paletteDeleter.running = false;
+        paletteDeleter.running = true;
+    }
+
+    Process {
+        id: paletteDeleter
+        property string pendingSlug: ""
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (this.text.trim() === "OK") {
+                    let wasActive = root.activeSlug() === paletteDeleter.pendingSlug;
+                    root.paletteDeleteConfirm = false;
+                    root.paletteDeleteStatus = "";
+                    paletteReader.running = false;
+                    paletteReader.running = true;
+                    if (wasActive) root.applyDock(Object.assign({}, root.dock, { palette: "x" }));
+                } else {
+                    root.paletteDeleteStatus = "Could not delete the palette";
+                }
+            }
+        }
     }
 
     // The instance is torn down right after closing (StackView clear):
@@ -1506,6 +1711,16 @@ Item {
                         transform: Translate { y: dZonesLoader.slideY }
                         Behavior on opacity { NumberAnimation { duration: 250 } }
                         onLoaded: { if (dZonesLoader.item) root.zonesPage = dZonesLoader.item; }
+                    }
+                    Loader {
+                        id: dModulesLoader
+                        anchors.fill: parent
+                        visible: root.currentPage === "d_modules"
+                        opacity: visible ? 1.0 : 0.0
+                        property real slideY: visible ? 0 : root.s(10)
+                        Behavior on slideY { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+                        transform: Translate { y: dModulesLoader.slideY }
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
                     }
                     Loader {
                         id: dWorkspacesLoader

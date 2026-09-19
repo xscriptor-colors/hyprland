@@ -33,6 +33,35 @@ The Settings panel can recolor the **active** palette in real time — no Matuge
 4. Propagation is instant: `dock/Colors.qml` and the widgets `Theme.qml` singleton watch the palettes directory, re-read the active file and re-apply it, so dock islands, Settings panel chrome and every desktop-widget face recolor live. The border push (`syncWindowBorders`) also re-syncs Hyprland window borders via `hyprctl eval`, regenerates kitty themes + the starship palette (`theme-sync.sh`) and rewrites the SDDM login theme (`sddm-colors.sh`).
 5. **Session snapshot**: the first edit of a palette copies its pristine file to `~/.local/state/quickshell/palette_backup/<slug>.json` (a snapshot from an earlier session is never overwritten). The card's **Reset** button (enabled while a snapshot exists) restores that snapshot atomically and deletes it; editing after a Reset starts a fresh snapshot. Only the active palette file is ever written — the other palettes stay untouched, and the file format is unchanged, so deleting `palette_backup/` and re-deploying `dock/palettes/` reverts everything.
 
+### Creating and deleting palettes
+
+The Palette card also manages custom palettes:
+
+- **New palette** — form with the eight base colors (Background, Red, Green, Yellow, Blue, Purple, Cyan, Foreground) seeded from the active palette, a live preview card and a name field (the slug is derived live). Creating writes `dock/palettes/<slug>.json` (full base16 + background/foreground + derived `roles.workspaceActive`) plus its `index.json` entry, atomically, and switches to it.
+- **Delete** — removes the active palette's file, its `index.json` entry and its session snapshot, after an inline confirmation. The built-in `x` palette is protected (it is `Colors.qml`'s fallback); deleting the active palette switches to `x` first.
+
+## Theme propagation (theme-sync)
+
+Palette changes propagate to the rest of the system through
+`scripts/theme-sync.sh`, a thin wrapper over the `scripts/themesync/` Python
+package (one module per application under `themesync/targets/`). The
+`Colors.qml` hook, `install.sh` and `reload.sh` all call the wrapper, so the
+entry point never changes.
+
+Targets: `kitty`, `starship`, `xtop`, `vscode`, `nvim`, `browsers`
+(Brave/Beta prefs + Firefox `user.js`), `opencode`, `rofi`, `cava`, `qt`
+(qt6ct/qt5ct), `gtk` (GTK3/4 CSS + system color-scheme) and `xfetch`.
+
+```bash
+theme-sync.sh --list                  # targets and availability
+theme-sync.sh --dry-run               # show what would change
+theme-sync.sh --targets kitty,xfetch  # only these apps
+```
+
+Adding an integration is one module in `themesync/targets/` (with `NAME`,
+`DESCRIPTION`, `available(env)` and `apply(env)`) plus one line in the
+registry; a failing target no longer aborts the rest.
+
 ## Per-palette role: workspaceActive
 
 Palette files can override semantic roles through `roles` (applied on top of

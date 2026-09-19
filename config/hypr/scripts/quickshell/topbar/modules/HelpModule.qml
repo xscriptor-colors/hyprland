@@ -7,6 +7,7 @@ import "../../dock"
 // here as the defaults.
 ModulePill {
     id: mod
+    moduleId: "help"
 
     padH: bar.s(6)
     idleRole: "text"
@@ -16,7 +17,7 @@ ModulePill {
     onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle guide"])
 
     Text {
-        text: "󰅖"
+        text: mod.glyph("󰅖")
         font.family: bar.fontFamily
         font.pixelSize: bar.s(22)
         color: mod.contentColor

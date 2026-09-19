@@ -6,6 +6,7 @@ import "../../dock"
 // (the clock already carries the day info; reduced = less clutter).
 ModulePill {
     id: mod
+    moduleId: "date"
 
     fullHeight: true
     bgRole: "base"
@@ -19,7 +20,7 @@ ModulePill {
     Text {
         text: bar.dateStr
         font.family: bar.fontFamily
-        font.pixelSize: bar.s(11)
+        font.pixelSize: bar.s(mod.moduleCfg.size > 0 ? mod.moduleCfg.size : 11)
         font.weight: Font.Bold
         color: mod.contentColor
     }

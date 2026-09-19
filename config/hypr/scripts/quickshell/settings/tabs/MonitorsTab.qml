@@ -118,6 +118,83 @@ Item {
         return monCurrentIsPortrait ? mon.resW : mon.resH;
     }
 
+    // ════ Campos avanzados (VRR / bitdepth / cm / mirror / disabled) ════
+    // Lectura reactiva vía monChangeTrigger (el modelo es un ListModel y
+    // setProperty no dispara bindings indirectos) y escritura con
+    // setProperty + trigger, igual que el resto de la tab.
+    function monField(name, fallback) {
+        let _ = root.monChangeTrigger;
+        if (Config.monitorsModel.count === 0) return fallback;
+        let v = Config.monitorsModel.get(Config.monActiveEditIndex)[name];
+        return (v === undefined || v === null) ? fallback : v;
+    }
+    function monFieldInt(name, fallback) {
+        let v = root.monField(name, fallback);
+        if (v === true) return 1;
+        if (v === false) return 0;
+        let n = parseInt(v);
+        return isNaN(n) ? fallback : n;
+    }
+    function setMonField(name, value) {
+        if (Config.monitorsModel.count === 0) return;
+        Config.monitorsModel.setProperty(Config.monActiveEditIndex, name, value);
+        root.monChangeTrigger++;
+    }
+    // Opciones de espejo: "none" + el resto de monitores (por descripción; el
+    // valor guardado es el NAME, que es lo que expone hyprctl y compara el
+    // reconciler).
+    property var monMirrorOptions: {
+        let _ = root.monChangeTrigger + Config.monActiveEditIndex;
+        let out = [{ value: "none", label: "None" }];
+        for (let i = 0; i < Config.monitorsModel.count; i++) {
+            if (i === Config.monActiveEditIndex) continue;
+            let m = Config.monitorsModel.get(i);
+            out.push({
+                value: m.name,
+                label: (m.description && m.description !== "") ? m.description : m.name
+            });
+        }
+        return out;
+    }
+
+    // Pill compacta de la sección Advanced (mismo lenguaje visual que el resto
+    // de la tab: superficie + borde del acento cuando está activa).
+    component MonPill: Rectangle {
+        property string label: ""
+        property bool active: false
+        property color accent: root.mauve
+        signal activated()
+
+        implicitWidth: pillText.implicitWidth + root.s(20)
+        implicitHeight: root.s(26)
+        Layout.preferredWidth: implicitWidth
+        Layout.preferredHeight: implicitHeight
+        radius: root.s(13)
+        color: active ? Qt.alpha(accent, 0.15)
+                      : (pillMa.containsMouse ? root.surface0 : root.mantle)
+        border.color: active ? accent : (pillMa.containsMouse ? root.surface1 : "transparent")
+        border.width: active ? root.s(2) : 1
+        Behavior on color { ColorAnimation { duration: 150 } }
+        Behavior on border.color { ColorAnimation { duration: 150 } }
+
+        Text {
+            id: pillText
+            anchors.centerIn: parent
+            text: parent.label
+            font.family: "Hack Nerd Font"
+            font.weight: parent.active ? Font.Black : Font.Medium
+            font.pixelSize: root.s(10)
+            color: parent.active ? parent.accent : root.text
+        }
+        MouseArea {
+            id: pillMa
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: parent.activated()
+        }
+    }
+
     // ════ Cuerpo original del tab ════
     Flickable {
         id: monFlickable
@@ -721,6 +798,133 @@ Item {
                         }
                     }
                 }
+            }
+
+            // ── Advanced (VRR / bit depth / color mode / mirror / disabled) ──
+            Text {
+                Layout.topMargin: root.s(4)
+                text: "Advanced"
+                font.family: "Hack Nerd Font"
+                font.weight: Font.Black
+                font.pixelSize: root.s(13)
+                color: root.text
+            }
+
+            // VRR: Off / On / Fullscreen (0/1/2)
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.s(8)
+                Text {
+                    Layout.preferredWidth: root.s(84)
+                    text: "VRR"
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
+                    color: root.subtext0
+                }
+                Repeater {
+                    model: [{ v: 0, l: "Off" }, { v: 1, l: "On" }, { v: 2, l: "Fullscreen" }]
+                    delegate: MonPill {
+                        required property var modelData
+                        label: modelData.l
+                        active: root.monFieldInt("vrr", 0) === modelData.v
+                        accent: root.sapphire
+                        onActivated: root.setMonField("vrr", modelData.v)
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
+
+            // Bit depth: 8 / 10
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.s(8)
+                Text {
+                    Layout.preferredWidth: root.s(84)
+                    text: "Bit depth"
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
+                    color: root.subtext0
+                }
+                MonPill {
+                    label: "8-bit"
+                    active: root.monFieldInt("bitdepth", 8) === 8
+                    accent: root.teal
+                    onActivated: root.setMonField("bitdepth", 8)
+                }
+                MonPill {
+                    label: "10-bit"
+                    active: root.monFieldInt("bitdepth", 8) === 10
+                    accent: root.teal
+                    onActivated: root.setMonField("bitdepth", 10)
+                }
+                Item { Layout.fillWidth: true }
+            }
+
+            // Color mode (cm): Auto / sRGB / Wide / HDR / EDID
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.s(8)
+                Text {
+                    Layout.preferredWidth: root.s(84)
+                    text: "Color mode"
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
+                    color: root.subtext0
+                }
+                Repeater {
+                    model: [
+                        { v: "auto", l: "Auto" }, { v: "srgb", l: "sRGB" },
+                        { v: "wide", l: "Wide" }, { v: "hdr", l: "HDR" },
+                        { v: "edid", l: "EDID" }
+                    ]
+                    delegate: MonPill {
+                        required property var modelData
+                        label: modelData.l
+                        active: String(root.monField("cm", "auto")) === modelData.v
+                        accent: root.mauve
+                        onActivated: root.setMonField("cm", modelData.v)
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
+
+            // Mirror: None + el resto de monitores (por descripción)
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.s(8)
+                Text {
+                    Layout.preferredWidth: root.s(84)
+                    text: "Mirror"
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
+                    color: root.subtext0
+                }
+                Repeater {
+                    model: root.monMirrorOptions
+                    delegate: MonPill {
+                        required property var modelData
+                        label: modelData.label
+                        active: String(root.monField("mirrorOf", "none")) === modelData.value
+                        accent: root.peach
+                        onActivated: root.setMonField("mirrorOf", modelData.value)
+                    }
+                }
+                Item { Layout.fillWidth: true }
+            }
+
+            // Enabled / Disabled (se aplica al pulsar "Apply & save")
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.s(8)
+                Text {
+                    Layout.preferredWidth: root.s(84)
+                    text: "Monitor"
+                    font.family: "Hack Nerd Font"; font.pixelSize: root.s(11)
+                    color: root.subtext0
+                }
+                MonPill {
+                    label: root.monField("disabled", false) === true ? "Disabled" : "Enabled"
+                    active: root.monField("disabled", false) === true
+                    accent: root.red
+                    onActivated: root.setMonField("disabled", !(root.monField("disabled", false) === true))
+                }
+                Item { Layout.fillWidth: true }
             }
 
             // ── Layout actions (persist beyond this session) ───────────

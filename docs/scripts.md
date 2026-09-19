@@ -11,6 +11,13 @@ All scripts reside in the repository root `scripts/` directory and are deployed 
 | `qs_manager.sh` | Central IPC manager for QuickShell widgets. Routes workspace switching (fast path, no sourcing) and widget toggle/open/close commands. Also handles wallpaper thumbnail preparation (converts webp, generates video poster frames) and Bluetooth scan lifecycle. |
 | `reload.sh` | Triggers a full QuickShell QML reload via IPC and copies Matugen-generated SDDM colors to the system theme directory. |
 
+## Theming
+
+| Script | Purpose |
+|--------|---------|
+| `theme-sync.sh` | Thin wrapper over the `themesync/` Python package. Called by `dock/Colors.qml` (palette-change hook), `install.sh` and `reload.sh`; the entry point never changes. |
+| `themesync/` | Modular theming engine. `core.py` holds the shared pieces (palette loading, color math, atomic writes, managed blocks, binary resolution with `~/.local/bin` fallback), `runner.py` orchestrates targets and `cli.py` parses flags (`--list`, `--dry-run`, `--targets`). One module per application in `themesync/targets/`: `kitty`, `starship`, `xtop`, `vscode`, `nvim`, `browsers`, `opencode`, `rofi`, `cava`, `qt`, `gtk`, `xfetch`. |
+
 ## UI Scripts
 
 | Script | Purpose |

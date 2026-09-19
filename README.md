@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> **This repository is no longer maintained.** These dotfiles have moved to [equisdots](https://github.com/equisdots) and will receive no further updates here. This repository will become **read-only**. Once X Linux is consolidated, it may be moved to `xscriptor-legacy`.
+
 <h1 align="center"> Hyperland <em>XShell</em> <img src="https://raw.githubusercontent.com/xscriptor-colors/web/main/public/svg/icons/hyprland.svg?v=2" width="20" alt="Xscriptor logo" />
 </h1>
 

@@ -6,6 +6,7 @@ import "../../dock"
 // Compact (vertical): icon only.
 ModulePill {
     id: mod
+    moduleId: "wifi"
 
     accentRole: "color6"
     accentActive: bar.showEthernet ? (bar.ethStatus === "Connected") : bar.isWifiOn
@@ -18,7 +19,7 @@ ModulePill {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.showEthernet ? "󰈀" : bar.wifiIcon
+            text: mod.glyph(bar.showEthernet ? "󰈀" : bar.wifiIcon)
             font.family: bar.fontFamily
             font.pixelSize: bar.s(16)
             color: mod.contentColor
@@ -36,7 +37,7 @@ ModulePill {
 
     Text {
         visible: mod.compact
-        text: bar.showEthernet ? "󰈀" : bar.wifiIcon
+        text: mod.glyph(bar.showEthernet ? "󰈀" : bar.wifiIcon)
         font.family: bar.fontFamily
         font.pixelSize: bar.s(20)
         color: mod.contentColor

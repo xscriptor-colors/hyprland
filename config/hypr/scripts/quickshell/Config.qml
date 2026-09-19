@@ -396,16 +396,126 @@ Item {
         monitorsModel.setProperty(mIdx, "uiY", bestY);
     }
 
+    // ── Resolución del modo EXACTO ─────────────────────────────────────────
+    // hl.monitor SOLO aplica con el string exacto de availableModes
+    // ("1920x1080@144.06Hz"): un formato entero ("1920x1080@144") no aplica y
+    // además resetea al modo preferido. Por eso resolvemos aquí el string real
+    // por resolución + tasa más cercana.
+    function monResolveMode(monitor, resW, resH, rate) {
+        let modes = [];
+        try { modes = JSON.parse(monitor.availableModes || "[]"); } catch (e) { modes = []; }
+        let parsed = [];
+        for (let i = 0; i < modes.length; i++) {
+            let mm = String(modes[i]).match(/^(\d+)x(\d+)@([\d.]+)Hz$/);
+            if (!mm) continue;
+            parsed.push({ s: modes[i], w: parseInt(mm[1]), h: parseInt(mm[2]), r: parseFloat(mm[3]) });
+        }
+        if (parsed.length === 0) return "highrr";
+        let w = Math.round(resW), h = Math.round(resH);
+        let target = parseFloat(rate);
+        if (isNaN(target)) target = 60;
+        // 1) misma resolución → tasa más cercana
+        let best = null;
+        for (let i = 0; i < parsed.length; i++) {
+            let pm = parsed[i];
+            if (pm.w !== w || pm.h !== h) continue;
+            let d = Math.abs(pm.r - target);
+            if (!best || d < best.d) best = { d: d, s: pm.s };
+        }
+        if (best) return best.s;
+        // 2) sin match de resolución → modo de la resolución más cercana (y
+        //    dentro de ella, la tasa más cercana).
+        let best2 = null;
+        for (let i = 0; i < parsed.length; i++) {
+            let pm = parsed[i];
+            let d = (Math.abs(pm.w - w) + Math.abs(pm.h - h)) * 1000 + Math.abs(pm.r - target);
+            if (!best2 || d < best2.d) best2 = { d: d, s: pm.s };
+        }
+        return best2 ? best2.s : "highrr";
+    }
+
+    function monFindByName(name) {
+        for (let i = 0; i < monitorsModel.count; i++) {
+            let m = monitorsModel.get(i);
+            if (m.name === name) return m;
+        }
+        return null;
+    }
+
+    // Lua `hl.monitor(...)` de un monitor con TODAS las opciones. `desc:`
+    // sobrevive a renames del conector; mode/position se omiten si el monitor
+    // está deshabilitado (solo `disabled = true`) y los campos en default se
+    // omiten para no ensuciar la config.
+    function monitorLuaFor(m, posX, posY) {
+        let outName = (m.description && m.description !== "") ? ("desc:" + m.description) : m.name;
+        let parts = [`output = \"${outName}\"`];
+        if (m.disabled === true) {
+            parts.push("disabled = true");
+        } else {
+            parts.push(`mode = \"${config.monResolveMode(m, m.resW, m.resH, m.rate)}\"`);
+            parts.push(`position = \"${posX}x${posY}\"`);
+        }
+        if (m.sysScale !== undefined) parts.push("scale = " + m.sysScale);
+        if (m.transform !== undefined && m.transform !== 0) parts.push("transform = " + m.transform);
+        let vrr = (m.vrr === 2) ? 2 : ((m.vrr === true || m.vrr === 1) ? 1 : 0);
+        parts.push("vrr = " + vrr);
+        parts.push("bitdepth = " + (m.bitdepth === 10 ? 10 : 8));
+        if (m.cm && m.cm !== "auto") parts.push(`cm = \"${m.cm}\"`);
+        if (m.mirrorOf && m.mirrorOf !== "none") {
+            let target = config.monFindByName(m.mirrorOf);
+            if (target && target.name !== m.name) {
+                let tdesc = (target.description && target.description !== "") ? ("desc:" + target.description) : target.name;
+                parts.push(`mirror = \"${tdesc}\"`);
+            }
+        }
+        return "hl.monitor({ " + parts.join(", ") + " })";
+    }
+
+    // Texto de display-config para el layout indicado. `entries` = array de
+    // { m, x, y } (m = item del monitorsModel con su posición FINAL en px).
+    // Formato: desc|x|y|scale|mode|transform|vrr|bitdepth|cm|mirror|disabled
+    // (campos extra tolerantes hacia atrás: los lectores viejos usan 1-5).
+    function monDisplayConfigText(entries) {
+        let lines = [];
+        lines.push("# Monitor layout: desc|x|y|scale|mode|transform|vrr|bitdepth|cm|mirror|disabled");
+        lines.push("#   desc = hyprctl description (EDID model+serial, survives connector renames)");
+        lines.push("#   x,y  = logical position | scale = fractional scale");
+        lines.push("#   mode = exact Hyprland mode, e.g. 1920x1080@144.11Hz (empty = highest RR)");
+        lines.push("#   extra: transform | vrr(0/1/2) | bitdepth(8/10) | cm | mirror(desc) | disabled(0/1)");
+        for (let i = 0; i < entries.length; i++) {
+            let e = entries[i];
+            let m = e.m;
+            let desc = (m.description && m.description !== "") ? m.description : m.name;
+            let mode = config.monResolveMode(m, m.resW, m.resH, m.rate);
+            let mirrorDesc = "";
+            if (m.mirrorOf && m.mirrorOf !== "" && m.mirrorOf !== "none") {
+                let mm = config.monFindByName(m.mirrorOf);
+                mirrorDesc = mm ? ((mm.description && mm.description !== "") ? mm.description : mm.name) : "";
+            }
+            let vrr = (m.vrr === 2) ? 2 : (m.vrr ? 1 : 0);
+            let bitdepth = (m.bitdepth === 10) ? 10 : 8;
+            let cm = (m.cm && m.cm !== "") ? m.cm : "auto";
+            let disabled = (m.disabled === true) ? 1 : 0;
+            lines.push([desc, Math.round(e.x), Math.round(e.y), m.sysScale, mode,
+                        m.transform || 0, vrr, bitdepth, cm, mirrorDesc, disabled].join("|"));
+        }
+        return lines.join("\n") + "\n";
+    }
+
     function applyMonitors() {
         if (monitorsModel.count === 0) return;
+        let cmds = [];
+        let entries = [];
+        let summaryString = "";
+        let jsonArr = [];
         if (monitorsModel.count === 1) {
             let m = monitorsModel.get(0);
             // Hyprland 0.55+ has no `hyprctl keyword monitor`; use the Lua API.
-            let lua = `hl.monitor({ output = \"${m.name}\", mode = \"${m.resW}x${m.resH}@${m.rate}\", position = \"0x0\", scale = ${m.sysScale}${m.transform !== 0 ? `, transform = ${m.transform}` : ""} })`;
-            let jsonArr = [{ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: 0, y: 0, scale: m.sysScale, transform: m.transform }];
-            config.setSetting("monitors", jsonArr);
-            config.sh(`hyprctl eval '${lua.replace(/'/g, "'\\''")}' ; pkill awww-daemon 2>/dev/null || true; awww-daemon & ; ~/.config/hypr/scripts/persist-display-config.sh > ~/.config/hypr/display-config 2>/dev/null`);
-            Quickshell.execDetached(["notify-send", "Display Update", "Applied: " + m.resW + "x" + m.resH + " @ " + m.rate + "Hz"]);
+            let lua = config.monitorLuaFor(m, 0, 0);
+            cmds.push(`hyprctl eval '${lua.replace(/'/g, "'\\''")}'`);
+            entries.push({ m: m, x: 0, y: 0 });
+            jsonArr.push({ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: 0, y: 0, scale: m.sysScale, transform: m.transform, vrr: m.vrr, disabled: m.disabled === true, mirrorOf: m.mirrorOf, cm: m.cm, bitdepth: m.bitdepth });
+            summaryString = m.name + " " + m.resW + "x" + m.resH + " @ " + m.rate + "Hz";
         } else {
             let rects = [];
             for (let i = 0; i < monitorsModel.count; i++) {
@@ -413,7 +523,7 @@ Item {
                 let isP = m.transform === 1 || m.transform === 3;
                 let physW = Math.round((isP ? m.resH : m.resW) / m.sysScale);
                 let physH = Math.round((isP ? m.resW : m.resH) / m.sysScale);
-                rects.push({ x: m.uiX / config.monUiScale, y: m.uiY / config.monUiScale, w: physW, h: physH, resW: m.resW, resH: m.resH, name: m.name, rate: m.rate, sysScale: m.sysScale, transform: m.transform });
+                rects.push({ idx: i, x: m.uiX / config.monUiScale, y: m.uiY / config.monUiScale, w: physW, h: physH, name: m.name });
             }
             function getTightSnap(pX, pY, sX, sY, sW, sH, mW, mH, t) {
                 let cx = pX; let cy = pY;
@@ -442,21 +552,31 @@ Item {
                 if (rects[i].x < finalMinX) finalMinX = rects[i].x;
                 if (rects[i].y < finalMinY) finalMinY = rects[i].y;
             }
-            let evalCmds = [], summaryString = "", jsonArr = [];
             for (let i = 0; i < rects.length; i++) {
                 let r = rects[i];
                 r.x = Math.round(r.x - finalMinX);
                 r.y = Math.round(r.y - finalMinY);
+                let m = monitorsModel.get(r.idx);
                 // Hyprland 0.55+ has no `hyprctl keyword monitor`; use the Lua API.
-                let lua = `hl.monitor({ output = \"${r.name}\", mode = \"${r.resW}x${r.resH}@${r.rate}\", position = \"${r.x}x${r.y}\", scale = ${r.sysScale}${r.transform !== 0 ? `, transform = ${r.transform}` : ""} })`;
-                evalCmds.push(`hyprctl eval '${lua.replace(/'/g, "'\\''")}'`);
+                let lua = config.monitorLuaFor(m, r.x, r.y);
+                cmds.push(`hyprctl eval '${lua.replace(/'/g, "'\\''")}'`);
+                entries.push({ m: m, x: r.x, y: r.y });
                 summaryString += r.name + " ";
-                jsonArr.push({ name: r.name, resW: r.resW, resH: r.resH, rate: parseInt(r.rate), x: r.x, y: r.y, scale: r.sysScale, transform: r.transform });
+                jsonArr.push({ name: m.name, resW: m.resW, resH: m.resH, rate: parseInt(m.rate), x: r.x, y: r.y, scale: m.sysScale, transform: m.transform, vrr: m.vrr, disabled: m.disabled === true, mirrorOf: m.mirrorOf, cm: m.cm, bitdepth: m.bitdepth });
             }
-            config.setSetting("monitors", jsonArr);
-            config.sh(evalCmds.join(" ; ") + " ; pkill awww-daemon 2>/dev/null || true; awww-daemon & ; ~/.config/hypr/scripts/persist-display-config.sh > ~/.config/hypr/display-config 2>/dev/null");
-            Quickshell.execDetached(["notify-send", "Display Update", "Applied layout for: " + summaryString.trim()]);
         }
+        config.setSetting("monitors", jsonArr);
+        // display-config DETERMINISTA desde el layout aplicado: no se relee el
+        // estado live (evita la carrera con restore-monitors.sh cuando los
+        // modesets multi-monitor todavía no han asentado). Atómico + bak.
+        let text = config.monDisplayConfigText(entries);
+        let writeCmd = "cat > \"$HOME/.config/hypr/display-config.tmp\" <<'XSC_DC_EOF'\n" + text + "XSC_DC_EOF\n" +
+                       "mv \"$HOME/.config/hypr/display-config.tmp\" \"$HOME/.config/hypr/display-config\" && " +
+                       "cp \"$HOME/.config/hypr/display-config\" \"$HOME/.config/hypr/display-config.bak\"";
+        config.sh(writeCmd + " ; " + cmds.join(" ; ") + " ; pkill xwww-daemon 2>/dev/null || true; xwww-daemon &");
+        Quickshell.execDetached(["notify-send", "Display Update",
+            monitorsModel.count === 1 ? ("Applied: " + summaryString)
+                                      : ("Applied layout for: " + summaryString.trim())]);
     }
 
     // Removes the persisted layout (~/.config/hypr/display-config) and sends all
@@ -484,6 +604,14 @@ Item {
             onStreamFinished: {
                 try {
                     let data = JSON.parse(this.text.trim());
+                    // vrr live es bool, pero el panel necesita 0/1/2
+                    // (2 = fullscreen-only). Con 2 el live es false fuera de
+                    // fullscreen: conservamos el 2 previo del mismo monitor.
+                    let prevVrr = {};
+                    for (let i = 0; i < config.monitorsModel.count; i++) {
+                        let pm = config.monitorsModel.get(i);
+                        prevVrr[pm.name] = pm.vrr;
+                    }
                     config.monitorsModel.clear();
                     let minX = 999999, minY = 999999;
                     for (let i = 0; i < data.length; i++) {
@@ -497,11 +625,22 @@ Item {
                         let tf = data[i].transform !== undefined ? data[i].transform : 0;
                         let normalizedX = (data[i].x - minX) * config.monUiScale;
                         let normalizedY = (data[i].y - minY) * config.monUiScale;
+                        let prev = prevVrr[data[i].name];
+                        let liveVrr = data[i].vrr === true;
+                        let vrrVal = liveVrr ? (prev === 2 ? 2 : 1) : (prev === 2 ? 2 : 0);
                         config.monitorsModel.append({
                             name: data[i].name, resW: data[i].width, resH: data[i].height,
                             sysScale: scl, rate: Math.round(data[i].refreshRate).toString(),
                             uiX: normalizedX, uiY: normalizedY, transform: tf,
-                            availableModes: JSON.stringify(data[i].availableModes || [])
+                            availableModes: JSON.stringify(data[i].availableModes || []),
+                            description: data[i].description || "",
+                            vrr: vrrVal,
+                            disabled: data[i].disabled === true,
+                            mirrorOf: data[i].mirrorOf || "none",
+                            cm: data[i].colorManagementPreset || "auto",
+                            bitdepth: (String(data[i].currentFormat || "").indexOf("2101010") !== -1) ? 10 : 8,
+                            sdrBrightness: data[i].sdrBrightness !== undefined ? data[i].sdrBrightness : 1,
+                            sdrSaturation: data[i].sdrSaturation !== undefined ? data[i].sdrSaturation : 1
                         });
                         if (data[i].focused) config.monActiveEditIndex = i;
                     }

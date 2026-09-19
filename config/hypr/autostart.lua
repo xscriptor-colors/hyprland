@@ -42,7 +42,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("~/.config/hypr/scripts/restore-monitors.sh")
 
     -- Wallpaper daemon
-    hl.exec_cmd("awww-daemon")
+    hl.exec_cmd("xwww-daemon")
 
     -- Quickshell QML-based shell — SINGLE ENTRY POINT via Shell.qml
     -- Shell.qml loads Main.qml + TopBar.qml + Floating.qml internally
