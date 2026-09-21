@@ -49,11 +49,10 @@
 ## Color Schemes <!-- phase:color-schemes -->
 
 - [x] Create dynamic theme system (#65)
-- [x] Implement 13 color schemes: (#66)
+- [x] Implement 12 color schemes: (#66)
   - [x] X (main theme)
   - [x] Madrid
   - [x] Lahabana
-  - [x] Seul
   - [x] Miami
   - [x] Paris
   - [x] Tokio
